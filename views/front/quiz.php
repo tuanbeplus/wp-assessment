@@ -63,8 +63,6 @@ $is_accepted = $status === 'accepted';
 ?>
 
 <?php if (current_user_can('administrator') || $_COOKIE['userId']): ?>
-    <!-- Unset redirect URL from Local storage -->
-    <?php $main->save_data_local_storage('sf_login_redirect_url', null); ?>
 
     <?php if (current_user_can('administrator') || $is_user_can_access == true): ?>
         <section id="assessment-main-wrapper" class="formWrapper" 
@@ -683,8 +681,6 @@ $is_accepted = $status === 'accepted';
     
     <!-- User is not logged in -->
     <?php 
-        $current_url = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        $main->save_data_local_storage('sf_login_redirect_url', $current_url);
         $quick_10_register_url = get_field('quick_10_register_url', 'option');
     ?>
     <section id="assessment-login-wrapper" class="formWrapper">
