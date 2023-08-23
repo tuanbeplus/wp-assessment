@@ -1,0 +1,194 @@
+@media only screen and (max-width:1920px) {}
+
+@media only screen and (max-width:1600px) {}
+
+@media only screen and (max-width:1440px) {}
+
+@media only screen and (max-width:1366px) {}
+
+@media only screen and (max-width:1280px) {}
+
+@media only screen and (max-width:1200px) {
+    .single-assessments .breadcrumbs-top {
+        margin-bottom: 42px;
+    }
+
+    .formWrapper .topBar {
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 1024px) {
+    .single-assessments .breadcrumbs-top {
+        margin-bottom: 32px;
+    }
+
+    .topBar h1 {
+        font-size: 40px;
+    }
+
+    .stepsWrap {
+        overflow-x: auto;
+    }
+
+    .stepsWrap .step {
+        min-width: 122px;
+        width: 122px;
+    }
+
+    .fieldsWrapper {
+        padding: 0 80px 50px;
+    }
+}
+
+@media only screen and (max-width:991px) {
+    .fieldsWrapper .checkBox label {
+        font-size: 1rem;
+    }
+
+    .form-spinner {
+        width: 100px;
+    }
+
+    .invite-colleagues-wrapper {
+        padding: 70px 40px;
+    }
+
+    #form-invite-colleagues {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    #emails-area {
+        font-size: 1rem;
+    }
+}
+
+@media only screen and (max-width:767px) {
+    .topBar h1 {
+        font-size: 32px;
+    }
+
+    .topBar .progressBtn {
+        padding: 12px 30px;
+    }
+
+    .form-spinner {
+        width: 80px;
+    }
+
+    .formWrapper {
+        padding-bottom: 40px;
+    }
+
+    .stepsWrap .step {
+        min-width: auto;
+        width: auto;
+        padding: 8px 12px;
+    }
+
+    .stepsWrap .step .completedImg,
+    .stepsWrap .step .editImg {
+        width: 34px;
+        height: 34px;
+    }
+
+    .stepsWrap .step .editImg img,
+    .stepsWrap .step .completedImg img {
+        width: 20px;
+    }
+
+    .fieldsWrapper {
+        padding: 0 24px 24px;
+    }
+
+    .fieldDetails {
+        margin-top: 16px;
+    }
+
+    .fieldDetails .question-description>* {
+        font-size: 1rem;
+    }
+
+    .quizAdvice p {
+        font-size: 16px;
+    }
+
+    .quizTitle {
+        font-size: 20px;
+        padding: 16px;
+    }
+
+    .fieldsWrapper .checkBox {
+        margin-bottom: 16px;
+    }
+
+    .textAreaWrap {
+        margin-top: 24px;
+    }
+
+    .question-add-files-container ._label {
+        font-size: 1.125rem;
+    }
+
+    .progressBtn,
+    .nextPrevBtn {
+        font-size: 16px;
+        padding: 16px 24px;
+        text-align: center;
+    }
+
+    .quizAdvice {
+        padding: 24px 24px 24px 50px;
+    }
+
+    .quizAdvice::before {
+        left: 10px
+    }
+
+    .quizAdvice .advice-area ul li,
+    .quizAdvice .advice-area ol li {
+        font-size: 1rem;
+        margin: 12px 0;
+    }
+
+    .formController {
+        margin-top: 30px;
+    }
+
+    .formController .nextPrevBtn {
+        margin: 0 10px;
+        padding: 12px 40px;
+    }
+}
+
+@media only screen and (max-width:575px) {
+    .formController {
+        margin-top: 28px;
+    }
+
+    .formController .nextPrevBtn {
+        margin: 10px;
+        padding: 14px 32px;
+        font-size: 16px;
+    }
+
+    .topBar .progressBtn {
+        padding: 14px 32px;
+        font-size: 16px;
+    }
+
+    .fieldDetails {
+        margin: 24px 0 16px;
+    }
+
+    .textAreaWrap textarea {
+        height: 140px;
+        font-size: 16px;
+    }
+}
+
+@media only screen and (max-width:480px) {}
+
+@media only screen and (max-width:385px) {}
