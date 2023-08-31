@@ -885,14 +885,18 @@ jQuery(document).ready(function ($) {
         let formData = new FormData();
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();
+        let userId = $('#sf_user_id').val();
+        let userName = $('#sf_user_name').val();
         let fileUploaderWrap = inputInstance.closest(".fileUploaderWrap")
 
         formData.append("file", file)
         formData.append("action", 'upload_assessment_attachment')
+        formData.append("sf_user_id", userId)
+        formData.append("sf_user_name", userName)
         formData.append("assessment_id", assessmentId)
         formData.append("organisation_id", organisationId)
         // formData.append("security", ajax_object.security)
-
+        
         let response = await $.ajax({
             type: 'POST',
             url: ajaxUrl,
@@ -923,6 +927,8 @@ jQuery(document).ready(function ($) {
 
     async function front_upload_additional_files(file, inputInstance, index) {
         let formData = new FormData();
+        let userId = $('#sf_user_id').val();
+        let userName = $('#sf_user_name').val();
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();
         let fileUploaderWrap = inputInstance.closest(".question-add-files-container")
@@ -933,6 +939,8 @@ jQuery(document).ready(function ($) {
     
         formData.append("file", file)
         formData.append("action", 'upload_assessment_attachment')
+        formData.append("sf_user_id", userId)
+        formData.append("sf_user_name", userName)
         formData.append("assessment_id", assessmentId)
         formData.append("organisation_id", organisationId)
         // formData.append("security", ajax_object.security)

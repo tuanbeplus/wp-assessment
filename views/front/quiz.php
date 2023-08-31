@@ -65,6 +65,12 @@ $is_accepted = $status === 'accepted';
 <?php if (current_user_can('administrator') || $_COOKIE['userId']): ?>
 
     <?php if (current_user_can('administrator') || $is_user_can_access == true): ?>
+
+        <input type="hidden" id="sf_user_id" value="<?php echo $_COOKIE['userId']; ?>" />
+        <input type="hidden" id="sf_user_name" value="<?php echo $_COOKIE['sf_name']; ?>" />
+        <input type="hidden" id="assessment_id" value="<?php echo $post_id; ?>" />
+        <input type="hidden" id="organisation_id" value="<?php echo $organisation_id; ?>"/>
+
         <section id="assessment-main-wrapper" class="formWrapper" 
                 data-required_answer_all="<?php echo $is_required_answer_all ?>"
                 data-required_document_all="<?php echo $is_required_document_all ?>">
@@ -143,8 +149,6 @@ $is_accepted = $status === 'accepted';
 
                 <?php if ($question_templates == 'Simple Assessment' && $questions && !$is_publish && !$is_accepted) : ?>
                     <!-- Begin Simple Assessment -->
-                    <input type="hidden" id="assessment_id" value="<?php echo $post_id; ?>"/>
-                    <input type="hidden" id="organisation_id" value="<?php echo $organisation_id; ?>"/>
                     <div class="stepperFormWrap" id="main-quiz-form">
                         <form onsubmit="return false" id="form_submit_quiz">
                             <div class="loading-overlay">
@@ -309,8 +313,6 @@ $is_accepted = $status === 'accepted';
 
                 <?php if ($question_templates == 'Comprehensive Assessment' && $questions && !$is_publish && !$is_accepted) : ?>
                     <!-- Begin Comprehensive Assessment -->
-                    <input type="hidden" id="assessment_id" value="<?php echo $post_id; ?>" />
-                    <input type="hidden" id="organisation_id" value="<?php echo $organisation_id; ?>"/>
                     <div class="stepperFormWrap" id="main-quiz-form">
                         <!-- form message -->
                         <div class="form-message">

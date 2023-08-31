@@ -600,7 +600,6 @@ class WP_Assessment
 
     function wp_insert_attachment_from_url($upload, $parent_post_id = null)
     {
-
         $file_path = $upload['file'];
         $file_name = basename($file_path);
         $file_type = wp_check_filetype($file_name, null);

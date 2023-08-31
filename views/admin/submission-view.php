@@ -40,6 +40,11 @@ function get_submit_field($array, $index, $key)
 $submission_score_arr = array();
 ?>
 
+<input type="hidden" id="assessment_id" value="<?php echo $assessment_id ?>"/>
+<input type="hidden" id="user_id" value="<?php echo $user_id ?>"/>
+<input type="hidden" id="submission_id" name="submission_id" value="<?php echo $post_id ?>"/>
+<input type="hidden" id="organisation_id" value="<?php echo $organisation_id ?>"/>
+
 <div class="container">
     <?php if ($assessment_meta == 'Simple Assessment'): ?>
         <!-- Begin Simple Submission -->
@@ -106,21 +111,6 @@ $submission_score_arr = array();
                     </div>
                 </div>
             <?php endforeach; ?>
-            <input type="hidden" id="assessment_id" value="<?php echo $assessment_id ?>"/>
-            <input type="hidden" id="user_id" value="<?php echo $user_id ?>"/>
-            <input type="hidden" id="submission_id" value="<?php echo $post_id ?>"/>
-            <input type="hidden" id="organisation_id" value="<?php echo $organisation_id ?>"/>
-
-            <?php if ($assessment_meta == 'Comprehensive Assessment'): ?>
-                <div class="submission-admin-view-footer">
-                    <a type="button" class="button button-primary button-large accept-button" title="Accept this Submission">
-                        Accept
-                    </a>
-                    <a type="button" class="button button-large reject-button" title="Reject this Submission">
-                        Reject
-                    </a>
-                </div>
-            <?php endif; ?>
         <?php endif; ?>
         <!-- End Simple Submission -->
     <?php endif; ?>
@@ -168,7 +158,6 @@ $submission_score_arr = array();
                         else {
                             $quiz_point = $field->quiz_point ? $field->quiz_point : 0;
                         }
-                        
 
                         $question_meta_field = $group_list[$quiz_id];
                         $sub_title = htmlentities(stripslashes(utf8_decode($question_meta_field['sub_title'])));
@@ -315,10 +304,6 @@ $submission_score_arr = array();
             </div>
         <?php endforeach;?>
         
-        <input type="hidden" id="assessment_id" value="<?php echo $assessment_id ?>"/>
-        <input type="hidden" id="user_id" value="<?php echo $user_id ?>"/>
-        <input type="hidden" id="submission_id" name="submission_id" value="<?php echo $post_id ?>"/>
-        <input type="hidden" id="organisation_id" value="<?php echo $organisation_id ?>"/>
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">
             <?php if ($is_required_answer_all == true): ?>

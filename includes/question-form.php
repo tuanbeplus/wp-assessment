@@ -830,6 +830,8 @@ class Question_Form
                 throw new Exception('File not found.');
             
             $assessment_id = intval($_POST['assessment_id']);
+            $sf_user_id = $_POST['sf_user_id'];
+            $sf_user_name = $_POST['sf_user_name'];
             $organisation_id = $_POST['organisation_id'];
                 
             $file = $_FILES["file"];
@@ -852,11 +854,12 @@ class Question_Form
             $main = new WP_Assessment();
             $attachment_id = $main->wp_insert_attachment_from_url($attachment);
 
-            if(isset($_COOKIE['userId'])) {
-                update_post_meta($attachment_id, 'sf_user_id' , $_COOKIE['userId']);
+            // Save meta if file upload form user's front
+            if(isset($sf_user_id)) {
+                update_post_meta($attachment_id, 'sf_user_id' , $sf_user_id);
             }
-            if(isset($_COOKIE['sf_name'])) {
-                update_post_meta( $attachment_id, 'sf_user_name' , $_COOKIE['sf_name']);
+            if(isset($sf_user_name)) {
+                update_post_meta( $attachment_id, 'sf_user_name' , $sf_user_name);
             }
             if(isset($assessment_id)) {
                 update_post_meta( $attachment_id, 'assessment_id' , $assessment_id);
