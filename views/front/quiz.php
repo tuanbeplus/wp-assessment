@@ -17,6 +17,8 @@ if (isset($_COOKIE['userId'])) {
 }
 
 $main = new WP_Assessment();
+$question_form = new Question_Form();
+$azure = new WP_Azure_Storage();
 
 $organisation_id = getUser($user_id)->records[0]->AccountId; 
 $questions = get_post_meta($post_id, 'question_group_repeater', true);
@@ -40,7 +42,6 @@ if($submission_id_save_quiz){
 $show_first_active_view = false;
 $total_quiz = is_array($questions) ? count($questions) : 0;
 
-$question_form = new Question_Form();
 $is_submission_exist = $question_form->is_submission_exist($user_id, $post_id);
 $status = get_post_meta($submission_id, 'assessment_status', true);
 $quiz_feedbacks = get_post_meta($submission_id, 'quiz_feedback', true);
@@ -54,12 +55,6 @@ $is_user_can_access = $main->check_access_salesforce_user($user_id, $post_id);
 $is_disabled = $status === 'pending';
 $is_publish = $status === 'publish';
 $is_accepted = $status === 'accepted';
-
-// if ($_GET['test'] == 'test') {
-//     echo "<pre>";
-//     print_r($_COOKIE);
-//     echo "</pre>";
-// }
 ?>
 
 <?php if (current_user_can('administrator') || $_COOKIE['userId']): ?>
@@ -558,12 +553,15 @@ $is_accepted = $status === 'accepted';
                                                         <!-- /Drag & drop file -->
 
                                                         <div class="filesList">
-                                                        <?php if ($arr_attachmentID): ?>
-                                                            <?php foreach($arr_attachmentID as $key => $field): ?>
+                                                        <?php 
+                                                            $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($j, $sub_id, $post_id, $organisation_id);
+                                                        ?>
+                                                        <?php if ($azure_attachments_uploaded): ?>
+                                                            <?php foreach($azure_attachments_uploaded as $key => $field): ?>
                                                                 <?php
-                                                                    $file = $field['value'];
-                                                                    $file_url = wp_get_attachment_url($file);
-                                                                    $file_name = get_the_title($file);
+                                                                    $file_id = $field->attachment_id;
+                                                                    $file_name = $field->attachment_name;
+                                                                    $file_url = $field->attachment_path;
                                                                     $file_index = $key + 1;
                                                                 ?>
                                                                 <?php if ($file_url): ?>
@@ -577,7 +575,7 @@ $is_accepted = $status === 'accepted';
                                                                     <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
                                                                             class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"
-                                                                            value="<?php echo $file; ?>">
+                                                                            value="<?php echo $file_id; ?>">
                                                                     <?php if($is_disabled): ?>
                                                                         <span class="icon-checked"><i class="fa-solid fa-circle-check"></i></span>
                                                                     <?php else: ?>

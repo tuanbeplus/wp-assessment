@@ -26,7 +26,6 @@ class WP_Assessment
 
         $this->set_quiz_table();
         $this->init_quiz_tables_for_users();
-
     }
 
     function set_email_content_type()
@@ -603,7 +602,6 @@ class WP_Assessment
         $file_path = $upload['file'];
         $file_name = basename($file_path);
         $file_type = wp_check_filetype($file_name, null);
-        // $attachment_title = sanitize_file_name(pathinfo($file_name, PATHINFO_FILENAME));
         $wp_upload_dir = wp_upload_dir();
 
         $post_info = array(

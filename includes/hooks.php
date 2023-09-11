@@ -19,7 +19,7 @@ add_action ('wp_head', function () {
  * 
  * @param array $args An array of query variables.
  */
-add_filter( 'ajax_query_attachments_args', 'wpa_hide_saturn_media_overlay_view' );
+// add_filter( 'ajax_query_attachments_args', 'wpa_hide_saturn_media_overlay_view' );
 function wpa_hide_saturn_media_overlay_view( $args ) {
     // Bail if this is not the admin area.
     if ( ! is_admin() ) {
@@ -43,7 +43,7 @@ function wpa_hide_saturn_media_overlay_view( $args ) {
  * 
  * @param WP_Query $query The WP_Query instance (passed by reference).
  */
-add_action( 'pre_get_posts', 'wpa_hide_saturn_media_list_view' );
+// add_action( 'pre_get_posts', 'wpa_hide_saturn_media_list_view' );
 function wpa_hide_saturn_media_list_view( $query ) {
     // Bail if this is not the admin area.
     if ( ! is_admin() ) {
@@ -70,4 +70,12 @@ function wpa_hide_saturn_media_list_view( $query ) {
     ]);
 
     return;
+}
+
+function sf_user_mail_from( $email ) {
+    return $_COOKIE['sf_user_email'];
+}
+
+function sf_user_mail_from_name( $name ) {
+    return $_COOKIE['sf_name'];
 }

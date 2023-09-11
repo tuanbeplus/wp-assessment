@@ -18,18 +18,12 @@ $quiz_answer_points = get_post_meta($post_id, 'quiz_answer_point', true);
 $is_required_answer_all = get_post_meta($assessment_id, 'is_required_answer_all', true);
 
 $main = new WP_Assessment();
+$azure = new WP_Azure_Storage();
 $quiz = $main->get_user_quiz_by_assessment_id_and_submissions($assessment_id, $post_id, $organisation_id);
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $group_quiz_points = unserialize(get_post_meta($post_id, 'group_quiz_point', true));
 $get_quiz_accepted = $main->get_quiz_accepted($assessment_id, $post_id, $organisation_id);
-
-// if ($_GET['test'] == 'test') {
-// }
-
-$table_name = $wpdb->prefix . 'user_quiz_submissions';
-$sql_query_points = "SELECT quiz_point FROM $table_name WHERE submission_id = $post_id AND user_id = '$user_id'";
-$result = $wpdb->get_results($sql_query_points);
 
 $i = 0;
 function get_submit_field($array, $index, $key)
@@ -174,11 +168,6 @@ $submission_score_arr = array();
                         if ($field->status) {
                             $type = $field->status;
                         }
-                        if ($field->attachment_id) {
-                            $attachment_id = $field->attachment_id;
-                            $url = wp_get_attachment_url($attachment_id);
-                            $attachment_type = get_post_mime_type($attachment_id);
-                        }
                         if ($field->attachment_ids) {
                             $arr_attachmentID = $field->attachment_ids;
                             $arr_attachmentID = json_decode($arr_attachmentID, true);
@@ -206,14 +195,16 @@ $submission_score_arr = array();
                                             <div class="description-thin"><?php echo $field->description; ?></div>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if ($field->attachment_ids) : ?>
+                                    <?php 
+                                        $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($group_id, $quiz_id, $assessment_id, $organisation_id);
+                                    ?>
+                                    <?php if ($azure_attachments_uploaded): ?>
                                         <div class="filesList_submission">
                                         <p><strong>Supporting Documentation</strong></p>
-                                        <?php foreach($arr_attachmentID as $field): ?>
+                                        <?php foreach($azure_attachments_uploaded as $field): ?>
                                             <?php
-                                                $file = $field['value'];
-                                                $file_url = wp_get_attachment_url($file);
-                                                $file_name = get_the_title($file);
+                                                $file_name = $field->attachment_name;
+                                                $file_url = $field->attachment_path;
                                             ?>
                                             <?php if ($file_url): ?>
                                             <span class="file-item">

@@ -264,7 +264,7 @@ jQuery(document).ready(function ($) {
         // let attachmentPath = $(this).val()
         let that = $(this);
         let file = e.target.files[0];
-        await upload_assessment_attachment(file, that)
+        await uploadAssessmentAttachment(file, that)
     });
     bodySelector.on('click', '#submit-quiz-btn', async function (e) {
         e.preventDefault();
@@ -465,7 +465,7 @@ jQuery(document).ready(function ($) {
                 file_item.find('input.input-file-hiden').addClass('additional-file-id-'+ item_index)
                 file_item.find('a.name').addClass('file-name-'+ item_index)
 
-                front_upload_additional_files(filesInput[i], inputElement, item_index);
+                frontUploadAdditionalFiles(filesInput[i], inputElement, item_index);
 
             }
             else {
@@ -486,37 +486,42 @@ jQuery(document).ready(function ($) {
 
     // EventListener for delete file item
     $(document).on('click', '.file-delete', function(){
+        let file_item = $(this).closest('.file-item')
+        let input_file_hiden = file_item.find('.input-file-hiden')
+        let attachmentId = input_file_hiden.val()
+        let assessmentId = assessmentIdInstance.val();
+        let organisationId = organisationIdInstance.val();
         let upload_file_container = $(this).closest('.question-add-files-container')
         let upload_message = upload_file_container.find('.upload-message._success')
-        let file_item = $(this).closest('.file-item')
-        let file_name = file_item.find('.name').text()
-        let input_file_hiden = file_item.find('.input-file-hiden')
-        let file_ID = input_file_hiden.val()
-        // console.log(file_ID);
+
         $.ajax({
-        type: 'POST',
-        url: ajaxUrl,
-        data:{
-            'action' : 'delete_additional_file_assessment',
-            'file_id' : file_ID,
-        },
-        beforeSend : function ( xhr ) {
-            file_item.css('opacity', '0.5').attr('disable')
-        },
-        success:function(response){
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'delete_azure_attachments_ajax',
+                'attachment_id' : attachmentId,
+                'assessment_id' : assessmentId,
+                'organisation_id' : organisationId,
+            },
+            beforeSend : function ( xhr ) {
+                file_item.css('opacity', '0.5').attr('disable')
+            },
+            success:function(response){
 
-            file_item.remove()
+                console.log(response);
 
-            upload_message.text('Delete file successfully.')
-            
-            setTimeout(function() {
-                upload_message.show()
-            }, 100)
-            
-            setTimeout(function() {
-                upload_message.hide()
-            }, 10000)
-        }
+                file_item.remove()
+
+                upload_message.text('Delete file successfully.')
+                
+                setTimeout(function() {
+                    upload_message.show()
+                }, 100)
+                
+                setTimeout(function() {
+                    upload_message.hide()
+                }, 10000)
+            }
         });
     });
 
@@ -556,7 +561,7 @@ jQuery(document).ready(function ($) {
             let position_at = emails_arr[i].search("@")
 
             if (position_at == -1) {
-                send_message.text('Please enter a valid email address.').show()
+                send_message.text('Please ensure that a valid email address has been entered.').show()
                 return
             }
             else {
@@ -582,7 +587,7 @@ jQuery(document).ready(function ($) {
                     send_message.text('Your invitation has been send.').show()
                 }
                 else {
-                    send_message.html("Can't send invitation, <br>emails must be separated by a comma.").show()
+                    send_message.html('Unable to send invitation, ensure that emails are seperated by a comma.').show()
                 }                
             }
         });
@@ -681,8 +686,8 @@ jQuery(document).ready(function ($) {
 
             if (isHasValue) {
                 files_arr.push({
-                                id: input.val(),
-                            })
+                    id: input.val(),
+                })
             }
         })
 
@@ -880,7 +885,7 @@ jQuery(document).ready(function ($) {
         return status;
     }
 
-    async function upload_assessment_attachment(file, inputInstance) {
+    async function uploadAssessmentAttachment(file, inputInstance) {
 
         let formData = new FormData();
         let assessmentId = assessmentIdInstance.val();
@@ -890,7 +895,7 @@ jQuery(document).ready(function ($) {
         let fileUploaderWrap = inputInstance.closest(".fileUploaderWrap")
 
         formData.append("file", file)
-        formData.append("action", 'upload_assessment_attachment')
+        formData.append("action", 'azure_upload_assessment_attachment')
         formData.append("sf_user_id", userId)
         formData.append("sf_user_name", userName)
         formData.append("assessment_id", assessmentId)
@@ -925,22 +930,23 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    async function front_upload_additional_files(file, inputInstance, index) {
+    async function frontUploadAdditionalFiles(file, inputInstance, index) {
         let formData = new FormData();
-        let userId = $('#sf_user_id').val();
         let userName = $('#sf_user_name').val();
+        let groupId =  inputInstance.closest('.group-question').data('group')
+        let quizId = inputInstance.closest('.fieldsWrapper').data('sub')
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();
         let fileUploaderWrap = inputInstance.closest(".question-add-files-container")
-        let count_files_item = fileUploaderWrap.find('.filesList .file-item').length
         let dropArea = fileUploaderWrap.find('.dropFiles')
         let upload_message_success = fileUploaderWrap.find('.upload-message._success')
         let upload_message_error = fileUploaderWrap.find('.upload-message._error')
     
         formData.append("file", file)
-        formData.append("action", 'upload_assessment_attachment')
-        formData.append("sf_user_id", userId)
-        formData.append("sf_user_name", userName)
+        formData.append("action", 'save_attachments_azure_storage_ajax')
+        formData.append("user_name", userName)
+        formData.append("parent_id", groupId)
+        formData.append("quiz_id", quizId)
         formData.append("assessment_id", assessmentId)
         formData.append("organisation_id", organisationId)
         // formData.append("security", ajax_object.security)
@@ -964,12 +970,11 @@ jQuery(document).ready(function ($) {
                     upload_message_success.hide()
                 }, 10000)
                 fileUploaderWrap.find('.btn-add-files-wrapper').removeClass('not-allowed')
+                console.log(response);
             }
         });
     
         const { status, message } = response;
-
-        // console.log(response);
     
         if (status) {
             let attachment_id = response?.attachment_id
@@ -984,7 +989,7 @@ jQuery(document).ready(function ($) {
         } else {
             upload_message_error.find('.message').text('There was aproblem attaching one of your files. Please try again.')
         }
-      }
+    }
 
     function toggleMessageWrap(message) {
         messageWrap.show();

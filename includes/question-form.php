@@ -33,7 +33,7 @@ class Question_Form
         add_action('wp_ajax_upload_assessment_attachment', array($this, 'upload_assessment_attachment'));
         add_action('wp_ajax_nopriv_upload_assessment_attachment', array($this, 'upload_assessment_attachment'));
 
-        add_action('wp_ajax_delete_additional_file_assessment', array($this, 'delete_additional_file_assessment'));
+        add_action('wp_ajax_delete_additional_file_assessment', array($this, 'delete_additional_file_assessment')); 
         add_action('wp_ajax_nopriv_delete_additional_file_assessment', array($this, 'delete_additional_file_assessment'));
 
         add_action('wp_ajax_send_invite_to_collaborator', array($this, 'send_invite_to_collaborator'));
@@ -589,15 +589,6 @@ class Question_Form
             if(isset($_COOKIE['sf_user_email'])) {
                 update_post_meta($post_id, 'sf_user_email', $_COOKIE['sf_user_email']);
             }
-            // if(isset($_COOKIE['sf_organization_name'])) {
-            //     update_post_meta($post_id, 'sf_organization_name', $_COOKIE['sf_organization_name']);
-            // }
-            // if(isset($_COOKIE['sf_membership_level'])) {
-            //     update_post_meta($post_id, 'sf_membership_level', $_COOKIE['sf_membership_level']);
-            // }
-            // if(isset($_COOKIE['sf_year_member_in'])) {
-            //     update_post_meta($post_id, 'sf_year_member_in', $_COOKIE['sf_year_member_in']);
-            // }
 
             return wp_send_json(array('message' => 'This Submission has been saved.', 'submission_url' => $submission_url, 'status' => true, 'submission_id' => $post_id));
         } catch (Exception $exception) {
@@ -688,8 +679,8 @@ class Question_Form
                     WHERE organisation_id='$organisation_id'
                     AND assessment_id='$assessment_id'
                     AND submission_id=0"
-                )
-            );
+                    )
+                );
 
             }
 
@@ -823,17 +814,16 @@ class Question_Form
         return $post_id;
     }
 
+    /**
+     * upload file form Admin to WP media
+     * 
+     */
     function upload_assessment_attachment()
     {
         try {
             if (!isset($_FILES["file"]))
                 throw new Exception('File not found.');
-            
-            $assessment_id = intval($_POST['assessment_id']);
-            $sf_user_id = $_POST['sf_user_id'];
-            $sf_user_name = $_POST['sf_user_name'];
-            $organisation_id = $_POST['organisation_id'];
-                
+                            
             $file = $_FILES["file"];
             $path = $file["tmp_name"];
             $max_file_size = wp_max_upload_size();
@@ -844,7 +834,6 @@ class Question_Form
 
             $fileName = preg_replace('/\s+/', '-', $file["name"]);
             $fileName = preg_replace('/[^A-Za-z0-9.\-]/', '', $fileName);
-
             // check_ajax_referer('assessment_attachment_upload', 'security');
             $attachment = wp_upload_bits($fileName, null, file_get_contents($file["tmp_name"]));
 
@@ -853,20 +842,6 @@ class Question_Form
             }
             $main = new WP_Assessment();
             $attachment_id = $main->wp_insert_attachment_from_url($attachment);
-
-            // Save meta if file upload form user's front
-            if(isset($sf_user_id)) {
-                update_post_meta($attachment_id, 'sf_user_id' , $sf_user_id);
-            }
-            if(isset($sf_user_name)) {
-                update_post_meta( $attachment_id, 'sf_user_name' , $sf_user_name);
-            }
-            if(isset($assessment_id)) {
-                update_post_meta( $attachment_id, 'assessment_id' , $assessment_id);
-            }
-            if(isset($organisation_id)) {
-                update_post_meta( $attachment_id, 'organisation_id' , $organisation_id);
-            }
 
             return wp_send_json(array('message' => 'Attachment has uploaded', 'status' => true, 'attachment_id' => $attachment_id));
         } catch (Exception $exception) {
@@ -1030,7 +1005,7 @@ class Question_Form
         ?>
         <div class="invite-colleagues-wrapper">
             <form id="form-invite-colleagues" method="post" onsubmit="return false">
-                <textarea id="emails-area" rows="3" placeholder="Add emails adddress sepated by a comma"></textarea>
+                <textarea id="emails-area" rows="3" placeholder="Add the emails (from your company) of all your colleagues who will assist you with the submission, please seperate each email by a comma."></textarea>
                 <div class="form-action">
                     <button id="btn-send-invite-colleagues" type="submit">
                         Send invite
@@ -1062,6 +1037,11 @@ class Question_Form
             $emails_sent = array();
             $assessment_link = get_permalink($assessment_id);
             $assessment_title = get_the_title($assessment_id);
+            $assessment_title = str_replace('&#8211;', '-', $assessment_title); //Remove special character code to dash(-)
+
+            // Filter mail from
+            add_filter( 'wp_mail_from', 'sf_user_mail_from' );
+            add_filter( 'wp_mail_from_name', 'sf_user_mail_from_name' );
 
             foreach ($emails as $email) {
 
@@ -1069,15 +1049,19 @@ class Question_Form
 
                 $email_name = strstr($email, '@', true); 
 
-                $content  = '<p>Hi <strong>'. $email_name .'</strong></p>';
-                $content .= '<p>You have a new invitation to work on '. $assessment_title .'<br>';
+                $content  = '<p style="font-size:15px;">Hello <strong>'. $email_name .'</strong></p>';
+                $content .= '<p style="font-size:15px;">You have an invitation to work on the '. $assessment_title .'<br>';
                 $content .= '<a href=' . $assessment_link . ' target="_blank">Click here to view the assessment.</a></p>';
 
-                $sent = wp_mail($email , 'New invitation from your colleague to '.$assessment_title, $content);
+                $sent = wp_mail($email , 'Invitation to work on the '.$assessment_title, $content);
 
                 $emails_sent[] = $email;
                 if (!$sent) throw new Exception($sent, 1);
             }
+
+            // Remove filter mail from
+            remove_filter( 'wp_mail_from', 'sf_user_mail_from' );
+            remove_filter( 'wp_mail_from_name', 'sf_user_mail_from_name' );
 
             return wp_send_json(array('message' => 'Invitations has been send', 'emails' => $emails_sent, 'status' => true));
 

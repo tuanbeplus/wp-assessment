@@ -265,15 +265,19 @@ body {
 #emails-area {
     width: 100%;
     border-radius: 10px;
-    padding: 14px;
+    padding: 12px 14px;
     font-size: 1.125rem;
     transition: none;
     border: 2px solid #663077;
+    -webkit-box-shadow: inset 4px 4px 3px 0px #dddddd;
+    -moz-box-shadow: inset 4px 4px 3px 0px #dddddd;
+    box-shadow: inset 4px 4px 3px 0px #dddddd;
 }
 
 #emails-area::placeholder {
-    font-size: 1.125rem;
-    color: #aaa;
+    font-size: 1.05rem;
+    line-height: 130%;
+    color: #777;
 }
 
 #btn-send-invite-colleagues {
@@ -290,9 +294,9 @@ body {
 
 #form-invite-colleagues .send-message {
     display: none;
+    width: 340px;
     position: absolute;
     margin-top: 10px;
-    white-space: nowrap;
     color: #fff;
     animation: slide-down 0.1s linear;
 }
@@ -942,12 +946,17 @@ body {
     display: inline-flex;
     align-items: baseline;
     font-size: 1rem;
+    line-height: 130%;
     color: #333;
 }
 
 .file-item > .name:hover {
     text-decoration: none;
     color: #0061A0;
+}
+
+.file-item > .name a {
+    display: flex;
 }
 
 .file-delete{
