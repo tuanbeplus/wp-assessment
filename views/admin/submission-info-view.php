@@ -13,7 +13,8 @@ $submission_status = get_post_meta($post_id, 'assessment_status', true);
 $total_submission_score = get_post_meta($post_id, 'total_submission_score', true);
 $report_id = get_post_meta($post_id, 'report_id', true);
 $report_url = home_url() . '/wp-admin/post.php?post='. $report_id .'&action=edit';
-$sf_organization_name = get_post_meta($post_id, 'sf_organization_name', true);
+$organisation_id = get_post_meta($post_id, 'organisation_id', true);
+$organization_data = sf_get_object_metadata('Account', $organisation_id);
 
 $main = new WP_Assessment();
 
@@ -58,20 +59,20 @@ update_post_meta($post_id, 'assessment_total_point', $total_points);
 ?>
 
 <div class="submission-info-container">
-    <?php if (!empty($sf_user_id)): ?>
+    <?php if (isset($sf_user_id)): ?>
         <p class="post-status-display">User: <strong><?php echo $sf_user_name; ?></strong></p>
     <?php else:?>
         <p class="post-status-display">User: <strong><?php echo $user->display_name; ?></strong></p>
     <?php endif; ?>
 
-    <?php if (!empty($sf_organization_name)): ?>
-        <p class="post-status-display">Company: <strong><?php echo $sf_organization_name; ?></strong></p>
-    <?php endif; ?>
-
-    <?php if (!empty($sf_user_id)): ?>
+    <?php if (isset($sf_user_id)): ?>
         <p class="post-status-display">Email: <strong><?php echo $sf_user_email; ?></strong></p>
     <?php else:?>
         <p class="post-status-display">Email: <strong><?php echo $user->user_email; ?></strong></p>
+    <?php endif; ?>
+
+    <?php if (isset($organization_data->Name)): ?>
+        <p class="post-status-display">Company: <strong><?php echo $organization_data->Name; ?></strong></p>
     <?php endif; ?>
 
     <p class="post-status-display">Status: <strong><?php echo $submission_status; ?></strong></p>
@@ -82,5 +83,4 @@ update_post_meta($post_id, 'assessment_total_point', $total_points);
             <button type="button" class="button button-primary button-large">View Report</button>
         </a>
     <?php endif; ?>
-
 </div>

@@ -565,13 +565,11 @@ $is_accepted = $status === 'accepted';
                                                                     $file_index = $key + 1;
                                                                 ?>
                                                                 <?php if ($file_url): ?>
-                                                                <span class="file-item">
-                                                                    <span class="name">
-                                                                        <a href="<?php echo $file_url; ?>" target="_blank">
+                                                                <span class="file-item file-item-<?php echo $file_index; ?>">
+                                                                    <a class="name" href="<?php echo $file_url; ?>" target="_blank">
                                                                             <i class="fa-solid fa-paperclip"></i>
                                                                             <?php echo $file_name; ?>
-                                                                        </a>
-                                                                    </span>
+                                                                    </a>
                                                                     <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
                                                                             class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"
@@ -579,7 +577,9 @@ $is_accepted = $status === 'accepted';
                                                                     <?php if($is_disabled): ?>
                                                                         <span class="icon-checked"><i class="fa-solid fa-circle-check"></i></span>
                                                                     <?php else: ?>
-                                                                        <span class="file-delete"><i class="fa-regular fa-trash-can"></i></span>
+                                                                        <button class="file-delete" aria-label="Remove this uploaded file">
+                                                                            <i class="fa-regular fa-trash-can"></i>
+                                                                        </button>
                                                                     <?php endif; ?>
                                                                 </span>
                                                                 <?php endif; ?>

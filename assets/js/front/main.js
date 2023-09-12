@@ -443,14 +443,14 @@ jQuery(document).ready(function ($) {
             // Upload droppedFiles[i] to Media
             file_item = $('<span/>', {class: 'file-item', style: 'display:none;',})
             // fileName = $('<a/>', { class: 'name', href: '', text: filesInput.item(i).name,})
-            fileName = $('<a/>', { class: 'name', text: filesInput.item(i).name,})
+            fileName = $('<span/>', { class: 'name', text: filesInput.item(i).name,})
             fileName.prepend('<i class="fa-solid fa-paperclip"></i>')
             file_id_input  = '<input name="" type="hidden" class="input-file-hiden additional-files" value=""/>';
 
             file_item
                 .append(fileName)
                 .append(file_id_input)
-                .append('<span class="file-delete"><i class="fa-regular fa-trash-can"></i></span>')
+                .append('<button class="file-delete" aria-label="Remove this uploaded file"><i class="fa-regular fa-trash-can"></i></button>')
 
             file_ext = filesInput.item(i).name.split('.').pop()
 
@@ -463,7 +463,7 @@ jQuery(document).ready(function ($) {
                 file_item.addClass('file-item-' + item_index)
                 file_item.find('input.input-file-hiden').attr('name', 'questions_'+group_questions_id+'_quiz_'+sub_question_id+'_attachmentIDs_'+ item_index )
                 file_item.find('input.input-file-hiden').addClass('additional-file-id-'+ item_index)
-                file_item.find('a.name').addClass('file-name-'+ item_index)
+                file_item.find('span.name').addClass('file-name-'+ item_index)
 
                 frontUploadAdditionalFiles(filesInput[i], inputElement, item_index);
 
@@ -963,32 +963,27 @@ jQuery(document).ready(function ($) {
                 fileUploaderWrap.find('.btn-add-files-wrapper').addClass('not-allowed')
             },
             success:function(response){
+                if (response.status == true) {
+                    let attachment_id = response.attachment_id
+                    upload_message_success.text('Uploaded file successfully.').show()
+                    setTimeout(function() {
+                        upload_message_success.hide()
+                    }, 10000)
+                    fileUploaderWrap.find('.btn-add-files-wrapper').removeClass('not-allowed')
+                    fileUploaderWrap.find('.additional-file-id-' + index).val(attachment_id)
+                    fileUploaderWrap.find('.file-item-' + index).removeAttr('style')
+                } 
+                else {
+                    fileUploaderWrap.find('.spinner-upload').hide()
+                    dropArea.removeClass('uploading')
+                    console.log(response.message);
+                    upload_message_error.find('.message').text('There was aproblem attaching one of your files. Please try again.')
+                    upload_message_error.css('display', 'flex')
+                }
                 fileUploaderWrap.find('.spinner-upload').hide()
                 dropArea.removeClass('uploading')
-                upload_message_success.text('Upload file successfully.').show()
-                setTimeout(function() {
-                    upload_message_success.hide()
-                }, 10000)
-                fileUploaderWrap.find('.btn-add-files-wrapper').removeClass('not-allowed')
-                console.log(response);
             }
-        });
-    
-        const { status, message } = response;
-    
-        if (status) {
-            let attachment_id = response?.attachment_id
-            fileUploaderWrap.find('.additional-file-id-' + index).val(attachment_id)
-            fileUploaderWrap.find('.file-item-' + index).removeAttr('style')
-
-            // wp.media.query(attachment_id).more().then(function (data) {
-            //     // preloading finished
-            //     new_file_url = wp.media.attachment(attachment_id).get('url');
-            //     fileUploaderWrap.find('a.file-name-' + index).attr('href', new_file_url)
-            // });
-        } else {
-            upload_message_error.find('.message').text('There was aproblem attaching one of your files. Please try again.')
-        }
+        }); 
     }
 
     function toggleMessageWrap(message) {

@@ -125,13 +125,6 @@ $submission_score_arr = array();
             ?>
             <div class="group-quiz-wrapper">
                 <p class="group-title"><?php echo $group_id.' - '.$group_title; ?></p>
-                <!-- <div class="row weighting">
-                    <label class="weighting-label"><strong>Weighting: <?php //echo $group_max_point ?></strong></label>
-                    <input class="input-group-weighting" type="number" max="<?php //echo $group_max_point ?>" 
-                            placeholder="Points" name="group_quiz_point[<?php //echo $group_id; ?>][point]" 
-                            value="<?php //echo $group_point; ?>" />
-                </div> -->
-
                 <!--  -->
                 <?php if ($quiz && is_array($quiz)) : ?>
                     <?php foreach ($quiz as $field) :
@@ -161,10 +154,6 @@ $submission_score_arr = array();
                         if ($field->answers) {
                             $answers = json_decode($field->answers);
                         }
-                        // if ($field->feedback) {
-                        //     $feedback = $field->feedback;
-                        //     $feedback = htmlentities(stripslashes(utf8_decode($feedback)));
-                        // }
                         if ($field->status) {
                             $type = $field->status;
                         }
@@ -360,7 +349,6 @@ $submission_score_arr = array();
 <!-- Hide meta box if quizs don't exist -->
 <?php if (empty($quiz)): ?>
     <style>
-        #acf-group_63abf1f270c08,
         #submitted_info_view,
         #questions-repeater-field {
             display: none!important;
@@ -368,7 +356,6 @@ $submission_score_arr = array();
     </style>
 <?php else: ?>
     <style>
-        #acf-group_63abf1f270c08,
         #submitted_info_view,
         #questions-repeater-field {
             display: block!important;

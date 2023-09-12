@@ -191,6 +191,12 @@ class WP_Azure_Storage {
                     // Delete attachment from Azure blob storage.
                     \Windows_Azure_Helper::delete_blob( $container_name, $blob_name);
                 }
+                else {
+                    return wp_send_json(array(
+                        'message' => 'Windows_Azure_Helper class does not exist!', 
+                        'status' => false
+                    ));
+                }
                 // Delete attachment row from WP azure table.
                 $wpdb->delete( $table, array('id' => $row_id ));
 
@@ -206,7 +212,7 @@ class WP_Azure_Storage {
     }
 
     /**
-     * Upload file form User's front to MS Azure & insert to table
+     * Upload attachments from User's front to MS Azure & insert to table
      * 
      */
     function save_attachments_azure_storage_ajax()
@@ -224,7 +230,6 @@ class WP_Azure_Storage {
             }
 
             $fileName = preg_replace('/\s+/', '-', $file["name"]);
-            $attachment_name = preg_replace('/[^A-Za-z0-9.\-]/', '', $fileName);
             // check_ajax_referer('assessment_attachment_upload', 'security');
             
             if (isset($_COOKIE['userId'])) {
@@ -265,6 +270,7 @@ class WP_Azure_Storage {
             // When upload file to WP media successful
             if (isset($attachment_id)) {
                 $attachment_path = wp_get_attachment_url($attachment_id);
+                $attachment_name = get_the_title($attachment_id);
 
                 $inputs = array(
                     'attachment_name' => $attachment_name,
@@ -281,17 +287,18 @@ class WP_Azure_Storage {
                     'organisation_id' => $organisation_id,
                 );
 
+                // Insert attachment data row to Azure table
                 $insert_table = $this->insert_attachments_azure_storage(array_merge($inputs, $conditions));
 
                 // Delete attachment in WP media
-                $wp_media_delete = wp_delete_attachment( $attachment_id, true );
+                $wp_media_deleted = wp_delete_attachment( $attachment_id, true );
 
                 return wp_send_json(array(
                     'attachment_id' => $attachment_id, 
                     'insert_row_id' => $insert_table, 
                     'message' => 'Attachments has been uploaded', 
                     'status' => true,                     
-                    'wp_media_delete' => $wp_media_delete,
+                    'wp_media_deleted' => $wp_media_deleted,
                 ));
             }
             else {

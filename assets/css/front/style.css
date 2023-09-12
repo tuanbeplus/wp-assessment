@@ -948,27 +948,36 @@ body {
     font-size: 1rem;
     line-height: 130%;
     color: #333;
+    cursor: default;
 }
 
-.file-item > .name:hover {
-    text-decoration: none;
+.file-item > a.name {
     color: #0061A0;
 }
 
-.file-item > .name a {
-    display: flex;
+.file-item > a.name:hover {
+    text-decoration: none;
+    color: #003d66;
+    cursor: pointer;
 }
 
-.file-delete{
+.file-item .file-delete{
     padding: 4px;
     margin-left: 10px;
 	display: flex;
 	color: #0061A0;
 	cursor: pointer;
+    border: none;
+    background-color: inherit;
 }
 
-.file-delete:hover {
+.file-item .file-delete:hover {
     color: #c32e2e;
+}
+
+.file-item .file-delete:focus {
+    border: 2px dashed #666!important;
+    background-color: inherit;
 }
 
 .upload-files-top {

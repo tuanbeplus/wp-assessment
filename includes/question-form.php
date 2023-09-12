@@ -833,7 +833,6 @@ class Question_Form
             }
 
             $fileName = preg_replace('/\s+/', '-', $file["name"]);
-            $fileName = preg_replace('/[^A-Za-z0-9.\-]/', '', $fileName);
             // check_ajax_referer('assessment_attachment_upload', 'security');
             $attachment = wp_upload_bits($fileName, null, file_get_contents($file["tmp_name"]));
 
