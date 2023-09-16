@@ -34,7 +34,7 @@ function admin_enqueue_scripts()
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
 
-        wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/main.js', true, rand());
+        wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/main.js', true, WP_ASSESSMENT_VER);
         wp_localize_script(
             'admin-js',
             'ajax_object',
@@ -44,7 +44,7 @@ function admin_enqueue_scripts()
             )
         );
     }
-    wp_enqueue_style('admin-css', WP_ASSESSMENT_ASSETS . '/css/style.css', false, rand());
+    wp_enqueue_style('admin-css', WP_ASSESSMENT_ASSETS . '/css/style.css', false, WP_ASSESSMENT_VER);
 }
 
 add_action('wp_enqueue_scripts', 'enqueue_scripts');
@@ -55,12 +55,12 @@ function enqueue_scripts()
         wp_enqueue_media();
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
-        wp_enqueue_style('front-style', WP_ASSESSMENT_ASSETS . '/css/front/style.css', true, rand());
-        wp_enqueue_style('front-responsive', WP_ASSESSMENT_ASSETS . '/css/front/responsive.css', true, rand());
+        wp_enqueue_style('front-style', WP_ASSESSMENT_ASSETS . '/css/front/style.css', true, WP_ASSESSMENT_VER);
+        wp_enqueue_style('front-responsive', WP_ASSESSMENT_ASSETS . '/css/front/responsive.css', true, WP_ASSESSMENT_VER);
 
         wp_enqueue_script('jquery', WP_ASSESSMENT_ASSETS . '/js/jquery.min.js');
         wp_enqueue_script('bootstrap-min-js', WP_ASSESSMENT_ASSETS . '/js/bootstrap.min.js');
-        wp_enqueue_script('main-js', WP_ASSESSMENT_ASSETS . '/js/front/main.js', true, rand());
+        wp_enqueue_script('main-js', WP_ASSESSMENT_ASSETS . '/js/front/main.js', true, WP_ASSESSMENT_VER);
         wp_localize_script(
             'main-js',
             'ajax_object',

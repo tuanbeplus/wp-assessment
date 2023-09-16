@@ -422,7 +422,7 @@ jQuery(document).ready(function ($) {
 
     function uploadMutilpleAttachments(filesInput, inputElement) {
 
-        const file_type_arr = [ 'ppt', 'pptx', 'pdf', 'doc', 'docx', 'xlsx', 'peg', 'png', 'jpg', 'mp4', 'mpg', 'wmv', 'mov', 'msg' ];
+        const file_type_arr = [ 'ppt', 'pptx', 'pdf', 'doc', 'docx', 'xlsx', 'peg', 'png', 'jpg', 'jpeg', 'mp4', 'mpg', 'wmv', 'mov', 'msg' ];
 
         let group_questions_id =  inputElement.closest('.group-question').data('group')
         let sub_question_id = inputElement.closest('.fieldsWrapper').data('sub')
@@ -972,13 +972,14 @@ jQuery(document).ready(function ($) {
                     fileUploaderWrap.find('.btn-add-files-wrapper').removeClass('not-allowed')
                     fileUploaderWrap.find('.additional-file-id-' + index).val(attachment_id)
                     fileUploaderWrap.find('.file-item-' + index).removeAttr('style')
+                    console.log(response.message);
                 } 
                 else {
                     fileUploaderWrap.find('.spinner-upload').hide()
                     dropArea.removeClass('uploading')
-                    console.log(response.message);
                     upload_message_error.find('.message').text('There was aproblem attaching one of your files. Please try again.')
                     upload_message_error.css('display', 'flex')
+                    console.log(response.message);
                 }
                 fileUploaderWrap.find('.spinner-upload').hide()
                 dropArea.removeClass('uploading')

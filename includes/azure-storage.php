@@ -91,7 +91,7 @@ class WP_Azure_Storage {
     }
 
     /**
-	 * Insert attachment to WP Media
+	 * Insert attachment to WP Media & Azure blob
 	 *
 	 */
     function insert_attachments_wp_media($upload, $parent_post_id = null)
@@ -144,7 +144,6 @@ class WP_Azure_Storage {
     function get_azure_attachments_uploaded($parent_id, $quiz_id, $assessment_id, $organisation_id) {
         try {
             global $wpdb;
-
             $table = $this->get_azure_storage_table();
 
             $sql = "SELECT * FROM $table 
@@ -156,6 +155,50 @@ class WP_Azure_Storage {
             $result = $wpdb->get_results($sql);
 
             return !empty($result) ? $result : null;
+
+            if ($wpdb->last_error) {
+                throw new Exception($wpdb->last_error);
+            }
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+
+    /**
+	 * Rename Azure attachment Name uploaded in table
+	 *
+	 * @return string New attachment Name
+	 */
+    function rename_azure_attachment_upload($file_name, $assessment_id, $user_id) {
+        try {
+            global $wpdb;
+            $table = $this->get_azure_storage_table();
+
+            $sql = "SELECT attachment_name FROM $table  
+                    WHERE assessment_id = $assessment_id 
+                    AND user_id = '$user_id'";
+
+            $result = $wpdb->get_results($sql);
+
+            if (!empty($result)) {
+                $attachment_name_arr = array();
+                $new_file_name = '';
+                $current_time = date('-H-i-s');
+                foreach ($result as $row) {
+                    if ($file_name == $row->attachment_name) {
+                        $name = substr($file_name, 0, strrpos($file_name, "."));
+                        $dot_and_ex = str_replace($name, '', $file_name);
+                        $new_file_name = $name.$current_time.$dot_and_ex; // New file name
+                    }
+                    else {
+                        $new_file_name = $file_name;
+                    }
+                }
+                return $new_file_name;
+            }
+            else {
+                return $file_name;
+            }
 
             if ($wpdb->last_error) {
                 throw new Exception($wpdb->last_error);
@@ -228,9 +271,6 @@ class WP_Azure_Storage {
             if (filesize($path) >  $max_file_size) {
                 throw new Exception('Maximum file size is ' . size_format($max_file_size) . '');
             }
-
-            $fileName = preg_replace('/\s+/', '-', $file["name"]);
-            // check_ajax_referer('assessment_attachment_upload', 'security');
             
             if (isset($_COOKIE['userId'])) {
                 $user_id = $_COOKIE['userId'];
@@ -259,7 +299,9 @@ class WP_Azure_Storage {
             $organisation_id = $_POST['organisation_id'];
             if (empty($organisation_id))
                 throw new Exception('Organisation ID not found.');
-
+            
+            $fileName = preg_replace('/\s+/', '-', $file["name"]);
+            $fileName = $this->rename_azure_attachment_upload($fileName, $assessment_id, $user_id);
             $attachment = wp_upload_bits($fileName, null, file_get_contents($file["tmp_name"]));
 
             if (!empty($attachment['error'])) {
@@ -280,7 +322,6 @@ class WP_Azure_Storage {
                     'parent_id' => $parent_id,
                     'quiz_id' => $quiz_id,
                 );
-                
                 $conditions = array(
                     'attachment_id' => $attachment_id,
                     'assessment_id' => $assessment_id,
@@ -296,13 +337,13 @@ class WP_Azure_Storage {
                 return wp_send_json(array(
                     'attachment_id' => $attachment_id, 
                     'insert_row_id' => $insert_table, 
-                    'message' => 'Attachments has been uploaded', 
+                    'message' => 'Attachment has been uploaded', 
                     'status' => true,                     
                     'wp_media_deleted' => $wp_media_deleted,
                 ));
             }
             else {
-                return wp_send_json(array('message' => 'Attachments not exist', 'status' => false));
+                return wp_send_json(array('message' => 'Attachment not exist', 'status' => false));
             }
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
