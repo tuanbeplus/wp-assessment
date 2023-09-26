@@ -593,6 +593,34 @@ jQuery(document).ready(function ($) {
         });
     })
 
+    $(document).on('click', '.sas-blob-cta', function (e){
+
+        let blobUrl = $(this).data('blob')
+
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'create_sas_blob_url_azure_ajax',
+                'blob_url' : blobUrl,
+            },
+            beforeSend : function ( xhr ) {
+                $(this).focus()
+            },
+            success:function(response){
+                if (response.status) {
+                    window.open(
+                        response.sas_blob_url,
+                        '_blank',
+                      );
+                } else {
+                    alert(response.message)
+                }
+                $(this).focusout()
+            }
+        });
+    });
+
     function moveToNextQuizStep(instance, prev = false) {
         let prevQuiz = instance;
         let nextQuiz = prev ? instance.prev() : instance.next();

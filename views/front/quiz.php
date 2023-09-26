@@ -1,12 +1,13 @@
 <?php
-header("Expires: Tue, 01 Jan 2000 00:00:00 GMT");
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-?>
-<?php get_header(); ?>
-<?php
+/**
+ * Assessments template front Saturn
+ * 
+ * @since 2.0.0
+ * @author Tuan
+ */
+
+get_header(); 
+
 global $post;
 global $wpdb;
 $post_id = $post->ID;
@@ -57,7 +58,7 @@ $is_publish = $status === 'publish';
 $is_accepted = $status === 'accepted';
 ?>
 
-<?php if (current_user_can('administrator') || $_COOKIE['userId']): ?>
+<?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
 
     <?php if (current_user_can('administrator') || $is_user_can_access == true): ?>
 
@@ -556,6 +557,36 @@ $is_accepted = $status === 'accepted';
                                                         <?php 
                                                             $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($j, $sub_id, $post_id, $organisation_id);
                                                         ?>
+                                                        <?php if ($arr_attachmentID): ?>
+                                                            <?php foreach($arr_attachmentID as $key => $field): ?>
+                                                                <?php
+                                                                    $file_id = $field['value'];
+                                                                    $file_url = wp_get_attachment_url($file_id);
+                                                                    $file_name = get_the_title($file_id);
+                                                                    $file_index = $key + 1;
+                                                                ?>
+                                                                <?php if ($file_url): ?>
+                                                                <span class="file-item file-item-<?php echo $file_index; ?>">
+                                                                    <a class="name" href="<?php echo $file_url; ?>" target="_blank">
+                                                                            <i class="fa-solid fa-paperclip"></i>
+                                                                            <?php echo $file_name; ?>
+                                                                    </a>
+                                                                    <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
+                                                                            type="hidden"
+                                                                            class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"
+                                                                            value="<?php echo $file_id; ?>">
+                                                                    <?php if($is_disabled): ?>
+                                                                        <span class="icon-checked"><i class="fa-solid fa-circle-check"></i></span>
+                                                                    <?php else: ?>
+                                                                        <button class="file-delete" aria-label="Remove this uploaded file">
+                                                                            <i class="fa-regular fa-trash-can"></i>
+                                                                        </button>
+                                                                    <?php endif; ?>
+                                                                </span>
+                                                                <?php endif; ?>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+
                                                         <?php if ($azure_attachments_uploaded): ?>
                                                             <?php foreach($azure_attachments_uploaded as $key => $field): ?>
                                                                 <?php
@@ -566,10 +597,10 @@ $is_accepted = $status === 'accepted';
                                                                 ?>
                                                                 <?php if ($file_url): ?>
                                                                 <span class="file-item file-item-<?php echo $file_index; ?>">
-                                                                    <a class="name" href="<?php echo $file_url; ?>" target="_blank">
+                                                                    <button class="name sas-blob-cta" data-blob="<?php echo $file_url; ?>">
                                                                             <i class="fa-solid fa-paperclip"></i>
                                                                             <?php echo $file_name; ?>
-                                                                    </a>
+                                                                    </button>
                                                                     <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
                                                                             class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"

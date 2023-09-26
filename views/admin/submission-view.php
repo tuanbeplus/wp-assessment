@@ -187,27 +187,48 @@ $submission_score_arr = array();
                                     <?php 
                                         $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($group_id, $quiz_id, $assessment_id, $organisation_id);
                                     ?>
-                                    <?php if ($azure_attachments_uploaded): ?>
+                                    <?php if ($azure_attachments_uploaded || $field->attachment_ids): ?>
                                         <div class="filesList_submission">
-                                        <p><strong>Supporting Documentation</strong></p>
-                                        <?php foreach($azure_attachments_uploaded as $field): ?>
-                                            <?php
-                                                $file_name = $field->attachment_name;
-                                                $file_url = $field->attachment_path;
-                                            ?>
-                                            <?php if ($file_url): ?>
-                                            <span class="file-item">
-                                                <span class="name">
-                                                    <a href="<?php echo $file_url; ?>" target="_blank">
-                                                        <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
-                                                        <?php echo $file_name; ?>
-                                                    </a>
+                                            <p><strong>Supporting Documentation</strong></p>
+                                            <!-- Old WP uploaded -->
+                                            <?php foreach($arr_attachmentID as $field): ?>
+                                                <?php
+                                                    $file = $field['value'];
+                                                    $file_url = wp_get_attachment_url($file);
+                                                    $file_name = get_the_title($file);
+                                                ?>
+                                                <?php if ($file_url): ?>
+                                                <span class="file-item">
+                                                    <span class="name">
+                                                        <a href="<?php echo $file_url; ?>" target="_blank">
+                                                            <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
+                                                            <?php echo $file_name; ?>
+                                                        </a>
+                                                    </span>
                                                 </span>
-                                            </span>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+
+                                            <!-- New Azure uploaded -->
+                                            <?php foreach($azure_attachments_uploaded as $field): ?>
+                                                <?php
+                                                    $file_name = $field->attachment_name;
+                                                    $file_url = $field->attachment_path;
+                                                ?>
+                                                <?php if ($file_url): ?>
+                                                <span class="file-item">
+                                                    <span class="name">
+                                                        <a class="sas-blob-cta" data-blob="<?php echo $file_url; ?>">
+                                                            <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
+                                                            <?php echo $file_name; ?>
+                                                        </a>
+                                                    </span>
+                                                </span>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
+
                                     <?php 
                                         $weighting = $question_meta_field['point'] ? $question_meta_field['point'] : 0;
                                         ?>

@@ -1147,6 +1147,34 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    $(document).on('click', '.sas-blob-cta', function (e){
+
+        let blobUrl = $(this).data('blob')
+
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'create_sas_blob_url_azure_ajax',
+                'blob_url' : blobUrl,
+            },
+            beforeSend : function ( xhr ) {
+                $(this).focus()
+            },
+            success:function(response){
+                if (response.status) {
+                    window.open(
+                        response.sas_blob_url,
+                        '_blank',
+                      );
+                } else {
+                    alert(response.message)
+                }
+                $(this).focusout()
+            }
+        });
+    });
+
     // require assessment admin fields
     $('input.group-question-admin-title').prop('required',true);
     $('input.question-admin-title').prop('required',true);

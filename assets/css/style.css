@@ -623,6 +623,7 @@
 
 .file-item > .name a {
     text-decoration: none;
+    cursor: pointer;
 }
 
 .file-delete{

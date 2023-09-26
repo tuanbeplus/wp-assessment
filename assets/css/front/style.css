@@ -951,14 +951,17 @@ body {
     cursor: default;
 }
 
-.file-item > a.name {
+.file-item > button.name {
     color: #0061A0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: inherit;
 }
 
-.file-item > a.name:hover {
+.file-item > button.name:hover {
     text-decoration: none;
     color: #003d66;
-    cursor: pointer;
 }
 
 .file-item .file-delete{

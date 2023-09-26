@@ -3,6 +3,9 @@
  * Class Azure Storage for Saturn
  *
  */
+
+use MicrosoftAzure\Storage\Common\Internal\Resources;
+
 class WP_Azure_Storage {
 
     public function __construct() 
@@ -12,6 +15,9 @@ class WP_Azure_Storage {
 
         add_action('wp_ajax_delete_azure_attachments_ajax', array($this, 'delete_azure_attachments_ajax'));
         add_action('wp_ajax_nopriv_delete_azure_attachments_ajax', array($this, 'delete_azure_attachments_ajax'));
+
+        add_action('wp_ajax_create_sas_blob_url_azure_ajax', array($this, 'create_sas_blob_url_azure_ajax'));
+        add_action('wp_ajax_nopriv_create_sas_blob_url_azure_ajax', array($this, 'create_sas_blob_url_azure_ajax'));
 
         $this->set_azure_storage_table();
         $this->init_azure_storage_attachments();
@@ -52,8 +58,8 @@ class WP_Azure_Storage {
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             attachment_id int(11) NOT NULL,
-            attachment_name varchar(100) NOT NULL,
-            attachment_path varchar(200) NOT NULL,
+            attachment_name varchar(300) NOT NULL,
+            attachment_path varchar(500) NOT NULL,
             assessment_id int(11) NOT NULL,
             parent_id int(11) NOT NULL,
             quiz_id int(11) NOT NULL,
@@ -127,7 +133,7 @@ class WP_Azure_Storage {
 
         wp_update_attachment_metadata($attach_id, $attach_data);
 
-        // remove filter
+        // remove MS Azure storage filter
         remove_filter( 'wp_generate_attachment_metadata', 'windows_azure_storage_wp_generate_attachment_metadata', 9);
         remove_filter( 'content_save_pre', 'windows_azure_storage_content_save_pre');
         remove_filter( 'wp_handle_upload_prefilter', 'windows_azure_storage_wp_handle_upload_prefilter');
@@ -255,11 +261,36 @@ class WP_Azure_Storage {
     }
 
     /**
+     * Generate Shared Access Signature token Azure
+     *
+     * @param string  $account_name    Account name for Microsoft Azure.
+     * @param string  $account_key     Account key for Microsoft Azure.
+     * @param string  $resource_path   Container/Blob.
+     *
+     * @return string URL
+     */    
+    function generate_sas_token_azure($resource_path) {
+        $account_name = get_option('azure_storage_account_name');
+        $account_key = get_option('azure_storage_account_primary_access_key');
+
+        $sas_helper = new MicrosoftAzure\Storage\Blob\BlobSharedAccessSignatureHelper($account_name, $account_key);
+        $sas = $sas_helper->generateBlobServiceSharedAccessSignatureToken(
+            Resources::RESOURCE_TYPE_BLOB,              # Resource name to generate the canonicalized resource. It can be Resources::RESOURCE_TYPE_BLOB or Resources::RESOURCE_TYPE_CONTAINER
+            "{$resource_path}",                         # The name of the resource, including the path of the resource. It should be {container}/{blob}: for blobs.
+            "r",                                        # Signed permissions.
+            (new \DateTime())->modify('+55 minute'),    # Signed expiry
+            (new \DateTime())->modify('-5 minute'),     # Signed start
+            '',                                         # Signed IP, the range of IP addresses from which a request will be accepted, eg. "168.1.5.60-168.1.5.70"
+            'https',                                    # Signed protocol, should always be https
+        );
+        return "https://{$account_name}.blob.core.windows.net/{$resource_path}?{$sas}";
+    }
+
+    /**
      * Upload attachments from User's front to MS Azure & insert to table
      * 
      */
-    function save_attachments_azure_storage_ajax()
-    {
+    function save_attachments_azure_storage_ajax() {
         try {
             if (!isset($_FILES["file"]))
                 throw new Exception('File not found.');
@@ -378,5 +409,27 @@ class WP_Azure_Storage {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }
     }
+
+    /**
+     * Create Shared Access Signature Blob URL Ajax
+     * 
+     */
+    function create_sas_blob_url_azure_ajax() {
+        try {
+            $blob_url = $_POST['blob_url'];
+            if (empty($blob_url))
+                throw new Exception('Blob URL not found.');
+
+            $resource_path = str_replace('blob.core.windows.net/', '', strstr($blob_url, 'blob.core.windows.net/'));
+            $sas_blob_url = $this->generate_sas_token_azure($resource_path);
+
+            return wp_send_json(array('sas_blob_url' => $sas_blob_url, 'status' => true));
+
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+    
 }
 new WP_Azure_Storage();
+

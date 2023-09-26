@@ -29,5 +29,6 @@ require_once(WP_ASSESSMENT_DIR . '/includes/question-form.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/local-storage.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/salesforce-api.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/azure-storage.php');
+require_once(WP_ASSESSMENT_DIR . '/vendor/autoload.php');
 
 
