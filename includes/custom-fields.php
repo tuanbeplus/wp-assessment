@@ -122,8 +122,8 @@ class Custom_Fields
         if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'assessments')
             return;
 
-        $assessment_template = $_POST['assessment_template'];
-        $group_questions = $_POST['group_questions'];
+        $assessment_template = $_POST['assessment_template'] ?? null;
+        $group_questions = $_POST['group_questions'] ?? array();
         $is_required_answer_all = $_POST['is_required_answer_all'] ?? 0;
         $is_required_document_all = $_POST['is_required_document_all'] ?? 0;
         $is_invite_colleagues = $_POST['is_invite_colleagues'] ?? 0;
@@ -137,8 +137,8 @@ class Custom_Fields
         $new_group_questions = array();
         $item = 1;
         foreach ($group_questions as $value) {
-          $new_group_questions[$item] = $value;
-          $item++;
+            $new_group_questions[$item] = $value;
+            $item++;
         }
 
         update_post_meta($post_id, 'question_group_repeater', base64_encode(serialize($new_group_questions)));
@@ -160,10 +160,10 @@ class Custom_Fields
         if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'assessments')
             return;
 
-        $report_sections = ($_POST['report_sections']) ? $_POST['report_sections'] : '';
-        $key_recommendation = ($_POST['key_recommendation']) ? $_POST['key_recommendation'] : '';
-        $executive_summary = ($_POST['executive_summary']) ? $_POST['executive_summary'] : '';
-        $evalution_findings = ($_POST['evalution_findings']) ? $_POST['evalution_findings'] : '';
+        $report_sections = isset($_POST['report_sections']) ? $_POST['report_sections'] : '';
+        $key_recommendation = isset($_POST['key_recommendation']) ? $_POST['key_recommendation'] : '';
+        $executive_summary = isset($_POST['executive_summary']) ? $_POST['executive_summary'] : '';
+        $evalution_findings = isset($_POST['evalution_findings']) ? $_POST['evalution_findings'] : '';
 
         update_post_meta($post_id, 'report_template_content', $report_sections);
         update_post_meta($post_id, 'report_recommendation', $key_recommendation);
@@ -230,7 +230,7 @@ class Custom_Fields
 
         $post_type = get_post_type($post_id);
 
-        $assigned_collaborator = ($_POST['assigned_collaborator']) ? $_POST['assigned_collaborator'] : '';
+        $assigned_collaborator = isset($_POST['assigned_collaborator']) ? $_POST['assigned_collaborator'] : '';
 
         update_post_meta($post_id, 'assigned_collaborator', $assigned_collaborator);
     }

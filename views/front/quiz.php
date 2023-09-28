@@ -16,12 +16,13 @@ if (isset($_COOKIE['userId'])) {
 } else {
     $user_id = get_current_user_id();
 }
+$wp_user_id = get_current_user_by_salesforce_id($_COOKIE['userId']);
 
 $main = new WP_Assessment();
 $question_form = new Question_Form();
 $azure = new WP_Azure_Storage();
 
-$organisation_id = getUser($user_id)->records[0]->AccountId; 
+$organisation_id = get_user_meta($wp_user_id, '__salesforce_account_id', true);
 $questions = get_post_meta($post_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 
@@ -62,8 +63,14 @@ $is_accepted = $status === 'accepted';
 
     <?php if (current_user_can('administrator') || $is_user_can_access == true): ?>
 
-        <input type="hidden" id="sf_user_id" value="<?php echo $_COOKIE['userId']; ?>" />
-        <input type="hidden" id="sf_user_name" value="<?php echo $_COOKIE['sf_name']; ?>" />
+        <?php if (isset($_COOKIE['userId'])): ?>
+            <input type="hidden" id="sf_user_id" value="<?php echo $_COOKIE['userId']; ?>" />
+        <?php endif; ?>
+
+        <?php if (isset($_COOKIE['sf_name'])): ?>
+            <input type="hidden" id="sf_user_name" value="<?php echo $_COOKIE['sf_name']; ?>" />
+        <?php endif; ?>
+        
         <input type="hidden" id="assessment_id" value="<?php echo $post_id; ?>" />
         <input type="hidden" id="organisation_id" value="<?php echo $organisation_id; ?>"/>
 
@@ -178,13 +185,13 @@ $is_accepted = $status === 'accepted';
                             <div class="quizDetails">
                                 <?php foreach ($questions as $field) : $j++; ?>
                                     <?php
-                                    $multiple_choice = $field['choice'];
+                                    $multiple_choice = $field['choice'] ?? array();
                                     $question_description = $field['description'] ?? '';
                                     $question_advice = $field['advice'] ?? '';
                                     $choices_index = 0;
 
-                                    $is_attachment = $field['is_question_supporting'] == 1;
-                                    $is_question_description = $field['is_description'] == 1;
+                                    $is_attachment = isset($field['is_question_supporting']) ? 1 : '';
+                                    $is_question_description = isset($field['is_description']) ? 1 : '';
                                     $question_title = $field['title'] ?? '';
 
                                     $item_class = $j === 1 ? 'quiz-item-show' : 'quiz-item-hide';
@@ -236,15 +243,17 @@ $is_accepted = $status === 'accepted';
                                                 <div class="multiple-choice-area <?php if (!empty($answers)) echo 'checked'; ?>">
                                                     <?php foreach ($multiple_choice as $item) :
                                                         $choices_index++;
-                                                        $is_checked = $main->is_answer_exist($choices_index, $answers) ? 'checked' : '';
+                                                        $is_checked = $main->is_answer_exist($choices_index, $answers) ? 'checked' : null;
+                                                        $answer = isset($item['answer']) ? $item['answer'] : null;
+                                                        $point = isset($item['point']) ? $item['point'] : null;
                                                     ?>
                                                         <div class="checkBox">
                                                             <input class="form-check-input <?php echo $is_checked; ?>" type="radio"
                                                                     value="" <?php echo $is_disabled ? 'disabled' : '' ?>
                                                                     id="checkbox-<?php echo $j ?>-<?php echo $choices_index; ?>"
                                                                     name="quiz_<?php echo $j; ?>_choice"
-                                                                    data-title="<?php echo $item['answer']; ?>" 
-                                                                    data-point="<?php echo $item['point']; ?>" 
+                                                                    data-title="<?php echo $answer; ?>" 
+                                                                    data-point="<?php echo $point; ?>" 
                                                                     data-id="<?php echo $choices_index; ?>" <?php echo $is_checked; ?>>
                                                             <label class="form-check-label" for="checkbox-<?php echo $j ?>-<?php echo $choices_index; ?>">
                                                                 <?php echo $item['answer']; ?>
@@ -324,12 +333,13 @@ $is_accepted = $status === 'accepted';
                                 <?php foreach ($questions as $group_id => $field):
                                     $args = '';
                                     foreach ($field['list'] as $sub):
+                                        $args_choice = $sub['choice'] ?? null;
                                         $args_is_description = $sub['is_description'] ?? null;
                                         $args_supporting_doc = $sub['supporting_doc'] ?? null;
-
+                                        
                                         $args = array(
                                             'is_required_answer_all' => $is_required_answer_all,
-                                            'choice' => $sub['choice'],
+                                            'choice' => $args_choice,
                                             'is_description' => $args_is_description,
                                             'supporting_doc' => $args_supporting_doc,
                                         );
@@ -398,7 +408,7 @@ $is_accepted = $status === 'accepted';
                                         <div class="quizTitle"><?php echo $group_question_title; ?></div>
                                         <?php foreach ($sub_question as $sub_id => $field): ?>
                                             <?php
-                                                $multiple_choice = $field['choice'];
+                                                $multiple_choice = $field['choice'] ?? null;
                                                 $sub_title = $field['sub_title'] ?? '';
                                                 $question_description = $field['description'];
                                                 $question_advice = $field['advice'] ?? '';
@@ -557,6 +567,7 @@ $is_accepted = $status === 'accepted';
                                                         <?php 
                                                             $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($j, $sub_id, $post_id, $organisation_id);
                                                         ?>
+                                                        <!-- WP media attachment file -->
                                                         <?php if ($arr_attachmentID): ?>
                                                             <?php foreach($arr_attachmentID as $key => $field): ?>
                                                                 <?php
@@ -587,6 +598,7 @@ $is_accepted = $status === 'accepted';
                                                             <?php endforeach; ?>
                                                         <?php endif; ?>
 
+                                                        <!-- Azure Storage attachment file -->
                                                         <?php if ($azure_attachments_uploaded): ?>
                                                             <?php foreach($azure_attachments_uploaded as $key => $field): ?>
                                                                 <?php
@@ -597,10 +609,10 @@ $is_accepted = $status === 'accepted';
                                                                 ?>
                                                                 <?php if ($file_url): ?>
                                                                 <span class="file-item file-item-<?php echo $file_index; ?>">
-                                                                    <button class="name sas-blob-cta" data-blob="<?php echo $file_url; ?>">
+                                                                    <a class="name" href="<?php echo $file_url; ?>" target="_blank">
                                                                             <i class="fa-solid fa-paperclip"></i>
                                                                             <?php echo $file_name; ?>
-                                                                    </button>
+                                                                    </a>
                                                                     <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
                                                                             class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"

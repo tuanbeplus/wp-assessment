@@ -1,8 +1,11 @@
 <?php 
 $user_id = get_user_meta($_GET['user_id'], '__salesforce_user_id', true);
 $_COOKIE['userId'] = $user_id;
+$dcr_terms = array('dcr');
+$accessible_terms = array('self-assessed','index');
 
-$assessments_accessible_all_users = get_assessments_accessible_all_users(); 
+$assessments_accessible_all_users = get_assessments_accessible_all_users($accessible_terms); 
+$dcr_accessible_all_users = get_assessments_accessible_all_users($dcr_terms); 
 $sf_product_id_opp = getProductIdByOpportunity();
 $drc_product_id = isset($sf_product_id_opp['dcr_product_id']) ? $sf_product_id_opp['dcr_product_id'] : null;
 $index_product_id = isset($sf_product_id_opp['index_product_id']) ? $sf_product_id_opp['index_product_id'] : null;
@@ -38,12 +41,20 @@ $index_assessments_list = get_assessments_related_sf_products($index_product_id,
             </div>
         <?php endif; ?>
 
-        <?php if ($dcr_assessments_list): ?>
+        <?php if ($dcr_accessible_all_users || $dcr_assessments_list): ?>
             <div class="dcr-list _list">
                 <h3 class="list-heading">DCR</h3>
                 <span class="hepler-text">Assessments in DCR section on Dashboard.</span>
                 <ul>
                     <?php foreach ($dcr_assessments_list as $dcr): ?>
+                        <li>
+                            <a href="<?php echo get_the_permalink($dcr); ?>" target="_blank">
+                                <?php echo get_the_title($dcr); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+
+                    <?php foreach ($dcr_accessible_all_users as $dcr): ?>
                         <li>
                             <a href="<?php echo get_the_permalink($dcr); ?>" target="_blank">
                                 <?php echo get_the_title($dcr); ?>

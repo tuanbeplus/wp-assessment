@@ -118,9 +118,9 @@ $submission_score_arr = array();
             <?php 
                 $group_title = $field_group['title'];
                 $group_title = htmlentities(stripslashes(utf8_decode($group_title)));
-                $group_max_point = $field_group['point'];
+                $group_max_point = $field_group['point'] ?? null;
                 $group_list = $field_group['list'];
-                $group_point = $group_quiz_points[$group_id]['point'];
+                $group_point = $group_quiz_points[$group_id]['point'] ?? null;
                 $section_score_arr = array();
             ?>
             <div class="group-quiz-wrapper">
@@ -148,8 +148,8 @@ $submission_score_arr = array();
 
                         $question_meta_field = $group_list[$quiz_id];
                         $sub_title = htmlentities(stripslashes(utf8_decode($question_meta_field['sub_title'])));
-                        $sub_list_point = $group_quiz_points[$field->parent_id]['sub_list'];
-                        $sub_quiz_point = $sub_list_point[$quiz_id]['point'];
+                        $sub_list_point = $group_quiz_points[$field->parent_id]['sub_list'] ?? null;
+                        $sub_quiz_point = $sub_list_point[$quiz_id]['point'] ?? null;
 
                         if ($field->answers) {
                             $answers = json_decode($field->answers);
@@ -210,22 +210,24 @@ $submission_score_arr = array();
                                             <?php endforeach; ?>
 
                                             <!-- New Azure uploaded -->
-                                            <?php foreach($azure_attachments_uploaded as $field): ?>
-                                                <?php
-                                                    $file_name = $field->attachment_name;
-                                                    $file_url = $field->attachment_path;
-                                                ?>
-                                                <?php if ($file_url): ?>
-                                                <span class="file-item">
-                                                    <span class="name">
-                                                        <a class="sas-blob-cta" data-blob="<?php echo $file_url; ?>">
-                                                            <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
-                                                            <?php echo $file_name; ?>
-                                                        </a>
+                                            <?php if (!empty($azure_attachments_uploaded)): ?>
+                                                <?php foreach($azure_attachments_uploaded as $field): ?>
+                                                    <?php
+                                                        $file_name = $field->attachment_name;
+                                                        $file_url = $field->attachment_path;
+                                                    ?>
+                                                    <?php if ($file_url): ?>
+                                                    <span class="file-item">
+                                                        <span class="name">
+                                                            <a href="<?php echo $file_url; ?>" target="_blank">
+                                                                <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
+                                                                <?php echo $file_name; ?>
+                                                            </a>
+                                                        </span>
                                                     </span>
-                                                </span>
-                                                <?php endif; ?>
-                                            <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         </div>
                                     <?php endif; ?>
 
@@ -266,7 +268,7 @@ $submission_score_arr = array();
                                     <textarea class="form-control-lg feedback-input" 
                                             name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
                                             placeholder="Your feedback here"
-                                            ><?php echo $quiz_feedbacks[$group_id][$quiz_id]; ?></textarea>
+                                            ><?php echo $quiz_feedbacks[$group_id][$quiz_id] ?? null; ?></textarea>
                                     <div class="card-action">
                                         <a type="button" class="button button-primary accept-quiz-feedback" 
                                             data-group-id="<?php echo $group_id ?>"
@@ -368,14 +370,7 @@ $submission_score_arr = array();
 <?php endif; ?>
 
 <!-- Hide meta box if quizs don't exist -->
-<?php if (empty($quiz)): ?>
-    <style>
-        #submitted_info_view,
-        #questions-repeater-field {
-            display: none!important;
-        }
-    </style>
-<?php else: ?>
+<?php if (!empty($quiz)): ?>
     <style>
         #submitted_info_view,
         #questions-repeater-field {

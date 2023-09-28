@@ -22,6 +22,7 @@ define('WP_ASSESSMENT_FRONT_IMAGES', plugins_url('/assets/images/front', __FILE_
 
 require_once(WP_ASSESSMENT_DIR . '/includes/function.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/statics.php');
+require_once(WP_ASSESSMENT_DIR . '/includes/helper.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/hooks.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/custom-post-type.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/custom-fields.php');

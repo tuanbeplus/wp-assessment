@@ -6,12 +6,6 @@ $single_repeater_group = get_post_meta($post->ID, 'question_group_repeater', tru
 $single_repeater_group = $main->wpa_unserialize_metadata($single_repeater_group);
 $question_templates = get_post_meta($post->ID, 'question_templates', true);
 
-// if ($_GET['test'] == 'test') {
-//     echo "<pre>";
-//     print_r($single_repeater_group);
-//     echo "</pre>";
-// }
-
 $i = 0; $j = 0;
 ?>
 <div id="question-template-wrapper" class="question-template-wrapper">
@@ -94,7 +88,7 @@ $i = 0; $j = 0;
                                 <?php
                                 // $sub_question_index++;
                                 $parent_question_id = $group_id;
-                                $multiple_choice = $field['choice'];
+                                $multiple_choice = $field['choice'] ?? '';
                                 $sub_title = $field['sub_title'] ?? '';
                                 $question_point = $field['point'] ?? '';
                                 $question_advice = $field['advice'] ?? '';

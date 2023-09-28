@@ -29,24 +29,26 @@ $sub_score_points_arr = array();
 $sub_total_points_arr = array();
 
 foreach ($questions as $group_id => $group_field) {
-    $group_point = $group_field['point'];
-    $sub_point_list = $group_field['list'];
+    $group_point = $group_field['point'] ?? null;
+    $sub_point_list = $group_field['list'] ?? null;
 
-    $group_point_input = $group_quiz_points[$group_id]['point'];
-    $group_point_input_list = $group_quiz_points[$group_id]['sub_list'];
+    $group_point_input = $group_quiz_points[$group_id]['point'] ?? null;
+    $group_point_input_list = $group_quiz_points[$group_id]['sub_list'] ?? null;
 
-    foreach ($quiz as $field) {
-        if ($field->parent_id == $group_id) {
-            $sub_point = $sub_point_list[$field->quiz_id]['point'];
-            if (!empty($sub_point) && $group_point) {
-                $sub_total_points_arr[] = $sub_point * $group_point;
-            }
-
-            $sub_point_input = $group_point_input_list[$field->quiz_id]['point'];
-            if (!empty($sub_point_input) && $group_point) {
-                $sub_score_points_arr[] = $sub_point_input * $group_point_input;
-            }
-        }        
+    if (!empty($quiz)) {
+        foreach ($quiz as $field) {
+            if ($field->parent_id == $group_id) {
+                $sub_point = $sub_point_list[$field->quiz_id]['point'];
+                if (!empty($sub_point) && $group_point) {
+                    $sub_total_points_arr[] = $sub_point * $group_point;
+                }
+    
+                $sub_point_input = $group_point_input_list[$field->quiz_id]['point'];
+                if (!empty($sub_point_input) && $group_point) {
+                    $sub_score_points_arr[] = $sub_point_input * $group_point_input;
+                }
+            }        
+        }
     }
 }
 
