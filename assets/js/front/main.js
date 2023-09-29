@@ -605,7 +605,6 @@ jQuery(document).ready(function ($) {
                 'blob_url' : blobUrl,
             },
             beforeSend : function ( xhr ) {
-                $(this).focus()
             },
             success:function(response){
                 if (response.status) {
@@ -616,7 +615,6 @@ jQuery(document).ready(function ($) {
                 } else {
                     alert(response.message)
                 }
-                $(this).focusout()
             }
         });
     });

@@ -219,7 +219,7 @@ $submission_score_arr = array();
                                                     <?php if ($file_url): ?>
                                                     <span class="file-item">
                                                         <span class="name">
-                                                            <a href="<?php echo $file_url; ?>" target="_blank">
+                                                            <a class="sas-blob-cta" data-blob="<?php echo $file_url; ?>">
                                                                 <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
                                                                 <?php echo $file_name; ?>
                                                             </a>

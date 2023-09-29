@@ -609,10 +609,10 @@ $is_accepted = $status === 'accepted';
                                                                 ?>
                                                                 <?php if ($file_url): ?>
                                                                 <span class="file-item file-item-<?php echo $file_index; ?>">
-                                                                    <a class="name" href="<?php echo $file_url; ?>" target="_blank">
+                                                                    <button class="name sas-blob-cta" data-blob="<?php echo $file_url; ?>">
                                                                             <i class="fa-solid fa-paperclip"></i>
                                                                             <?php echo $file_name; ?>
-                                                                    </a>
+                                                                    </button>
                                                                     <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
                                                                             class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"

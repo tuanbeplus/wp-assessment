@@ -942,21 +942,21 @@ body {
 
 .file-item > .name{
     width: 100%;
-    padding: 10px 14px;
+    padding: 8px 12px;
     display: inline-flex;
     align-items: baseline;
     font-size: 1rem;
     line-height: 130%;
     color: #333;
     cursor: default;
+    border: 2px solid #fff;
+    border-radius: 4px;
 }
 
 .file-item > button.name {
     color: #0061A0;
-    border: none;
-    border-radius: 4px;
     cursor: pointer;
-    background-color: inherit;
+    background-color: inherit!important;
 }
 
 .file-item > button.name:hover {
