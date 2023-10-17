@@ -421,22 +421,39 @@ jQuery(document).ready(function ($) {
     let quiz_weighting = weighting_wrapper.data('weighting')
     let sub_score = quiz_wrapper.find('.sub-total-score-val')
     let all_sub_score = section_wrapper.find('.sub-total-score-val')
+    let all_sections_score = $('.total-section-score-val')
+    let total_score_element = $('.total-submission-score')
+    let input_total_score = $('input[name="total_submission_score"]')
     var sub_scores_arr = [];
+    var section_scores_arr = [];
     var total_section_score_val = 0;
+    var total_submission_score_val = 0;
 
-    sub_score.text(answer_point * quiz_weighting)
+    // Sub questions Scoring
+    sub_score.text(parseFloat(answer_point * quiz_weighting).toFixed(1));
 
     all_sub_score.each(function(e) {
-      let sub_score_int = parseInt($(this).text())
-      sub_scores_arr.push( sub_score_int )
-      
+      let sub_score_fl = parseFloat($(this).text());
+      sub_scores_arr.push(sub_score_fl);
     })
-
     sub_scores_arr.forEach( num => {
       total_section_score_val += num;
     })
 
-    total_section_score.text(total_section_score_val)
+    // Section Scoring
+    total_section_score.text(total_section_score_val.toFixed(1));
+
+    all_sections_score.each(function(e) {
+        let section_score_fl = parseFloat($(this).text());
+        section_scores_arr.push(section_score_fl);
+    })
+    section_scores_arr.forEach( num => {
+        total_submission_score_val += num;
+    })
+
+    // Total Submission Scoring
+    total_score_element.text(total_submission_score_val.toFixed(1));
+    input_total_score.val(total_submission_score_val.toFixed(1))
   });
 
   // change or type point for Group question

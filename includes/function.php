@@ -878,16 +878,13 @@ class WP_Assessment
                 $is_user_can_access = true;
             }
         }
-        elseif ($index_product_id && !empty($related_sf_products)) {
+        if ($index_product_id && !empty($related_sf_products)) {
             if (in_array('index', $terms_arr) && in_array($index_product_id, $related_sf_products)) {
                 $is_user_can_access = true;
             }
         }
-        elseif ($is_all_users_can_access == true) {
+        if ($is_all_users_can_access == true) {
             $is_user_can_access = true;
-        }
-        else {
-            $is_user_can_access = false;
         }
 
         return $is_user_can_access;

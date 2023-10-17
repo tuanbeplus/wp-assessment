@@ -16,13 +16,12 @@ if (isset($_COOKIE['userId'])) {
 } else {
     $user_id = get_current_user_id();
 }
-$wp_user_id = get_current_user_by_salesforce_id($_COOKIE['userId']);
 
 $main = new WP_Assessment();
 $question_form = new Question_Form();
 $azure = new WP_Azure_Storage();
 
-$organisation_id = get_user_meta($wp_user_id, '__salesforce_account_id', true);
+$organisation_id = getUser($_COOKIE['userId'])->records[0]->AccountId;
 $questions = get_post_meta($post_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 

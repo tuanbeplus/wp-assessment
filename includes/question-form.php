@@ -160,15 +160,14 @@ class Question_Form
                         else {
                             $input['description'] = null;
                         }
-                            
-
+                        
                         if (!empty($attachment_id))
                             $input['attachment_id'] = $attachment_id;
 
                         if (!empty($attachmentIDs))
                             $input['attachment_ids'] = json_encode($attachmentIDs);
 
-                        if (!empty($quiz_point))
+                        if ($quiz_point != null) 
                             $input['quiz_point'] = $quiz_point;
 
                         // if (count($input) === 0)
@@ -344,86 +343,86 @@ class Question_Form
                     }
                 }
 
-              //Save quiz
-              $main = new WP_Assessment();
+                //Save quiz
+                $main = new WP_Assessment();
 
-              foreach ($list_quiz as $parent_id => $quiz_post) {
+                foreach ($list_quiz as $parent_id => $quiz_post) {
 
-                  if($quiz_id != $parent_id) continue;
+                    if($quiz_id != $parent_id) continue;
 
-                  foreach ($quiz_post as $quiz_id => $p) {
+                    foreach ($quiz_post as $quiz_id => $p) {
 
-                    $answers = $p['choice'];
-                    $description = $p['description'] ?? null;
-                    $attachment_id = $p['attachment'] ?? null;
-                    $attachmentIDs = $p['attachmentIDs'] ?? null;
-                    $quiz_point = $p['point'] ?? null;
+                        $answers = $p['choice'];
+                        $description = $p['description'] ?? null;
+                        $attachment_id = $p['attachment'] ?? null;
+                        $attachmentIDs = $p['attachmentIDs'] ?? null;
+                        $quiz_point = $p['point'] ?? null;
 
-                    if($submission_id){
-                        // $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $user_id , $parent_id);
-                        $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $organisation_id , $parent_id);
+                        if($submission_id){
+                            // $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $user_id , $parent_id);
+                            $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $organisation_id , $parent_id);
+                        }
+                        else{
+                            // $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $user_id , $parent_id);
+                            $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id , $parent_id);
+                        }
+
+                        $is_new = !$assessment;
+                        $input = [];
+
+                        if (!empty($user_id))
+                            $input['user_id'] = $user_id;
+
+                        if (!empty($organisation_id))
+                            $input['organisation_id'] = $organisation_id;
+
+                        if (!empty($submission_id))
+                            $input['submission_id'] = $submission_id;
+
+                        if (!empty($answers))
+                            $input['answers'] = json_encode($answers);
+
+                        if (!empty($description))
+                            $input['description'] = $description;
+
+                        if (!empty($attachment_id))
+                            $input['attachment_id'] = $attachment_id;
+
+                        if (!empty($attachmentIDs))
+                            $input['attachment_ids'] = json_encode($attachmentIDs);
+
+                        if ($quiz_point != null) 
+                            $input['quiz_point'] = $quiz_point;
+
+                        // if (count($input) === 0)
+                        //     throw new Exception('Please complete the answer');
+
+                        if($submission_id){
+                            $conditions = array(
+                                // 'user_id' => $user_id,
+                                'organisation_id' => $organisation_id,
+                                'assessment_id' => $assessment_id,
+                                'quiz_id' => $quiz_id,
+                                'parent_id' => $parent_id,
+                                'submission_id' => $submission_id
+                            );
+                        } else {
+                            $conditions = array(
+                                // 'user_id' => $user_id,
+                                'organisation_id' => $organisation_id,
+                                'assessment_id' => $assessment_id,
+                                'quiz_id' => $quiz_id,
+                                'parent_id' => $parent_id
+                            );
+                        }
+
+                        if ($is_new || !$submission_id) {
+                            $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
+                        } else {
+                            $main->update_quiz_assessment($input, $conditions);
+                        }
+
                     }
-                    else{
-                        // $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $user_id , $parent_id);
-                        $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id , $parent_id);
-                    }
-
-                    $is_new = !$assessment;
-                    $input = [];
-
-                    if (!empty($user_id))
-                        $input['user_id'] = $user_id;
-
-                    if (!empty($organisation_id))
-                        $input['organisation_id'] = $organisation_id;
-
-                    if (!empty($submission_id))
-                        $input['submission_id'] = $submission_id;
-
-                    if (!empty($answers))
-                        $input['answers'] = json_encode($answers);
-
-                    if (!empty($description))
-                        $input['description'] = $description;
-
-                    if (!empty($attachment_id))
-                        $input['attachment_id'] = $attachment_id;
-
-                    if (!empty($attachmentIDs))
-                        $input['attachment_ids'] = json_encode($attachmentIDs);
-
-                    if (!empty($quiz_point))
-                        $input['quiz_point'] = $quiz_point;
-
-                    // if (count($input) === 0)
-                    //     throw new Exception('Please complete the answer');
-
-                    if($submission_id){
-                        $conditions = array(
-                            // 'user_id' => $user_id,
-                            'organisation_id' => $organisation_id,
-                            'assessment_id' => $assessment_id,
-                            'quiz_id' => $quiz_id,
-                            'parent_id' => $parent_id,
-                            'submission_id' => $submission_id
-                        );
-                    } else {
-                        $conditions = array(
-                            // 'user_id' => $user_id,
-                            'organisation_id' => $organisation_id,
-                            'assessment_id' => $assessment_id,
-                            'quiz_id' => $quiz_id,
-                            'parent_id' => $parent_id
-                        );
-                    }
-
-                    if ($is_new || !$submission_id) {
-                        $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
-                    } else {
-                        $main->update_quiz_assessment($input, $conditions);
-                    }
-
-                }
 
                 }
 

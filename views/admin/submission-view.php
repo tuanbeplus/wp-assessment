@@ -139,7 +139,7 @@ $submission_score_arr = array();
 
                         $quiz_id = $field->quiz_id;
 
-                        if (!empty($quiz_answer_points[$group_id][$quiz_id])) {
+                        if ($quiz_answer_points[$group_id][$quiz_id] != null) {
                             $quiz_point = $quiz_answer_points[$group_id][$quiz_id];
                         }
                         else {
@@ -254,12 +254,18 @@ $submission_score_arr = array();
                                 <div class="card-footer">
                                     <p class="sub-total-score">
                                         Sub Question score: 
-                                        <span class="sub-total-score-val" id="sub-total-score-val-<?php echo $quiz_id; ?>"><?php 
-                                            if (!empty($weighting) && !empty($quiz_point)) {
+                                        <span class="sub-total-score-val" id="sub-total-score-val-<?php echo $quiz_id; ?>">
+                                        <?php 
+                                            if (empty($quiz_point)) {
+                                                echo '0';
+                                            }
+                                            elseif ($weighting != null && $quiz_point != null) {
                                                 $sub_question_score = $weighting * $quiz_point;
                                                 $section_score_arr[] = $sub_question_score;
                                                 echo $sub_question_score;
-                                            } ?></span>
+                                            } 
+                                        ?>
+                                        </span>
                                     </p>
                                 </div>
                             </div>
@@ -267,7 +273,7 @@ $submission_score_arr = array();
                                 <div class="card-body">
                                     <textarea class="form-control-lg feedback-input" 
                                             name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
-                                            placeholder="Your feedback here"
+                                            placeholder="Add feedback here"
                                             ><?php echo $quiz_feedbacks[$group_id][$quiz_id] ?? null; ?></textarea>
                                     <div class="card-action">
                                         <a type="button" class="button button-primary accept-quiz-feedback" 
@@ -294,13 +300,16 @@ $submission_score_arr = array();
 
                 <?php endif; ?>
                 <!--  -->
-                <?php if (!empty($section_score_arr)): 
+                <?php 
+                    if (!empty($section_score_arr)): 
                         $total_section_score = array_sum($section_score_arr);
                         $submission_score_arr[] = $total_section_score;
                 ?>
                     <div class="total-section-score">
                         <span>Total Section score: 
-                            <span class="total-section-score-val"><?php echo $total_section_score; ?></span>
+                            <span class="total-section-score-val">
+                                <?php echo number_format($total_section_score, 1); ?>
+                            </span>
                         </span>
                     </div>
                 <?php endif;?>
@@ -355,11 +364,6 @@ $submission_score_arr = array();
         </div>
     <?php endif; ?>
 </div>
-
-<?php
-    $total_submission_score = array_sum($submission_score_arr);
-    update_post_meta( $post_id, 'total_submission_score', $total_submission_score );
-?>
 
 <?php if ($assessment_meta == 'Simple Assessment'): ?>
     <style>

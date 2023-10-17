@@ -101,6 +101,7 @@ body {
 .notificationBar ul.testDetails li {
     font-size: 1.125rem;
     margin-bottom: 16px;
+    line-height: 130%;
 }
 
 .notificationBar ul.testDetails li span.crossIcon {
@@ -453,6 +454,7 @@ body {
 /*}*/
 
 .quiz {
+    position: relative;
     background-color: #fff;
 }
 
@@ -588,8 +590,8 @@ body {
     margin-left: 0;
     margin-top: 0;
     border-radius: 8px;
-    border: 2px solid transparent;
-    padding: 4px 22px;
+    border: 1px solid transparent;
+    padding: 5px 22px;
     line-height: 140%;
     display: flex;
     align-items: center;
@@ -656,11 +658,11 @@ body {
 }
 
 .fieldsWrapper .checkBox input.form-check-input:focus+label {
-    border: 2px solid #333;
+    border: 1px solid #222;
 }
 
 .fieldsWrapper .checkBox input.form-check-input:checked+label {
-    background-color: #faaa1a;
+    background-color: #ffb838;
 }
 
 .textAreaWrap {

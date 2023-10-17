@@ -183,6 +183,7 @@ class Custom_Fields
         $group_quiz_points = $_POST['group_quiz_point'] ?? null;
         $quiz_feedbacks = $_POST['quiz_feedback'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
+        $total_submission_score = $_POST['total_submission_score'] ?? null;
 
         // echo '<pre>';
         // print_r($quiz_feedbacks);
@@ -201,6 +202,7 @@ class Custom_Fields
         update_post_meta($post_id, 'group_quiz_point', $new_group_quiz_points);
         update_post_meta($post_id, 'quiz_feedback', $quiz_feedbacks);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);
+        update_post_meta($post_id, 'total_submission_score', $total_submission_score);
     }
 
     function save_assigned_moderator($post_id): void

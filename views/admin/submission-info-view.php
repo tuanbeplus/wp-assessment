@@ -78,7 +78,11 @@ update_post_meta($post_id, 'assessment_total_point', $total_points);
     <?php endif; ?>
 
     <p class="post-status-display">Status: <strong><?php echo $submission_status; ?></strong></p>
-    <p class="post-status-display">Total Score: <strong><?php echo $total_submission_score; ?></strong></p>
+    <p class="post-status-display">
+        Total Score: 
+        <strong class="total-submission-score"><?php echo $total_submission_score; ?></strong>
+        <input type="hidden" name="total_submission_score" value="<?php echo $total_submission_score; ?>">
+    </p>
 
     <?php if ($report_id): ?>
         <a href="<?php echo $report_url; ?>" target="_blank">

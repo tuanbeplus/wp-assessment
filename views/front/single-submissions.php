@@ -116,7 +116,9 @@ for($i = 0; $i < $count_quiz; $i++) {
 					<a href="mailto:info@and.org.au">info@and.org.au</a>
 					<a href="tel:(02) 8270 9200">(02) 8270 9200</a>
 
-					<a id="printSubmissionEntry" href="#Print">Print Preliminary Report (.PDF)</a>
+					<?php if (!in_array('index', $assessment_term_arr)): ?>
+						<a id="printSubmissionEntry" href="#Print">Print Preliminary Report (.PDF)</a>
+					<?php endif; ?>
 				</div>
 				<div class="wrapperTablePrint">
 					<img id="logoPrintPage" style="margin: 0 auto 20px;display:block" src="<?php echo get_template_directory_uri().'/assets/imgs/logo.svg'; ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
