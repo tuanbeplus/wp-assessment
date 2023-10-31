@@ -28,7 +28,7 @@ $evalution_findings = get_post_meta($post_id, 'evalution_findings', true);
                         <textarea class="form-control description_area" 
                                 name="key_recommendation[<?php echo esc_attr($index); ?>][priority]"><?php echo $row_area['priority']; ?></textarea>
                         <div class="row-recommendation-action">
-                            <span class="remove-row-recom" title="remove row"><i class="fa-solid fa-circle-minus"></i></span>
+                            <span class="remove-row-recom" title="remove row"><i class="fa-regular fa-circle-xmark"></i></span>
                         </div>
                     </div>
                 </div>
@@ -44,7 +44,7 @@ $evalution_findings = get_post_meta($post_id, 'evalution_findings', true);
                     <textarea class="form-control description_area" 
                             name="key_recommendation[1][priority]"></textarea>
                     <div class="row-recommendation-action">
-                        <span class="remove-row-recom" title="remove row"><i class="fa-solid fa-circle-minus"></i></span>
+                        <span class="remove-row-recom" title="remove row"><i class="fa-regular fa-circle-xmark"></i></span>
                     </div>
                 </div>
             </div>

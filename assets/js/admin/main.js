@@ -12,8 +12,9 @@ jQuery(document).ready(function ($) {
         groupCount = groupCount + 1;
                                     
         let group_questions_html  = '<div class="group-question-wrapper question" id="question-group-row-' + groupCount + '" data-id="' + groupCount + '">';
+            group_questions_html += '    <input class="is_locked_input" type="hidden" name="group_questions[' + groupCount + '][is_locked]" value="0">';
             group_questions_html += '    <div class="question-wrapper-top">';
-            group_questions_html += '       <span class="button btn-remove-group">Remove Group';
+            group_questions_html += '       <span class="button btn-remove-group">- Remove Group';
             group_questions_html += '           <div class="remove-message">Are you sure?';
             group_questions_html += '               <span class="btn-remove">Remove</span>';
             group_questions_html += '               <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>';
@@ -43,13 +44,17 @@ jQuery(document).ready(function ($) {
             group_questions_html += '    <!-- Button add more sub questions -->';
             group_questions_html += '    <div class="add-row-field"><span class="add-row button button-primary">Add Sub Questions</span></div>';
             group_questions_html += '    <div class="question-wrapper-bottom">';
-            group_questions_html += '       <span class="btn-expland-wrapper">';
-            group_questions_html += '          <span class="text">Expland Group</span>';
-            group_questions_html += '          <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>';
-            group_questions_html += '       </span>';
+            group_questions_html += '       <a class="btn-lock-question" role="button">';
+            group_questions_html += '           <img class="locked-icon" src="/wp-content/plugins/wp-assessment/assets/images/lock.svg" width="36" height="36">';
+            group_questions_html += '           <span class="lock-text">Lock</span>';
+            group_questions_html += '       </a>';
+            group_questions_html += '       <a class="btn-expland-wrapper" role="button">';
+            group_questions_html += '           <span class="text">Expland Group</span>';
+            group_questions_html += '           <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>';
+            group_questions_html += '       </a>';
             group_questions_html += '    </div>';
-            group_questions_html += '</div>';                        
-                                
+            group_questions_html += '</div>';                
+            
         group_parent_repeater.append(group_questions_html)
   });
 
@@ -71,7 +76,7 @@ jQuery(document).ready(function ($) {
         let question_row_html  = '<div class="question-row-container" id="question-main-row-' + rowCount + '" data-id="'+rowCount+'">';
             question_row_html += '    <input type="hidden" name="question_repeater[]"/>';
             question_row_html += '    <div class="remove-question-block">';
-            question_row_html += '        <span class="button btn-remove-question">Remove Question';
+            question_row_html += '        <span class="button btn-remove-question">- Remove Question';
             question_row_html += '            <div class="remove-message from-left">Are you sure?';
             question_row_html += '                <span class="btn-remove">Remove</span>';
             question_row_html += '                <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>';
@@ -178,8 +183,9 @@ jQuery(document).ready(function ($) {
         let wp_advice_editor = 'wp-advice-editor-' + Date.now();
 
         let simple_question_html  = '<div class="simple-question-container question question-row-container" id="question-main-row-' + groupCount_Simple + '">';
+            simple_question_html += '    <input class="is_locked_input" type="hidden" name="group_questions[' + groupCount_Simple + '][is_locked]" value="0">';
             simple_question_html += '    <div class="question-wrapper-top">';
-            simple_question_html += '       <span class="button btn-remove-question">Remove Question';
+            simple_question_html += '       <span class="button btn-remove-question">- Remove Question';
             simple_question_html += '           <div class="remove-message">Are you sure? ';
             simple_question_html += '               <span class="btn-remove">Remove</span>';
             simple_question_html += '               <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>';
@@ -240,10 +246,14 @@ jQuery(document).ready(function ($) {
             simple_question_html += '        </div>';
             simple_question_html += '    </div>';
             simple_question_html += '    <div class="question-wrapper-bottom">';
-            simple_question_html += '        <span class="btn-expland-wrapper">';
+            simple_question_html += '       <a class="btn-lock-question" role="button">';
+            simple_question_html += '           <img class="locked-icon" src="/wp-content/plugins/wp-assessment/assets/images/lock.svg" width="36" height="36">';
+            simple_question_html += '           <span class="lock-text">Lock</span>';
+            simple_question_html += '       </a>';
+            simple_question_html += '       <a class="btn-expland-wrapper" role="button">';
             simple_question_html += '           <span class="text">Expland Question</span>';
             simple_question_html += '           <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>';
-            simple_question_html += '        </span>';
+            simple_question_html += '       </a>';
             simple_question_html += '    </div>';
             simple_question_html += '</div>';
 
@@ -858,7 +868,7 @@ jQuery(document).ready(function ($) {
             row_recom += '    <div class="priorities-area col-7">'
             row_recom += '        <textarea class="form-control description_area" name="key_recommendation['+ row_recom_index +'][priority]"></textarea>'
             row_recom += '        <div class="row-recommendation-action">'
-            row_recom += '            <span class="remove-row-recom"><i class="fa-solid fa-circle-minus"></i></span>'
+            row_recom += '            <span class="remove-row-recom"><i class="fa-regular fa-circle-xmark"></i></span>'
             row_recom += '        </div>'
             row_recom += '    </div>'
             row_recom += '</div>'
@@ -1190,6 +1200,60 @@ jQuery(document).ready(function ($) {
                 $(this).focusout()
             }
         });
+    });
+
+    $(document).on('click', '.btn-lock-question', function (e){
+
+        let question_wrapper = $(this).closest('#question-group-repeater .question')
+        let is_locked_input = question_wrapper.find('input.is_locked_input')
+        let locked_icon = $(this).find('.locked-icon');
+        let lock_text = $(this).find('.lock-text');
+        let btn_collapse = question_wrapper.find('.btn-expland-wrapper.active')
+        let group_title = question_wrapper.find('input.group-question-admin-title')
+        let question_title = question_wrapper.find('input.question-admin-title')
+
+        if (question_wrapper.hasClass('disabled')) {
+            // Unlock
+            question_wrapper.removeClass('disabled')
+            locked_icon.hide()
+            lock_text.text('Lock')
+            is_locked_input.val('0')
+            group_title.removeAttr('tabindex')
+            question_title.removeAttr('tabindex')
+        }
+        else {
+            // Collapse Question before lock
+            btn_collapse.click();
+            // Lock
+            question_wrapper.addClass('disabled')
+            locked_icon.show()
+            lock_text.text('Unlock')
+            is_locked_input.val('1')
+            group_title.attr('tabindex', '-1')
+            question_title.attr('tabindex', '-1')
+        }
+    });
+
+    $(document).on('change', '#is_assessment_completed', function (e){
+        let checkbox = $(this)
+        let all_questions = $('#question-group-repeater .question')
+
+        if (checkbox.is(":checked")) {
+            // Lock all questions
+            all_questions.each(function(e) {
+                if (!$(this).hasClass('disabled')) {
+                    $(this).find('.btn-lock-question').click().addClass('disabled');
+                }
+            })
+        }
+        else {
+            // Unlock all questions
+            all_questions.each(function(e) {
+                if ($(this).hasClass('disabled')) {
+                    $(this).find('.btn-lock-question').click().removeClass('disabled');
+                }
+            })
+        }
     });
 
     // require assessment admin fields

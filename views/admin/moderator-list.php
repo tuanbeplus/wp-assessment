@@ -17,6 +17,7 @@ $args_collab = array(
 );
 $collaborators = get_users($args_collab);
 $selected_collaborators = get_post_meta($post->ID, 'assigned_collaborator', true);
+$is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', true);
 ?>
 
 <div class="assigned-moderator-wrapper">
@@ -63,6 +64,16 @@ $selected_collaborators = get_post_meta($post->ID, 'assigned_collaborator', true
                 </li>
             <?php endforeach; ?>
         </ul>
+    </div>
+
+    <div class="assessment-completed-box">
+        <p class="_label">All questions of assessment are completed, <br>mark this assessment as completed and lock all questions</p>
+        <label for="is_assessment_completed">
+            <input <?php if ($is_assessment_completed == true) echo 'checked'; ?>
+                    type="checkbox" id="is_assessment_completed" 
+                    name="is_assessment_completed" value="1">
+            Tick as Completed
+        </label>
     </div>
 
     <input id="assessment_id" type="hidden" name="assessment_id" value="<?php echo $post->ID; ?>" />

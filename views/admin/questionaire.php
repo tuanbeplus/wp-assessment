@@ -5,6 +5,7 @@ $main = new WP_Assessment();
 $single_repeater_group = get_post_meta($post->ID, 'question_group_repeater', true);
 $single_repeater_group = $main->wpa_unserialize_metadata($single_repeater_group);
 $question_templates = get_post_meta($post->ID, 'question_templates', true);
+$is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', true);
 
 $i = 0; $j = 0;
 ?>
@@ -37,15 +38,22 @@ $i = 0; $j = 0;
             <?php $i = 0; $j = 0; ?>
             <?php foreach ($single_repeater_group as $group_id => $group_field) : ?>
                 <?php
-                    $group_question_title = $group_field['title'];
+                    $group_question_title = $group_field['title'] ?? null;
+                    $is_locked_group = $group_field['is_locked'] ?? null;
                     $group_question_title = htmlentities(stripslashes(utf8_decode($group_question_title)));
                     $group_question_point = $group_field['point'] ?? null;
                     $group_question_sub = isset($group_field['list'] )?  $group_field['list'] : array();
                 ?>
-                <div class="group-question-wrapper question" id="question-group-row-<?php echo $group_id; ?>" data-id="<?php echo $group_id; ?>">
+                <div id="question-group-row-<?php echo $group_id; ?>" data-id="<?php echo $group_id; ?>"
+                    class="group-question-wrapper question <?php if($is_locked_group == true) echo 'disabled'; ?>">
+
+                    <input class="is_locked_input" type="hidden" 
+                            name="group_questions[<?php echo $group_id; ?>][is_locked]"
+                            value="<?php if($is_locked_group == true) echo '1'; ?>">
+                    
                     <div class="question-wrapper-top">
                         <span class="button btn-remove-group">
-                            Remove Group
+                            - Remove Group
                             <div class="remove-message">
                                 Are you sure? 
                                 <span class="btn-remove">Remove</span>
@@ -60,7 +68,8 @@ $i = 0; $j = 0;
                             <input class="form-field group-question-admin-title form-control"
                                     name="group_questions[<?php echo $group_id; ?>][title]"
                                     value="<?php echo $group_question_title; ?>"
-                                    placeholder="Group Question Title"/>
+                                    placeholder="Group Question Title"
+                                    tabindex="<?php if($is_locked_group == true) echo '-1'; ?>"/>
                         </div>
                         <!-- <div class="col-2 question-row-points-container">
                             <label><strong>Question Point</strong></label>
@@ -109,7 +118,7 @@ $i = 0; $j = 0;
 
                                     <div class="remove-question-block" >
                                         <span class="button btn-remove-question">
-                                            Remove Question
+                                            - Remove Question
                                             <div class="remove-message from-left">
                                                 Are you sure? 
                                                 <span class="btn-remove">Remove</span>
@@ -291,10 +300,14 @@ $i = 0; $j = 0;
                         <span class="add-row button button-primary">Add Sub Question</span>
                     </div>
                     <div class="question-wrapper-bottom">
-                        <span class="btn-expland-wrapper">
+                        <a class="btn-lock-question <?php if($is_assessment_completed == true) echo 'disabled'; ?>" role="button">
+                            <img class="locked-icon" src="/wp-content/plugins/wp-assessment/assets/images/lock.svg" width="36" height="36">
+                            <span class="lock-text"> <?php echo ($is_locked_group == true) ? 'Unlock' : 'Lock'; ?></span>
+                        </a>
+                        <a class="btn-expland-wrapper" role="button">
                             <span class="text">Expland Group</span>
                             <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
-                        </span>
+                        </a>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -309,6 +322,7 @@ $i = 0; $j = 0;
                     $i++;
                     $multiple_choice = $field['choice'];
                     $question_title = $field['title'] ?? '';
+                    $is_locked_question = $field['is_locked'] ?? '';
                     $question_point = $field['point'] ?? '';
                     $question_advice = $field['advice'] ?? '';
                     $question_description = $field['description'] ?? '';
@@ -320,9 +334,16 @@ $i = 0; $j = 0;
                     $question_description = stripslashes($question_description);
                     $question_advice = stripslashes($question_advice);
                 ?>
-                <div class="simple-question-container question question-row-container" id="question-main-row-<?php echo $i; ?>">
+                <div id="question-main-row-<?php echo $i; ?>" 
+                    class="simple-question-container question question-row-container <?php if($is_locked_question == true) echo 'disabled'; ?>">
+
+                    <input class="is_locked_input" type="hidden" 
+                            name="group_questions[<?php echo $i; ?>][is_locked]"
+                            value="<?php if($is_locked_question == true) echo '1'; ?>">
+
                     <div class="question-wrapper-top">
-                        <span class="button btn-remove-question">Remove Question
+                        <span class="button btn-remove-question">
+                            - Remove Question
                             <div class="remove-message">Are you sure? 
                                 <span class="btn-remove">Remove</span>
                                 <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>
@@ -337,7 +358,8 @@ $i = 0; $j = 0;
                             <input class="form-field question-admin-title form-control"
                                     name="group_questions[<?php echo $i; ?>][title]"
                                     value="<?php echo $question_title; ?>"
-                                    placeholder="Question Title"/>
+                                    placeholder="Question Title"
+                                    tabindex="<?php if($is_locked_question == true) echo '-1'; ?>"/>
                             <div class="admin-question-row-textarea">
                                 <div class="visual-textarea-wrapper">
                                     <?php
@@ -445,10 +467,14 @@ $i = 0; $j = 0;
                         </div>
                     </div>
                     <div class="question-wrapper-bottom">
-                        <span class="btn-expland-wrapper">
+                        <a class="btn-lock-question <?php if($is_assessment_completed == true) echo 'disabled'; ?>" role="button">
+                            <img class="locked-icon" src="/wp-content/plugins/wp-assessment/assets/images/lock.svg" width="36" height="36">
+                            <span class="lock-text"> <?php echo ($is_locked_question == true) ? 'Unlock' : 'Lock'; ?></span>
+                        </a>
+                        <a class="btn-expland-wrapper" role="button">
                             <span class="text">Expland Question</span>
                             <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
-                        </span>
+                        </a>
                     </div>
                 </div>
             <?php endforeach; ?>

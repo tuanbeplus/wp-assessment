@@ -129,6 +129,7 @@ class Custom_Fields
         $is_invite_colleagues = $_POST['is_invite_colleagues'] ?? 0;
         $is_all_users_can_access = $_POST['is_all_users_can_access'] ?? 0;
         $related_sf_products = $_POST['related_sf_products'] ?? null;
+        $is_assessment_completed = $_POST['is_assessment_completed'] ?? 0;
         
         // echo "<pre>";
         // print_r($group_questions);
@@ -148,6 +149,7 @@ class Custom_Fields
         update_post_meta($post_id, 'is_invite_colleagues', $is_invite_colleagues);
         update_post_meta($post_id, 'is_all_users_can_access', $is_all_users_can_access);
         update_post_meta($post_id, 'related_sf_products', $related_sf_products);
+        update_post_meta($post_id, 'is_assessment_completed', $is_assessment_completed);
 
     }
 
