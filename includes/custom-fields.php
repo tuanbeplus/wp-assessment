@@ -7,7 +7,6 @@ class Custom_Fields
     {
         add_action('admin_init', array($this, 'init_meta_boxes_assessment_admin'));
         add_action('admin_init', array($this, 'init_meta_boxes_submission_admin_view')); 
-        // add_action('admin_init', array($this, 'wpa_assessments_additional_files')); 
 
         add_action('save_post', array($this, 'question_repeatable_meta_box_save'));
         add_action('save_post', array($this, 'report_template_meta_box_save'));
@@ -24,14 +23,14 @@ class Custom_Fields
     function init_meta_boxes_assessment_admin(): void
     {
         add_meta_box('questions-repeater-field', 'Questions', array($this, 'question_repeatable_meta_box_callback'), 'assessments', 'normal', 'default');
+        add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
 
         if (current_user_can('administrator')) {
-            add_meta_box('moderator-list', 'Select Moderator', array($this, 'display_moderator_select_list'), 'assessments', 'normal', 'default');
+            add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), 'assessments', 'normal', 'default');
         }
 
         add_meta_box('report-section-field', 'Report Template', array($this, 'report_section_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('report-recommendation-field', 'Report Recommendation', array($this, 'report_recommendation_meta_box_callback'), 'assessments', 'normal', 'default');
-        add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
     }
 
     function init_meta_boxes_submission_admin_view(): void
@@ -46,21 +45,6 @@ class Custom_Fields
         return include_once ADMIN_ASSESSMENT_OPTION_VIEW;
     }
 
-    function os_linkto_meta_box_html() 
-    {
-        global $post;
-        echo '<select name=”os_linkto_product[]” id=”os_linkto_product” multiple=”yes” size=”10″>';
-        echo '<option value=””>-</option>';
-        $val = get_post_meta($post->ID, 'os_linkto_product', true);
-        $q = get_posts('post_type=assessments&post_parent=0&numberposts=-1&orderby=menu_order&order=ASC');
-        
-        foreach ($q as $obj)
-        {
-        echo '<option value="'.$obj->ID.'" "checked="checked">'.$obj->post_title.'</option>';
-        }
-        echo '</select>';
-    }
-
     function attachment_uploader_info_section_admin()
     {
         return include_once ADMIN_ATTACHMENT_UPLOADER_INFO_VIEW;
@@ -73,7 +57,7 @@ class Custom_Fields
 
     function question_repeatable_meta_box_callback()
     {
-        return include_once MODERATOR_LIST_ADMIN_QUESTIONAIRE_FIELDS;
+        return include_once ADMIN_QUESTIONAIRE_FIELDS;
     }
 
     function report_recommendation_meta_box_callback()
@@ -94,18 +78,6 @@ class Custom_Fields
     function submission_info_section_admin()
     {
         return include_once ADMIN_SUBMISSION_INFO_VIEW;
-    }
-    function submission_key_recommendation_section_admin()
-    {
-        return include_once SUBMISSON_KEY_RECOMMENDATION;
-    }
-    function submission_e_summary_section_admin()
-    {
-        return include_once SUBMISSON_E_SUMMARY;
-    }
-    function submission_key_findings_section_admin()
-    {
-        return include_once SUBMISSON_KEY_FINDINGS;
     }
 
     function assessments_additional_profile_fields() 

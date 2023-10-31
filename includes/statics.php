@@ -2,26 +2,28 @@
 const WP_ASSESSMENT_ADMIN_VIEW_DIR = WP_ASSESSMENT_DIR . '/views/admin';
 const WP_ASSESSMENT_FRONT_VIEW_DIR = WP_ASSESSMENT_DIR . '/views/front';
 
-// define admin views
-const MODERATOR_LIST_ADMIN_SELECT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/moderator-list.php';
-const MODERATOR_LIST_ADMIN_QUESTIONAIRE_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/questionaire.php';
-const ADMIN_REPORT_CONTENT_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/report/report-content.php';
-const ADMIN_REPORT_SECTION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/report/report-section.php';
-const ADMIN_REPORT_RECOMMENDATION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/report/report-recommendation.php';
+// define admin views Assessments
+const ADMIN_QUESTIONAIRE_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/questionaire.php';
+const ADMIN_ASSESSMENT_OPTION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/assessment-options-view.php';
+const MODERATOR_LIST_ADMIN_SELECT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/moderator-list.php';
+const ADMIN_REPORT_CONTENT_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-content.php';
+const ADMIN_REPORT_SECTION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-section.php';
+const ADMIN_REPORT_RECOMMENDATION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-recommendation.php';
+
+// define admin views Submissions
+const ADMIN_SUBMISSION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-view.php';
+const ADMIN_SUBMISSION_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-info-view.php';
+
+// define admin views Users
 const USER_ASSESSMENTS_PERCHASED_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/users/assessments-purchased-view.php';
-const ADMIN_SUBMISSION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submission-view.php';
-const ADMIN_SUBMISSION_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submission-info-view.php';
-const ADMIN_ASSESSMENT_OPTION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessment-options-view.php';
-const ADMIN_ATTACHMENT_UPLOADER_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/attachment-uploader-info-view.php';
-const SUBMISSON_KEY_RECOMMENDATION = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submission-details/key-recommendation.php';
-const SUBMISSON_KEY_FINDINGS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submission-details/key-findings.php';
-const SUBMISSON_E_SUMMARY = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submission-details/e-summary.php';
+
+// define admin views Attachments
+const ADMIN_ATTACHMENT_UPLOADER_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/attachments/attachment-uploader-info-view.php';
 
 // define front views
 const QUIZ_TEMPLATE_VIEW = WP_ASSESSMENT_FRONT_VIEW_DIR . '/quiz.php';
 const SINGLE_REPORTS_TEMPLATE = WP_ASSESSMENT_FRONT_VIEW_DIR . '/single-reports.php';
 const SINGLE_SUBMISSIONS_TEMPLATE = WP_ASSESSMENT_FRONT_VIEW_DIR . '/single-submissions.php';
-const QUIZ_TEMPLATE_VIEW_MULTI = WP_ASSESSMENT_FRONT_VIEW_DIR . '/quiz_multi.php';
 
 // Plugin enqueue scripts
 add_action('admin_enqueue_scripts', 'admin_enqueue_scripts');
