@@ -886,7 +886,7 @@ jQuery(document).ready(function ($) {
         advice_container.find('.visual-textarea-wrapper').slideToggle()
     });
 
-    $(document).on('click', '.field-select2 .item', function (e){
+    $(document).on('click', '.field-select2 .sf-products-list .item', function (e){
         let item_dropdown = $(this)
         let sf_product_id = item_dropdown.data('id')
         let item_select_input = '<li class="item-selected products-selected" data-id="'+ sf_product_id +'">'
@@ -1254,6 +1254,115 @@ jQuery(document).ready(function ($) {
                 }
             })
         }
+    });
+
+    $(document).on('keyup change', '.field-select2 input.search-item', function (e){
+        let keyword = $(this).val().toLowerCase();
+        let member_items = $('.list-items-dropdown .item.member')
+
+        member_items.filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(keyword) > -1);
+        });
+    });
+
+    // Ajax create List member dropdown
+    $(document).on('change', '#select-org', function (e){
+        let OrgId = $(this).val();
+        let PostId = $('input#post_ID').val();
+        let list_members = $('.field-select2 #list-members-dropdown');
+        let member_options_box = $('#access-control-panel .member-options');
+
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'get_members_from_org_ajax',
+                'organisation_id' : OrgId,
+                'post_id' : PostId,
+            },
+            beforeSend : function ( xhr ) {
+                member_options_box.addClass('loading')
+            },
+            success:function(response){
+                if (response.status == true) {
+                    list_members.html(response.list)
+                }
+                else {
+                    alert(response.message)
+                }
+                member_options_box.removeClass('loading')
+            }
+        });
+    });
+
+    // Add Items to Assigned members List
+    var members_count = 0;
+    if ($('#assigned-members-list .member-item').length) {
+        members_count = $(".group-question-wrapper").length;
+    }
+    $(document).on('click', '.field-select2 #list-members-dropdown .item', function (e){
+        members_count = members_count + 1;
+        let member_id = $(this).data('id');
+        let member_name = $(this).text().trim();
+        let member_item = null;
+        let org_name = $(this).data('org-name').trim();
+        let assigned_members_list = $('.assigned-members #assigned-members-list');
+        let assigned_member_items = assigned_members_list.find('.member-item');
+        let assigned_members_arr = [];
+
+        member_item  = '<li class="member-item" data-id="'+ member_id +'">'
+        member_item += '   <span>'
+        member_item += '       <i class="fa-solid fa-user"></i>'
+        member_item += '       <span class="member-name">'+ member_name +' - '+ org_name +'</span>'       
+        member_item += '   </span>'
+        member_item += '   <span class="icon-delete-member"><i class="fa-regular fa-circle-xmark"></i></span>'
+        member_item += '   <input type="hidden" name="assigned_members['+ members_count +'][id]" value="'+ member_id +'">'
+        member_item += '   <input type="hidden" name="assigned_members['+ members_count +'][name]" value="'+ member_name +'">'
+        member_item += '   <input type="hidden" name="assigned_members['+ members_count +'][org]" value="'+ org_name +'">'
+        member_item += '</li>'
+
+        assigned_member_items.each(function (e) {
+            assigned_members_arr.push($(this).data('id'));
+        })        
+
+        if (jQuery.inArray(member_id, assigned_members_arr) == -1) {
+            assigned_members_list.prepend(member_item);
+            $(this).addClass('selected')
+        }
+    });
+
+    // Remove Assigned member
+    $(document).on('click', '.member-item .icon-delete-member', function (e){
+        let assigned_member_item = $(this).closest('.member-item');
+        let member_id = assigned_member_item.data('id');
+        let members_dropdown = $('#list-members-dropdown .item.member');
+
+        members_dropdown.each(function (e) {
+            if ($(this).data('id') == member_id) {
+                $(this).removeClass('selected');
+            }
+        })
+        assigned_member_item.remove()
+    });
+
+    // Refresh Member Data
+    $(document).on('click', '#btn-refresh-members', function (e){
+        let btn = $(this)
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'save_option_members_data_ajax',
+                'clicked' : true,
+            },
+            beforeSend : function ( xhr ) {
+                btn.addClass('loading')
+            },
+            success:function(response){
+                btn.removeClass('loading')
+                alert(response.message)
+            }
+        });
     });
 
     // require assessment admin fields

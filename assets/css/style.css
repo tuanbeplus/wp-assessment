@@ -895,6 +895,8 @@
 .list-items-dropdown {
     display: none;
     position: absolute;
+    max-height: 300px;
+    overflow-y: scroll;
     width: 100%;
     top: 100%;
     margin-top: 6px;
@@ -1080,4 +1082,136 @@
 
 .question.disabled .btn-lock-question .locked-icon {
     display: block;
+}
+
+/* Access control panel box */
+
+.access-control-panel-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.member-options {
+    max-width: 400px;
+    padding-right: 12px;
+}
+
+.member-options.loading {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+}
+
+.member-options #select-org {
+    margin-top: 8px;
+    display: block;
+    width: 100%;
+    height: 34px;
+}
+
+.member-options .field-select2 label {
+    margin-bottom: 0;
+}
+
+.member-options #members-selected-area {
+    margin-top: 8px;
+    padding: 0;
+    border: none;
+    border-color: #8c8f94;
+}
+
+.member-options #members-selected-area::after {
+    content: "";
+}
+
+.field-select2 input.search-item {
+    width: 100%;
+    height: 34px;
+    border: 1px solid #666;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.assigned-members {
+    margin-top: -7px;
+    margin-bottom: -13px;
+    padding: 12px;
+    border-radius: 2px;
+    border-left: 1px solid #ccc;
+}
+
+.assigned-members > h3 {
+    font-size: 18px;
+}
+
+.assigned-members .assigned-members-list {
+    max-height: 300px;
+    min-height: 44px;
+    overflow-y: scroll;
+    padding: 6px;
+    border: 1px solid #888;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+.assigned-members-list .member-item {
+    width: 100%;
+    padding: 5px 7px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #777;
+    background-color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.assigned-members-list .member-item:last-child {
+    margin-bottom: 0;
+}
+
+.member-item .icon-delete-member {
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.member-item .icon-delete-member:hover {
+    color: #b32d2e;
+}
+
+.member-item .member-name {
+    margin-left: 2px;
+}
+
+#btn-refresh-members {
+    display: block;
+    width: fit-content;
+    margin: 8px 0 10px;
+}
+
+#btn-refresh-members .icon-refresh {
+    display: inline-block;
+    line-height: 1;
+}
+
+#btn-refresh-members.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: default;
+}
+
+#btn-refresh-members.loading .icon-refresh{
+    animation: rotating 1s linear infinite;
+}
+
+@keyframes rotating {
+    0%{
+       transform: rotate(0deg);
+    }
+    100%{
+       transform: rotate(360deg);
+    }
 }

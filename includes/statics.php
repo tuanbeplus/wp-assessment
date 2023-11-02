@@ -6,6 +6,7 @@ const WP_ASSESSMENT_FRONT_VIEW_DIR = WP_ASSESSMENT_DIR . '/views/front';
 const ADMIN_QUESTIONAIRE_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/questionaire.php';
 const ADMIN_ASSESSMENT_OPTION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/assessment-options-view.php';
 const MODERATOR_LIST_ADMIN_SELECT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/moderator-list.php';
+const ADMIN_ACCESS_CONTROL_PANEL = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/access-control-panel.php';
 const ADMIN_REPORT_CONTENT_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-content.php';
 const ADMIN_REPORT_SECTION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-section.php';
 const ADMIN_REPORT_RECOMMENDATION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-recommendation.php';

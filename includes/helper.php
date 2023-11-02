@@ -211,3 +211,104 @@ function get_current_user_by_salesforce_id($sf_user_id)
         return $user[0]->ID;
     }
 }
+
+/**
+ * Get List members (User) from Organisation
+ *
+ * @param string $organisation_id   Salesforce Organisation ID
+ * 
+ * @param string $post_id   Assessment ID
+ *
+ * @return html List Members
+ * 
+ */
+add_action('wp_ajax_get_members_from_org_ajax', 'get_members_from_org_ajax');
+add_action('wp_ajax_nopriv_get_members_from_org_ajax', 'get_members_from_org_ajax');
+function get_members_from_org_ajax() 
+{
+	try {
+		$organisation_id = $_POST['organisation_id'];
+		if (empty($organisation_id))
+            throw new Exception('Organisation not found.');
+
+		$post_id = $_POST['post_id'];
+		if (empty($post_id))
+			throw new Exception('Assessment ID not found.');
+
+		$users = get_option('salesforce_members_data');
+		$assigned_members = get_post_meta($post_id, 'assigned_members', true);
+		$assigned_member_ids = array();
+		$list_members_dropdown = null;
+		$selected = null;
+		foreach ($assigned_members as $member) {
+			$assigned_member_ids[] = $member['id'];
+		}
+
+		if (!empty($users)) {
+			foreach ($users as $user) {
+				if ($user['AccountId'] == $organisation_id) {
+					if (in_array($user['Id'], $assigned_member_ids)) 
+						$selected = 'selected';
+					else 
+						$selected = null;
+
+					$list_members_dropdown.= '<li class="item member '.$selected.'" data-id="'.$user['Id'];
+					$list_members_dropdown.= 	'" data-org-name="'.$user['OrgName'].'">';
+					$list_members_dropdown.= 	$user['Name'];
+					$list_members_dropdown.= '</li>';
+				}
+			}
+			return wp_send_json(array('list' => $list_members_dropdown, 'status' => true));
+			die;
+		}
+		else {
+			throw new Exception('The organisation did not have any members.');
+		}
+
+	} catch (Exception $exception) {
+		return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+	}
+}
+
+/**
+ * Save option salesforce_members_data to WP Options
+ *
+ * @param array $members_data   Salesforce Member(User) Data get by API
+ * 
+ * @return string Message Successful/Failed
+ * 
+ */
+add_action('wp_ajax_save_option_members_data_ajax', 'save_option_members_data_ajax');
+add_action('wp_ajax_nopriv_save_option_members_data_ajax', 'save_option_members_data_ajax');
+function save_option_members_data_ajax()
+{
+	try {
+		if ($_POST['clicked'] == true) {
+			$members_data = getAllUsersFromOrgMember();
+
+			if (!empty($members_data)) {
+				
+				if (get_option('salesforce_members_data')) {
+					update_option('salesforce_members_data', $members_data);
+					return wp_send_json(array('message' => 'Refresh Successful', 'status' => true));
+				}
+				else {
+					$add_option = add_option('salesforce_members_data', $members_data);
+
+					if ($add_option) {
+						return wp_send_json(array('message' => 'Add Successful', 'status' => true));
+					}
+					else {
+						throw new Exception('Refresh Failed');
+					}
+				}
+			}
+			else {
+				throw new Exception('Empty Members Data');
+			}
+		}
+		
+	} catch (Exception $exception) {
+		return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+	}
+}

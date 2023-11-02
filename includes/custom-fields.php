@@ -24,6 +24,7 @@ class Custom_Fields
     {
         add_meta_box('questions-repeater-field', 'Questions', array($this, 'question_repeatable_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
+        add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'side', 'default');
 
         if (current_user_can('administrator')) {
             add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), 'assessments', 'normal', 'default');
@@ -84,6 +85,11 @@ class Custom_Fields
     {
         return include_once USER_ASSESSMENTS_PERCHASED_FIELDS;
     }
+    
+    function access_control_panel_meta_box_callback() 
+    {
+        return include_once ADMIN_ACCESS_CONTROL_PANEL;
+    }
 
     function question_repeatable_meta_box_save($post_id): void
     {
@@ -102,16 +108,22 @@ class Custom_Fields
         $is_all_users_can_access = $_POST['is_all_users_can_access'] ?? 0;
         $related_sf_products = $_POST['related_sf_products'] ?? null;
         $is_assessment_completed = $_POST['is_assessment_completed'] ?? 0;
-        
-        // echo "<pre>";
-        // print_r($group_questions);
-        // echo "</pre>";
+        $assigned_members = $_POST['assigned_members'] ?? null;
 
+        // Renew Index of Questions array
         $new_group_questions = array();
         $item = 1;
         foreach ($group_questions as $value) {
             $new_group_questions[$item] = $value;
             $item++;
+        }
+
+        // Renew Index of Members array
+        $new_assigned_members = array();
+        $index = 1;
+        foreach ($assigned_members as $value) {
+            $new_assigned_members[$index] = $value;
+            $index++;
         }
 
         update_post_meta($post_id, 'question_group_repeater', base64_encode(serialize($new_group_questions)));
@@ -122,6 +134,7 @@ class Custom_Fields
         update_post_meta($post_id, 'is_all_users_can_access', $is_all_users_can_access);
         update_post_meta($post_id, 'related_sf_products', $related_sf_products);
         update_post_meta($post_id, 'is_assessment_completed', $is_assessment_completed);
+        update_post_meta($post_id, 'assigned_members', $new_assigned_members);
 
     }
 

@@ -14,7 +14,8 @@ $post_id = $post->ID;
 if (isset($_COOKIE['userId'])) {
     $user_id = $_COOKIE['userId'];
 } else {
-    $user_id = get_current_user_id();
+    $wp_user_id = get_current_user_id();
+    $user_id = get_user_meta($wp_user_id, '__salesforce_user_id', true);
 }
 
 $main = new WP_Assessment();
