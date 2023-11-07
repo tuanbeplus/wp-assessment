@@ -11,11 +11,13 @@ get_header();
 global $post;
 global $wpdb;
 $post_id = $post->ID;
+
 if (isset($_COOKIE['userId'])) {
     $user_id = $_COOKIE['userId'];
+} else if (is_user_logged_in()) {
+    $user_id = get_user_meta(get_current_user_id(), '__salesforce_user_id', true);
 } else {
-    $wp_user_id = get_current_user_id();
-    $user_id = get_user_meta($wp_user_id, '__salesforce_user_id', true);
+    $user_id = null;
 }
 
 $main = new WP_Assessment();

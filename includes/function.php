@@ -868,6 +868,7 @@ class WP_Assessment
         $related_sf_products = get_post_meta($assessment_id, 'related_sf_products', true);
         
         $assigned_members = get_post_meta( $assessment_id, 'assigned_members', true);
+        $invited_members = get_post_meta( $assessment_id, 'invited_members', true);
         $assigned_member_ids = array();
         foreach ($assigned_members as $member) {
             $assigned_member_ids[] = $member['id'];
@@ -891,10 +892,17 @@ class WP_Assessment
         // }
 
         // Accessible for all assigned members
-        if (in_array($user_id, $assigned_member_ids)) {
-            $is_user_can_access = true;
+        if (is_array($assigned_member_ids)) {
+            if (in_array($user_id, $assigned_member_ids)) {
+                $is_user_can_access = true;
+            }
         }
-
+        // Accessible for all invited members
+        if (is_array($invited_members)) {
+            if (in_array($user_id, $invited_members)) {
+                $is_user_can_access = true;
+            }
+        }
         // Assessment is accessible for all loged in users
         if ($is_all_users_can_access == true) {
             $is_user_can_access = true;

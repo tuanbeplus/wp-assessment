@@ -26,6 +26,12 @@ function getOpportunityLineItem($opportunity_id)
 	return $response;
 }
 
+function getOrgFromId($org_id)
+{
+	$response = sf_get_object_metadata('Account', $org_id);
+	return $response;
+}
+
 function getAllOrgMembers()
 {
   	$sql = "SELECT Id, Name, Type 
@@ -85,15 +91,38 @@ function getAllUsersFromOrgMember()
 	return $user_members;
 }
 
+function getUserFromEmail($email) 
+{
+	$sql = "SELECT Id, Name, Email, ContactId, AccountId
+			FROM User
+			WHERE Email='{$email}'
+			ORDER BY Name ASC";
 
-function sf_update_contact() {
+	$response = sf_query_object_metadata($sql);
+
+	if (isset($response->records)) {
+		return $response->records;
+	}
+	else {
+		return null;
+	}
+}
+
+function getUserById($user_id)
+{
+	$response = sf_get_object_metadata('User', $user_id);
+	return $response;
+}
+
+function updateSobjectRecord($obj_name, $record_id, $content = []) 
+{
 	$sf_access_token = get_field('salesforce_api_access_token', 'option');
 	$sf_endpoint_url = get_field('salesforce_endpoint_url', 'option');
 	$sf_api_ver = get_field('salesforce_api_version', 'option');
 
-	$url = "$sf_endpoint_url/services/data/$sf_api_ver/sobjects/Contact/0039h00000BQnzhAAD";
+	$url = "$sf_endpoint_url/services/data/$sf_api_ver/sobjects/$obj_name/$record_id";
 
-   	$content = json_encode(array("Email" => "test3@gmail.com"));
+   	$content_json = json_encode($content);
 
 	$curl = curl_init($url);
 	curl_setopt($curl, CURLOPT_HEADER, false);
@@ -101,10 +130,9 @@ function sf_update_contact() {
 		array("Authorization: OAuth $sf_access_token",
 			"Content-type: application/json"));
 	curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PATCH");
-	curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $content_json);
 
 	$response = curl_exec($curl);
-
 	$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
 	if ($status != 204) {

@@ -53,7 +53,7 @@ $is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', t
             <?php  endif; ?>
         </div>
         <div class="send-invite-wrapper">
-            <span id="btn-send-invite" class="button button-primary">Send invite</span>
+            <a id="btn-send-invite" class="button button-medium">Send invite</a>
         </div>
         <ul id="assigned_collaborator" class="collaborator-select-list">
             <?php foreach ($collaborators as $collaborator) :

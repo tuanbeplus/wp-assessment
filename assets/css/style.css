@@ -831,6 +831,10 @@
     margin-top: 6px;
 }
 
+.collaborator-box #btn-send-invite {
+    font-weight: 500;
+}
+
 /* Assessment options */
 .assessment-options-container .field-checkbox {
     margin: 12px 0;
@@ -898,6 +902,7 @@
     max-height: 300px;
     overflow-y: scroll;
     width: 100%;
+    max-width: 400px;
     top: 100%;
     margin-top: 6px;
     padding: 6px 8px;
@@ -1087,12 +1092,12 @@
 /* Access control panel box */
 
 .access-control-panel-wrapper {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
 }
 
 .member-options {
-    max-width: 400px;
+    width: 100%;
+    max-width: 450px;
     padding-right: 12px;
 }
 
@@ -1106,6 +1111,7 @@
     margin-top: 8px;
     display: block;
     width: 100%;
+    max-width: 400px;
     height: 34px;
 }
 
@@ -1126,22 +1132,40 @@
 
 .field-select2 input.search-item {
     width: 100%;
+    max-width: 400px;
     height: 34px;
     border: 1px solid #666;
     border-radius: 3px;
     font-size: 14px;
 }
 
-.assigned-members {
+.field-select2 input.search-item:focus {
+    border-color: #2271b1;
+}
+
+.accessible-members-wrapper {
+    width: 100%;
+    max-width: 700px;
     margin-top: -7px;
     margin-bottom: -13px;
-    padding: 12px;
+    padding: 12px 16px;
     border-radius: 2px;
     border-left: 1px solid #ccc;
 }
 
+.assigned-members {
+    margin-bottom: 24px;
+}
+.assigned-members:last-child {
+    margin-bottom: 0;
+}
+
 .assigned-members > h3 {
     font-size: 18px;
+}
+
+.assigned-members > p {
+    margin-bottom: 12px;
 }
 
 .assigned-members .assigned-members-list {
@@ -1190,6 +1214,7 @@
     display: block;
     width: fit-content;
     margin: 8px 0 10px;
+    font-weight: 500;
 }
 
 #btn-refresh-members .icon-refresh {

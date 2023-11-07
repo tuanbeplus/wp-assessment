@@ -701,6 +701,7 @@ body {
 
 .textAreaWrap textarea:focus {
     outline: none !important;
+    box-shadow: 0px 0px 0px 2px #333!important;
 }
 
 .quizAdvice {
@@ -1346,19 +1347,51 @@ body.single-reports {
     border-radius: 24px;
     transition: all 0.3s;
 }
+
 .submission-success-wrapper .submission-content #printEntry:hover {
     background-color: #a22f2c;
 }
+
 .submission-success-wrapper .sidebar {
     width: 100%;
     max-width: 320px;
 }
+
 .submission-success-wrapper .sidebar .inner {
-    padding: 28px 0;
+    padding: 28px 16px;
+    background-color: #fff;
+    box-shadow: 0px 14px 28px rgba(0, 0, 0, 0.08);
+    left: initial !important;
 }
+
+.submission-success-wrapper .sidebar .inner .heading {
+    margin-bottom: 18px;
+    font-family: "Avenir-Medium";
+    font-size: 1.5rem;
+    line-height: 130%;
+}
+
 .submission-success-wrapper .sidebar ul > *:last-child {
     padding-bottom: 16px;
     border-bottom: 1px solid #dfdfdf !important;
+}
+
+.submission-success-wrapper .sidebar a {
+    display: flex;
+    align-items: center;
+}
+
+.submission-success-wrapper .sidebar a:hover {
+    text-decoration: none;
+}
+
+.material-icons {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
 }
 
 @media only screen and (max-width: 1366px) {

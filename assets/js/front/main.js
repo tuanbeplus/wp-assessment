@@ -21,6 +21,8 @@ jQuery(document).ready(function ($) {
     initQuizDetail();
     updateCallToActions();
     styleActiveStep();
+    markAsCompletedSection();
+    activeFirstPendingSection();
 
     bodySelector.on('click', '#continue-quiz-btn', async function (e) {
         e.preventDefault();
@@ -40,7 +42,7 @@ jQuery(document).ready(function ($) {
         }
 
         if (is_required_document_all == true) {
-            let is_uploaded_doc_required = getUploadedDocumentRequired()
+            let is_uploaded_doc_required = getUploadedDocumentRequired(currentQuiz)
             if (is_uploaded_doc_required == false) return;
         }
         
@@ -169,11 +171,67 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    function getUploadedDocumentRequired()
+    function markAsCompletedSection() 
+    {
+        let is_required_all_document = $('#assessment-main-wrapper').data('required_document_all')
+        let all_sections = $('#form_submit_quiz .quizDetails .quiz')
+        let section_id = null;
+
+        all_sections.each(function (e) {
+            section_id = $(this).data('group')
+            // get all answers choice
+            if (is_required_all_document == true) {
+                if (isAnswerChoicesChecked($(this)) == true 
+                && isAnswerCmtsFilled($(this)) == true
+                && getUploadedDocumentRequired($(this)) == true) {
+                    $('.stepsWrap .step-'+ section_id).addClass('completed')
+                }
+            }
+            else{
+                if (isAnswerChoicesChecked($(this)) == true 
+                && isAnswerCmtsFilled($(this)) == true) {
+                    $('.stepsWrap .step-'+ section_id).addClass('completed')
+                }
+            }
+        })
+    }
+
+    function isAnswerChoicesChecked(section_wrapper)
+    {
+        let answer_choices = section_wrapper.find('.multiple-choice-area').length;
+        let answer_choices_checked = section_wrapper.find('.multiple-choice-area.checked').length;
+
+        if (answer_choices == answer_choices_checked) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+
+    function isAnswerCmtsFilled(section_wrapper)
+    {
+        let answer_cmts = section_wrapper.find('textarea.quiz-description')
+        let count_empty_des = 0;
+
+        answer_cmts.each(function(e) {
+            if ($(this).val() == '') {
+                count_empty_des++
+            }
+        })
+
+        if (count_empty_des > 0) {
+            return false
+        }
+        else {
+            return true
+        }
+    }
+
+    function getUploadedDocumentRequired(currentQuiz)
     {
         var upload_file_arr = [];
-        let question_main_wrapper = $('#assessment-main-wrapper .quiz.active')
-        let upload_doc_container = question_main_wrapper.find('.question-add-files-container')
+        let upload_doc_container = currentQuiz.find('.question-add-files-container')
         
         upload_doc_container.each(function(e) {
 
@@ -184,11 +242,11 @@ jQuery(document).ready(function ($) {
                 $('#saving-spinner').hide()
                 $('.formController button').css('opacity', '1')
                 upload_message_error.find('.message').text('Supporting documentation is required!')
-                question_main_wrapper.find('.answer-notification').show()
+                currentQuiz.find('.answer-notification').show()
                 upload_message_error.css('display', 'flex')
 
                 setTimeout(function() {
-                    question_main_wrapper.find('.answer-notification').hide()
+                    currentQuiz.find('.answer-notification').hide()
                 }, 15000)
                 
             }
@@ -219,6 +277,44 @@ jQuery(document).ready(function ($) {
 
         let count_checked_choices = choices.length;
         return count_checked_choices;
+    }
+
+    function activeFirstPendingSection()
+    {
+        let all_steps = $('#main-quiz-form .step')
+        let all_section_wrapper = $('#main-quiz-form .quizDetails .quiz')
+        let step_ids = [];
+        let first_step_id = null;
+        let section_wrapper_id = null;
+
+        all_steps.each(function (e) {
+            // Remove all class active of step
+            $(this).removeClass('active')
+
+            // Add steps id peding to Array
+            if (!$(this).hasClass('completed')) {
+                step_ids.push($(this).data('id'))
+            }
+        })
+        // Add class active to first step pending
+        $('#main-quiz-form .step.step-'+ step_ids[0]).addClass('active')
+
+        // Add class active to first section pending
+        all_section_wrapper.each(function (e) {
+            section_wrapper_id = $(this).data('group')
+            first_step_id = step_ids[0] ?? 1;
+        
+            if (section_wrapper_id == first_step_id) {
+                $(this).removeClass('quiz-item-hide').addClass('quiz-item-show active')
+            }
+            else {
+                $(this).removeClass('active')
+                $(this).removeClass('quiz-item-show')
+                if (!$(this).hasClass('quiz-item-hide')) {
+                    $(this).addClass('quiz-item-hide')
+                }
+            }
+        })
     }
 
     bodySelector.on('click', '.progressBtn', async function (e) {
@@ -582,13 +678,20 @@ jQuery(document).ready(function ($) {
             },
             success:function(response){
                 $('#btn-send-invite-colleagues').removeClass('sending')
-                console.log(response.status);
+                console.log(response);
                 if (response.status == true) {
                     send_message.text('Your invitation has been send.').show()
                 }
                 else {
                     send_message.html('Unable to send invitation, ensure that emails are seperated by a comma.').show()
-                }                
+                }        
+                
+                if (response.updated_meta == false) {
+                    console.log("Post meta invited_members has not been updated.");
+                }
+                else {
+                    console.log("Updated post meta invited_members Successful.");
+                }
             }
         });
     })

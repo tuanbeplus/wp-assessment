@@ -37,11 +37,6 @@ for($i = 0; $i < $count_quiz; $i++) {
 		$invalid_answers[$i] = $submission_data_arr[$i]['parent_id'];
 	}
 }
-// if ($_GET['test'] == 'test') {
-// 	echo '<pre>';
-//     print_r($_COOKIE);
-// 	echo '</pre>';
-// }
 ?>
 
 <section id="primary">
@@ -99,19 +94,6 @@ for($i = 0; $i < $count_quiz; $i++) {
 					<p>The Australian Network on Disability team will be in contact with you once evidence/this submission has been reviewed (for Index and Disability Confident Recruiter).*</p>
 					<p>If you have any questions at all, please reach out to your key contact person.</p>
 					<p>*Quick10 are self-assessments only and organisations will not be contacted about results.</p>
-					<!-- <p><strong>What happens next?</strong></p> -->
-					<?php 
-						// if ($question_templates == 'Simple Assessment') {
-						// 	echo '<p>There is no further action required from the organisation. The Index team will begin their evaluation process. 
-						// 			You can expect your Index report within 8 weeks if submitted prior to September 30th, or in March/April of the 
-						// 			following year if submitted prior to the first Friday in December.</p>';
-						// }
-						// elseif ($question_templates == 'Comprehensive Assessment') {
-						// 	echo '<p>As part of Disability Confident Recruiter, the organisation must now complete the education phase. 
-						// 			Your staff are required to successfully complete the Disability Confident Recruiter eLearn modules. 
-						// 			Once these are done, your organisation will be awarded status.</p>';
-						// }
-					?>
 					<p><strong>Contact us</strong></p>
 					<a href="mailto:info@and.org.au">info@and.org.au</a>
 					<a href="tel:(02) 8270 9200">(02) 8270 9200</a>
@@ -167,9 +149,9 @@ for($i = 0; $i < $count_quiz; $i++) {
 					</div>
 				</div>
 				</div>
-				<div class="on-this-page sidebar">
+				<div class="sidebar">
 					<div class="inner">
-						<p>In this section</p>
+						<p class="heading">In this section</p>
 						<ul>
 							<li>
 								<a href="/dashboard/" class="circle dark-red">

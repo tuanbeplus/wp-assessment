@@ -1029,39 +1029,64 @@ class Question_Form
 
             $emails = $_POST['emails'];
             if (empty($emails))
-                throw new Exception('Email not found.');
+                throw new Exception('Emails not found.');
 
             $main = new WP_Assessment();
             $emails_sent = array();
+            $invited_members_arr = array();
+            $updated_meta = false;
             $assessment_link = get_permalink($assessment_id);
             $assessment_title = get_the_title($assessment_id);
             $assessment_title = str_replace('&#8211;', '-', $assessment_title); //Remove special character code to dash(-)
-
+            
             // Filter mail from
             add_filter( 'wp_mail_from', 'sf_user_mail_from' );
             add_filter( 'wp_mail_from_name', 'sf_user_mail_from_name' );
 
             foreach ($emails as $email) {
-
+                $email = trim($email);
                 $email = preg_replace('/\s+/', '', $email); //Remove all white space from email
-
                 $email_name = strstr($email, '@', true); 
 
                 $content  = '<p style="font-size:15px;">Hello <strong>'. $email_name .'</strong></p>';
                 $content .= '<p style="font-size:15px;">You have an invitation to work on the '. $assessment_title .'<br>';
                 $content .= '<a href=' . $assessment_link . ' target="_blank">Click here to view the assessment.</a></p>';
 
+                // Send mail to users
                 $sent = wp_mail($email , 'Invitation to work on the '.$assessment_title, $content);
-
                 $emails_sent[] = $email;
                 if (!$sent) throw new Exception($sent, 1);
+
+                // Add users ID to Array
+                $user = getUserFromEmail($email);
+                if (!empty($user)) {                    
+                    $invite_members_arr[] = $user[0]->Id;
+                }
             }
 
+            if (!empty($invite_members_arr)) {
+                $invited_members = get_post_meta($assessment_id, 'invited_members', true);
+                if (!empty($invited_members)) {
+                    // Merge old & new invite members array and update to post meta
+                    $new_invited_members = array_unique(array_merge($invited_members, $invite_members_arr));
+                    $updated_meta = update_post_meta($assessment_id, 'invited_members', $new_invited_members);
+                }
+                else {
+                    // Update new invite members to post meta
+                    $updated_meta = update_post_meta($assessment_id, 'invited_members', $invite_members_arr);
+                }
+            }
+            
             // Remove filter mail from
             remove_filter( 'wp_mail_from', 'sf_user_mail_from' );
             remove_filter( 'wp_mail_from_name', 'sf_user_mail_from_name' );
 
-            return wp_send_json(array('message' => 'Invitations has been send', 'emails' => $emails_sent, 'status' => true));
+            return wp_send_json(array(
+                    'message' => 'Invitations has been send', 
+                    'emails' => $emails_sent, 
+                    'updated_meta' => $updated_meta,
+                    'status' => true
+                ));
 
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));

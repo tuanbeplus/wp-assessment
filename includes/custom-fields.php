@@ -109,6 +109,7 @@ class Custom_Fields
         $related_sf_products = $_POST['related_sf_products'] ?? null;
         $is_assessment_completed = $_POST['is_assessment_completed'] ?? 0;
         $assigned_members = $_POST['assigned_members'] ?? null;
+        $invited_members = $_POST['invited_members'] ?? null;
 
         // Renew Index of Questions array
         $new_group_questions = array();
@@ -135,6 +136,7 @@ class Custom_Fields
         update_post_meta($post_id, 'related_sf_products', $related_sf_products);
         update_post_meta($post_id, 'is_assessment_completed', $is_assessment_completed);
         update_post_meta($post_id, 'assigned_members', $new_assigned_members);
+        update_post_meta($post_id, 'invited_members', $invited_members);
 
     }
 
