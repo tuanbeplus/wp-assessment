@@ -1,6 +1,5 @@
 <?php
 global $post;
-
 $args = array(
     'role'    => 'moderator',
     'order'   => 'ASC'
@@ -65,16 +64,18 @@ $is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', t
             <?php endforeach; ?>
         </ul>
     </div>
-
-    <div class="assessment-completed-box">
-        <p class="_label">All questions of assessment are completed, <br>mark this assessment as completed and lock all questions</p>
-        <label for="is_assessment_completed">
-            <input <?php if ($is_assessment_completed == true) echo 'checked'; ?>
-                    type="checkbox" id="is_assessment_completed" 
-                    name="is_assessment_completed" value="1">
-            Tick as Completed
-        </label>
-    </div>
+    
+    <?php if ($post->post_type == 'assessments'): ?>
+        <div class="assessment-completed-box">
+            <p class="_label">All questions of assessment are completed, <br>mark this assessment as completed and lock all questions</p>
+            <label for="is_assessment_completed">
+                <input <?php if ($is_assessment_completed == true) echo 'checked'; ?>
+                        type="checkbox" id="is_assessment_completed" 
+                        name="is_assessment_completed" value="1">
+                Tick as Completed
+            </label>
+        </div>
+    <?php endif; ?>
 
     <input id="assessment_id" type="hidden" name="assessment_id" value="<?php echo $post->ID; ?>" />
     

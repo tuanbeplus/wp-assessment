@@ -262,7 +262,6 @@ class Question_Form
                     );
                 }
 
-
               if ($is_new || !$submission_id) {
                   $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
               } else {
@@ -421,9 +420,7 @@ class Question_Form
                         } else {
                             $main->update_quiz_assessment($input, $conditions);
                         }
-
                     }
-
                 }
 
             }else{
@@ -554,11 +551,11 @@ class Question_Form
                     'post_status' => 'publish'
                 ));
 
-                if (!$submission) throw new Exception('Cannot submit assessment 1!');
+                if (!$submission) throw new Exception('Cannot submit assessment - Error 1!');
 
                 $post_id = $submission;
             }
-            elseif ($is_submission_progress_exist){
+            elseif ($is_submission_progress_exist) {
                 $submission = wp_update_post(array(
                     'ID'        => $is_submission_progress_exist,
                     'post_type' => 'submissions',
@@ -566,9 +563,13 @@ class Question_Form
                     'post_status' => 'publish'
                 ));
 
-                if (!$submission) throw new Exception('Cannot submit assessment 2!');
+                if (!$submission) throw new Exception('Cannot submit assessment - Error 2!');
 
                 $post_id = $submission;
+            }
+            elseif ($is_submission_exist) {
+                $post_id = $is_submission_exist;
+                update_post_meta($post_id, 'assessment_status', 'pending');
             }
 
             update_post_meta($post_id, 'user_id', $user_id);
@@ -680,7 +681,6 @@ class Question_Form
                     AND submission_id=0"
                     )
                 );
-
             }
 
             return wp_send_json(array('message' => 'Assessment progress has been saved', 'status' => true, 'submission_id' => $post_id));
@@ -715,6 +715,7 @@ class Question_Form
         $args = array(
             'post_type' => 'submissions',
             'posts_per_page' => 1,
+            'post_status' => 'publish',
             'meta_query' => array(
                 // array(
                 //     'key' => 'user_id',
@@ -728,10 +729,10 @@ class Question_Form
                     'key' => 'assessment_id',
                     'value' => $assessment_id,
                 ),
-                array(
-                    'key' => 'assessment_status',
-                    'value' => 'publish',
-                ),
+                // array(
+                //     'key' => 'assessment_status',
+                //     'value' => 'publish',
+                // ),
             ),
         );
         $query = new WP_Query($args);
@@ -773,7 +774,7 @@ class Question_Form
         if (is_array($post) && count($post) > 0) {
             $post_id = $post[0]->ID;
             $status = get_post_meta($post_id, 'assessment_status', true);
-            if($status == 'rejected') return '';
+            if($status == 'pending' || $status == 'accepted') return '';
         }
 
         return $post_id;
@@ -962,26 +963,23 @@ class Question_Form
     function send_invite_to_collaborator()
     {
         try {
-            global $post;
-            $post_id = $post->ID;
-
-            $assessment_id = intval($_POST['assessment_id']);
-            if (empty($assessment_id))
-                throw new Exception('Assessment not found.');
+            $post_id = intval($_POST['post_id']);
+            if (empty($post_id))
+                throw new Exception('Post ID not found.');
 
             $user_id_arr = $_POST['user_id_arr'];
             if (empty($user_id_arr))
                 throw new Exception('User not found.');
 
-            $assessment_link = home_url() .'/wp-admin/post.php?post='. $assessment_id .'&action=edit';
-            $assessment_title = get_the_title($assessment_id);
-            $content = '<a href=' . $assessment_link . '>'. $assessment_title  .'</a>';
+            $post_edit_link = home_url() .'/wp-admin/post.php?post='. $post_id .'&action=edit';
+            $post_title = get_the_title($post_id);
+            $content = '<p>Click here to view the <a href=' . $post_edit_link . '>'. $post_title  .'</a></p>';
                 
             foreach ($user_id_arr as $user_id) {
 
                 $user = get_user_by('id', $user_id['id']);
                 $email = $user->user_email;
-                $sent = wp_mail($email , 'You have a invite from Moderator.', $content);
+                $sent = wp_mail($email , 'You have an invitation to work on the '.$post_title, $content);
 
                 if (!$sent) throw new Exception($sent, 1);
             }

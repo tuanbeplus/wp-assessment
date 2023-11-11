@@ -155,7 +155,7 @@ function get_submissions_completed($organisation_id, $assessment_id)
  * @return array Assessments array
  * 
  */
-function get_assessments_accessible_all_users($arr_terms)
+function get_assessments_accessible_all_users($organisation_id, $arr_terms)
 {
     $args = array(
 		'post_type' => 'assessments',
@@ -182,7 +182,7 @@ function get_assessments_accessible_all_users($arr_terms)
 	$assessments_arr = array();
 
 	foreach ($assessments->posts as $assessment) {
-
+		$submission_completed = get_submissions_completed($organisation_id, $assessment->ID);
 		if (empty($submission_completed)) {
 			$assessments_arr[] = $assessment->ID;
 		}
@@ -190,6 +190,109 @@ function get_assessments_accessible_all_users($arr_terms)
 	wp_reset_postdata();
     
     return $assessments_arr;
+}
+
+/**
+ * Check accessible for Salesforce Members(User)
+ *
+ * @param string $user_id   		Salesforce User ID
+ * @param int 	 $assessment_id   	Assessment ID
+ *
+ * @return boolean true/false
+ * 
+ */
+function check_access_salesforce_members($user_id, $assessment_id)
+{
+	$is_user_can_access = false;
+	$main = new WP_Assessment();
+	$terms_arr = $main->get_assessment_terms($assessment_id);
+	$is_all_users_can_access = get_post_meta($assessment_id, 'is_all_users_can_access', true);
+	$related_sf_products = get_post_meta($assessment_id, 'related_sf_products', true);
+	
+	$assigned_members = get_post_meta( $assessment_id, 'assigned_members', true);
+	$invited_members = get_post_meta( $assessment_id, 'invited_members', true);
+	$assigned_member_ids = array();
+	foreach ($assigned_members as $member) {
+		$assigned_member_ids[] = $member['id'];
+	}
+
+	// $sf_product_id_opp = getProductIdByOpportunity();
+	// $drc_product_id = isset($sf_product_id_opp['dcr_product_id']) ? $sf_product_id_opp['dcr_product_id'] : null;
+	// $index_product_id = isset($sf_product_id_opp['index_product_id']) ? $sf_product_id_opp['index_product_id'] : null;
+	
+
+	// check user access to asessment
+	// if ($drc_product_id && !empty($related_sf_products)) {
+	//     if (in_array('dcr', $terms_arr) && in_array($drc_product_id, $related_sf_products)) {
+	//         $is_user_can_access = true;
+	//     }
+	// }
+	// if ($index_product_id && !empty($related_sf_products)) {
+	//     if (in_array('index', $terms_arr) && in_array($index_product_id, $related_sf_products)) {
+	//         $is_user_can_access = true;
+	//     }
+	// }
+
+	// Accessible for all assigned members
+	if (is_array($assigned_member_ids)) {
+		if (in_array($user_id, $assigned_member_ids)) {
+			$is_user_can_access = true;
+		}
+	}
+	// Accessible for all invited members
+	if (is_array($invited_members)) {
+		if (in_array($user_id, $invited_members)) {
+			$is_user_can_access = true;
+		}
+	}
+	// Assessment is accessible for all loged in users
+	if ($is_all_users_can_access == true) {
+		$is_user_can_access = true;
+	}
+
+	return $is_user_can_access;
+}
+
+/**
+ * Get all Assessments accessible for Member
+ *
+ * @param string $user_id   		Salesforce User ID
+ * @param string $organisation_id   Salesforce Account ID
+ * @param array  $arr_terms   		Terms array of Assessment
+ *
+ * @return array Assessments accessible array
+ * 
+ */
+function get_assessments_accessible_members($user_id, $organisation_id, $arr_terms)
+{
+	$args = array(
+		'post_type' => 'assessments',
+		'posts_per_page' => -1,
+		'post_status' => 'publish',
+		'tax_query' => array(  
+			array(
+				'taxonomy' => 'category',
+				'field' => 'slug',
+				'terms' => $arr_terms,
+				'include_children' => true,
+				'operator' => 'IN'
+			)
+		),
+	);
+	$assessments = get_posts($args);
+	$accessible_assessments = array();
+
+	foreach ($assessments as $assessment) {
+		$is_accessible = check_access_salesforce_members($user_id, $assessment->ID);
+		$submission_completed = get_submissions_completed($organisation_id, $assessment->ID);
+
+		if ($is_accessible == true && empty($submission_completed)) {
+			$accessible_assessments[] = $assessment->ID;
+		}
+	}
+	wp_reset_postdata();
+	
+	return $accessible_assessments;
 }
 
 /**
@@ -258,6 +361,10 @@ function get_members_from_org_ajax()
 					$list_members_dropdown.= '</li>';
 				}
 			}
+			if (empty($list_members_dropdown)) {
+				$list_members_dropdown = '<p>No members found</p>';
+			}
+
 			return wp_send_json(array('list' => $list_members_dropdown, 'status' => true));
 			die;
 		}

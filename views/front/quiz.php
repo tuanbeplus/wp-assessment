@@ -54,7 +54,7 @@ $is_required_document_all = get_post_meta($post_id, 'is_required_document_all', 
 $is_invite_colleagues = get_post_meta($post_id, 'is_invite_colleagues', true);
 
 // check user access to asessment
-$is_user_can_access = $main->check_access_salesforce_user($user_id, $post_id);
+$is_user_can_access = check_access_salesforce_members($user_id, $post_id);
 
 $is_disabled = $status === 'pending';
 $is_publish = $status === 'publish';
@@ -100,9 +100,10 @@ $is_accepted = $status === 'accepted';
                     <?php echo $question_form->get_invite_colleagues_form(); ?>
                 <?php endif; ?>
 
+                <!-- Notification Box -->
                 <?php if ($status == 'rejected' && $questions && !$is_disabled) : ?>
                     <div class="notificationBar">
-                        <div class="bgRed"> <h3>ATTENTION</h3> </div>
+                        <div class="bgRed"><h3>ATTENTION</h3></div>
                         <div class="messageBox">
                             <p class="result">Your submission has been rejected by the moderator for the following reason.</p>
                             <ul class="testDetails">
@@ -152,7 +153,20 @@ $is_accepted = $status === 'accepted';
                     </div>
                 <?php endif; ?>
 
-                <?php if ($question_templates == 'Simple Assessment' && $questions && !$is_publish && !$is_accepted) : ?>
+                <?php if($is_disabled): ?>
+                    <div class="notificationBar">
+                        <h3 style="text-align:center;">Your assessment is under pending review!</h3>
+                    </div>
+                <?php endif; ?>
+
+                <?php if($is_accepted): ?>
+                    <div class="notificationBar">
+                        <h3 style="text-align:center;">Your assessment is accepted!</h3>
+                    </div>
+                <?php endif; ?>
+                <!-- Notification Box -->
+
+                <?php if ($question_templates == 'Simple Assessment' && $questions && !$is_disabled && !$is_accepted) : ?>
                     <!-- Begin Simple Assessment -->
                     <div class="stepperFormWrap" id="main-quiz-form">
                         <form onsubmit="return false" id="form_submit_quiz">
@@ -318,7 +332,7 @@ $is_accepted = $status === 'accepted';
                     <!-- End Simple Assessment -->
                 <?php endif; ?>
 
-                <?php if ($question_templates == 'Comprehensive Assessment' && $questions && !$is_publish && !$is_accepted) : ?>
+                <?php if ($question_templates == 'Comprehensive Assessment' && $questions && !$is_disabled && !$is_accepted) : ?>
                     <!-- Begin Comprehensive Assessment -->
                     <div class="stepperFormWrap" id="main-quiz-form">
                         <!-- form message -->
@@ -693,23 +707,6 @@ $is_accepted = $status === 'accepted';
                     </div>
                     <!-- End Comprehensive Assessment -->
                 <?php endif; ?>
-
-                <?php if($is_publish): ?>
-                    <section class="formWrapper">
-                        <div class="container">
-                            Your assessment is pending!
-                        </div>
-                    </section>
-                <?php endif; ?>
-
-                <?php if($is_accepted): ?>
-                    <section class="formWrapper">
-                        <div class="container">
-                            Your assessment is accepted!
-                        </div>
-                    </section>
-                <?php endif; ?>
-
             </div>
         </section>
         

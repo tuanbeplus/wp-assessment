@@ -169,7 +169,7 @@ class CustomPostType
         $args = array(
             'labels' => $labels,
             'hierarchical' => false,
-            'supports' => array('title', 'thumbnail', 'author', 'editor'),
+            'supports' => array('title', 'thumbnail', 'author'),
             'show_ui' => true,
             'show_in_menu' => true,
             'show_in_nav_menus' => true,

@@ -17,11 +17,6 @@ $assigned_member_ids = array();
 foreach ($assigned_members as $member) {
     $assigned_member_ids[] = $member['id'];
 }
-
-// echo "<pre>";
-// print_r($assigned_member_ids);
-// print_r($invited_members);
-// echo "</pre>";
 ?>
 
 <div class="access-control-panel-wrapper">

@@ -5,9 +5,7 @@ class Custom_Fields
 
     public function __construct()
     {
-        add_action('admin_init', array($this, 'init_meta_boxes_assessment_admin'));
-        add_action('admin_init', array($this, 'init_meta_boxes_submission_admin_view')); 
-
+        add_action('admin_init', array($this, 'init_meta_boxes_admin'));
         add_action('save_post', array($this, 'question_repeatable_meta_box_save'));
         add_action('save_post', array($this, 'report_template_meta_box_save'));
         add_action('save_post', array($this, 'save_assigned_moderator'));
@@ -20,24 +18,26 @@ class Custom_Fields
         // moderator user list
     }
 
-    function init_meta_boxes_assessment_admin(): void
+    function init_meta_boxes_admin(): void
     {
+        // Assessments
         add_meta_box('questions-repeater-field', 'Questions', array($this, 'question_repeatable_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
         add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'side', 'default');
-
         if (current_user_can('administrator')) {
-            add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), 'assessments', 'normal', 'default');
+            add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions'), 'normal', 'default');
         }
-
-        add_meta_box('report-section-field', 'Report Template', array($this, 'report_section_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('report-recommendation-field', 'Report Recommendation', array($this, 'report_recommendation_meta_box_callback'), 'assessments', 'normal', 'default');
-    }
 
-    function init_meta_boxes_submission_admin_view(): void
-    {
+        // Submisions
         add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'submission_list_card_section_admin'), 'submissions', 'normal', 'default');
         add_meta_box('submitted_info_view', 'Submission by: ', array($this, 'submission_info_section_admin'), 'submissions', 'side', 'default');
+
+        // Reports
+        add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), 'reports', 'normal', 'default');
+        add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
+
+        // Attachments
         add_meta_box('attachment_uploader_info_view', 'Uploaded by member', array($this, 'attachment_uploader_info_section_admin'), 'attachment', 'side', 'default');
     }
 
@@ -51,7 +51,7 @@ class Custom_Fields
         return include_once ADMIN_ATTACHMENT_UPLOADER_INFO_VIEW;
     }
 
-    function report_section_meta_box_callback()
+    function report_template_meta_box_callback()
     {
         return include_once ADMIN_REPORT_SECTION_FIELDS;
     }
@@ -89,6 +89,11 @@ class Custom_Fields
     function access_control_panel_meta_box_callback() 
     {
         return include_once ADMIN_ACCESS_CONTROL_PANEL;
+    }
+
+    function link_report_to_assessment_callback()
+    {
+        return include_once LINK_REPORT_TO_ASSESSMENT;
     }
 
     function question_repeatable_meta_box_save($post_id): void
@@ -146,18 +151,20 @@ class Custom_Fields
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
 
-        if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'assessments')
+        if (!current_user_can('edit_post', $post_id))
             return;
 
         $report_sections = isset($_POST['report_sections']) ? $_POST['report_sections'] : '';
         $key_recommendation = isset($_POST['key_recommendation']) ? $_POST['key_recommendation'] : '';
         $executive_summary = isset($_POST['executive_summary']) ? $_POST['executive_summary'] : '';
         $evalution_findings = isset($_POST['evalution_findings']) ? $_POST['evalution_findings'] : '';
+        $linked_assessment = isset($_POST['linked_assessment']) ? $_POST['linked_assessment'] : '';
 
         update_post_meta($post_id, 'report_template_content', $report_sections);
         update_post_meta($post_id, 'report_recommendation', $key_recommendation);
         update_post_meta($post_id, 'executive_summary', $executive_summary);
         update_post_meta($post_id, 'evalution_findings', $evalution_findings);
+        update_post_meta($post_id, 'linked_assessment', $linked_assessment);
 
     }
 
@@ -216,10 +223,8 @@ class Custom_Fields
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
 
-        if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'assessments')
+        if (!current_user_can('edit_post', $post_id))
             return;
-
-        $post_type = get_post_type($post_id);
 
         $assigned_collaborator = isset($_POST['assigned_collaborator']) ? $_POST['assigned_collaborator'] : '';
 

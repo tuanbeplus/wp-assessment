@@ -767,11 +767,9 @@ jQuery(document).ready(function ($) {
     });
 
     $(document).on("click", "#btn-send-invite", async function (e) {
-
-        let assessmentId = $(`[name="assessment_id"]`).val()
-        
+        let btn = $(this)
+        let postId = $('input#post_ID').val()
         let collab_input = $('#collaborator-selected-list').find('.selected-collab-item')
-
         let collab_arr = [];
 
         collab_input.each(function () {
@@ -780,20 +778,21 @@ jQuery(document).ready(function ($) {
         })
 
         $.ajax({
-        type: 'POST',
-        url: ajaxUrl,
-        data:{
-            'action' : 'send_invite_to_collaborator',
-            'assessment_id': assessmentId,
-            'user_id_arr' : collab_arr,
-        },
-        beforeSend : function ( xhr ) {
-            
-        },
-        success:function(response){
-            alert(response.message)
-            console.log(response);
-        }
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'send_invite_to_collaborator',
+                'post_id': postId,
+                'user_id_arr' : collab_arr,
+            },
+            beforeSend : function ( xhr ) {
+                btn.addClass('sending')
+            },
+            success:function(response){
+                btn.removeClass('sending')
+                alert(response.message)
+                console.log(response);
+            }
         });
     });
 
@@ -852,31 +851,37 @@ jQuery(document).ready(function ($) {
     }
   });
 
-    var key_recom_container = $('#report-recommendation-field .key-recommendation-field-container')
+    var key_recom_container = $('#report-recommendation-field .key-recommendations-list')
     var row_recom_index = 0;
     if ($(".row-recommendation").length) {
         row_recom_index = $(".row-recommendation").length;
     }
+
     $(document).on('click', '#report-recommendation-field .add-row-recommendation', function (e){
 
-        row_recom_index = row_recom_index + 1
+        row_recom_index = row_recom_index + 1;
+        let btn_position = $(this).data('position')
         
-        let row_recom = '<div id="row-recommendation-'+ row_recom_index +'" class="row row-recommendation">'
-            row_recom += '    <div class="key-title col-5">'
-            row_recom += '        <textarea class="form-control description_area" name="key_recommendation['+ row_recom_index +'][key]"></textarea>'
+        let row_recom = '<li id="row-recommendation-'+ row_recom_index +'" class="row-recommendation">'
+            row_recom += '    <div class="key-title">'
+            row_recom += '        <textarea class="form-control"'
+            row_recom += '                  placeholder="Prefilled Recommendation Title"'
+            row_recom += '                  name="key_recommendation['+ row_recom_index +'][key]"></textarea>'
             row_recom += '    </div>'
-            row_recom += '    <div class="priorities-area col-7">'
-            row_recom += '        <textarea class="form-control description_area" name="key_recommendation['+ row_recom_index +'][priority]"></textarea>'
-            row_recom += '        <div class="row-recommendation-action">'
-            row_recom += '            <span class="remove-row-recom"><i class="fa-regular fa-circle-xmark"></i></span>'
-            row_recom += '        </div>'
+            row_recom += '    <div class="key-action">'
+            row_recom += '        <span class="remove-row"><i class="fa-regular fa-circle-xmark"></i></span>'
             row_recom += '    </div>'
-            row_recom += '</div>'
-                            
-        key_recom_container.append(row_recom)
+            row_recom += '</li>'
+        
+        if (btn_position == 'top') {
+            key_recom_container.prepend(row_recom)
+        }
+        else if (btn_position == 'bottom') {
+            key_recom_container.append(row_recom)
+        }
     });
 
-    $(document).on('click', '.row-recommendation .remove-row-recom', function (e){
+    $(document).on('click', '.row-recommendation .key-action', function (e){
         $(this).closest('#report-recommendation-field .row-recommendation').remove()
     });
 
@@ -995,7 +1000,7 @@ jQuery(document).ready(function ($) {
     $(".accept-button").on("click", async function (e) {
         e.preventDefault();
         await submit_feedback_submission($(this), "accepted");
-        await createComprehensiveReport();
+        // await createComprehensiveReport();
     });
 
     async function submit_feedback_submission(btn, feedbackType) {

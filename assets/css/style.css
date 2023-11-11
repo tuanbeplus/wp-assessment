@@ -215,6 +215,7 @@
 
 .question .form-control {
     border-color: #acaeb2;
+    box-shadow: inset 3px 3px 3px 0px #eee;
 }
 
 .question .form-control:disabled {
@@ -770,7 +771,7 @@
     display: flex;
     gap: 4px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 13px;
     background-color: #f1f1f1;
 }
 
@@ -833,6 +834,29 @@
 
 .collaborator-box #btn-send-invite {
     font-weight: 500;
+    position: relative;
+}
+
+.collaborator-box #btn-send-invite::before {
+    display: none;
+    content: "Sending...";
+    position: absolute;
+    padding: 0 10px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border-radius: 6px;
+}
+
+.collaborator-box #btn-send-invite.sending {
+    opacity: 0.8;
+    pointer-events: none;
+    cursor: default;
+}
+
+.collaborator-box #btn-send-invite.sending::before {
+    display: block!important;
 }
 
 /* Assessment options */
@@ -913,6 +937,10 @@
     box-shadow: rgba(0, 0, 0, 0.10) 0px 3px 3px 0px;
 }
 
+.list-items-dropdown > *:last-child {
+    margin-bottom: 0;
+}
+
 .list-items-dropdown .item {
     margin: 0;
     padding: 4px 6px;
@@ -960,26 +988,55 @@
 }
 
 .recommendation-wrapper {
-    padding: 0 10px;
+    padding: 0 10px 10px;
 }
 
 .add-row-recommendation-block {
     margin-top: 10px;
-    text-align: right;
-}
-.key-recommendation-field-container .row-recommendation {
-    margin-top: 10px;
 }
 
-.row-recommendation .description_area {
-    font-size: 0.9rem;
-    line-height: 140%;
+.key-recommendations-list {
+    padding: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-.key-recommendation-field-container .row-recommendation-action {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.key-recommendations-list .row-recommendation {
+    margin: 10px 0;
+    max-width: 700px;
+    position: relative;
+    font-size: 17px;
+}
+
+.row-recommendation .key-title {
+    width: 100%;
+}
+
+.row-recommendation .key-title textarea {
+    height: 40px;
+    min-height: 40px;
+    border: 1.5px solid #aaa;
+}
+
+.row-recommendation .key-title textarea:focus {
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.4);
+}
+
+.row-recommendation .key-action {
+    position: absolute;
+    right: 6px;
+    top: 2px;
+    cursor: pointer;
+}
+
+.row-recommendation .key-action .remove-row {
+    padding: 4px;
+    font-size: 20px;
+    display: block;
+}
+
+.row-recommendation .key-action .remove-row:hover {
+    color: #b32d2e;
 }
 
 .key-recommendation-field-container .priorities-area {
@@ -1230,6 +1287,12 @@
 
 #btn-refresh-members.loading .icon-refresh{
     animation: rotating 1s linear infinite;
+}
+
+/* Reports */
+
+#link-report-to-assessment .link-report-wrapper {
+    padding-top: 8px;
 }
 
 @keyframes rotating {

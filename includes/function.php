@@ -861,56 +861,6 @@ class WP_Assessment
         return $terms_arr;
     }
 
-    function check_access_salesforce_user($user_id, $assessment_id)
-    {
-        $terms_arr = $this->get_assessment_terms($assessment_id);
-        $is_all_users_can_access = get_post_meta($assessment_id, 'is_all_users_can_access', true);
-        $related_sf_products = get_post_meta($assessment_id, 'related_sf_products', true);
-        
-        $assigned_members = get_post_meta( $assessment_id, 'assigned_members', true);
-        $invited_members = get_post_meta( $assessment_id, 'invited_members', true);
-        $assigned_member_ids = array();
-        foreach ($assigned_members as $member) {
-            $assigned_member_ids[] = $member['id'];
-        }
-
-        $sf_product_id_opp = getProductIdByOpportunity();
-        $drc_product_id = isset($sf_product_id_opp['dcr_product_id']) ? $sf_product_id_opp['dcr_product_id'] : null;
-        $index_product_id = isset($sf_product_id_opp['index_product_id']) ? $sf_product_id_opp['index_product_id'] : null;
-        $is_user_can_access = false;
-
-        // check user access to asessment
-        // if ($drc_product_id && !empty($related_sf_products)) {
-        //     if (in_array('dcr', $terms_arr) && in_array($drc_product_id, $related_sf_products)) {
-        //         $is_user_can_access = true;
-        //     }
-        // }
-        // if ($index_product_id && !empty($related_sf_products)) {
-        //     if (in_array('index', $terms_arr) && in_array($index_product_id, $related_sf_products)) {
-        //         $is_user_can_access = true;
-        //     }
-        // }
-
-        // Accessible for all assigned members
-        if (is_array($assigned_member_ids)) {
-            if (in_array($user_id, $assigned_member_ids)) {
-                $is_user_can_access = true;
-            }
-        }
-        // Accessible for all invited members
-        if (is_array($invited_members)) {
-            if (in_array($user_id, $invited_members)) {
-                $is_user_can_access = true;
-            }
-        }
-        // Assessment is accessible for all loged in users
-        if ($is_all_users_can_access == true) {
-            $is_user_can_access = true;
-        }
-
-        return $is_user_can_access;
-    }
-
     function get_field_organisation_id($user_id) {
 
         $account_id = getAccountMember($user_id)['Id'];
