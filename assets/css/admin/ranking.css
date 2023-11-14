@@ -1,0 +1,56 @@
+#ranking_assessment_linked .inside {
+  margin: 0;
+  padding: 15px 12px;
+}
+#ranking_assessment_linked .select2-container--default .select2-selection--single {
+  height: auto;
+  min-height: 35px;
+}
+#ranking_assessment_linked .select2-container--default .select2-selection--single .select2-selection__rendered {
+  line-height: 130%;
+  white-space: normal;
+  font-size: 15px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.ranking-detail-ss {
+  /* border-radius: 8px; */
+  /* padding: 10px 20px 16px; */
+  margin-top: 26px;
+  border: 1px solid #ddd;
+  box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
+}
+.ss-row {
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid #ddd;
+}
+.ss-row:first-child {
+  border-top: 0;
+}
+.left-col,
+.right-col {
+  padding: 12px;
+}
+.left-col {
+  width: 160px;
+  border-right: 1px solid #ddd;
+}
+.right-col {
+  width: calc(100% - 160px);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+td,
+th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #f6f7f7;
+}
