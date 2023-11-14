@@ -1,20 +1,39 @@
 <?php 
 global $post;
 
-$report_sections = array('intro', 'outro', 'address', 'appendix');
-$report_template_content = get_post_meta($post->ID, 'report_template_content', true);
+// $report_sections = array('intro', 'outro', 'address', 'appendix');
+$report_sections = array('intro');
+$report_template = get_post_meta($post->ID, 'report_template', true);
 ?>
 
-<div id="report-section-wrapper" class="report-section-wrapper">
-    <!-- <div class="report-option-container">
-        <div class="row">
-            <div class="add-report-option-box">
-                <span id="btn-add-report-option" class="button button-primary">+ Add report section</span>
-            </div>
-        </div>
-    </div> -->
+<div id="report-template-wrapper" class="report-template-wrapper">
+    <div class="field-checkbox">
+        <label for="report-include-toc">
+            <input type="checkbox" name="is_report_include_toc" id="report-include-toc">
+            Include Table of content
+        </label>
+    </div>
     <!-- begin Report section -->
-    <div id="report-section-container" class="report-section-container">
+    <div id="report-template" class="report-template">
+        <!-- Front page -->
+        <div id="report-front-page" class="_section">
+            <h3 class="_heading">Report front page (cover)</h3>
+            <input type="text" name="report_template[front_page][title]" id="">
+            <?php
+                $content   = '';
+                $editor_id = 'report-front-page-wpeditor';
+                $editor_settings = array(
+                    'textarea_name' => "report_template[front_page][content]",
+                    'textarea_rows' => 12,
+                    'quicktags' => true, // Remove view as HTML button.
+                    'default_editor' => 'tinymce',
+                    'tinymce' => true,
+                );
+                wp_editor( $content, $editor_id, $editor_settings );
+            ?>
+        </div>
+        <!-- /Front page -->
+
         <?php foreach($report_sections as $section): ?>
             <?php //if($report_template_content): ?>
                 <!-- Section -->

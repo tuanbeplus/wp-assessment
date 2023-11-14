@@ -27,15 +27,15 @@ class Custom_Fields
         if (current_user_can('administrator')) {
             add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions'), 'normal', 'default');
         }
-        add_meta_box('report-recommendation-field', 'Report Recommendation', array($this, 'report_recommendation_meta_box_callback'), 'assessments', 'normal', 'default');
+        add_meta_box('report-key-areas-field', 'Add Key Areas', array($this, 'report_key_areas_meta_box_callback'), 'assessments', 'normal', 'default');
 
         // Submisions
         add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'submission_list_card_section_admin'), 'submissions', 'normal', 'default');
         add_meta_box('submitted_info_view', 'Submission by: ', array($this, 'submission_info_section_admin'), 'submissions', 'side', 'default');
 
         // Reports
-        add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), 'reports', 'normal', 'default');
-        add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
+        add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), 'assessments', 'normal', 'default');
+        // add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
 
         // Attachments
         add_meta_box('attachment_uploader_info_view', 'Uploaded by member', array($this, 'attachment_uploader_info_section_admin'), 'attachment', 'side', 'default');
@@ -61,9 +61,9 @@ class Custom_Fields
         return include_once ADMIN_QUESTIONAIRE_FIELDS;
     }
 
-    function report_recommendation_meta_box_callback()
+    function report_key_areas_meta_box_callback()
     {
-        return include_once ADMIN_REPORT_RECOMMENDATION_FIELDS;
+        return include_once ADMIN_REPORT_KEY_AREAS_FIELDS;
     }
 
     function display_moderator_select_list()
@@ -155,13 +155,13 @@ class Custom_Fields
             return;
 
         $report_sections = isset($_POST['report_sections']) ? $_POST['report_sections'] : '';
-        $key_recommendation = isset($_POST['key_recommendation']) ? $_POST['key_recommendation'] : '';
+        $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
         $executive_summary = isset($_POST['executive_summary']) ? $_POST['executive_summary'] : '';
         $evalution_findings = isset($_POST['evalution_findings']) ? $_POST['evalution_findings'] : '';
         $linked_assessment = isset($_POST['linked_assessment']) ? $_POST['linked_assessment'] : '';
 
         update_post_meta($post_id, 'report_template_content', $report_sections);
-        update_post_meta($post_id, 'report_recommendation', $key_recommendation);
+        update_post_meta($post_id, 'report_key_areas', $report_key_areas);
         update_post_meta($post_id, 'executive_summary', $executive_summary);
         update_post_meta($post_id, 'evalution_findings', $evalution_findings);
         update_post_meta($post_id, 'linked_assessment', $linked_assessment);

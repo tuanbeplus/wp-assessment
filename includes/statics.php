@@ -9,7 +9,7 @@ const MODERATOR_LIST_ADMIN_SELECT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments
 const ADMIN_ACCESS_CONTROL_PANEL = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/access-control-panel.php';
 const ADMIN_REPORT_CONTENT_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-content.php';
 const ADMIN_REPORT_SECTION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-section.php';
-const ADMIN_REPORT_RECOMMENDATION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-recommendation.php';
+const ADMIN_REPORT_KEY_AREAS_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-key-areas.php';
 
 // define admin views Submissions
 const ADMIN_SUBMISSION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-view.php';

@@ -851,22 +851,23 @@ jQuery(document).ready(function ($) {
     }
   });
 
-    var key_recom_container = $('#report-recommendation-field .key-recommendations-list')
+    var key_recom_container = $('#report-key-areas-field .key-areas-list')
     var row_recom_index = 0;
-    if ($(".row-recommendation").length) {
-        row_recom_index = $(".row-recommendation").length;
+    if ($(".row-key-area").length) {
+        row_recom_index = $(".row-key-area").length;
     }
 
-    $(document).on('click', '#report-recommendation-field .add-row-recommendation', function (e){
+    $(document).on('click', '#report-key-areas-field .add-key-area', function (e){
 
         row_recom_index = row_recom_index + 1;
         let btn_position = $(this).data('position')
         
-        let row_recom = '<li id="row-recommendation-'+ row_recom_index +'" class="row-recommendation">'
+        let row_recom = '<li id="row-key-area-'+ row_recom_index +'" class="row-key-area">'
             row_recom += '    <div class="key-title">'
-            row_recom += '        <textarea class="form-control"'
-            row_recom += '                  placeholder="Prefilled Recommendation Title"'
-            row_recom += '                  name="key_recommendation['+ row_recom_index +'][key]"></textarea>'
+            row_recom += '          <input type="text" class="form-control"'
+            row_recom += '                  placeholder="Add key Area name"'
+            row_recom += '                  name="report_key_areas['+ row_recom_index +'][key]"'
+            row_recom += '                  value="">'
             row_recom += '    </div>'
             row_recom += '    <div class="key-action">'
             row_recom += '        <span class="remove-row"><i class="fa-regular fa-circle-xmark"></i></span>'
@@ -881,8 +882,8 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    $(document).on('click', '.row-recommendation .key-action', function (e){
-        $(this).closest('#report-recommendation-field .row-recommendation').remove()
+    $(document).on('click', '.row-key-area .key-action', function (e){
+        $(this).closest('#report-key-areas-field .row-key-area').remove()
     });
 
     $(document).on('click', '.btn-toggle-advice-area', function (e){

@@ -965,10 +965,6 @@
 }
 
 /* Report section */
-#report-recommendation-field ._heading {
-    margin: 20px 0 16px 0;
-    font-size: 1.25rem;
-}
 
 .add-report-option-box {
     display: flex;
@@ -987,76 +983,65 @@
     margin-bottom: 20px;
 }
 
-.recommendation-wrapper {
+.key-areas-container {
     padding: 0 10px 10px;
+    display: flex;
 }
 
-.add-row-recommendation-block {
-    margin-top: 10px;
-}
-
-.key-recommendations-list {
-    padding: 0;
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
-.key-recommendations-list .row-recommendation {
-    margin: 10px 0;
+.key-areas-list {
+    width: 100%;
     max-width: 700px;
+    padding: 0;
+    margin: 0 10px;
+}
+
+.key-areas-list .row-key-area {
+    margin: 10px 0;
     position: relative;
     font-size: 17px;
 }
 
-.row-recommendation .key-title {
+.row-key-area .key-title {
     width: 100%;
 }
 
-.row-recommendation .key-title textarea {
-    height: 40px;
-    min-height: 40px;
-    border: 1.5px solid #aaa;
+.row-key-area .key-title input {
+    font-size: 16px;
+    min-height: 36px;
 }
 
-.row-recommendation .key-title textarea:focus {
-    box-shadow: 0 0 0 3px rgba(13,110,253,0.4);
-}
-
-.row-recommendation .key-action {
+.row-key-area .key-action {
     position: absolute;
-    right: 6px;
-    top: 2px;
+    right: 4px;
+    top: 0;
     cursor: pointer;
 }
 
-.row-recommendation .key-action .remove-row {
+.row-key-area .key-action .remove-row {
     padding: 4px;
     font-size: 20px;
     display: block;
 }
 
-.row-recommendation .key-action .remove-row:hover {
+.row-key-area .key-action .remove-row:hover {
     color: #b32d2e;
 }
 
-.key-recommendation-field-container .priorities-area {
-    display: flex;
-    gap: 20px;
-}
-
-.row-recommendation-action .remove-row-recom {
+.row-key-area .remove-row-recom {
     font-size: 22px;
     color: #ba0000;
     cursor: pointer;
 }
 
-.row-recommendation-action .remove-row-recom:hover {
+.row-key-area .remove-row-recom:hover {
     color: #e80000;
 }
 
-.evalution-findings-field-container {
-    margin: 40px 0 10px;
+.button.add-key-area {
+    margin: 10px;
+    height: fit-content;
 }
+
 /* .Report section */
 
 /* attachment uploader info */
