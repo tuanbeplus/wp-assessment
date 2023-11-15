@@ -9,13 +9,19 @@ $assessment_id = get_post_meta($post_id, 'assessment_id', true);
 $organisation_id = get_post_meta($post_id, 'organisation_id', true);
 $quiz_id = get_post_meta($post_id, 'quiz_id', true);
 $assessment_meta = get_post_meta($assessment_id, 'question_templates', true);
-$report_template_content = get_post_meta($assessment_id, 'report_template_content', true);
-$report_recommendation = get_post_meta($assessment_id, 'report_recommendation', true);
-$executive_summary = get_post_meta($assessment_id, 'executive_summary', true);
-$evalution_findings = get_post_meta($assessment_id, 'evalution_findings', true);
+$report_key_areas = get_post_meta($assessment_id, 'report_key_areas', true);
+$report_template = get_post_meta($assessment_id, 'report_template', true);
+$is_required_answer_all = get_post_meta($assessment_id, 'is_required_answer_all', true);
 $quiz_feedbacks = get_post_meta($post_id, 'quiz_feedback', true);
 $quiz_answer_points = get_post_meta($post_id, 'quiz_answer_point', true);
-$is_required_answer_all = get_post_meta($assessment_id, 'is_required_answer_all', true);
+$and_score = get_post_meta($post_id, 'and_score', true);
+$agreeed_score = get_post_meta($post_id, 'agreeed_score', true);
+$submission_key_area = get_post_meta($post_id, 'submission_key_area', true);
+$recommentdation = get_post_meta($post_id, 'recommentdation', true);
+
+// echo '<pre>';
+// print_r();
+// echo '</pre>';
 
 $main = new WP_Assessment();
 $azure = new WP_Azure_Storage();
@@ -150,6 +156,7 @@ $submission_score_arr = array();
                         $sub_title = htmlentities(stripslashes(utf8_decode($question_meta_field['sub_title'])));
                         $sub_list_point = $group_quiz_points[$field->parent_id]['sub_list'] ?? null;
                         $sub_quiz_point = $sub_list_point[$quiz_id]['point'] ?? null;
+                        $weighting = $question_meta_field['point'] ?? 0;
 
                         if ($field->answers) {
                             $answers = json_decode($field->answers);
@@ -163,11 +170,14 @@ $submission_score_arr = array();
                         }
                         ?>
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$quiz_id; ?>">
-                            <div class="card">
+                            <div class="card content">
                                 <div class="card-header">
                                     <h4 class="quiz-title"><?php echo $group_id.'.'.$quiz_id.' - '.$sub_title; ?></h4>
                                 </div>
                                 <div class="card-body">
+                                    <input type="hidden" name="assessment_id" value="<?php echo $assessment_id ?>"/>
+                                    <input type="hidden" name="user_id" value="<?php echo $user_id ?>"/>
+                                    <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $quiz_id ?>" class="quiz-input"/>
                                     <?php if (is_array($answers) && count($answers) > 0) : ?>
                                         <div class="submission-answers-list">
                                             <strong>Selected Answers</strong>
@@ -230,44 +240,98 @@ $submission_score_arr = array();
                                             <?php endif; ?>
                                         </div>
                                     <?php endif; ?>
-
-                                    <?php 
-                                        $weighting = $question_meta_field['point'] ? $question_meta_field['point'] : 0;
-                                        ?>
-                                    <div class="row weighting" data-weighting="<?php echo $weighting; ?>">
-                                        <label class="weighting-label"><strong>Weighting: <?php echo $weighting; ?></strong></label>
-                                        <div class="field-answer-point">
-                                            <label for="input-answer-point-<?php echo $group_id; ?>-<?php echo $quiz_id; ?>" class="weighting-label">
-                                                <strong>Answer point:</strong>
-                                            </label>
-                                            <input class="input-answer-point" 
-                                                    id="input-answer-point-<?php echo $group_id; ?>-<?php echo $quiz_id; ?>"
-                                                    type="number" placeholder="points"
-                                                    name="quiz_answer_point[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]" 
-                                                    value="<?php echo $quiz_point; ?>" />
+                                    <!-- Question Weighting -->
+                                    <div class="weighting" data-weighting="<?php echo $weighting; ?>">
+                                        <label class="weighting-label col-6">
+                                            Weighting: <strong><?php echo $weighting; ?></strong>
+                                        </label>
+                                        <label class="answer-point-label col-6">
+                                            Answer point: <strong><?php echo $quiz_point; ?></strong>
+                                        </label>
+                                    </div>
+                                    <!-- /Question Weighting -->
+                                    <!-- Org Scoring -->
+                                    <div class="scoring">
+                                        <label class="col-12"><strong>Scoring</strong></label>
+                                        <div class="scoring-wrapper">
+                                            <div class="org-score">
+                                                <label>Org Score:
+                                                    <strong><?php 
+                                                        if (empty($quiz_point)) {
+                                                            echo '0';
+                                                        }
+                                                        elseif ($weighting != null && $quiz_point != null) {
+                                                            $sub_question_score = $weighting * $quiz_point;
+                                                            $section_score_arr[] = $sub_question_score;
+                                                            echo $sub_question_score;
+                                                        } 
+                                                    ?></strong>
+                                                </label>
+                                            </div>
+                                            <div class="and-score">
+                                                <label for="and-score-input">
+                                                    AND Score
+                                                    <input id="and-score-input" type="number" step="0.1" 
+                                                            name="and_score[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]" 
+                                                            value="<?php echo $and_score[$group_id][$quiz_id] ?? null; ?>">
+                                                </label>
+                                            </div>
+                                            <div class="agreed-score">
+                                                <label for="agreed-score-input">
+                                                    Agreeed Score
+                                                    <input id="agreed-score-input" type="number" step="0.1" 
+                                                            name="agreeed_score[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]" 
+                                                            value="<?php echo $agreeed_score[$group_id][$quiz_id] ?? null; ?>">
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
-                                    <input type="hidden" name="assessment_id" value="<?php echo $assessment_id ?>" />
-                                    <input type="hidden" name="user_id" value="<?php echo $user_id ?>" />
-                                    <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $quiz_id ?>" class="quiz-input" />
+                                    <!-- /Org Scoring -->
+                                    <!-- Key Areas -->
+                                    <div class="key-areas">
+                                        <label class="col-12"><strong>Select Key Area</strong></label>
+                                        <select class="select-key-area" name="submission_key_area[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]">
+                                            <option value=""></option>
+                                            <?php if (!empty($report_key_areas)): ?>
+                                                <?php foreach ($report_key_areas as $key_area): ?>
+                                                    <option value="<?php echo $key_area['key'] ?>"
+                                                        <?php 
+                                                        if (isset($submission_key_area[$group_id][$quiz_id])) {
+                                                            if ($key_area['key'] == $submission_key_area[$group_id][$quiz_id]) {
+                                                                echo 'selected';
+                                                            }
+                                                        } ?>>
+                                                        <?php echo $key_area['key'] ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                    <!-- /Key Areas -->
+                                    <!-- Recommentdation -->
+                                    <div class="recommentdation">
+                                        <div class="_top">
+                                            <label><strong>Recommentdation</strong></label>
+                                            <a class="button button-medium">+ Add Recommentdation</a>
+                                        </div>
+                                        <div class="_wpeditor">
+                                            <?php 
+                                            $content   = $recommentdation[$group_id][$quiz_id] ?? null;
+                                            $editor_id = 'recommentdation-wpeditor-'.$group_id.'-'.$quiz_id;
+                                            $editor_settings = array(
+                                                'textarea_name' => 'recommentdation['.$group_id.']['.$quiz_id.']',
+                                                'textarea_rows' => 10,
+                                                'quicktags' => true, // Remove view as HTML button.
+                                                'default_editor' => 'tinymce',
+                                                'tinymce' => true,
+                                            );
+                                            wp_editor( $content, $editor_id, $editor_settings );
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <!-- /Recommentdation -->
                                 </div>
-                                <div class="card-footer">
-                                    <p class="sub-total-score">
-                                        Sub Question score: 
-                                        <span class="sub-total-score-val" id="sub-total-score-val-<?php echo $quiz_id; ?>">
-                                        <?php 
-                                            if (empty($quiz_point)) {
-                                                echo '0';
-                                            }
-                                            elseif ($weighting != null && $quiz_point != null) {
-                                                $sub_question_score = $weighting * $quiz_point;
-                                                $section_score_arr[] = $sub_question_score;
-                                                echo $sub_question_score;
-                                            } 
-                                        ?>
-                                        </span>
-                                    </p>
-                                </div>
+                                <div class="card-footer"></div>
                             </div>
                             <div class="card feedback">
                                 <div class="card-body">

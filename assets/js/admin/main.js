@@ -1371,6 +1371,73 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // Report Front page add logo
+    $(document).on('click', '#report-add-logo', function(e){
+        e.preventDefault();
+        let logo_uploader = wp.media({
+            title: 'Logo image',
+            button: {
+                text: 'Use this image'
+            },
+            multiple: false
+        }).on('select', function() {
+            let attachment = logo_uploader.state().get('selection').first().toJSON();
+            $('#front-page-logo-url').val(attachment.url);
+            $('img#report-front-logo-preview').attr('src', attachment.url).show()
+        })
+        .open();
+        $('#report-front-page #btn-remove-logo').addClass('active')
+    });
+
+    // Remove current Logo
+    $(document).on('click', '#btn-remove-logo', function(e){
+        e.preventDefault();
+        $('#front-page-logo-url').val(null);
+        $('img#report-front-logo-preview').attr('src', null).hide()
+    });
+
+    // Add Generic page to List
+    var page_count = 0;
+    if ($('#generic-pages-list .generic-page').length) {
+        page_count = $('#generic-pages-list .generic-page').length;
+    }
+    $(document).on('click', '.btn-add-generic-page', function(e){
+        let insert_position = $(this).data('insert')
+        let textarea_id = 'generic-page-textarea-' + Date.now();
+        page_count = page_count + 1;
+        
+        let generic_page_item  = '<li id="generic-page-'+ page_count +'" class="_section generic-page">'
+            generic_page_item +=     '<h3 class="_heading">Generic page</h3>'
+            generic_page_item +=     '<input type="text" name="report_template[generic_page]['+ page_count +'][title]" placeholder="Add title">'
+            generic_page_item +=     '<textarea id="'+ textarea_id +'" class="generic-page-wpeditor" name="report_template[generic_page]['+ page_count +'][content]" rows="10"></textarea>'
+            generic_page_item +=     '<div class="add-row-block">'
+            generic_page_item +=         '<a class="btn-remove-generic-page button_remove">Remove this row</a>'
+            generic_page_item +=         '<a class="btn-add-generic-page button button-primary" data-insert="bottom">+ Add row</a>'
+            generic_page_item +=     '</div>'
+            generic_page_item += '</li>'
+
+        if (insert_position == 'top') {
+            $('.report-template #generic-pages-list').prepend(generic_page_item)
+        }
+        else {
+            $(this).closest('#generic-pages-list .generic-page').after(generic_page_item)
+        }
+        // Append WP editor
+        append_wpeditor('#'+ textarea_id, true)
+    });
+
+    // Remove a Generic page row
+    $(document).on('click', '.btn-remove-generic-page', function(e){
+        e.preventDefault();
+        let currnet_row = $(this).closest('#generic-pages-list .generic-page')
+        
+        currnet_row.addClass('removing')
+        setTimeout(function() {
+            currnet_row.remove();
+        }, 300)
+    });
+
+
     // require assessment admin fields
     $('input.group-question-admin-title').prop('required',true);
     $('input.question-admin-title').prop('required',true);

@@ -154,18 +154,24 @@ class Custom_Fields
         if (!current_user_can('edit_post', $post_id))
             return;
 
-        $report_sections = isset($_POST['report_sections']) ? $_POST['report_sections'] : '';
+        $report_template = isset($_POST['report_template']) ? $_POST['report_template'] : '';
+        $is_report_include_toc = isset($_POST['is_report_include_toc']) ? $_POST['is_report_include_toc'] : '';
         $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
-        $executive_summary = isset($_POST['executive_summary']) ? $_POST['executive_summary'] : '';
-        $evalution_findings = isset($_POST['evalution_findings']) ? $_POST['evalution_findings'] : '';
-        $linked_assessment = isset($_POST['linked_assessment']) ? $_POST['linked_assessment'] : '';
 
-        update_post_meta($post_id, 'report_template_content', $report_sections);
+        // Renew Index of generic page Report template array
+        $new_report_template = array();
+        $index = 1;
+        if (!empty($report_template)) {
+            foreach ($report_template['generic_page'] as $generic_page) {
+                $new_report_template[$index] = $generic_page;
+                $index++;
+            }
+            $report_template['generic_page'] = $new_report_template;
+        }
+
+        update_post_meta($post_id, 'report_template', $report_template);
+        update_post_meta($post_id, 'is_report_include_toc', $is_report_include_toc);
         update_post_meta($post_id, 'report_key_areas', $report_key_areas);
-        update_post_meta($post_id, 'executive_summary', $executive_summary);
-        update_post_meta($post_id, 'evalution_findings', $evalution_findings);
-        update_post_meta($post_id, 'linked_assessment', $linked_assessment);
-
     }
 
     function on_save_submission_custom_fields($post_id): void
@@ -180,6 +186,10 @@ class Custom_Fields
         $quiz_feedbacks = $_POST['quiz_feedback'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
         $total_submission_score = $_POST['total_submission_score'] ?? null;
+        $and_score = $_POST['and_score'] ?? null;
+        $agreeed_score = $_POST['agreeed_score'] ?? null;
+        $submission_key_area = $_POST['submission_key_area'] ?? null;
+        $recommentdation = $_POST['recommentdation'] ?? null;
 
         // echo '<pre>';
         // print_r($quiz_feedbacks);
@@ -199,6 +209,10 @@ class Custom_Fields
         update_post_meta($post_id, 'quiz_feedback', $quiz_feedbacks);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);
         update_post_meta($post_id, 'total_submission_score', $total_submission_score);
+        update_post_meta($post_id, 'and_score', $and_score);
+        update_post_meta($post_id, 'agreeed_score', $agreeed_score);
+        update_post_meta($post_id, 'submission_key_area', $submission_key_area);
+        update_post_meta($post_id, 'recommentdation', $recommentdation);
     }
 
     function save_assigned_moderator($post_id): void

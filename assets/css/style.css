@@ -492,10 +492,20 @@
     font-size: 1.2rem;
 }
 
-.card .submission-answers-list {
+.card.content .card-body > * {
     margin-bottom: 12px;
-    padding-bottom: 4px;
+    padding-bottom: 14px;
     border-bottom: 1px dashed #ccc;
+}
+
+.card.content .card-body > *:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.submission-view-item-row .card .card-footer {
+    min-height: 40px;
 }
 
 .submission-view-item-row .card ul {
@@ -503,6 +513,9 @@
     padding-left: 18px;
     font-size: 14px;
     list-style: disc;
+}
+.submission-view-item-row .card ul li {
+    margin-bottom: 0;
 }
 
 .submission-view-item-row .card .description-label {
@@ -513,12 +526,12 @@
 .submission-view-item-row .card .description-thin {
     width: 100%;
     font-size: 14px;
-}
-
-.submission-view-item-row .user-comment-area {
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px dashed #ccc;
+    line-height: 150%;
+    max-height: 250px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    border-radius: 2px;
 }
 
 .submission-view-item-row .card textarea.feedback-input {
@@ -691,12 +704,35 @@
     margin-top: 8px;
 }
 
-.filesList_submission {
-    margin: 16px 0;
-}
-
 .filesList_submission > p {
     margin-bottom: 0;
+}
+
+.card-body .weighting {
+    display: flex;
+}
+
+.scoring input[type="number"] {
+    width: 80px;
+}
+
+.scoring .scoring-wrapper {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.scoring label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.key-areas .select-key-area {
+    margin-top: 8px;
+    min-width: 200px;
 }
 
 .question-add-files-container .btn-add-files-wrapper {
@@ -1280,11 +1316,128 @@
     padding-top: 8px;
 }
 
+.report-template-wrapper {
+    padding: 8px;
+}
+
+.report-template-wrapper .field-include-toc {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.report-template ._section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 2px dashed #aaa;
+    animation: append-animate 0.3s linear;
+    transition: all 0.3s;
+}
+
+.report-template ._section.removing {
+    animation: zoom-out 0.3s linear;
+}
+
+.report-template .add-row-block-top {
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+.report-template ._section .add-row-block {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+#report-front-page ._container{
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+#report-front-page ._container .field-content {
+    width: 100%;
+}
+
+.report-template > *:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border: none;
+}
+
+.report-template #generic-pages-list {
+    padding: 0;
+}
+
+.report-template ._heading {
+    margin-bottom: 14px;
+    font-size: 20px;
+}
+
+.report-template input[type="text"] {
+    width: 100%;
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+
+.report-template .field-upload-logo {
+    max-width: 200px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    height: fit-content;
+}
+
+.field-upload-logo .logo-preview-block {
+    margin-top: 12px;
+    min-height: 100px;
+    border: 1px solid #aaa;
+    border-radius: 2px;
+    background-color: #f5f5f5;
+    box-shadow: inset 3px 3px 3px 0px #eee;
+}
+
+.logo-preview-block img {
+    display: none;
+    width: 100%;
+    border-radius: 2px;
+    box-shadow: inset 3px 3px 3px 0px #eee;
+}
+
+.logo-preview-block img.active {
+    display: block;
+}
+
+.button_remove {
+    color: #b32d2e;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#btn-remove-logo {
+    display: none;
+    margin-top: 10px;
+}
+
+#btn-remove-logo.active {
+    display: block;
+}
+
 @keyframes rotating {
     0%{
        transform: rotate(0deg);
     }
     100%{
        transform: rotate(360deg);
+    }
+}
+
+@keyframes zoom-out {
+    0% {
+      transform: scale(1, 1);
+    }
+    100% {
+      transform: scale(0.1, 0.1);
     }
 }

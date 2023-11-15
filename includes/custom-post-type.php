@@ -6,7 +6,7 @@ class CustomPostType
     {
         add_action('init', array($this, 'register_assessment_custom_post_type'));
         add_action('init', array($this, 'register_submissions_custom_post_type'));
-        add_action('init', array($this, 'register_reports_custom_post_type'));
+        // add_action('init', array($this, 'register_reports_custom_post_type'));
         add_action('init', array($this, 'register_assessment_categories'));
 
         add_filter('manage_assessments_posts_columns', array($this, 'customize_assessments_admin_column'));
