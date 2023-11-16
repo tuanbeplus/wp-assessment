@@ -82,7 +82,7 @@ $is_accepted = $status === 'accepted';
             <div class="container">
                 <div class="topBar">
                     <h1><?php echo $quiz_title; ?></h1>
-                    <?php if(!$is_publish && !$is_accepted): ?>
+                    <?php if(!$is_disabled && !$is_accepted): ?>
                     <div class="topbar-action">
                         <?php if ($is_invite_colleagues == true): ?>
                             <button id="toggle-invite-colleagues"><span class="material-icons">arrow_forward</span>Invite Colleagues</button>
@@ -102,7 +102,7 @@ $is_accepted = $status === 'accepted';
 
                 <!-- Notification Box -->
                 <?php if ($status == 'rejected' && $questions && !$is_disabled) : ?>
-                    <div class="notificationBar">
+                    <div class="notificationBar rejected">
                         <div class="bgRed"><h3>ATTENTION</h3></div>
                         <div class="messageBox">
                             <p class="result">Your submission has been rejected by the moderator for the following reason.</p>
@@ -118,28 +118,18 @@ $is_accepted = $status === 'accepted';
                                     <?php
                                     $sub_question = $field['list'];
                                     foreach ($sub_question as $sub => $field) :
-                                    $submission_data_sub = $main->is_quiz_exist_in_object_sub($quiz_id,$sub, $quiz, $organisation_id);
-                                    $sub_title = $field['sub_title'] ?? '';
-                                    $sub_title = htmlentities(stripslashes(utf8_decode($sub_title)));
-                                    $__status_sub = $submission_data_sub['status'];
-                                    ?>
+                                        $submission_data_sub = $main->is_quiz_exist_in_object_sub($quiz_id,$sub, $quiz, $organisation_id);
+                                        $sub_title = $field['sub_title'] ?? '';
+                                        $sub_title = htmlentities(stripslashes(utf8_decode($sub_title)));
+                                        $__status_sub = $submission_data_sub['status'];
+                                        ?>
                                         <?php if ($__status_sub) : ?>
                                             <li>
-                                                <?php if ($__status_sub === 'rejected') : ?>
-                                                    <span class="crossIcon">
-                                                        <i class="fa-solid fa-circle-xmark"></i>
-                                                    </span>
-                                                <?php elseif ($__status_sub === 'accepted') : ?>
-                                                    <span class="checkedIcon">
-                                                        <i class="fa-solid fa-circle-check"></i>
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="">
-                                                        <i class="fa-solid fa-circle-exclamation"></i>
-                                                    </span>
-                                                <?php endif; ?>
+                                                <span><?php echo $quiz_id.'.'.$sub.' - '; ?></span>
                                                 <span class="stepNumber"><?php echo $sub_title; ?></span>:
-                                                <span class="remarks"><strong><?php echo $__status_sub; ?></strong></span>
+                                                <span class="remarks <?php echo $__status_sub; ?>">
+                                                    <strong><?php echo $__status_sub; ?></strong>
+                                                </span>
                                             </li>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
@@ -154,13 +144,13 @@ $is_accepted = $status === 'accepted';
                 <?php endif; ?>
 
                 <?php if($is_disabled): ?>
-                    <div class="notificationBar">
+                    <div class="notificationBar pending">
                         <h3 style="text-align:center;">Your assessment is under pending review!</h3>
                     </div>
                 <?php endif; ?>
 
                 <?php if($is_accepted): ?>
-                    <div class="notificationBar">
+                    <div class="notificationBar accepted">
                         <h3 style="text-align:center;">Your assessment is accepted!</h3>
                     </div>
                 <?php endif; ?>

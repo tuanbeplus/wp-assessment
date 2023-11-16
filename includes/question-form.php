@@ -169,6 +169,9 @@ class Question_Form
 
                         if ($quiz_point != null) 
                             $input['quiz_point'] = $quiz_point;
+                        
+                        $input['status'] = 'pending'; // Reset Quiz status
+                        $input['feedback'] = null; // Reset Quiz status
 
                         // if (count($input) === 0)
                             // throw new Exception('Please complete the answer');
@@ -393,6 +396,9 @@ class Question_Form
                         if ($quiz_point != null) 
                             $input['quiz_point'] = $quiz_point;
 
+                        $input['status'] = 'pending'; // Reset Quiz status
+                        $input['feedback'] = null; // Reset Quiz status
+
                         // if (count($input) === 0)
                         //     throw new Exception('Please complete the answer');
 
@@ -577,6 +583,7 @@ class Question_Form
             update_post_meta($post_id, 'assessment_id', $assessment_id);
             update_post_meta($post_id, 'submission_id', $post_id);
             update_post_meta($post_id, 'assessment_status', 'pending');
+            delete_post_meta($post_id, 'quiz_feedback');
 
             $submission_url = get_permalink( $post_id );
 
@@ -752,6 +759,7 @@ class Question_Form
         $args = array(
             'post_type' => 'submissions',
             'posts_per_page' => 1,
+            'post_status' => 'draft',
             'meta_query' => array(
                 // array(
                 //     'key' => 'user_id',
@@ -909,6 +917,33 @@ class Question_Form
             return wp_send_json(array('quiz_id' => $quiz_id, 'parent_id' => $parent_quiz_id, 'message' => 'Feedback for this quiz has been updated', 'status' => true));
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+
+    function save_all_submission_feedback()
+    {
+        $main = new WP_Assessment();
+        $input = [];
+        $submission_id = $_POST['submission_id'] ?? null;
+        $assessment_id = get_post_meta($submission_id, 'assessment_id', true) ?? null;
+        $organisation_id = $_POST['organisation_id'] ?? null;
+        $quiz_feedback_arr = $_POST['quiz_feedback'] ?? array();
+
+        if (!empty($quiz_feedback_arr) && isset($submission_id) && isset($assessment_id) && isset($organisation_id)) {
+            foreach ($quiz_feedback_arr as $i => $section) {
+                foreach ($section as $j => $feedback) {
+                    $input['feedback'] = $feedback ?? null;
+                    $conditions = array(
+                        // 'user_id' => $user_id,
+                        'organisation_id' => $organisation_id,
+                        'quiz_id' => $j,
+                        'parent_id' => $i,
+                        'assessment_id' => $assessment_id,
+                        'submission_id' => $submission_id,
+                    );
+                    $main->update_quiz_assessment($input, $conditions);
+                }
+            }
         }
     }
 

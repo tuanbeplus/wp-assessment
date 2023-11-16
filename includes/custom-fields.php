@@ -182,6 +182,8 @@ class Custom_Fields
             return;
         if (!current_user_can('edit_post', $post_id))
             return;
+
+        $question_form = new Question_Form();
         $group_quiz_points = $_POST['group_quiz_point'] ?? null;
         $quiz_feedbacks = $_POST['quiz_feedback'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
@@ -192,9 +194,8 @@ class Custom_Fields
         $recommentdation = $_POST['recommentdation'] ?? null;
 
         // echo '<pre>';
-        // print_r($quiz_feedbacks);
+        // print_r();
         // echo '</pre>';
-        // die;
 
         $new_group_quiz_points = array();
         $item = 1;
@@ -213,6 +214,7 @@ class Custom_Fields
         update_post_meta($post_id, 'agreeed_score', $agreeed_score);
         update_post_meta($post_id, 'submission_key_area', $submission_key_area);
         update_post_meta($post_id, 'recommentdation', $recommentdation);
+        $question_form->save_all_submission_feedback(); 
     }
 
     function save_assigned_moderator($post_id): void

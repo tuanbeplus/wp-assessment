@@ -19,10 +19,6 @@ $agreeed_score = get_post_meta($post_id, 'agreeed_score', true);
 $submission_key_area = get_post_meta($post_id, 'submission_key_area', true);
 $recommentdation = get_post_meta($post_id, 'recommentdation', true);
 
-// echo '<pre>';
-// print_r();
-// echo '</pre>';
-
 $main = new WP_Assessment();
 $azure = new WP_Azure_Storage();
 $quiz = $main->get_user_quiz_by_assessment_id_and_submissions($assessment_id, $post_id, $organisation_id);
@@ -40,10 +36,10 @@ function get_submit_field($array, $index, $key)
 $submission_score_arr = array();
 ?>
 
-<input type="hidden" id="assessment_id" value="<?php echo $assessment_id ?>"/>
-<input type="hidden" id="user_id" value="<?php echo $user_id ?>"/>
+<input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
+<input type="hidden" id="user_id" name="user_id" value="<?php echo $user_id ?>"/>
 <input type="hidden" id="submission_id" name="submission_id" value="<?php echo $post_id ?>"/>
-<input type="hidden" id="organisation_id" value="<?php echo $organisation_id ?>"/>
+<input type="hidden" id="organisation_id" name="organisation_id" value="<?php echo $organisation_id ?>"/>
 
 <div class="container">
     <?php if ($assessment_meta == 'Simple Assessment'): ?>
@@ -78,6 +74,7 @@ $submission_score_arr = array();
                 <div class="submission-view-item-row" id="<?php echo $i ?>-main-container">
                     <div class="card">
                         <div class="card-body">
+                            <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $i ?>" class="quiz-input" />
                             <h4 class="quiz-title"><?php echo $i .' - '. $question_title; ?></h4>
                             <?php if (is_array($answers) && count($answers) > 0) : ?>
                                 <div class="submission-answers-list">
@@ -104,9 +101,6 @@ $submission_score_arr = array();
                                     <input class="input-weighting" type="number" max="<?php echo $max_point ?>" placeholder="Points" name="quiz_point" value="<?php echo $field->quiz_point; ?>" />
                                 </div>
                             <?php endif; ?>
-                            <input type="hidden" name="assessment_id" value="<?php echo $assessment_id ?>" />
-                            <input type="hidden" name="user_id" value="<?php echo $user_id ?>" />
-                            <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $i ?>" class="quiz-input" />
                         </div>
                     </div>
                 </div>
@@ -161,6 +155,9 @@ $submission_score_arr = array();
                         if ($field->answers) {
                             $answers = json_decode($field->answers);
                         }
+                        if ($field->feedback) {
+                            $feedback = $field->feedback;
+                        }
                         if ($field->status) {
                             $type = $field->status;
                         }
@@ -175,8 +172,6 @@ $submission_score_arr = array();
                                     <h4 class="quiz-title"><?php echo $group_id.'.'.$quiz_id.' - '.$sub_title; ?></h4>
                                 </div>
                                 <div class="card-body">
-                                    <input type="hidden" name="assessment_id" value="<?php echo $assessment_id ?>"/>
-                                    <input type="hidden" name="user_id" value="<?php echo $user_id ?>"/>
                                     <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $quiz_id ?>" class="quiz-input"/>
                                     <?php if (is_array($answers) && count($answers) > 0) : ?>
                                         <div class="submission-answers-list">
@@ -291,7 +286,7 @@ $submission_score_arr = array();
                                     <div class="key-areas">
                                         <label class="col-12"><strong>Select Key Area</strong></label>
                                         <select class="select-key-area" name="submission_key_area[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]">
-                                            <option value=""></option>
+                                            <option value="">Choose Key Area</option>
                                             <?php if (!empty($report_key_areas)): ?>
                                                 <?php foreach ($report_key_areas as $key_area): ?>
                                                     <option value="<?php echo $key_area['key'] ?>"
@@ -312,7 +307,10 @@ $submission_score_arr = array();
                                     <div class="recommentdation">
                                         <div class="_top">
                                             <label><strong>Recommentdation</strong></label>
-                                            <a class="button button-medium">+ Add Recommentdation</a>
+                                            <a class="btn-add-recommentdation button button-medium">
+                                                <span class="text">Add Recommentdation</span>
+                                                <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
+                                            </a>
                                         </div>
                                         <div class="_wpeditor">
                                             <?php 
@@ -320,7 +318,7 @@ $submission_score_arr = array();
                                             $editor_id = 'recommentdation-wpeditor-'.$group_id.'-'.$quiz_id;
                                             $editor_settings = array(
                                                 'textarea_name' => 'recommentdation['.$group_id.']['.$quiz_id.']',
-                                                'textarea_rows' => 10,
+                                                'textarea_rows' => 12,
                                                 'quicktags' => true, // Remove view as HTML button.
                                                 'default_editor' => 'tinymce',
                                                 'tinymce' => true,

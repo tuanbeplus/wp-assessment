@@ -71,8 +71,30 @@ body {
     margin-right: auto;
     background: #fff;
     padding: 20px 30px;
-    border-radius: 10px;
+    border-radius: 2px;
     box-shadow: rgb(0 0 0 / 4%) 0px 3px 5px;
+}
+
+.formWrapper .notificationBar.rejected {
+    max-height: 500px;
+    overflow-y: scroll;
+    border-bottom: 1px solid #ddd;
+}
+
+.formWrapper .notificationBar.pending {
+    border-left: 6px solid orange;
+}
+
+.formWrapper .notificationBar.accepted {
+    border-left: 6px solid green;
+}
+
+.notificationBar .remarks.accepted {
+    color: green;
+}
+
+.notificationBar .remarks.rejected {
+    color: darkred;
 }
 
 .formWrapper .require-login {

@@ -535,7 +535,7 @@
 }
 
 .submission-view-item-row .card textarea.feedback-input {
-    min-height: 110px;
+    min-height: 200px;
     font-size: 0.9rem;
     padding: 8px;
     width: 100%;
@@ -720,7 +720,9 @@
     margin-top: 4px;
     display: flex;
     align-items: center;
-    gap: 30px;
+    flex-wrap: wrap;
+    column-gap: 40px;
+    row-gap: 16px;
 }
 
 .scoring label {
@@ -733,6 +735,30 @@
 .key-areas .select-key-area {
     margin-top: 8px;
     min-width: 200px;
+}
+
+.recommentdation ._top{
+    display: flex;
+    justify-content: space-between;
+}
+
+.recommentdation ._wpeditor {
+    display: none;
+    margin-top: 16px;
+}
+
+.recommentdation ._wpeditor .wp-editor-container iframe {
+    min-height: 200px!important;
+}
+
+.btn-add-recommentdation .icon-chevron-down {
+    margin-left: 2px;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+.btn-add-recommentdation.active .icon-chevron-down {
+    transform: rotate(180deg);
 }
 
 .question-add-files-container .btn-add-files-wrapper {
@@ -1035,6 +1061,10 @@
     margin: 10px 0;
     position: relative;
     font-size: 17px;
+}
+
+.key-areas-list .row-key-area:last-child {
+    margin-bottom: 0;
 }
 
 .row-key-area .key-title {

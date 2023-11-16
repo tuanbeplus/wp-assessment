@@ -1037,7 +1037,7 @@ jQuery(document).ready(function ($) {
         alert(message);
 
         if (status) {
-            $('#publish').click()
+            location.reload()
             return true;
         }
     }
@@ -1437,6 +1437,22 @@ jQuery(document).ready(function ($) {
         }, 300)
     });
 
+    // Show up Recommentdation WP editor
+    $(document).on('click', '.btn-add-recommentdation', function(e){
+        e.preventDefault();
+        let recommentdation_wrapper = $(this).closest('.recommentdation')
+
+        if ($(this).hasClass('active')) {
+            $(this).removeClass('active')
+            $(this).find('.text').text('Add Recommentdation')
+            recommentdation_wrapper.find('._wpeditor').removeClass('active').slideUp()
+        }
+        else {
+            $(this).addClass('active')
+            $(this).find('.text').text('Hide Recommentdation')
+            recommentdation_wrapper.find('._wpeditor').addClass('active').slideDown()
+        }
+    });
 
     // require assessment admin fields
     $('input.group-question-admin-title').prop('required',true);
