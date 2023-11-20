@@ -14,6 +14,7 @@ $report_template = get_post_meta($assessment_id, 'report_template', true);
 $is_required_answer_all = get_post_meta($assessment_id, 'is_required_answer_all', true);
 $quiz_feedbacks = get_post_meta($post_id, 'quiz_feedback', true);
 $quiz_answer_points = get_post_meta($post_id, 'quiz_answer_point', true);
+$org_score = get_post_meta($post_id, 'org_score', true);
 $and_score = get_post_meta($post_id, 'and_score', true);
 $agreeed_score = get_post_meta($post_id, 'agreeed_score', true);
 $submission_key_area = get_post_meta($post_id, 'submission_key_area', true);
@@ -252,8 +253,10 @@ $submission_score_arr = array();
                                             <div class="org-score">
                                                 <label>Org Score:
                                                     <strong><?php 
+                                                        $sub_question_score = 0;
                                                         if (empty($quiz_point)) {
-                                                            echo '0';
+                                                            $section_score_arr[] = 0;
+                                                            echo $sub_question_score;
                                                         }
                                                         elseif ($weighting != null && $quiz_point != null) {
                                                             $sub_question_score = $weighting * $quiz_point;
@@ -261,6 +264,9 @@ $submission_score_arr = array();
                                                             echo $sub_question_score;
                                                         } 
                                                     ?></strong>
+                                                    <input class="org-score-input" type="hidden" 
+                                                            name="org_score[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]"
+                                                            value="<?php echo $sub_question_score; ?>">
                                                 </label>
                                             </div>
                                             <div class="and-score">
@@ -363,20 +369,24 @@ $submission_score_arr = array();
                 <?php endif; ?>
                 <!--  -->
                 <?php 
-                    if (!empty($section_score_arr)): 
+                    if ($section_score_arr != null): 
                         $total_section_score = array_sum($section_score_arr);
                         $submission_score_arr[] = $total_section_score;
                 ?>
                     <div class="total-section-score">
                         <span>Total Section score: 
                             <span class="total-section-score-val">
-                                <?php echo number_format($total_section_score, 1); ?>
+                                <?php echo number_format($total_section_score, 1) ?? 0; ?>
                             </span>
                         </span>
                     </div>
                 <?php endif;?>
             </div>
         <?php endforeach;?>
+        
+        <!-- Save Total Submission Score -->
+        <?php update_post_meta($post_id, 'total_submission_score', array_sum($submission_score_arr)); ?>
+        <input type="hidden" name="total_submission_score" value="<?php echo array_sum($submission_score_arr); ?>">
         
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">
@@ -421,6 +431,7 @@ $submission_score_arr = array();
                 </a>
                 <a type="button" class="button button-large reject-button" title="Reject this Submission">
                     Reject
+                    <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
                 </a>
             <?php endif; ?>
         </div>

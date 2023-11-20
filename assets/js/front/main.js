@@ -879,14 +879,12 @@ jQuery(document).ready(function ($) {
             data: data,
         });
         const {status, message, result, list_quiz} = response;
+
+        console.log(response);
         
-        if (status) {
-            console.log(response);
-        }
-        else {
+        if (status == false) {
             alert(message)
         }
-
         return status;
     }
 
@@ -919,8 +917,11 @@ jQuery(document).ready(function ($) {
         });
         const {status, message} = response;
 
-        if (!status) alert(message)
+        console.log(response);
 
+        if (status == false) {
+            alert(message)
+        }
         return status;
     }
 

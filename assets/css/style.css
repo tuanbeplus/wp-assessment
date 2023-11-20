@@ -384,6 +384,7 @@
 .question-row-points-container input {
     min-height: 36px;
     font-size: 15px;
+    box-shadow: inset 3px 3px 3px 0px #eee;
 }
 
 .sub-point.question-row-points-container {
@@ -581,6 +582,12 @@
     position: relative;
 }
 
+.submission-admin-view-footer .button.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: default;
+}
+
 .submission-admin-view-footer .icon-spinner {
     display: none;
     position: absolute;
@@ -759,6 +766,46 @@
 
 .btn-add-recommentdation.active .icon-chevron-down {
     transform: rotate(180deg);
+}
+
+#submission-scoring-field .scoring-wrapper {
+    padding: 16px 40px;
+}
+
+.scoring-wrapper > ._field {
+    margin-bottom: 20px;
+    border-bottom: 1px dashed #ccc;
+    font-size: 14px;
+}
+
+.scoring-wrapper > ._field:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.scoring-wrapper > ._field strong {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.scoring-wrapper > ._field p {
+    font-size: 14px;
+}
+
+.scoring-wrapper > ._field .org-score,
+.scoring-wrapper > ._field ul {
+    padding-left: 0;
+    margin-left: 24px;
+}
+
+.scoring-wrapper > ._field ol {
+    padding-left: 16px;
+    margin-left: 24px;
+}
+
+.scoring-wrapper > ._field ol li,
+.scoring-wrapper > ._field ul li {
+    font-size: 14px;
 }
 
 .question-add-files-container .btn-add-files-wrapper {
@@ -1053,7 +1100,7 @@
 .key-areas-list {
     width: 100%;
     max-width: 700px;
-    padding: 0;
+    padding-left: 10px;
     margin: 0 10px;
 }
 
@@ -1106,6 +1153,14 @@
 .button.add-key-area {
     margin: 10px;
     height: fit-content;
+}
+
+.framework-chart-wrapper {
+    text-align: right;
+}
+
+.framework-chart-wrapper .framework-chart-canvas{
+    background-color: #fff;
 }
 
 /* .Report section */

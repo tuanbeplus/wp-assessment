@@ -637,7 +637,7 @@ class WP_Assessment
         $args = array(
             'post_type' => 'submissions',
             'posts_per_page' => 1,
-            'post_status' => 'publish',
+            'post_status' => 'any',
             'meta_query' => array(
                 // array(
                 //     'key' => 'user_id',

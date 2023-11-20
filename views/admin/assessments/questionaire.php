@@ -186,7 +186,7 @@ $i = 0; $j = 0;
                                         </div>
                                         <div class="col-2 sub-point question-row-points-container">
                                             <label><strong>Question Point</strong></label>
-                                            <input type="number" step="0.01" class="question-point-input"
+                                            <input type="number" step="0.1" class="question-point-input"
                                                     name="group_questions[<?php echo $parent_question_id; ?>][list][<?php echo $question_id; ?>][point]"
                                                     value="<?php if ($question_point != '') echo esc_attr($question_point); ?>"/>
                                             <div class="question-points-actions-container">

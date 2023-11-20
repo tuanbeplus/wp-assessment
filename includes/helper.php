@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Get Member's Opportunities has perchased
  *
@@ -417,5 +416,63 @@ function save_option_members_data_ajax()
 		
 	} catch (Exception $exception) {
 		return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+	}
+}
+
+/**
+ * Sum Submission score array
+ *
+ * @param array $score_array   Submission Score Array
+ * 
+ * @return string Total Score 
+ * 
+ */
+function array_sum_submission_score($score_array=[]) 
+{
+	$total_score = array();
+	if (is_array($score_array) && !empty($score_array)) {
+		foreach ($score_array as $i => $group) {
+			foreach ($group as $j => $quiz) {
+				$total_score[] = $quiz;
+			}
+		}
+	}
+	$result = array_sum($total_score) ?? 0;
+	return $result;
+}
+
+/**
+ * Get Organisation data by Salesforce User ID & Org ID
+ *
+ * @return array Organisation data 
+ * 
+ */
+function get_sf_organisation_data($sf_user_id, $org_id)
+{
+	$args = array(
+		'meta_query' => array(
+			'relation' => 'AND', 
+			array(
+				'key' => '__salesforce_user_id',
+				'value' => $sf_user_id,
+				'compare' => '='
+			),
+			array(
+				'key' => '__salesforce_account_id',
+				'value' => $org_id,
+				'compare' => '='
+			)
+		)
+	);
+	$user = get_users($args);
+	$org_meta = get_user_meta($user[0]->ID, '__salesforce_account_json', true);
+
+	if (!empty($org_meta)) {
+		return json_decode($org_meta, true);
+	}
+	else {
+		$org_data = sf_get_object_metadata('Account', $org_id);
+		$org_data = json_decode(json_encode($org_data), true);
+		return $org_data;
 	}
 }

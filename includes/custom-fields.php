@@ -31,10 +31,12 @@ class Custom_Fields
 
         // Submisions
         add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'submission_list_card_section_admin'), 'submissions', 'normal', 'default');
-        add_meta_box('submitted_info_view', 'Submission by: ', array($this, 'submission_info_section_admin'), 'submissions', 'side', 'default');
+        add_meta_box('submitted_info_view', 'Submission by ', array($this, 'submission_info_section_admin'), 'submissions', 'side', 'default');
+        add_meta_box('submission-scoring-field', 'Submission Scoring ', array($this, 'submission_scoring_section_admin'), 'submissions', 'normal', 'default');
 
         // Reports
         add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), 'assessments', 'normal', 'default');
+        add_meta_box('report-framework-chart', 'Framework Chart', array($this, 'report_framework_chart_meta_box_callback'), 'reports', 'normal', 'default');
         // add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
 
         // Attachments
@@ -81,6 +83,10 @@ class Custom_Fields
         return include_once ADMIN_SUBMISSION_INFO_VIEW;
     }
 
+    function submission_scoring_section_admin() {
+        return include_once ADMIN_SUBMISSION_SCORING_VIEW;
+    }
+
     function assessments_additional_profile_fields() 
     {
         return include_once USER_ASSESSMENTS_PERCHASED_FIELDS;
@@ -94,6 +100,11 @@ class Custom_Fields
     function link_report_to_assessment_callback()
     {
         return include_once LINK_REPORT_TO_ASSESSMENT;
+    }
+
+    function report_framework_chart_meta_box_callback()
+    {
+        return include_once REPORT_FRAMEWORK_CHART_VIEW;
     }
 
     function question_repeatable_meta_box_save($post_id): void
@@ -142,7 +153,6 @@ class Custom_Fields
         update_post_meta($post_id, 'is_assessment_completed', $is_assessment_completed);
         update_post_meta($post_id, 'assigned_members', $new_assigned_members);
         update_post_meta($post_id, 'invited_members', $invited_members);
-
     }
 
     function report_template_meta_box_save($post_id): void
@@ -188,6 +198,7 @@ class Custom_Fields
         $quiz_feedbacks = $_POST['quiz_feedback'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
         $total_submission_score = $_POST['total_submission_score'] ?? null;
+        $org_score = $_POST['org_score'] ?? null;
         $and_score = $_POST['and_score'] ?? null;
         $agreeed_score = $_POST['agreeed_score'] ?? null;
         $submission_key_area = $_POST['submission_key_area'] ?? null;
@@ -210,6 +221,7 @@ class Custom_Fields
         update_post_meta($post_id, 'quiz_feedback', $quiz_feedbacks);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);
         update_post_meta($post_id, 'total_submission_score', $total_submission_score);
+        update_post_meta($post_id, 'org_score', $org_score);
         update_post_meta($post_id, 'and_score', $and_score);
         update_post_meta($post_id, 'agreeed_score', $agreeed_score);
         update_post_meta($post_id, 'submission_key_area', $submission_key_area);

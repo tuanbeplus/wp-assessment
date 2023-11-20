@@ -128,14 +128,13 @@ class Question_Form
                         $quiz_point = $p['point'] ?? null;
 
                         if($submission_id){
-                            // $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $user_id , $parent_id);
-                            $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $organisation_id , $parent_id);
+                            // $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $user_id , $parent_id);
+                            $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $organisation_id , $parent_id);
                         }else{
-                            // $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $user_id , $parent_id);
-                            $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id , $parent_id);
+                            // $quiz_data = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $user_id , $parent_id);
+                            $quiz_data = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id , $parent_id);
                         }
 
-                        $is_new = !$assessment;
                         $input = [];
 
                         if (!empty($user_id))
@@ -173,9 +172,6 @@ class Question_Form
                         $input['status'] = 'pending'; // Reset Quiz status
                         $input['feedback'] = null; // Reset Quiz status
 
-                        // if (count($input) === 0)
-                            // throw new Exception('Please complete the answer');
-
                         if($submission_id){
                             $conditions = array(
                                 // 'user_id' => $user_id,
@@ -195,9 +191,11 @@ class Question_Form
                             );
                         }
 
-                        if ($is_new || !$submission_id) {
+                        if (!$quiz_data) { 
+                            // Insert Quiz record if quiz_data not exist
                             $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                         } else {
+                            // Update Quiz record if quiz_data exist
                             $main->update_quiz_assessment($input, $conditions);
                         }
                     }
@@ -217,14 +215,13 @@ class Question_Form
                 $main = new WP_Assessment();
 
                 if($submission_id){
-                    // $assessment = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $user_id);
-                    $assessment = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $organisation_id);
+                    // $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $user_id);
+                    $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $organisation_id);
                 }else{
-                    // $assessment = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $user_id);
-                    $assessment = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id);
+                    // $quiz_data = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $user_id);
+                    $quiz_data = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id);
                 }
 
-                $is_new = !$assessment;
                 $input = [];
 
                 if (!empty($user_id))
@@ -265,11 +262,13 @@ class Question_Form
                     );
                 }
 
-              if ($is_new || !$submission_id) {
-                  $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
-              } else {
-                  $main->update_quiz_assessment($input, $conditions);
-              }
+                if (!$quiz_data) { 
+                    // Insert Quiz record if quiz_data not exist
+                    $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
+                } else {
+                    // Update Quiz record if quiz_data exist
+                    $main->update_quiz_assessment($input, $conditions);
+                }
             }
 
             return wp_send_json(array('message' => 'Progress has been updated', 'status' => true, 'data' => array_merge($input, $conditions)));
@@ -361,15 +360,14 @@ class Question_Form
                         $quiz_point = $p['point'] ?? null;
 
                         if($submission_id){
-                            // $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $user_id , $parent_id);
-                            $assessment = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $organisation_id , $parent_id);
+                            // $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $user_id , $parent_id);
+                            $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $organisation_id , $parent_id);
                         }
                         else{
-                            // $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $user_id , $parent_id);
-                            $assessment = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id , $parent_id);
+                            // $quiz_data = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $user_id , $parent_id);
+                            $quiz_data = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id , $parent_id);
                         }
 
-                        $is_new = !$assessment;
                         $input = [];
 
                         if (!empty($user_id))
@@ -421,9 +419,11 @@ class Question_Form
                             );
                         }
 
-                        if ($is_new || !$submission_id) {
+                        if (!$quiz_data) { 
+                            // Insert Quiz record if quiz_data not exist
                             $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                         } else {
+                            // Update Quiz record if quiz_data exist
                             $main->update_quiz_assessment($input, $conditions);
                         }
                     }
@@ -443,14 +443,13 @@ class Question_Form
                 $main = new WP_Assessment();
 
                 if($submission_id){
-                    // $assessment = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $user_id);
-                    $assessment = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $organisation_id);
+                    // $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $user_id);
+                    $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $organisation_id);
                 }else{
-                    // $assessment = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $user_id);
-                    $assessment = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id);
+                    // $quiz_data = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $user_id);
+                    $quiz_data = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id);
                 }
 
-                $is_new = !$assessment;
                 $input = [];
 
                 if (!empty($user_id))
@@ -491,9 +490,11 @@ class Question_Form
                     );
                 }
 
-                if ($is_new || !$submission_id) {
+                if (!$quiz_data) { 
+                    // Insert Quiz record if quiz_data not exist
                     $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                 } else {
+                    // Update Quiz record if quiz_data exist
                     $main->update_quiz_assessment($input, $conditions);
                 }
             }
@@ -643,16 +644,19 @@ class Question_Form
             elseif ($is_submission_progress_exist) {
                 update_post_meta($post_id, 'assessment_status', 'draft');
             }
-            else {
-                throw new Exception('You have already submitted this assessment!');
+            elseif($is_submission_exist) {
+                $submission = wp_update_post(array(
+                    'ID'        => $is_submission_exist,
+                    'post_type' => 'submissions',
+                    'post_title' => 'Progress on ' . $assessment_title,
+                    'post_status' => 'draft'
+                ));
             }
 
             update_post_meta($post_id, 'user_id', $user_id);
             update_post_meta($post_id, 'organisation_id', $organisation_id);
             update_post_meta($post_id, 'assessment_id', $assessment_id);
             update_post_meta($post_id, 'submission_id', $post_id);
-
-            // $submission_url = get_permalink( $post_id );
 
             if(isset($_COOKIE['userId'])) {
                 update_field('sf_user_id' , $_COOKIE['userId'], $post_id);
@@ -736,10 +740,6 @@ class Question_Form
                     'key' => 'assessment_id',
                     'value' => $assessment_id,
                 ),
-                // array(
-                //     'key' => 'assessment_status',
-                //     'value' => 'publish',
-                // ),
             ),
         );
         $query = new WP_Query($args);
@@ -759,7 +759,7 @@ class Question_Form
         $args = array(
             'post_type' => 'submissions',
             'posts_per_page' => 1,
-            'post_status' => 'draft',
+            'post_status' => 'any',
             'meta_query' => array(
                 // array(
                 //     'key' => 'user_id',

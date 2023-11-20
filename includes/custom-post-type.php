@@ -6,7 +6,7 @@ class CustomPostType
     {
         add_action('init', array($this, 'register_assessment_custom_post_type'));
         add_action('init', array($this, 'register_submissions_custom_post_type'));
-        // add_action('init', array($this, 'register_reports_custom_post_type'));
+        add_action('init', array($this, 'register_reports_custom_post_type'));
         add_action('init', array($this, 'register_assessment_categories'));
 
         add_filter('manage_assessments_posts_columns', array($this, 'customize_assessments_admin_column'));
@@ -169,7 +169,7 @@ class CustomPostType
         $args = array(
             'labels' => $labels,
             'hierarchical' => false,
-            'supports' => array('title', 'thumbnail', 'author'),
+            'supports' => array('title', 'thumbnail', 'author', 'editor'),
             'show_ui' => true,
             'show_in_menu' => true,
             'show_in_nav_menus' => true,
@@ -181,6 +181,7 @@ class CustomPostType
             'rewrite' => true,
             'public' => true,
             'map_meta_cap' => true,
+            // 'show_in_rest' => true,
             'menu_icon' => 'dashicons-format-aside',
         );
 

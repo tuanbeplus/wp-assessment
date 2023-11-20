@@ -14,9 +14,11 @@ const ADMIN_REPORT_KEY_AREAS_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/r
 // define admin views Submissions
 const ADMIN_SUBMISSION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-view.php';
 const ADMIN_SUBMISSION_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-info-view.php';
+const ADMIN_SUBMISSION_SCORING_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-scoring.php';
 
 // define admin views Reports
 const LINK_REPORT_TO_ASSESSMENT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/link-report-to-assessment.php';
+const REPORT_FRAMEWORK_CHART_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-framework-chart.php';
 
 // define admin views Users
 const USER_ASSESSMENTS_PERCHASED_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/users/assessments-purchased-view.php';
@@ -39,7 +41,7 @@ function admin_enqueue_scripts()
         wp_enqueue_media();
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
-
+        wp_enqueue_script('chart-lib', 'https://cdn.jsdelivr.net/npm/chart.js');
         wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/main.js', true, WP_ASSESSMENT_VER);
         wp_localize_script(
             'admin-js',
@@ -63,7 +65,6 @@ function enqueue_scripts()
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
         wp_enqueue_style('front-style', WP_ASSESSMENT_ASSETS . '/css/front/style.css', true, WP_ASSESSMENT_VER);
         wp_enqueue_style('front-responsive', WP_ASSESSMENT_ASSETS . '/css/front/responsive.css', true, WP_ASSESSMENT_VER);
-
         wp_enqueue_script('jquery', WP_ASSESSMENT_ASSETS . '/js/jquery.min.js');
         wp_enqueue_script('bootstrap-min-js', WP_ASSESSMENT_ASSETS . '/js/bootstrap.min.js');
         wp_enqueue_script('main-js', WP_ASSESSMENT_ASSETS . '/js/front/main.js', true, WP_ASSESSMENT_VER);

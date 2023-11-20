@@ -1009,6 +1009,7 @@ jQuery(document).ready(function ($) {
         // let user_id = $("#user_id").val();
         let submission_id = $("#submission_id").val();
         let organisation_id = $("#organisation_id").val();
+        let parent_wrapper = btn.closest('.submission-admin-view-footer')
 
         const payload = {
             action: "final_accept_reject_assessment",
@@ -1024,10 +1025,10 @@ jQuery(document).ready(function ($) {
             url: ajaxUrl, 
             data: payload,
             beforeSend : function ( xhr ) {
-                btn.addClass('loading')
+                parent_wrapper.find('.button').addClass('loading')
             },
             success:function(response){
-                btn.removeClass('loading')
+                parent_wrapper.find('.button').removeClass('loading')
             }
         });
         const { quiz_point, status, message } = response;
@@ -1452,6 +1453,18 @@ jQuery(document).ready(function ($) {
             $(this).find('.text').text('Hide Recommentdation')
             recommentdation_wrapper.find('._wpeditor').addClass('active').slideDown()
         }
+    });
+
+    // Click to Download Framework Chart Image
+    $(document).on('click', '#btn-download-chart', function(e){
+        e.preventDefault();
+        console.log('click');
+        let canvas = $('#report-framework-chart .framework-chart-canvas');
+        image = canvas[0].toDataURL("image/jpg", 1.0);
+        let link = document.createElement('a');
+        link.download = "framework-chart.jpg";
+        link.href = image;
+        link.click();
     });
 
     // require assessment admin fields

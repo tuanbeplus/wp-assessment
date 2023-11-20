@@ -14,7 +14,14 @@ $total_submission_score = get_post_meta($post_id, 'total_submission_score', true
 $report_id = get_post_meta($post_id, 'report_id', true);
 $report_url = home_url() . '/wp-admin/post.php?post='. $report_id .'&action=edit';
 $organisation_id = get_post_meta($post_id, 'organisation_id', true);
-$organization_data = sf_get_object_metadata('Account', $organisation_id);
+
+$org_metadata = get_post_meta($post_id, 'org_data', true);
+if (empty($org_metadata)) {
+    $sf_org_data = get_sf_organisation_data($user_id, $organisation_id);
+    update_post_meta($post_id, 'org_data', $sf_org_data);
+    $org_metadata =  get_post_meta($post_id, 'org_data', true);
+}
+delete_post_meta($post_id, 'org_industry');
 
 $main = new WP_Assessment();
 
@@ -57,7 +64,6 @@ $total_points = array_sum($sub_total_points_arr);
 
 update_post_meta($post_id, 'assessment_total_score', $total_score_point);
 update_post_meta($post_id, 'assessment_total_point', $total_points);
-
 ?>
 
 <div class="submission-info-container">
@@ -73,15 +79,18 @@ update_post_meta($post_id, 'assessment_total_point', $total_points);
         <p class="post-status-display">Email: <strong><?php echo $user->user_email; ?></strong></p>
     <?php endif; ?>
 
-    <?php if (isset($organization_data->Name)): ?>
-        <p class="post-status-display">Company: <strong><?php echo $organization_data->Name; ?></strong></p>
+    <?php if (isset($org_metadata['Name'])): ?>
+        <p class="post-status-display">Company: <strong><?php echo $org_metadata['Name']; ?></strong></p>
+    <?php endif; ?>
+
+    <?php if (isset($org_metadata['Industry'])): ?>
+        <p class="post-status-display">Industry: <strong><?php echo $org_metadata['Industry']; ?></strong></p>
     <?php endif; ?>
 
     <p class="post-status-display">Status: <strong><?php echo $submission_status; ?></strong></p>
     <p class="post-status-display">
         Total Score: 
         <strong class="total-submission-score"><?php echo $total_submission_score; ?></strong>
-        <input type="hidden" name="total_submission_score" value="<?php echo $total_submission_score; ?>">
     </p>
 
     <?php if ($report_id): ?>
