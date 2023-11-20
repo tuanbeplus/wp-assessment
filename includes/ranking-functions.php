@@ -16,6 +16,8 @@ class AndAssessmentRanking {
     add_action('init', array($this, 'register_ranking_custom_post_type'));
     add_action('admin_init', array($this, 'add_ranking_meta_boxes'));
     add_action('admin_enqueue_scripts', array($this, 'ranking_enqueue_scripts'));
+
+    add_action('save_post', array($this, 'save_post_for_ranking'));
   }
 
   /**
@@ -61,7 +63,7 @@ class AndAssessmentRanking {
    */
   function add_ranking_meta_boxes(): void {
     add_meta_box('ranking_detail_sections', 'Ranking detail', array($this, 'ranking_detail_sections_render'), 'ranking', 'normal', 'default');
-    add_meta_box('ranking_assessment_linked', 'Assessment', array($this, 'ranking_assessment_linked_render'), 'ranking', 'side', 'default');
+    // add_meta_box('ranking_assessment_linked', 'Assessment', array($this, 'ranking_assessment_linked_render'), 'ranking', 'side', 'default');
   }
 
   function ranking_enqueue_scripts(): void {
@@ -88,6 +90,42 @@ class AndAssessmentRanking {
   function ranking_assessment_linked_render() {
     return include_once AD_RANKING_ASSESSMENT_VIEW;
   }
+
+  /**
+   * Function to save ranking info
+   */
+  function save_post_for_ranking($post_id): void {
+
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+            return;
+
+        if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'ranking')
+            return;
+
+        $assigned_id = get_field('assessment', $post_id);
+        $ranking_list = array();
+        $org_list = array();
+
+        // Get all submission for this assessment
+        $args = array(
+          'numberposts' => -1, 
+          'post_status' => 'publish', 
+          'post_type' => 'submissions',
+        );
+        $submissions = get_posts( $args );
+        foreach ( $submissions as $sub ) {
+          // $org_name = get_field();
+          // if ( in_array($org_list) ) {
+
+            $ranking_list[] = array(
+              'organization' => $sub->ID
+            );
+          // }
+          
+        }
+
+        update_field('position_by_total_score', json_encode($ranking_list), $post_id );
+    }
 
 }
 
