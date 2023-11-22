@@ -13,11 +13,24 @@
   padding-top: 6px;
   padding-bottom: 6px;
 }
+div[data-name="position_by_total_score"],
+div[data-name="position_by_industry"],
+div[data-name="position_by_framework"] {
+  display: none;
+}
 
+.no-info-box {
+  padding: 20px;
+  text-align: center;
+}
+.no-info-box h3 {
+  font-size: 20px;
+  margin: 0;
+}
 .ranking-detail-ss {
   /* border-radius: 8px; */
   /* padding: 10px 20px 16px; */
-  margin-top: 26px;
+  margin: 25px 0;
   border: 1px solid #ddd;
   box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
 }
@@ -29,16 +42,14 @@
 .ss-row:first-child {
   border-top: 0;
 }
-.left-col,
-.right-col {
+.left-col {
+  width: 180px;
+  border-right: 1px solid #ddd;
   padding: 12px;
 }
-.left-col {
-  width: 160px;
-  border-right: 1px solid #ddd;
-}
 .right-col {
-  width: calc(100% - 160px);
+  width: calc(100% - 180px);
+  padding: 15px 30px;
 }
 table {
   border-collapse: collapse;
@@ -48,9 +59,44 @@ td,
 th {
   border: 1px solid #dddddd;
   text-align: left;
-  padding: 8px;
+  padding: 10px;
+  width: max-content;
 }
-
+th {
+  font-size: 14px;
+}
+td.no-col,
+th.no-col {
+  width: 60px;
+  text-align: center;
+}
 tr:nth-child(even) {
   background-color: #f6f7f7;
+}
+.cl-row {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+.cl-row:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+.label {
+  font-size: 14px;
+  font-weight: bold;
+}
+.fr-row {
+  padding: 20px;
+  margin-top: 26px;
+  border: 1px solid #ddd;
+  /* border-radius: 8px; */
+  box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
+}
+.cr-info {
+  padding-left: 32px;
+}
+.pr-info {
+  margin-bottom: 15px;
 }

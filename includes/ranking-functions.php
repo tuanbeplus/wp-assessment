@@ -102,8 +102,8 @@ class AndAssessmentRanking {
         if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'ranking')
             return;
 
-        $assigned_id = get_field('assessment', $post_id);
-        $ranking_list = array();
+        $assessment_id = get_field('assessment', $post_id);
+        $submissions_info = array();
         $org_list = array();
 
         // Get all submission for this assessment
@@ -111,20 +111,82 @@ class AndAssessmentRanking {
           'numberposts' => -1, 
           'post_status' => 'publish', 
           'post_type' => 'submissions',
+          'meta_key' => 'assessment_id',
+		      'meta_value' => $assessment_id,
         );
         $submissions = get_posts( $args );
-        foreach ( $submissions as $sub ) {
-          // $org_name = get_field();
-          // if ( in_array($org_list) ) {
+        foreach ( $submissions as $sub ) {     
+          $user_id = get_post_meta($sub->ID, 'user_id', true);
+          $org_id = get_post_meta($sub->ID, 'organisation_id', true);
+          $org_metadata = get_post_meta($sub->ID, 'org_data', true);
+          $sub_all_scores = get_post_meta($sub->ID, 'org_score', true);
 
-            $ranking_list[] = array(
-              'organization' => $sub->ID
+          if ( ! $org_metadata ) {
+            $org_metadata = get_sf_organisation_data($user_id, $org_id);
+            update_post_meta($sub->ID, 'org_data', $org_metadata);
+          }
+          $total_score = get_post_meta($sub->ID, 'total_submission_score', true);
+          $org_name = (isset($org_metadata['Name'])) ? $org_metadata['Name'] : '';
+          $industry_name = (isset($org_metadata['Industry'])) ? $org_metadata['Industry'] : '';
+
+          if ( ! in_array($org_name, $org_list) && $org_name ) {
+            $submissions_info[] = array(
+              'sub_id' => $sub->ID,
+              'org_name' => $org_name,
+              'industry_name' => $industry_name,
+              'total_score' => $total_score,
+              'all_score' => $sub_all_scores
             );
-          // }
-          
+            $org_list[] = $org_name;
+          }
         }
 
-        update_field('position_by_total_score', json_encode($ranking_list), $post_id );
+        // Position by Total Score
+        update_field('position_by_total_score', json_encode($submissions_info), $post_id );
+
+        // Start - Position by Industry
+        $ranking_by_industry = array();
+
+        foreach ($submissions_info as $sub_i) {
+          $ranking_by_industry[$sub_i['industry_name']][] = $sub_i;
+        }
+        update_field('position_by_industry', json_encode($ranking_by_industry), $post_id );
+        // End - Position by Industry
+
+        // Start - Position by Framework
+        $ranking_by_framework = array();
+        $wp_ass = new WP_Assessment();
+        $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+        $questions = $wp_ass->wpa_unserialize_metadata($questions);
+
+        foreach ($questions as $parent_id => $parent_question) {
+          $child_questions = array();
+          $parent_title = htmlentities(stripslashes(utf8_decode( $parent_question['title'] )));
+          $parent_title = $parent_title;
+          $child_questions_lst = $parent_question['list'];
+
+          foreach ($child_questions_lst as $child_id => $child_question) {
+            $subs_lst = array();
+            foreach ($submissions_info as $sub_i) {
+              $all_score = $sub_i['all_score'];
+              $subs_lst[] = array(
+                'org_name' => $sub_i['org_name'],
+                'q_score' => $all_score[$parent_id][$child_id]
+              );
+            }
+            $child_questions[$child_id] = array(
+              'title' => $child_question['sub_title'],
+              'subs' => $subs_lst
+            );
+          }
+          $ranking_by_framework[$parent_id] = array(
+            'title' => $parent_title,
+            'child_questions' => $child_questions
+          );
+        }
+        update_field('position_by_framework', json_encode($ranking_by_framework), $post_id );
+        // End - Position by Framework
+
     }
 
 }
