@@ -26,7 +26,7 @@ $overall_agreeed_score = array_sum_submission_score($agreeed_score);
         <ol class="key-area-list">
         <?php if (!empty($report_key_areas)): ?>
             <?php foreach ($report_key_areas as $key_area): ?>
-                <li><?php echo $key_area['key'] ?>: <strong>[]</strong></li>
+                <li><?php echo $key_area; ?>: <strong>[]</strong></li>
             <?php endforeach; ?>
         <?php else: ?>
             <li>No Key Area found</li>

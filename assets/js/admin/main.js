@@ -154,6 +154,13 @@ jQuery(document).ready(function ($) {
             question_row_html += '            <div class="filesList"></div>'
             question_row_html += '        </div>'
             question_row_html += '    </div>'
+            question_row_html += '    <div class="key-areas">'
+            question_row_html += '        <label class="col-12"><strong>Select Key Area</strong></label>'
+            question_row_html += '        <select id="select-key-area-'+ group_id +'-'+ rowCount +'" class="select-key-area"'
+            question_row_html += '                name="group_questions['+ group_id +'][list]['+ rowCount +'][key_area]">'
+            question_row_html += '            <option value="">Choose Key Area</option>'
+            question_row_html += '        </select>'
+            question_row_html += '    </div>'
             question_row_html += '</div>';
 
         group_questions_wrapper.addClass('toggle')
@@ -165,11 +172,24 @@ jQuery(document).ready(function ($) {
         let wpeditor_des_wrapper = $('#' + wp_editor)
         let wpeditor_advice_wrapper = $('#' + wp_advice_editor)
 
+        // Render WP Editor 
         append_wpeditor(wpeditor_des_wrapper, false)
         append_wpeditor(wpeditor_advice_wrapper, false)
 
+        // Render Key Area
+        render_key_area_question($('#select-key-area-'+ group_id +'-'+ rowCount ))
+
         return false;
     });
+
+    function render_key_area_question(select_key_area) {
+        let key_area_input = $('.key-areas-list .key-area-input')
+        
+        key_area_input.each(function(e) {
+            let option_item = '<option value="'+ $(this).val() +'">'+ $(this).val() +'</option>';
+            select_key_area.append(option_item)
+        })
+    }
 
     var groupCount_Simple = 0;
     if ($(".simple-question-container").length) {
@@ -1456,13 +1476,12 @@ jQuery(document).ready(function ($) {
     });
 
     // Click to Download Framework Chart Image
-    $(document).on('click', '#btn-download-chart', function(e){
+    $(document).on('click', '.btn-download-chart', function(e){
         e.preventDefault();
-        console.log('click');
-        let canvas = $('#report-framework-chart .framework-chart-canvas');
+        let canvas = $(this).closest('.chart').find('canvas');
         image = canvas[0].toDataURL("image/jpg", 1.0);
         let link = document.createElement('a');
-        link.download = "framework-chart.jpg";
+        link.download = "dashboard-chart.jpg";
         link.href = image;
         link.click();
     });

@@ -9,7 +9,6 @@ $assessment_id = get_post_meta($post_id, 'assessment_id', true);
 $organisation_id = get_post_meta($post_id, 'organisation_id', true);
 $quiz_id = get_post_meta($post_id, 'quiz_id', true);
 $assessment_meta = get_post_meta($assessment_id, 'question_templates', true);
-$report_key_areas = get_post_meta($assessment_id, 'report_key_areas', true);
 $report_template = get_post_meta($assessment_id, 'report_template', true);
 $is_required_answer_all = get_post_meta($assessment_id, 'is_required_answer_all', true);
 $quiz_feedbacks = get_post_meta($post_id, 'quiz_feedback', true);
@@ -288,27 +287,6 @@ $submission_score_arr = array();
                                         </div>
                                     </div>
                                     <!-- /Org Scoring -->
-                                    <!-- Key Areas -->
-                                    <div class="key-areas">
-                                        <label class="col-12"><strong>Select Key Area</strong></label>
-                                        <select class="select-key-area" name="submission_key_area[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]">
-                                            <option value="">Choose Key Area</option>
-                                            <?php if (!empty($report_key_areas)): ?>
-                                                <?php foreach ($report_key_areas as $key_area): ?>
-                                                    <option value="<?php echo $key_area['key'] ?>"
-                                                        <?php 
-                                                        if (isset($submission_key_area[$group_id][$quiz_id])) {
-                                                            if ($key_area['key'] == $submission_key_area[$group_id][$quiz_id]) {
-                                                                echo 'selected';
-                                                            }
-                                                        } ?>>
-                                                        <?php echo $key_area['key'] ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </select>
-                                    </div>
-                                    <!-- /Key Areas -->
                                     <!-- Recommentdation -->
                                     <div class="recommentdation">
                                         <div class="_top">

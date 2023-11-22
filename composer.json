@@ -3,6 +3,7 @@
       "microsoft/azure-storage-blob": "*",
       "microsoft/azure-storage-table": "*",
       "microsoft/azure-storage-queue": "*",
-      "microsoft/azure-storage-file": "*"
+      "microsoft/azure-storage-file": "*",
+        "mpdf/mpdf": "^8.2"
     }
   }

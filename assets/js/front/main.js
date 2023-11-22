@@ -76,19 +76,12 @@ jQuery(document).ready(function ($) {
                 let section_id = active_question_wrapper.data('group')
                 let form_message = $('#main-quiz-form .form-message')
 
-                if (incomplete_sub_question == 0) {
-                    form_message.addClass('_success')
-                    form_message.find('.message').text('Section '+ section_id +' has been saved.')
-                }
-                else {
-                    form_message.addClass('_warning')
-                    form_message.find('.message').text('Section '+ section_id +' has been saved, you did not answer '+ incomplete_sub_question +'/'+ all_sub_question_wrapper + ' question!')
-                }
+                form_message.addClass('_success')
+                form_message.find('.message').text('Section '+ section_id +' has been saved.')
                 form_message.show()
                 setTimeout(function() {
                     form_message.hide()
                     form_message.removeClass('_success')
-                    form_message.removeClass('_warning')
                 }, 15000)
             }
             else {
@@ -518,7 +511,12 @@ jQuery(document).ready(function ($) {
 
     function uploadMutilpleAttachments(filesInput, inputElement) {
 
-        const file_type_arr = [ 'ppt', 'pptx', 'pdf', 'doc', 'docx', 'xlsx', 'peg', 'png', 'jpg', 'jpeg', 'mp4', 'mpg', 'wmv', 'mov', 'msg' ];
+        // const file_type_arr = [ 
+        //         'ppt', 'pptx', 'pdf', 'doc', 
+        //         'docx', 'xlsx', 'peg', 'png', 
+        //         'jpg', 'jpeg', 'mp4', 'mpg', 
+        //         'wmv', 'mov', 'msg', 'svg',
+        //     ];
 
         let group_questions_id =  inputElement.closest('.group-question').data('group')
         let sub_question_id = inputElement.closest('.fieldsWrapper').data('sub')
@@ -548,9 +546,9 @@ jQuery(document).ready(function ($) {
                 .append(file_id_input)
                 .append('<button class="file-delete" aria-label="Remove this uploaded file"><i class="fa-regular fa-trash-can"></i></button>')
 
-            file_ext = filesInput.item(i).name.split('.').pop()
+            file_ext = filesInput.item(i).name.split('.').pop().toLowerCase();
 
-            if (jQuery.inArray(file_ext, file_type_arr) !== -1) {
+            // if (jQuery.inArray(file_ext, file_type_arr) !== -1) {
                 
                 filesList.append(file_item);
 
@@ -563,20 +561,20 @@ jQuery(document).ready(function ($) {
 
                 frontUploadAdditionalFiles(filesInput[i], inputElement, item_index);
 
-            }
-            else {
-                file_error_list.push({ name: filesInput.item(i).name })
-                // console.log(file_ext);
-                if (file_error_list.length > 0) {
-                    let error_text = 'The following file could not be uploaded.<br>'
-                    for (let i = 0; i < file_error_list.length; i++) {
-                        error_text += '<span class="file-name">'+ file_error_list[i].name + '</span><br>'
-                    }
-                        error_text += 'Please make sure your files are in one of the folowing formats: .ppt, .pdf, .docx, .xlsx, .png, .jpg, .mp4.'
-                    upload_message_error.css('display', 'flex')
-                    upload_message_error.find('.message').html(error_text)
-                }
-            }
+            // }
+            // else {
+            //     file_error_list.push({ name: filesInput.item(i).name })
+            //     // console.log(file_ext);
+            //     if (file_error_list.length > 0) {
+            //         let error_text = 'The following file could not be uploaded.<br>'
+            //         for (let i = 0; i < file_error_list.length; i++) {
+            //             error_text += '<span class="file-name">'+ file_error_list[i].name + '</span><br>'
+            //         }
+            //             error_text += 'Please make sure your files are in one of the folowing formats: .ppt, .pdf, .docx, .xlsx, .png, .jpg, .mp4.'
+            //         upload_message_error.css('display', 'flex')
+            //         upload_message_error.find('.message').html(error_text)
+            //     }
+            // }
         }
     }
 

@@ -18,7 +18,7 @@ const ADMIN_SUBMISSION_SCORING_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissio
 
 // define admin views Reports
 const LINK_REPORT_TO_ASSESSMENT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/link-report-to-assessment.php';
-const REPORT_FRAMEWORK_CHART_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-framework-chart.php';
+const REPORT_DASHBOARD_CHART_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-dashboard-charts.php';
 
 // define admin views Users
 const USER_ASSESSMENTS_PERCHASED_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/users/assessments-purchased-view.php';

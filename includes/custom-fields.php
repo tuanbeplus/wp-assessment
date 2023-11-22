@@ -36,7 +36,7 @@ class Custom_Fields
 
         // Reports
         add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), 'assessments', 'normal', 'default');
-        add_meta_box('report-framework-chart', 'Framework Chart', array($this, 'report_framework_chart_meta_box_callback'), 'reports', 'normal', 'default');
+        add_meta_box('report-dashboard-charts', 'Dashboard Charts', array($this, 'report_dashboard_chart_meta_box_callback'), 'reports', 'normal', 'default');
         // add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
 
         // Attachments
@@ -102,9 +102,9 @@ class Custom_Fields
         return include_once LINK_REPORT_TO_ASSESSMENT;
     }
 
-    function report_framework_chart_meta_box_callback()
+    function report_dashboard_chart_meta_box_callback()
     {
-        return include_once REPORT_FRAMEWORK_CHART_VIEW;
+        return include_once REPORT_DASHBOARD_CHART_VIEW;
     }
 
     function question_repeatable_meta_box_save($post_id): void
@@ -201,7 +201,7 @@ class Custom_Fields
         $org_score = $_POST['org_score'] ?? null;
         $and_score = $_POST['and_score'] ?? null;
         $agreeed_score = $_POST['agreeed_score'] ?? null;
-        $submission_key_area = $_POST['submission_key_area'] ?? null;
+        // $submission_key_area = $_POST['submission_key_area'] ?? null;
         $recommentdation = $_POST['recommentdation'] ?? null;
 
         // echo '<pre>';
@@ -224,7 +224,7 @@ class Custom_Fields
         update_post_meta($post_id, 'org_score', $org_score);
         update_post_meta($post_id, 'and_score', $and_score);
         update_post_meta($post_id, 'agreeed_score', $agreeed_score);
-        update_post_meta($post_id, 'submission_key_area', $submission_key_area);
+        // update_post_meta($post_id, 'submission_key_area', $submission_key_area);
         update_post_meta($post_id, 'recommentdation', $recommentdation);
         $question_form->save_all_submission_feedback(); 
     }

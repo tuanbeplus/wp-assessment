@@ -4,21 +4,23 @@ $post_id = $post->ID;
 $report_key_areas = get_post_meta($post_id, 'report_key_areas', true);
 ?>
 <div class="key-areas-container">
+    <input id="key-areas-json" type="hidden" value='<?php echo json_encode($report_key_areas); ?>'>
     <!-- Key Areas List -->
     <ol class="key-areas-list">
     <?php if (!empty($report_key_areas)): $index = 0; ?>
-        <?php foreach($report_key_areas as $key_area): $index++; ?>
+        <?php foreach($report_key_areas as $key_area): ?>
             <li id="row-key-area-<?php echo esc_attr($index); ?>" class="row-key-area">
                 <div class="key-title">
-                    <input type="text" class="form-control" 
+                    <input type="text" class="form-control key-area-input" 
                             placeholder="Add key Area name"
-                            name="report_key_areas[<?php echo esc_attr($index); ?>][key]"
-                            value="<?php echo $key_area['key']; ?>">
+                            name="report_key_areas[<?php echo esc_attr($index); ?>]"
+                            value="<?php echo $key_area; ?>">
                 </div>
                 <div class="key-action">
                     <span class="remove-row"><i class="fa-regular fa-circle-xmark"></i></span>
                 </div>
             </li>
+            <?php $index++; ?>
         <?php endforeach; ?>
     <?php else: ?>
         <!-- Blank Key Area -->
@@ -26,7 +28,7 @@ $report_key_areas = get_post_meta($post_id, 'report_key_areas', true);
             <div class="key-title">
                 <input type="text" class="form-control" 
                         placeholder="Add key Area name"
-                        name="report_key_areas[1][key]"
+                        name="report_key_areas[0]"
                         value="">
             </div>
             <div class="key-action">

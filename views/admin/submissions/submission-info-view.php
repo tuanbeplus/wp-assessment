@@ -19,9 +19,7 @@ $org_metadata = get_post_meta($post_id, 'org_data', true);
 if (empty($org_metadata)) {
     $sf_org_data = get_sf_organisation_data($user_id, $organisation_id);
     update_post_meta($post_id, 'org_data', $sf_org_data);
-    $org_metadata =  get_post_meta($post_id, 'org_data', true);
 }
-delete_post_meta($post_id, 'org_industry');
 
 $main = new WP_Assessment();
 

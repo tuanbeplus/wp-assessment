@@ -585,6 +585,11 @@ class Question_Form
             update_post_meta($post_id, 'submission_id', $post_id);
             update_post_meta($post_id, 'assessment_status', 'pending');
             delete_post_meta($post_id, 'quiz_feedback');
+            $org_metadata = get_post_meta($post_id, 'org_data', true);
+            if (empty($org_metadata)) {
+                $sf_org_data = get_sf_organisation_data($user_id, $organisation_id);
+                update_post_meta($post_id, 'org_data', $sf_org_data);
+            }
 
             $submission_url = get_permalink( $post_id );
 
@@ -657,6 +662,11 @@ class Question_Form
             update_post_meta($post_id, 'organisation_id', $organisation_id);
             update_post_meta($post_id, 'assessment_id', $assessment_id);
             update_post_meta($post_id, 'submission_id', $post_id);
+            $org_metadata = get_post_meta($post_id, 'org_data', true);
+            if (empty($org_metadata)) {
+                $sf_org_data = get_sf_organisation_data($user_id, $organisation_id);
+                update_post_meta($post_id, 'org_data', $sf_org_data);
+            }
 
             if(isset($_COOKIE['userId'])) {
                 update_field('sf_user_id' , $_COOKIE['userId'], $post_id);

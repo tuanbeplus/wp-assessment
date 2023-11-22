@@ -1,12 +1,11 @@
 <?php
 global $post;
 $main = new WP_Assessment();
-
 $single_repeater_group = get_post_meta($post->ID, 'question_group_repeater', true);
 $single_repeater_group = $main->wpa_unserialize_metadata($single_repeater_group);
 $question_templates = get_post_meta($post->ID, 'question_templates', true);
 $is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', true);
-
+$report_key_areas = get_post_meta($post->ID, 'report_key_areas', true);
 $i = 0; $j = 0;
 ?>
 <div id="question-template-wrapper" class="question-template-wrapper">
@@ -71,22 +70,6 @@ $i = 0; $j = 0;
                                     placeholder="Group Question Title"
                                     tabindex="<?php if($is_locked_group == true) echo '-1'; ?>"/>
                         </div>
-                        <!-- <div class="col-2 question-row-points-container">
-                            <label><strong>Question Point</strong></label>
-
-                            <input type="number" class="question-point-input"
-                                    value="<?php //echo $group_question_point; ?>"
-                                    name="group_questions[<?php //echo $group_id; ?>][point]"/>
-
-                            <div class="question-points-actions-container">
-                                <div class="increment-question-point" aria-hidden="true">
-                                    <i class="fa fa-plus"></i>
-                                </div>
-                                <div class="decrement-question-point" aria-hidden="true">
-                                    <i class="fa fa-minus"></i>
-                                </div>
-                            </div>
-                        </div> -->
                     </div>
 
                     <div class="question-field-container">
@@ -106,6 +89,7 @@ $i = 0; $j = 0;
                                 $is_question_description = $field['is_description'] ?? '';
                                 $supporting_doc = $field['supporting_doc'] ?? '';
                                 $is_description = $field['is_description'] ?? '';
+                                $selected_key_area = $field['key_area'] ?? '';
 
                                 // remove Slashes of Quotes character(\", \')
                                 $sub_title = htmlentities(stripslashes(utf8_decode($sub_title)));
@@ -292,6 +276,22 @@ $i = 0; $j = 0;
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Key Areas -->
+                                    <div class="key-areas">
+                                        <label class="col-12"><strong>Select Key Area</strong></label>
+                                        <select class="select-key-area" name="group_questions[<?php echo $parent_question_id; ?>][list][<?php echo $question_id; ?>][key_area]">
+                                            <option value="">Choose Key Area</option>
+                                            <?php if (!empty($report_key_areas)): ?>
+                                                <?php foreach ($report_key_areas as $key_area): ?>
+                                                    <option value="<?php echo $key_area; ?>"
+                                                        <?php if ($selected_key_area == $key_area) echo 'selected'; ?>>
+                                                        <?php echo $key_area; ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </div>
+                                    <!-- /Key Areas -->
                                 </div>
                         <?php endforeach; ?>
                     </div>
@@ -404,21 +404,7 @@ $i = 0; $j = 0;
                                 </div>
                             </div>
                         </div>
-                        <div class="col-2 question-row-points-container">
-                            <!-- <label><strong>Question Point</strong></label>
-                            <input type="number"
-                                    class="question-point-input"
-                                    name="group_questions[ // echo $i; ][point]"
-                                    value=" // echo $question_point; "/>
-                            <div class="question-points-actions-container">
-                                <div class="increment-question-point" aria-hidden="true">
-                                    <i class="fa fa-plus"></i>
-                                </div>
-                                <div class="decrement-question-point" aria-hidden="true">
-                                    <i class="fa fa-minus"></i>
-                                </div>
-                            </div> -->
-                        </div>
+                        <div class="col-2 question-row-points-container"></div>
                     </div>
                     <div class="row question-other-info-container">
                         <div class="col-12">
@@ -441,13 +427,6 @@ $i = 0; $j = 0;
                                                     <input type="text" name="group_questions[<?php echo $question_id; ?>][choice][<?php echo $key; ?>][answer]"
                                                             value="<?php if ($item['answer'] != '') echo esc_attr($item['answer']); ?>"/>
                                                 </td>
-                                                <!-- <td>
-                                                    <label>Point</label>
-                                                    <input type="number"
-                                                            class="choice-item-point"
-                                                            name="group_questions[<?php //echo $question_id; ?>][choice][<?php //echo $key; ?>][point]"
-                                                            value="<?php //if ($item['point'] != '') echo esc_attr($item['point']); ?>"/>
-                                                </td> -->
                                                 <td>
                                                     <label></label>
                                                     <input type="checkbox" name="group_questions[<?php echo $question_id; ?>][choice][<?php echo $key; ?>][is_correct]"
