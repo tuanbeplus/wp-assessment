@@ -476,3 +476,27 @@ function get_sf_organisation_data($sf_user_id, $org_id)
 		return $org_data;
 	}
 }
+
+/**
+ * Check Report of Submission exist 
+ * 
+ * @param $submission_id
+ *
+ * @return int Report ID  
+ * 
+ */
+function is_report_of_submission_exist($submission_id) {
+	$args = array(
+		'post_type' => 'reports',
+		'posts_per_page' => 1,
+		'post_status' => 'any',
+		'meta_query' => array(
+			array(
+				'key' => 'submission_id',
+				'value' => $submission_id,
+			)
+		),
+	);
+	$reports = get_posts($args);
+	return $reports[0]->ID;
+}

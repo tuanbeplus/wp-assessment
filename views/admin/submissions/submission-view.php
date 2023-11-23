@@ -405,7 +405,7 @@ $submission_score_arr = array();
             <?php else: ?>
                 <p class="label">Accept or reject this submission</p>
                 <a type="button" class="button button-primary button-large accept-button" title="Accept this Submission">
-                    Accept & Create Report
+                    Accept this Submission
                 </a>
                 <a type="button" class="button button-large reject-button" title="Reject this Submission">
                     Reject

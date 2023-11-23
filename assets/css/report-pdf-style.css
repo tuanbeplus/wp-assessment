@@ -1,0 +1,50 @@
+/* Saturn - Report PDF Stylesheet */
+* {
+    font-family: "Avenir-Roman";
+}
+h1, h2, h3 h4, h5, h6 {
+    font-family: "Avenir-Heavy";
+}
+p, li {
+    font-family: "Avenir-Roman";
+    font-size: 14px;
+    letter-spacing: 0.4px!important;
+}
+.page {
+    position: relative;
+    padding-top: 40px;
+    padding-bottom: 30px;
+    width: 100%;
+    height: 100%;
+    /* background-image: url("/wp-content/plugins/wp-assessment/assets/images/and-bg-gray-shape.png"); */
+    background-size: contain;
+    background-position: top;
+    background-position-x: 270px;
+    background-position-y: 300px;
+    background-repeat: no-repeat;
+    letter-spacing: 0.4px!important;
+}
+
+.page img {
+    margin: auto;
+}
+
+.shape {
+    position: absolute;
+    margin-top: -400px;
+    margin-right: -400px;
+    top: 0;
+    z-index: -10;
+}
+
+.footer {
+    width: 100%;
+}
+
+.footer a {
+    text-decoration: none;
+}
+
+.footer .hypelinks-list a {
+    color: #333;
+}

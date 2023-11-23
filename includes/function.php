@@ -706,32 +706,45 @@ class WP_Assessment
 
     function create_comprehensive_report()
     {
-        $post_id = intval($_POST['submission_id']);
-        $is_report_exist = get_post_meta($post_id, 'report_id', true);
+        try {
+            $post_id = intval($_POST['submission_id']);
+            $is_report_exist = is_report_of_submission_exist($post_id);
 
-        // if (!$is_report_exist) {
+            if (!$is_report_exist) {
+                $assessment_id = get_post_meta($post_id, 'assessment_id', true);
+                $user_id = get_post_meta($post_id, 'user_id', true);
+                $sf_user_name = get_post_meta($post_id, 'sf_user_name', true);
+                $org_data = get_post_meta($post_id, 'org_data', true) ?? null;
+                $assessment_title = get_the_title($assessment_id);
 
-            $assessment_id = get_post_meta($post_id, 'assessment_id', true);
-            $user_id = get_post_meta($post_id, 'user_id', true);
-            $sf_user_name = get_post_meta($post_id, 'sf_user_name', true);
-            $assessment_title = get_the_title($assessment_id);
+                $report_id = wp_insert_post(array(
+                    'post_type' => 'reports',
+                    'post_title' => 'Report on ' .$assessment_title. ' - ' .$org_data['Name'],
+                    // 'post_content'  => $this->wpa_get_report_content($post_id),
+                    // 'post_status' => 'draft',
+                    'post_status' => 'publish',
+                ));
 
-            $report_id = wp_insert_post(array(
-                'post_type' => 'reports',
-                'post_title' => 'Report on ' . $assessment_title,
-                'post_content'  => $this->wpa_get_report_content($post_id),
-                'post_status' => 'draft',
-                // 'post_status' => 'publish',
-            ));
+                if (isset($report_id)) {
+                    update_post_meta($report_id, 'user_id', $user_id);
+                    update_post_meta($report_id, 'sf_user_name', $sf_user_name);
+                    update_post_meta($report_id, 'assessment_id', $assessment_id);
+                    update_post_meta($report_id, 'submission_id', $post_id);
+                    update_post_meta($report_id, 'org_data', $org_data);
+                    update_post_meta($post_id, 'report_id', $report_id);
 
-            update_post_meta($report_id, 'user_id', $user_id);
-            update_post_meta($report_id, 'sf_user_name', $sf_user_name);
-            update_post_meta($report_id, 'assessment_id', $assessment_id);
-            update_post_meta($report_id, 'submission_id', $post_id);
-            update_post_meta($post_id, 'report_id', $report_id);
-
-            wp_send_json($report_id);
-        // }
+                    return wp_send_json(array('report_id' => $report_id, 'status' => true));
+                }
+                else {
+                    throw new Exception('The created report failed!');
+                }
+            }
+            else {
+                throw new Exception('The report on this submission already exists.');
+            }
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
     }
 
     function wpa_get_report_content($post_id)

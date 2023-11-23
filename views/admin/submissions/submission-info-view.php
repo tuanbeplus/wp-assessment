@@ -11,8 +11,6 @@ $sf_user_id = get_post_meta($post_id, 'sf_user_id', true);
 $sf_user_email = get_post_meta($post_id, 'sf_user_email', true);
 $submission_status = get_post_meta($post_id, 'assessment_status', true);
 $total_submission_score = get_post_meta($post_id, 'total_submission_score', true);
-$report_id = get_post_meta($post_id, 'report_id', true);
-$report_url = home_url() . '/wp-admin/post.php?post='. $report_id .'&action=edit';
 $organisation_id = get_post_meta($post_id, 'organisation_id', true);
 
 $org_metadata = get_post_meta($post_id, 'org_data', true);
@@ -90,10 +88,4 @@ update_post_meta($post_id, 'assessment_total_point', $total_points);
         Total Score: 
         <strong class="total-submission-score"><?php echo $total_submission_score; ?></strong>
     </p>
-
-    <?php if ($report_id): ?>
-        <a href="<?php echo $report_url; ?>" target="_blank">
-            <button type="button" class="button button-primary button-large">View Report</button>
-        </a>
-    <?php endif; ?>
 </div>

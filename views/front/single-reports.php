@@ -10,39 +10,81 @@ global $post;
 $post_id = $post->ID;
 $post_meta = get_post_meta($post_id);
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
+$submission_id = get_post_meta($post_id, 'submission_id', true);
+$org_data = get_post_meta($post_id, 'org_data', true);
 $assessment_title = get_the_title($assessment_id);
-
+$pdf_stylesheet = file_get_contents(WP_ASSESSMENT_ASSETS . '/css/report-pdf-style.css');
+$report_template = get_post_meta($assessment_id, 'report_template', true);
 $mpdf = new \Mpdf\Mpdf();
+
+// echo "<pre>";
+// print_r($report_template);
+// echo "</pre>";
+
+// Include Stylesheet
+$mpdf->WriteHTML($pdf_stylesheet,\Mpdf\HTMLParserMode::HEADER_CSS);
 
 // Define the Header/Footer before writing anything so they appear on the first page
 $mpdf->SetHTMLHeader(
-    '<div style="text-align: left;">
-        <img src="https://andorg1dev.wpengine.com/wp-content/uploads/2023/09/AND-logo-colour-stacked-1024x729-1.png" alt="" width="100">
+    '<div class="header" style="font-family:"Avenir-Roman";">
+        <img class="logo" src="/wp-content/plugins/wp-assessment/assets/images/and-logo-hor.png" 
+            style="width:200px;opacity:0.6;">
     </div>'
-);
-$mpdf->SetHTMLFooter(
-    '<table width="100%">
-        <tr>
-            <td width="33%">{DATE j-m-Y}</td>
-            <td width="33%" align="center">{PAGENO}/{nbpg}</td>
-            <td width="33%" style="text-align: right;">My document</td>
-        </tr>
-    </table>'
 );
 
-// Write some HTML code:
+// Define the Header/Footer before writing anything so they appear on the first page
+if (!empty($report_template['footer'])) {
+    $mpdf->SetHTMLFooter(
+        '<div class="footer">'
+            .$report_template['footer'].
+        '</div>'
+    );
+}
+else {
+    $mpdf->SetHTMLFooter(
+        file_get_contents(WP_ASSESSMENT_ADMIN_VIEW_DIR. '/reports/report-pdf-footer.php')
+    );
+}
+
+// Render Front page
 $mpdf->WriteHTML(
-    '<div width="100%" height="100%" style="background: url(https://img.freepik.com/free-vector/blue-curve-background_53876-113112.jpg?w=1380&t=st=1700644705~exp=1700645305~hmac=547982f3a7257e13979a444b8853307868446ab8f419c934af37ffeb268d38cf);">
-        
-    </div>'
+    '<div class="front-page page">
+        <div class="intro">
+            <p class="org-name">'. $org_data['Name'] .'</p>
+            <p class="title">'. $report_template['front_page']['title'] .'</p>
+            <p class="year">'. date('Y') .'</p>
+        </div>'
+        . $report_template['front_page']['content'] .
+    '</div>'
 );
 $mpdf->AddPage();
 
-$mpdf->WriteHTML('text page 2');
-// $mpdf->AddPage();
+// Render All generic pages
+$count = 0;
+foreach ($report_template['generic_page'] as $index => $generic_page) {
+    $count++;
+    $page_content  = '';
+    $page_content .= '<div class="page">';
+    $page_content .=    '<h2>'. $generic_page['title'] .'</h2>';
+    $page_content .=    $generic_page['content'];
+    $page_content .= '</div>';
+
+    $mpdf->WriteHTML($page_content);
+
+    // Do not add page break to last page
+    if ($index < $count) {
+        $mpdf->AddPage();
+    }
+}
 
 // Output a PDF file directly to the browser
 $mpdf->Output();
 ?>
+
+
+
+
+
+
 
  

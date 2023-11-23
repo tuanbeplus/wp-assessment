@@ -588,7 +588,7 @@
     cursor: default;
 }
 
-.submission-admin-view-footer .icon-spinner {
+.icon-spinner {
     display: none;
     position: absolute;
     top: 50%;
@@ -810,6 +810,25 @@
 .scoring-wrapper > ._field ol li,
 .scoring-wrapper > ._field ul li {
     font-size: 14px;
+}
+
+.scoring-wrapper .report-action {
+    position: relative;
+    width: fit-content;
+}
+
+#btn-create-report.loading {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.8;
+}
+
+#btn-view-report {
+    display: none;
+}
+
+#btn-view-report.show {
+    display: inline-block;
 }
 
 .question-add-files-container .btn-add-files-wrapper {
@@ -1429,7 +1448,9 @@ ul.dashboard-charts-list li.chart {
 }
 
 .report-template-wrapper .field-include-toc {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    padding: 10px 0 20px;
+    border-bottom: 2px dashed #aaa;
     font-size: 16px;
 }
 
@@ -1496,7 +1517,7 @@ ul.dashboard-charts-list li.chart {
     max-width: 200px;
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid #999;
+    border: 1px solid #acacac;
     border-radius: 4px;
     height: fit-content;
 }

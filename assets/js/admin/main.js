@@ -1021,7 +1021,6 @@ jQuery(document).ready(function ($) {
     $(".accept-button").on("click", async function (e) {
         e.preventDefault();
         await submit_feedback_submission($(this), "accepted");
-        // await createComprehensiveReport();
     });
 
     async function submit_feedback_submission(btn, feedbackType) {
@@ -1061,24 +1060,6 @@ jQuery(document).ready(function ($) {
             location.reload()
             return true;
         }
-    }
-
-    async function createComprehensiveReport() {
-        let submission_id = $("#submission_id").val();
-        $.ajax({
-            type: 'POST',
-            url: ajaxUrl,
-            data:{
-                'action' : 'create_comprehensive_report',
-                'submission_id': submission_id,
-            },
-            beforeSend : function ( xhr ) {
-                
-            },
-            success:function(response){
-                console.log(response);
-            }
-        });
     }
 
     function toggleBtnDisable() {
@@ -1481,9 +1462,38 @@ jQuery(document).ready(function ($) {
         let canvas = $(this).closest('.chart').find('canvas');
         image = canvas[0].toDataURL("image/jpg", 1.0);
         let link = document.createElement('a');
-        link.download = "dashboard-chart.jpg";
+        link.download = 'dashboard-chart.jpg';
         link.href = image;
         link.click();
+    });
+
+    // Click to Create Report
+    $(document).on('click', '#btn-create-report', function(e){
+        e.preventDefault();
+        let btn = $(this)
+        let submission_id = $("#submission_id").val();
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'create_comprehensive_report',
+                'submission_id': submission_id,
+            },
+            beforeSend : function ( xhr ) {
+                btn.addClass('loading')
+            },
+            success:function(response){
+                btn.removeClass('loading')
+                if (response.report_id) {
+                    $('#btn-view-report')
+                        .addClass('show')
+                        .attr('href', '/wp-admin/post.php?post='+ response.report_id +'&action=edit')
+                }
+                if (response.status == false) {
+                    alert(response.message)
+                }
+            }
+        });
     });
 
     // require assessment admin fields
