@@ -1,19 +1,19 @@
 /* Saturn - Report PDF Stylesheet */
 * {
-    font-family: "Avenir-Roman";
+    font-family: Arial, Helvetica, sans-serif;
 }
 h1, h2, h3 h4, h5, h6 {
-    font-family: "Avenir-Heavy";
+    font-family: Arial, Helvetica, sans-serif;
 }
 p, li {
-    font-family: "Avenir-Roman";
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 14px;
     letter-spacing: 0.4px!important;
 }
 .page {
     position: relative;
     padding-top: 40px;
-    padding-bottom: 30px;
+    padding-bottom: 40px;
     width: 100%;
     height: 100%;
     /* background-image: url("/wp-content/plugins/wp-assessment/assets/images/and-bg-gray-shape.png"); */
@@ -37,6 +37,36 @@ p, li {
     z-index: -10;
 }
 
+.page.front-page {
+    padding-top: 100px;
+    border: none;
+}
+
+.front-page .intro{
+    text-align: center;
+    margin: 60px 0;
+    padding: 6px 0;
+    border-top: 0.5px solid #222;
+    border-bottom: 0.5px solid #222;
+}
+
+.front-page .intro .org-name {
+    margin-top: 0;
+    padding: 0;
+    font-size: 20px;
+}
+
+.front-page .intro .title{
+    margin: 40px auto;
+    font-size: 20px;
+}
+
+.front-page .intro .year {
+    margin-bottom: 0;
+    padding: 0;
+    font-size: 20px;
+}
+
 .footer {
     width: 100%;
 }
@@ -47,4 +77,71 @@ p, li {
 
 .footer .hypelinks-list a {
     color: #333;
+}
+
+.mpdf_toc {
+    padding: 40px 0;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+caption {
+    margin-top: 16px;
+    text-align: left;
+    font-style: italic;
+}
+
+table.recom-table {
+    border: 1px solid #333;
+}
+
+table.recom-table th {
+    margin: 0;
+    padding: 6px 10px;
+    text-align: left;
+    border: 1px solid #333;
+}
+
+table.recom-table th:last-child {
+    border-left: none!important;
+}
+
+table.recom-table td {
+    margin: 0;
+    padding: 16px 10px;
+    text-align: left;
+    border-left: 1px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+table.recom-table td:last-child {
+    border-right: 1px solid #333!important;
+}
+
+table.recom-table ul p {
+    margin-bottom: 16px;
+}
+
+table.table-3 th {
+    padding: 0 10px 16px;
+    width: 20%;
+    text-align: left;
+    padding-top: 0;
+    vertical-align: text-top;
+    line-height: 140%;
+}
+
+table.table-3 td {
+    padding: 0 10px 30px;
+    border: 1px solid #98c2ff;
+    border-left: none;
+    background-color: azure;
+}
+
+table.table-3 td:first-child {
+    text-align: right;
+    border-bottom: none;
+    background-color: none;
 }

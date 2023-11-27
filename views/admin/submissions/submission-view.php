@@ -15,7 +15,7 @@ $quiz_feedbacks = get_post_meta($post_id, 'quiz_feedback', true);
 $quiz_answer_points = get_post_meta($post_id, 'quiz_answer_point', true);
 $org_score = get_post_meta($post_id, 'org_score', true);
 $and_score = get_post_meta($post_id, 'and_score', true);
-$agreeed_score = get_post_meta($post_id, 'agreeed_score', true);
+$agreed_score = get_post_meta($post_id, 'agreed_score', true);
 $submission_key_area = get_post_meta($post_id, 'submission_key_area', true);
 $recommentdation = get_post_meta($post_id, 'recommentdation', true);
 
@@ -125,6 +125,7 @@ $submission_score_arr = array();
             ?>
             <div class="group-quiz-wrapper">
                 <p class="group-title"><?php echo $group_id.' - '.$group_title; ?></p>
+                <input type="hidden" name="recommentdation[<?php echo $group_id; ?>][key_area]" value="<?php echo $group_title; ?>">
                 <!--  -->
                 <?php if ($quiz && is_array($quiz)) : ?>
                     <?php foreach ($quiz as $field) :
@@ -278,10 +279,10 @@ $submission_score_arr = array();
                                             </div>
                                             <div class="agreed-score">
                                                 <label for="agreed-score-input">
-                                                    Agreeed Score
+                                                    Agreed Score
                                                     <input id="agreed-score-input" type="number" step="0.1" 
-                                                            name="agreeed_score[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]" 
-                                                            value="<?php echo $agreeed_score[$group_id][$quiz_id] ?? null; ?>">
+                                                            name="agreed_score[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]" 
+                                                            value="<?php echo $agreed_score[$group_id][$quiz_id] ?? null; ?>">
                                                 </label>
                                             </div>
                                         </div>
@@ -298,10 +299,10 @@ $submission_score_arr = array();
                                         </div>
                                         <div class="_wpeditor">
                                             <?php 
-                                            $content   = $recommentdation[$group_id][$quiz_id] ?? null;
+                                            $content   = $recommentdation[$group_id]['list'][$quiz_id] ?? null;
                                             $editor_id = 'recommentdation-wpeditor-'.$group_id.'-'.$quiz_id;
                                             $editor_settings = array(
-                                                'textarea_name' => 'recommentdation['.$group_id.']['.$quiz_id.']',
+                                                'textarea_name' => 'recommentdation['.$group_id.'][list]['.$quiz_id.']',
                                                 'textarea_rows' => 12,
                                                 'quicktags' => true, // Remove view as HTML button.
                                                 'default_editor' => 'tinymce',
@@ -349,23 +350,27 @@ $submission_score_arr = array();
                 <?php 
                     if ($section_score_arr != null): 
                         $total_section_score = array_sum($section_score_arr);
+                        $count_sub = count($section_score_arr);
+                        $section_score = number_format($total_section_score/$count_sub, 1) ?? 0;
                         $submission_score_arr[] = $total_section_score;
                 ?>
                     <div class="total-section-score">
-                        <span>Total Section score: 
+                        <span>Section score: 
                             <span class="total-section-score-val">
-                                <?php echo number_format($total_section_score, 1) ?? 0; ?>
+                                <?php echo $section_score; ?>
                             </span>
                         </span>
+                        <input type="hidden" name="org_section_score[<?php echo $group_id; ?>]" 
+                                value="<?php echo $section_score; ?>">
                     </div>
                 <?php endif;?>
             </div>
         <?php endforeach;?>
         
         <!-- Save Total Submission Score -->
-        <?php update_post_meta($post_id, 'total_submission_score', array_sum($submission_score_arr)); ?>
-        <input type="hidden" name="total_submission_score" value="<?php echo array_sum($submission_score_arr); ?>">
-        
+        <input type="hidden" name="total_submission_score[sum]" value="<?php echo array_sum($submission_score_arr); ?>">
+        <input type="hidden" name="total_submission_score[percent]" value="<?php echo round(array_sum($submission_score_arr)/268.8*100); ?>">
+
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">
             <?php if ($is_required_answer_all == true): ?>

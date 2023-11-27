@@ -485,7 +485,8 @@ function get_sf_organisation_data($sf_user_id, $org_id)
  * @return int Report ID  
  * 
  */
-function is_report_of_submission_exist($submission_id) {
+function is_report_of_submission_exist($submission_id) 
+{
 	$args = array(
 		'post_type' => 'reports',
 		'posts_per_page' => 1,
@@ -499,4 +500,105 @@ function is_report_of_submission_exist($submission_id) {
 	);
 	$reports = get_posts($args);
 	return $reports[0]->ID;
+}
+
+/**
+ * Get Maturity Level from Organisation Score
+ * 
+ * @param $score 
+ *
+ * @return int Maturity Level  
+ * 
+ */
+function get_maturity_level_org($score) 
+{
+	if ($score != null) {
+		if ($score >= 0 && $score < 0.5) {
+			return 1;
+		}
+		else if ($score >= 0.5 && $score < 1) {
+			return 1.5;
+		}
+		else if ($score >= 1 && $score < 1.5) {
+			return 2;
+		}
+		else if ($score >= 1.5 && $score < 2) {
+			return 2.5;
+		}
+		else if ($score >= 2 && $score < 3) {
+			return 3;
+		}
+		else if ($score >= 3 && $score < 4) {
+			return 3.5;
+		}
+		else if ($score >= 4) {
+			return 4;
+		}
+	}
+	else {
+		return null;
+	}
+}
+
+/**
+ * Get all submissions of an assessment
+ * 
+ * @param $assessment_id 
+ *
+ * @return array Submission objects
+ * 
+ */
+function get_all_submissions_of_assessment($assessment_id)
+{
+	$args = array(
+		'post_type' => 'submissions',
+		'posts_per_page' => -1,
+		'post_status' => 'any',
+		'meta_query' => array(
+			array(
+				'key' => 'assessment_id',
+				'value' => $assessment_id,
+			)
+		),
+	);
+	$submissions = get_posts($args);
+	return $submissions;
+}
+
+/**
+ * Calculator Overall of all Submissions Score
+ * 
+ * @param $assessment_id 
+ * @param $post_meta 
+ *
+ * @return array average score of all Submissions, Percent average score of all Submissions
+ * 
+ */
+function cal_overall_total_score($assessment_id, $post_meta)
+{
+	$overall_scores = array();
+	$result = array();
+	$submissions = get_all_submissions_of_assessment($assessment_id);
+
+	if (!empty($submissions)) {
+		foreach ($submissions as $submission){
+			$total_score = get_post_meta($submission->ID, $post_meta, true) ?? 0;
+			$overall_scores[] = $total_score['sum'];
+		}
+		if (!empty($overall_scores) && is_array($overall_scores)) {
+			$result['sum_average'] = number_format(array_sum($overall_scores)/count($overall_scores), 1);
+			$result['percent_average'] = round($result['sum_average']/268.8*100);
+			return $result;
+		}
+		else {
+			return 0;
+		}
+	}
+	else {
+		return 0;
+	}
+}
+
+function test_print(){
+	return 'here';
 }

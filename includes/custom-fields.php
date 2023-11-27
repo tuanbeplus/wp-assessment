@@ -165,7 +165,6 @@ class Custom_Fields
             return;
 
         $report_template = isset($_POST['report_template']) ? $_POST['report_template'] : '';
-        $is_report_include_toc = isset($_POST['is_report_include_toc']) ? $_POST['is_report_include_toc'] : '';
         $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
 
         // Renew Index of generic page Report template array
@@ -180,7 +179,6 @@ class Custom_Fields
         }
 
         update_post_meta($post_id, 'report_template', $report_template);
-        update_post_meta($post_id, 'is_report_include_toc', $is_report_include_toc);
         update_post_meta($post_id, 'report_key_areas', $report_key_areas);
     }
 
@@ -200,8 +198,8 @@ class Custom_Fields
         $total_submission_score = $_POST['total_submission_score'] ?? null;
         $org_score = $_POST['org_score'] ?? null;
         $and_score = $_POST['and_score'] ?? null;
-        $agreeed_score = $_POST['agreeed_score'] ?? null;
-        // $submission_key_area = $_POST['submission_key_area'] ?? null;
+        $agreed_score = $_POST['agreed_score'] ?? null;
+        $org_section_score = $_POST['org_section_score'] ?? null;
         $recommentdation = $_POST['recommentdation'] ?? null;
 
         // echo '<pre>';
@@ -214,18 +212,29 @@ class Custom_Fields
           $new_group_quiz_points[$item] = $value;
           $item++;
         }
-
         $new_group_quiz_points = serialize($new_group_quiz_points);
-        
+
+        // Save total AND Score
+        $total_and_score = array();
+        $total_and_score['sum'] = array_sum_submission_score($and_score);
+        $total_and_score['percent'] = round((array_sum_submission_score($and_score))/268.8*100);
+
+        // Save total Agreed Score
+        $total_agreed_score = array();
+        $total_agreed_score['sum'] = array_sum_submission_score($agreed_score);
+        $total_agreed_score['percent'] = round((array_sum_submission_score($agreed_score))/268.8*100);
+
         update_post_meta($post_id, 'group_quiz_point', $new_group_quiz_points);
         update_post_meta($post_id, 'quiz_feedback', $quiz_feedbacks);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);
         update_post_meta($post_id, 'total_submission_score', $total_submission_score);
         update_post_meta($post_id, 'org_score', $org_score);
         update_post_meta($post_id, 'and_score', $and_score);
-        update_post_meta($post_id, 'agreeed_score', $agreeed_score);
-        // update_post_meta($post_id, 'submission_key_area', $submission_key_area);
+        update_post_meta($post_id, 'agreed_score', $agreed_score);
+        update_post_meta($post_id, 'org_section_score', $org_section_score);
         update_post_meta($post_id, 'recommentdation', $recommentdation);
+        update_post_meta($post_id, 'total_and_score', $total_and_score);
+        update_post_meta($post_id, 'total_agreed_score', $total_agreed_score);
         $question_form->save_all_submission_feedback(); 
     }
 

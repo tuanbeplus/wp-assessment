@@ -28,7 +28,9 @@ $dataset_2021 = '[3.5, 2.5, 4.0, 3.0, 3.5, 3.0, 4.0, 4.0, 3.0, 3.5]';
     <ul class="dashboard-charts-list">
     <?php foreach ($key_areas as $key): ?>
         <li class="chart">
-            <canvas id="<?php echo $key; ?>-dashboard-chart-<?php echo $canvas_id; ?>" class="dashboard-chart-canvas">
+            <canvas id="<?php echo $key; ?>-dashboard-chart-<?php echo $canvas_id; ?>" 
+                    class="dashboard-chart-canvas"
+                    data-key="<?php echo $key; ?>">
             </canvas>
             <a class="btn-download-chart button button-medium" role="button">
                 Download as Image

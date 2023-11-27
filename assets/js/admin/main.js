@@ -1460,9 +1460,10 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '.btn-download-chart', function(e){
         e.preventDefault();
         let canvas = $(this).closest('.chart').find('canvas');
+        let key_area = canvas.data('key');
         image = canvas[0].toDataURL("image/jpg", 1.0);
         let link = document.createElement('a');
-        link.download = 'dashboard-chart.jpg';
+        link.download = key_area+'-dashboard-chart.jpg';
         link.href = image;
         link.click();
     });

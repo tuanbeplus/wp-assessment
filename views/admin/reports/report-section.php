@@ -1,21 +1,17 @@
 <?php 
 global $post;
-$is_report_include_toc = get_post_meta($post->ID, 'is_report_include_toc', true);
 $report_template = get_post_meta($post->ID, 'report_template', true);
 $report_logo_url = $report_template['front_page']['logo_url'] ?? null;
 $report_front_title = $report_template['front_page']['title'] ?? null;
 $report_front_content = $report_template['front_page']['content'] ?? null;
-    // echo "<pre>";
-    // print_r($report_template);
-    // echo "</pre>";
 ?>
 
 <div id="report-template-wrapper" class="report-template-wrapper">
     <div class="field-include-toc">
         <label for="report-include-toc">
             <input id="report-include-toc" type="checkbox" 
-                    name="is_report_include_toc" placeholder="Add title" value="1"
-                    <?php if ($is_report_include_toc == true) echo 'checked'; ?>>
+                    name="report_template[is_include_toc]" placeholder="Add title" value="1"
+                    <?php if ($report_template['is_include_toc'] == true) echo 'checked'; ?>>
             Include table of content
         </label>
     </div>

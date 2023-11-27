@@ -11,6 +11,8 @@ $sf_user_id = get_post_meta($post_id, 'sf_user_id', true);
 $sf_user_email = get_post_meta($post_id, 'sf_user_email', true);
 $submission_status = get_post_meta($post_id, 'assessment_status', true);
 $total_submission_score = get_post_meta($post_id, 'total_submission_score', true);
+$total_and_score = get_post_meta($post_id, 'total_and_score', true);
+$total_agreed_score = get_post_meta($post_id, 'total_agreed_score', true);
 $organisation_id = get_post_meta($post_id, 'organisation_id', true);
 
 $org_metadata = get_post_meta($post_id, 'org_data', true);
@@ -84,8 +86,34 @@ update_post_meta($post_id, 'assessment_total_point', $total_points);
     <?php endif; ?>
 
     <p class="post-status-display">Status: <strong><?php echo $submission_status; ?></strong></p>
-    <p class="post-status-display">
-        Total Score: 
-        <strong class="total-submission-score"><?php echo $total_submission_score; ?></strong>
-    </p>
+
+    <?php if (isset($total_submission_score)): ?>
+        <p class="post-status-display">
+            Total Org Score: 
+            <strong class="total-submission-score">
+                <?php echo $total_submission_score['sum']; ?>
+                (<?php echo $total_submission_score['percent']; ?>%)
+            </strong>
+        </p>
+    <?php endif; ?>
+
+    <?php if (isset($total_and_score)): ?>
+        <p class="post-status-display">
+            Total AND Score: 
+            <strong class="total-submission-score">
+                <?php echo $total_and_score['sum'] ?? 0; ?>
+                (<?php echo $total_and_score['percent'] ?? 0; ?>%)
+            </strong>
+        </p>
+    <?php endif; ?>
+
+    <?php if (isset($total_agreed_score)): ?>
+        <p class="post-status-display">
+            Total Agreed Score: 
+            <strong class="total-submission-score">
+                <?php echo $total_agreed_score['sum'] ?? 0; ?>
+                (<?php echo $total_agreed_score['percent'] ?? 0; ?>%)
+            </strong>
+        </p>
+    <?php endif; ?>
 </div>
