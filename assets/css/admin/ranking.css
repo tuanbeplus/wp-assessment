@@ -94,6 +94,26 @@ tr:nth-child(even) {
   /* border-radius: 8px; */
   box-shadow: rgb(50 50 93 / 25%) 0px 2px 5px -1px, rgb(0 0 0 / 30%) 0px 1px 3px -1px;
 }
+.pr-ranking-lst.hide {
+  margin: 0;
+  height: 0;
+  overflow: hidden;
+}
+.pr-ranking {
+  margin-top: 24px;
+}
+.btn-expand-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+.icon-chevron-down {
+  transition: ease 0.25s all;
+  margin-left: 8px;
+}
+.icon-chevron-down.up {
+  transform: rotate(178deg);
+}
 .cr-info {
   margin-top: 15px;
   padding-left: 32px;

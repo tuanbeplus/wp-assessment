@@ -11,8 +11,6 @@ $ranking_by_industry = json_decode($by_industry, true);
 
 $by_framework = get_field('position_by_framework', $post->ID);
 $ranking_by_framework = json_decode($by_framework, true);
-
-// print_r($ranking_by_framework);
 ?>
 
 <div class="container">
@@ -44,15 +42,16 @@ $ranking_by_framework = json_decode($by_framework, true);
                   <th class="no-col">#</th>
                   <th>Organization name</th>
                   <th>Total score</th>
+                  <th>Total percent</th>
                 </tr>
                 <?php
-                usort($ranking_by_total_score, fn($a, $b) => $b['total_score'] <=> $a['total_score']);
                 foreach ($ranking_by_total_score as $key => $item) {
                   ?>
                   <tr>
-                    <td class="no-col"><?php echo $key+1; ?></td>
+                    <td class="no-col"><?php echo $item['org_rank']; ?></td>
                     <td><?php echo $item['org_name']; ?></td>
                     <td><?php echo $item['total_score']; ?></td>
+                    <td><?php echo $item['total_percent']; ?>%</td>
                   </tr>
                   <?php
                 }
@@ -76,10 +75,8 @@ $ranking_by_framework = json_decode($by_framework, true);
               <label class="label">Industry</label>
           </div>
           <div class="right-col">
-            <?php 
-            foreach ($ranking_by_industry as $key => $industry) {
-              $indus = $industry;
-              usort($indus, fn($a, $b) => $b['total_score'] <=> $a['total_score']);
+            <?php
+            foreach ($ranking_by_industry['by_indus_data'] as $key => $industry) {
             ?>
             <div class="cl-row">
               <table>
@@ -87,14 +84,16 @@ $ranking_by_framework = json_decode($by_framework, true);
                     <th class="no-col">#</th>
                     <th><?php echo $key; ?></th>
                     <th>Total score</th>
+                    <th>Total percent</th>
                   </tr>
                   <?php
-                  foreach ($indus as $key => $item) {
+                  foreach ($industry as $key => $item) {
                     ?>
                     <tr>
                       <td class="no-col"><?php echo $key+1; ?></td>
                       <td><?php echo $item['org_name']; ?></td>
                       <td><?php echo $item['total_score']; ?></td>
+                      <td><?php echo $item['total_percent']; ?>%</td>
                     </tr>
                     <?php
                   }
@@ -131,35 +130,65 @@ $ranking_by_framework = json_decode($by_framework, true);
                     <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
                   </a>
                 </div>
-                <div class="cr-info">
-                  <?php
-                  $child_questions = $framework['child_questions'];
-                  foreach ($child_questions as $child_id => $child_question) {
-                    $q_subs = $child_question['subs'];
-                    usort($q_subs, fn($a, $b) => $b['q_score'] <=> $a['q_score']);
-                  ?>
-                    <div class="cl-row">
-                      <table>
-                          <tr>
-                            <th class="no-col">#</th>
-                            <th><?php echo $parent_id.'.'.$child_id.' - '. $child_question['title']; ?></th>
-                            <th>Score</th>
-                          </tr>
-                          <?php
-                          foreach ($q_subs as $key => $item) {
-                            ?>
+                <div class="pr-ranking-lst">
+                  <div class="pr-ranking">
+                    <table>
+                      <tr>
+                        <th class="no-col">#</th>
+                        <th><?php echo $framework['title']; ?></th>
+                        <th>Score</th>
+                        <th>Maturity level</th>
+                      </tr>
+                      <?php
+                      $parent_questions = $framework['parent_questions'];
+                      foreach ($parent_questions as $pr_key => $pr_item) {
+                        ?>
+                        <tr>
+                          <td class="no-col"><?php echo $pr_item['org_rank']; ?></td>
+                          <td><?php echo $pr_item['org_name']; ?></td>
+                          <td><?php echo $pr_item['group_q_score']; ?></td>
+                          <td><?php echo $pr_item['level']; ?></td>
+                        </tr>
+                      <?php
+                      }
+                    ?>
+                    </table>
+                  </div>
+                  <a class="btn-expand-wrapper" role="button">
+                      <span class="text">Expand Group</span>
+                      <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
+                  </a>
+                  <div class="cr-info hide">
+                    <?php
+                    $child_questions = $framework['child_questions'];
+                    foreach ($child_questions as $child_id => $child_question) {
+                      $q_subs = $child_question['subs'];
+                      usort($q_subs, fn($a, $b) => $b['q_score'] <=> $a['q_score']);
+                    ?>
+                      <div class="cl-row">
+                        <table>
                             <tr>
-                              <td class="no-col"><?php echo $key+1; ?></td>
-                              <td><?php echo $item['org_name']; ?></td>
-                              <td><?php echo $item['q_score']; ?></td>
+                              <th class="no-col">#</th>
+                              <th><?php echo $parent_id.'.'.$child_id.' - '. $child_question['title']; ?></th>
+                              <th>Score</th>
                             </tr>
                             <?php
-                          }
-                          ?>
-                        </table>
-                    </div>
-            <?php } ?>
+                            foreach ($q_subs as $key => $item) {
+                              ?>
+                              <tr>
+                                <td class="no-col"><?php echo $key+1; ?></td>
+                                <td><?php echo $item['org_name']; ?></td>
+                                <td><?php echo $item['q_score']; ?></td>
+                              </tr>
+                              <?php
+                            }
+                            ?>
+                          </table>
+                      </div>
+              <?php } ?>
+                  </div>
                 </div>
+                
               </div>
             <?php
             } ?>

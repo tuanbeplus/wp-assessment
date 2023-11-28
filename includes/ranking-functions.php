@@ -120,6 +120,7 @@ class AndAssessmentRanking {
           $org_id = get_post_meta($sub->ID, 'organisation_id', true);
           $org_metadata = get_post_meta($sub->ID, 'org_data', true);
           $sub_all_scores = get_post_meta($sub->ID, 'org_score', true);
+          $group_all_scores = get_post_meta($sub->ID, 'org_section_score', true);
 
           if ( ! $org_metadata ) {
             $org_metadata = get_sf_organisation_data($user_id, $org_id);
@@ -132,25 +133,52 @@ class AndAssessmentRanking {
           if ( ! in_array($org_name, $org_list) && $org_name ) {
             $submissions_info[] = array(
               'sub_id' => $sub->ID,
+              'org_id' => $org_id,
               'org_name' => $org_name,
               'industry_name' => $industry_name,
-              'total_score' => $total_score,
+              'total_score' => $total_score['sum'],
+              'total_percent' => $total_score['percent'],
+              'group_score' => $group_all_scores,
               'all_score' => $sub_all_scores
             );
             $org_list[] = $org_name;
           }
         }
 
-        // Position by Total Score
-        update_field('position_by_total_score', json_encode($submissions_info), $post_id );
+        // Start - Position by Total Score
+        $ranking_by_total_score = $submissions_info;
+        usort($ranking_by_total_score, fn($a, $b) => $b['total_score'] <=> $a['total_score']);
+        $ranking_by_tt_sc = array();
+        foreach ($ranking_by_total_score as $key=>$rk_item) {
+          $temp_item = $rk_item;
+          $temp_item['org_rank'] = $key+1;
+          $ranking_by_tt_sc[$rk_item['org_id']] = $temp_item;
+        }
+        update_field('position_by_total_score', json_encode($ranking_by_tt_sc), $post_id );
+        // End - Position by Total Score
 
         // Start - Position by Industry
         $ranking_by_industry = array();
-
         foreach ($submissions_info as $sub_i) {
           $ranking_by_industry[$sub_i['industry_name']][] = $sub_i;
         }
-        update_field('position_by_industry', json_encode($ranking_by_industry), $post_id );
+        $ranking_by_indus = array();
+        $indus_data = array();
+        foreach ($ranking_by_industry as $id_key => $industry) {
+          $indus = $industry;
+          usort($indus, fn($a, $b) => $b['total_score'] <=> $a['total_score']);
+          foreach ($indus as $key => $item) {
+            $temp_item = $item;
+            $temp_item['org_rank'] = $key+1;
+            $indus_data[$item['org_id']] = $temp_item;
+          }
+          $ranking_by_indus[$id_key] = $indus;
+        }
+        $ranking_by_indus_data = array(
+          'by_indus_data' => $ranking_by_indus,
+          'rank_data' => $indus_data
+        );
+        update_field('position_by_industry', json_encode($ranking_by_indus_data), $post_id );
         // End - Position by Industry
 
         // Start - Position by Framework
@@ -158,13 +186,50 @@ class AndAssessmentRanking {
         $wp_ass = new WP_Assessment();
         $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
         $questions = $wp_ass->wpa_unserialize_metadata($questions);
-
         foreach ($questions as $parent_id => $parent_question) {
           $child_questions = array();
           $parent_title = htmlentities(stripslashes(utf8_decode( $parent_question['title'] )));
           $parent_title = $parent_title;
           $child_questions_lst = $parent_question['list'];
 
+          // Get Parents Ranking info
+          $parent_lst = array();
+          foreach ($submissions_info as $sub_i) {
+            $group_score = $sub_i['group_score'];
+            $parent_lst[] = array(
+              'org_id' => $sub_i['org_id'],
+              'org_name' => $sub_i['org_name'],
+              'group_q_score' => $group_score[$parent_id]
+            );
+          }
+          usort($parent_lst, fn($a, $b) => $b['group_q_score'] <=> $a['group_q_score']);
+          $ranking_by_parent_q = array();
+          $level1 = $level2 = $level3 = $level4 = 0;
+          foreach ($parent_lst as $key=>$pr_item) {
+            $level = get_maturity_level_org($pr_item['group_q_score']);
+            $temp_item = $pr_item;
+            $temp_item['org_rank'] = $key+1;
+            $temp_item['level'] = 'Level ' . $level;
+            $ranking_by_parent_q[$pr_item['org_id']] = $temp_item;
+
+            if ( $level >= 4 ) {
+              $level4++;
+            } elseif ($level >= 3) {
+              $level3++;
+            } elseif ($level >= 2) {
+              $level2++;
+            } else {
+              $level1++;
+            }
+          }
+          $org_at_levels = array(
+            'level1' => $level1,
+            'level2' => $level2,
+            'level3' => $level3,
+            'level4' => $level4
+          );
+
+          // Get Child Question Ranking info
           foreach ($child_questions_lst as $child_id => $child_question) {
             $subs_lst = array();
             foreach ($submissions_info as $sub_i) {
@@ -181,6 +246,8 @@ class AndAssessmentRanking {
           }
           $ranking_by_framework[$parent_id] = array(
             'title' => $parent_title,
+            'parent_questions' => $ranking_by_parent_q,
+            'org_at_levels' => $org_at_levels,
             'child_questions' => $child_questions
           );
         }
