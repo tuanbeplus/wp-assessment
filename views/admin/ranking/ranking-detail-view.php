@@ -147,7 +147,7 @@ $ranking_by_framework = json_decode($by_framework, true);
                           <td class="no-col"><?php echo $pr_item['org_rank']; ?></td>
                           <td><?php echo $pr_item['org_name']; ?></td>
                           <td><?php echo $pr_item['group_q_score']; ?></td>
-                          <td><?php echo $pr_item['level']; ?></td>
+                          <td><?php echo 'Level '.$pr_item['level']; ?></td>
                         </tr>
                       <?php
                       }

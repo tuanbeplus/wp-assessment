@@ -36,10 +36,9 @@ function get_submit_field($array, $index, $key)
 }
 $submission_score_arr = array();
 
-
-echo "<pre>";
-// print_r($questions);
-echo "</pre>";
+// echo "<pre>";
+// print_r();
+// echo "</pre>";
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -324,6 +323,9 @@ echo "</pre>";
                                         <div class="key-area">
                                             <label><strong>Key Area:</strong></label>
                                             <h6 style="margin-top:10px;"><?php echo $key_area; ?></h6>
+                                            <input class="org-score-input" type="hidden" 
+                                            name="key_area[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]"
+                                            value="<?php echo $key_area; ?>">
                                         </div>
                                     <?php endif; ?>
                                 </div>

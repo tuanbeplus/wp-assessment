@@ -205,11 +205,14 @@ class AndAssessmentRanking {
           usort($parent_lst, fn($a, $b) => $b['group_q_score'] <=> $a['group_q_score']);
           $ranking_by_parent_q = array();
           $level1 = $level2 = $level3 = $level4 = 0;
+          $pr_total_score = $pr_items_cnt = 0;
           foreach ($parent_lst as $key=>$pr_item) {
+            $pr_items_cnt++;
+            $pr_total_score += $pr_item['group_q_score'];
             $level = get_maturity_level_org($pr_item['group_q_score']);
             $temp_item = $pr_item;
             $temp_item['org_rank'] = $key+1;
-            $temp_item['level'] = 'Level ' . $level;
+            $temp_item['level'] = $level;
             $ranking_by_parent_q[$pr_item['org_id']] = $temp_item;
 
             if ( $level >= 4 ) {
@@ -228,6 +231,7 @@ class AndAssessmentRanking {
             'level3' => $level3,
             'level4' => $level4
           );
+          $maturity_pr_level = ( $pr_items_cnt > 0 ) ? get_maturity_level_org($pr_total_score/$pr_items_cnt) : 0;
 
           // Get Child Question Ranking info
           foreach ($child_questions_lst as $child_id => $child_question) {
@@ -248,6 +252,7 @@ class AndAssessmentRanking {
             'title' => $parent_title,
             'parent_questions' => $ranking_by_parent_q,
             'org_at_levels' => $org_at_levels,
+            'average_maturity_level' => $maturity_pr_level,
             'child_questions' => $child_questions
           );
         }

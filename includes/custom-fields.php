@@ -201,6 +201,45 @@ class Custom_Fields
         $agreed_score = $_POST['agreed_score'] ?? null;
         $org_section_score = $_POST['org_section_score'] ?? null;
         $recommentdation = $_POST['recommentdation'] ?? null;
+        $key_area = $_POST['key_area'] ?? null;
+
+        $maturity_level = array();
+        foreach ($key_area as $pr_key => $ka) {
+            $framework_cnt = $implementation_cnt = $review_cnt = $innovation_cnt = 0;
+            $framework_vl = $implementation_vl = $review_vl = $innovation_vl = 0;
+            foreach ($ka as $c_key => $value) {
+                switch ($value) {
+                    case 'Framework':
+                        $framework_cnt++;
+                        $framework_vl += $org_score[$pr_key][$c_key]; 
+                        break;
+                    case 'Implementation':
+                        $implementation_cnt++;
+                        $implementation_vl += $org_score[$pr_key][$c_key]; 
+                        break;
+                    case 'Review':
+                        $review_cnt++;
+                        $review_vl += $org_score[$pr_key][$c_key];
+                        break;
+                    case 'Innovation':
+                        $innovation_cnt++;
+                        $innovation_vl += $org_score[$pr_key][$c_key];
+                        break;
+                    default:
+                        break;
+                }
+            }
+            $framework_level = ($framework_cnt > 0) ? get_maturity_level_org($framework_vl/$framework_cnt) : 0;
+            $implementation_level = ($implementation_cnt > 0) ? get_maturity_level_org($implementation_vl/$implementation_cnt) : 0;
+            $review_level = ($review_cnt > 0) ? get_maturity_level_org($review_vl/$review_cnt) : 0;
+            $innovation_level = ($innovation_cnt > 0) ? get_maturity_level_org($innovation_vl/$innovation_cnt) : 0;
+            $maturity_level[$pr_key] = array(
+                'Framework' => $framework_level,
+                'Implementation' => $implementation_level,
+                'Review' => $review_level,
+                'Innovation' => $innovation_level
+            );
+        }
 
         // echo '<pre>';
         // print_r();
@@ -235,6 +274,8 @@ class Custom_Fields
         update_post_meta($post_id, 'recommentdation', $recommentdation);
         update_post_meta($post_id, 'total_and_score', $total_and_score);
         update_post_meta($post_id, 'total_agreed_score', $total_agreed_score);
+        update_post_meta($post_id, 'key_area', $key_area);
+        update_post_meta($post_id, 'maturity_level', $maturity_level);
         $question_form->save_all_submission_feedback(); 
     }
 
