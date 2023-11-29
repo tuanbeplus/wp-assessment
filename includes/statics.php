@@ -1,6 +1,7 @@
 <?php
 const WP_ASSESSMENT_ADMIN_VIEW_DIR = WP_ASSESSMENT_DIR . '/views/admin';
 const WP_ASSESSMENT_FRONT_VIEW_DIR = WP_ASSESSMENT_DIR . '/views/front';
+const WP_ASSESSMENT_TEMPLATE = WP_ASSESSMENT_DIR . 'templates';
 
 // define admin views Assessments
 const ADMIN_QUESTIONAIRE_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/questionaire.php';

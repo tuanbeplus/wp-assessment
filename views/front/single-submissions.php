@@ -21,7 +21,7 @@ $assessment_questions_data = $main->wpa_unserialize_metadata($assessment_questio
 $question_templates = get_post_meta($assessment_id, 'question_templates', true);
 $report_id = get_post_meta($subs_id, 'report_id', true);
 $user_id = get_post_meta($subs_id, 'user_id', true);
-$assessment_term_arr = $main->get_assessment_terms($assessment_id);
+$assessment_term_arr = get_assessment_terms($assessment_id);
 
 $invalid_answers = array();
 
@@ -99,7 +99,7 @@ for($i = 0; $i < $count_quiz; $i++) {
 					<a href="tel:(02) 8270 9200">(02) 8270 9200</a>
 
 					<?php //if (!in_array('index', $assessment_term_arr)): ?>
-						<a id="printSubmissionEntry" href="#Print">Print Preliminary Report (.PDF)</a>
+						<!-- <a id="printSubmissionEntry" href="#Print">Print Preliminary Report (.PDF)</a> -->
 					<?php //endif; ?>
 				</div>
 				<div class="wrapperTablePrint">

@@ -156,7 +156,7 @@ $is_accepted = $status === 'accepted';
                 <?php endif; ?>
                 <!-- Notification Box -->
 
-                <?php if ($question_templates == 'Simple Assessment' && $questions && !$is_disabled && !$is_accepted) : ?>
+                <?php if ($question_templates == 'Simple Assessment' && $questions && !$is_accepted) : ?>
                     <!-- Begin Simple Assessment -->
                     <div class="stepperFormWrap" id="main-quiz-form">
                         <form onsubmit="return false" id="form_submit_quiz">
@@ -322,7 +322,7 @@ $is_accepted = $status === 'accepted';
                     <!-- End Simple Assessment -->
                 <?php endif; ?>
 
-                <?php if ($question_templates == 'Comprehensive Assessment' && $questions && !$is_disabled && !$is_accepted) : ?>
+                <?php if ($question_templates == 'Comprehensive Assessment' && $questions && !$is_accepted) : ?>
                     <!-- Begin Comprehensive Assessment -->
                     <div class="stepperFormWrap" id="main-quiz-form">
                         <!-- form message -->

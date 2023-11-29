@@ -6,6 +6,10 @@
  * 
  */
 
+global $post;
+$report_id = $post->ID;
+$post_meta = get_post_meta($report_id);
+
 $canvas_id = rand(1, 9999);
 $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
 $sections = "[

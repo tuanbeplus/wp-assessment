@@ -192,6 +192,28 @@ function get_assessments_accessible_all_users($organisation_id, $arr_terms)
 }
 
 /**
+ * Get all terms of an Assessment
+ *
+ * @param int 	 $assessment_id   	Assessment ID
+ *
+ * @return array Terms Array
+ * 
+ */
+function get_assessment_terms($assessment_id)
+{
+	$terms = get_the_terms( $assessment_id , 'category' );
+	$terms_arr = array();
+
+	if ($terms) {
+		foreach ($terms as $term) {
+			$terms_arr[] = $term->slug;
+		}
+	}
+
+	return $terms_arr;
+}
+
+/**
  * Check accessible for Salesforce Members(User)
  *
  * @param string $user_id   		Salesforce User ID
@@ -204,7 +226,7 @@ function check_access_salesforce_members($user_id, $assessment_id)
 {
 	$is_user_can_access = false;
 	$main = new WP_Assessment();
-	$terms_arr = $main->get_assessment_terms($assessment_id);
+	$terms_arr = get_assessment_terms($assessment_id);
 	$is_all_users_can_access = get_post_meta($assessment_id, 'is_all_users_can_access', true);
 	$related_sf_products = get_post_meta($assessment_id, 'related_sf_products', true);
 	
@@ -566,6 +588,33 @@ function get_all_submissions_of_assessment($assessment_id)
 }
 
 /**
+ * Get ranking of an assessment
+ * 
+ * @param $assessment_id 
+ *
+ * @return int Ranking ID
+ * 
+ */
+function get_ranking_of_assessment($assessment_id) 
+{
+	$args = array(
+		'post_type' => 'ranking',
+		'posts_per_page' => 1,
+		'post_status' => 'publish',
+		'orderby' => 'date',
+		'order' => 'DESC',
+		'meta_query' => array(
+			array(
+				'key' => 'assessment',
+				'value' => $assessment_id,
+			)
+		),
+	);
+	$ranking = get_posts($args);
+	return $ranking[0]->ID;
+}
+
+/**
  * Calculator Overall of all Submissions Score
  * 
  * @param $assessment_id 
@@ -599,6 +648,31 @@ function cal_overall_total_score($assessment_id, $post_meta)
 	}
 }
 
-function test_print(){
-	return 'here';
+/**
+ * Calculator average of all Industry type Score
+ * 
+ * @param array $industry_score_data	Industry total score data from Ranking 
+ *
+ * @return int Average Percent 
+ * 
+ */
+function cal_average_industry_score($industry_score_data=[])
+{
+	$total_industry_score = array();
+	if (!empty($industry_score_data)) {
+		foreach ($industry_score_data as $record) {
+			$total_industry_score[] = $record['total_score'];
+		}
+
+		if (is_array($total_industry_score)) {
+			$average = array_sum($total_industry_score) / count($total_industry_score);
+			$average_percent = round($average/268.8*100);
+			return $average_percent;
+		}
+		else {
+			return false;
+		}
+	}
 }
+
+

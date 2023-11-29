@@ -12,6 +12,10 @@
     font-size: 15px;
 }
 
+.admin-question-row-textarea .wp-editor-container iframe {
+    min-height: 260px!important;
+}
+
 .group-question-wrapper > .row > .question-row-points-container {
     margin-top: 15px;
 }
@@ -329,7 +333,7 @@
 }
 
 .group-question-wrapper .question-advice-row-container .visual-textarea-wrapper .wp-editor-container iframe {
-    min-height: 260px!important;
+    min-height: 220px!important;
 }
 
 .btn-toggle-advice-area {

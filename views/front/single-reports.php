@@ -10,46 +10,34 @@ global $post;
 $post_id = $post->ID;
 $main = new WP_Assessment();
 $mpdf = new \Mpdf\Mpdf();
+$report = new WP_Report_PDF();
 $post_meta = get_post_meta($post_id);
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
 $submission_id = get_post_meta($post_id, 'submission_id', true);
+$ranking_id = get_ranking_of_assessment($assessment_id);
 $org_data = get_post_meta($post_id, 'org_data', true);
 $assessment_title = get_the_title($assessment_id);
 $pdf_stylesheet = file_get_contents(WP_ASSESSMENT_ASSETS . '/css/report-pdf-style.css');
 $report_template = get_post_meta($assessment_id, 'report_template', true);
 $recommentdation = get_post_meta($submission_id, 'recommentdation', true);
-// $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
-// $questions = $main->wpa_unserialize_metadata($questions);
+
+// Data position from Ranking
+$position_by_total_score = json_decode(get_field('position_by_total_score', $ranking_id), true);
+$position_by_industry = json_decode(get_field('position_by_industry', $ranking_id), true);
+$position_by_framework = json_decode(get_field('position_by_framework', $ranking_id), true);
 
 // echo "<pre>";
-// print_r($recommentdation);
+// print_r();
 // echo "</pre>";
+// $report->report_pdf_header();
 // die;
 
 // Include Stylesheet
 $mpdf->WriteHTML($pdf_stylesheet,\Mpdf\HTMLParserMode::HEADER_CSS);
 
 // Define the Header/Footer before writing anything so they appear on the first page
-$mpdf->SetHTMLHeader(
-    '<div class="header" style="font-family:"Avenir-Roman";">
-        <img class="logo" src="/wp-content/plugins/wp-assessment/assets/images/and-logo-hor.png" 
-            style="width:200px;opacity:0.6;">
-    </div>'
-);
-
-// Define the Header/Footer before writing anything so they appear on the first page
-if (!empty($report_template['footer'])) {
-    $mpdf->SetHTMLFooter(
-        '<div class="footer">'
-            .$report_template['footer'].
-        '</div>'
-    );
-}
-else {
-    $mpdf->SetHTMLFooter(
-        file_get_contents(WP_ASSESSMENT_ADMIN_VIEW_DIR. '/reports/report-pdf-footer.php')
-    );
-}
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-header.php';
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-footer.php';
 
 // Render Front page
 $front_page = '<div class="front-page page" style="text-align:center;">
@@ -122,10 +110,41 @@ $recom_table .= '</div>';
 // $mpdf->WriteHTML($recom_table);
 // $mpdf->AddPage();
 
+// Render Highlights table
+$highlights_table = 
+    '<div class="page">
+        <h2>Highlights</h2>
+        <p>The below table highlights existing strengths at [Organisation] 
+            identified through the evaluation process for each key area. 
+        </p>
+        <table class="recom-table" width="100%">
+            <tr>
+                <th width="40%">Key Area</th>
+                <th width="60%">Strengths</th>
+            </tr>';
+        foreach ($recommentdation as $section){
+            $highlights_table .= 
+            '<tr>
+                <td width="40%">'. $section['key_area'] .'</td>
+                <td width="60%"></td>
+            </tr>';
+        }
+$highlights_table .= 
+        '</table>
+        <caption>Table 2 - Highlights</caption>
+    </div>';
+
+$mpdf->WriteHTML($highlights_table);
+$mpdf->AddPage();
+
 // Begin Part A - Organisation Dashboard
 $total_org_score = get_post_meta($submission_id, 'total_submission_score', true);
 $overall_org_score = cal_overall_total_score($assessment_id, 'total_submission_score');
 $overall_and_score = cal_overall_total_score($assessment_id, 'total_and_score');
+$org_score_rank = $position_by_total_score[$org_data['Id']]['org_rank'];
+$org_industry_rank = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'];
+$average_industry = cal_average_industry_score($position_by_industry['by_indus_data'][$org_data['Industry']]);
+
 $total_index_score = 
 "<div class='page'>
     <h2>Part A - Organisational Dashboard</h2>
@@ -149,15 +168,16 @@ $total_index_score =
             </td>
             <td>". $total_org_score['percent'] ."</td>
             <td>". $overall_and_score['percent_average'] ."</td>
-            <td>4</td>
+            <td>". $org_score_rank ."</td>
             <td>". $overall_org_score['percent_average'] ."</td>
         </tr>
     </table>
     <caption class='table-caption'>Table 3 - Total Index Score and Benchmark</caption>
     <p>". $org_data['Name'] ." scored ". $total_org_score['percent'] ."/100 in the Access and Inclusion Index, 
-        which ranked [X] overall. The average Access and Inclusion Index score 
+        which ranked ". $org_score_rank ." overall. The average Access and Inclusion Index score 
         for participating organisations is ". $overall_org_score['percent_average'] .
     ".</p>
+
     <h3>Industry Benchmark</h3>
     <table class='table-3'>
         <tr>
@@ -166,24 +186,26 @@ $total_index_score =
             <th>Industry Average</th>
         </tr>
         <tr>
-            <td>Industry Benchmark</td>
-            <td>1</td>
-            <td>56</td>
+            <td style='text-align:right;border-bottom:none;background-color:none;'>
+                Industry Benchmark
+            </td>
+            <td>". $org_industry_rank ."</td>
+            <td>". $average_industry ."</td>
         </tr>
     </table>
     <caption>Table 4 - Industry Benchmark</caption>
-    <p>". $org_data['Name'] ." was ranked [X] against all submitting 
-        organisations in the [Industry Name] industry. 
+    <p>". $org_data['Name'] ." was ranked ". $org_industry_rank ." against all submitting 
+        organisations in the ". $org_data['Industry'] ." industry. 
         The average Access and Inclusion Index score for 
-        organisations in your industry is [X].</p>
+        organisations in your industry is ". $average_industry .".</p>
 </div>";
 
 // Render Total Index Score section
 $mpdf->WriteHTML($total_index_score);
 
-// Output a PDF file directly to the browser
+// // Output a PDF file directly to the browser
 $mpdf->Output();
-?>
+
 
 
 

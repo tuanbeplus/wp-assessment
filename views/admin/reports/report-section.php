@@ -4,6 +4,8 @@ $report_template = get_post_meta($post->ID, 'report_template', true);
 $report_logo_url = $report_template['front_page']['logo_url'] ?? null;
 $report_front_title = $report_template['front_page']['title'] ?? null;
 $report_front_content = $report_template['front_page']['content'] ?? null;
+$is_include_toc = $report_template['is_include_toc'] ?? true;
+$terms = get_assessment_terms($post->ID);
 ?>
 
 <div id="report-template-wrapper" class="report-template-wrapper">
@@ -11,7 +13,7 @@ $report_front_content = $report_template['front_page']['content'] ?? null;
         <label for="report-include-toc">
             <input id="report-include-toc" type="checkbox" 
                     name="report_template[is_include_toc]" placeholder="Add title" value="1"
-                    <?php if ($report_template['is_include_toc'] == true) echo 'checked'; ?>>
+                    <?php if ($is_include_toc == true) echo 'checked'; ?>>
             Include table of content
         </label>
     </div>

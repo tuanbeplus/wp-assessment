@@ -168,9 +168,6 @@ class Question_Form
 
                         if ($quiz_point != null) 
                             $input['quiz_point'] = $quiz_point;
-                        
-                        $input['status'] = 'pending'; // Reset Quiz status
-                        $input['feedback'] = null; // Reset Quiz status
 
                         if($submission_id){
                             $conditions = array(
@@ -394,9 +391,6 @@ class Question_Form
                         if ($quiz_point != null) 
                             $input['quiz_point'] = $quiz_point;
 
-                        $input['status'] = 'pending'; // Reset Quiz status
-                        $input['feedback'] = null; // Reset Quiz status
-
                         // if (count($input) === 0)
                         //     throw new Exception('Please complete the answer');
 
@@ -584,7 +578,7 @@ class Question_Form
             update_post_meta($post_id, 'assessment_id', $assessment_id);
             update_post_meta($post_id, 'submission_id', $post_id);
             update_post_meta($post_id, 'assessment_status', 'pending');
-            delete_post_meta($post_id, 'quiz_feedback');
+
             $org_metadata = get_post_meta($post_id, 'org_data', true);
             if (empty($org_metadata)) {
                 $sf_org_data = get_sf_organisation_data($user_id, $organisation_id);

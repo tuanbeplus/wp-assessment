@@ -9,6 +9,11 @@ global $post;
 $post_id = $post->ID;
 $main = new WP_Assessment();
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
+$terms = get_assessment_terms($assessment_id);
+
+// Exit if this Submission isn't from Index
+if (!in_array('index', $terms)) return;
+
 $total_org_score = get_post_meta($post_id, 'total_submission_score', true);
 $org_section_score = get_post_meta($post_id, 'org_section_score', true);
 $report_key_areas = get_post_meta($assessment_id, 'report_key_areas', true);
@@ -26,7 +31,6 @@ $questions = $main->wpa_unserialize_metadata($questions);
 // print_r($overall_org_score);
 // echo "</pre>";
 ?>
-
 <div class="scoring-wrapper">
     <div class="maturity-level _field">
         <p><strong>Maturity Level</strong></p>

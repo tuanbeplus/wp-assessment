@@ -8,6 +8,7 @@ h1, h2, h3 h4, h5, h6 {
 p, li {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 14px;
+    line-height: 150%;
     letter-spacing: 0.4px!important;
 }
 .page {
@@ -134,7 +135,7 @@ table.table-3 th {
 }
 
 table.table-3 td {
-    padding: 0 10px 30px;
+    padding: 4px 10px 30px;
     border: 1px solid #98c2ff;
     border-left: none;
     background-color: azure;

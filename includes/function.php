@@ -859,21 +859,6 @@ class WP_Assessment
         }
     }
 
-    function get_assessment_terms($post_id)
-    {
-        $terms = get_the_terms( $post_id , 'category' );
-
-        $terms_arr = array();
-
-        if ($terms) {
-            foreach ($terms as $term) {
-                $terms_arr[] = $term->slug;
-            }
-        }
-
-        return $terms_arr;
-    }
-
     function get_field_organisation_id($user_id) {
 
         $account_id = getAccountMember($user_id)['Id'];
@@ -905,7 +890,7 @@ class WP_Assessment
 
     function get_self_assessed_score($assessment_id, $submission_data_arr)
     {
-        $assessment_term_arr = $this->get_assessment_terms($assessment_id);
+        $assessment_term_arr = get_assessment_terms($assessment_id);
 
         if (in_array('self-assessed', $assessment_term_arr)) {
 
