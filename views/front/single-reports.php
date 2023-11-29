@@ -27,9 +27,8 @@ $position_by_industry = json_decode(get_field('position_by_industry', $ranking_i
 $position_by_framework = json_decode(get_field('position_by_framework', $ranking_id), true);
 
 // echo "<pre>";
-// print_r();
+// print_r($position_by_framework);
 // echo "</pre>";
-// $report->report_pdf_header();
 // die;
 
 // Include Stylesheet
@@ -40,170 +39,30 @@ require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-header.php';
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-footer.php';
 
 // Render Front page
-$front_page = '<div class="front-page page" style="text-align:center;">
-    <img width="180" src="'. $report_template['front_page']['logo_url'] .'" alt="">
-    <div class="intro">
-        <p class="org-name">'. $org_data['Name'] .'</p>
-        <p class="title" width="400">'. $report_template['front_page']['title'] .'</p>
-        <p class="year">'. date('Y') .'</p>
-    </div>'
-    .$report_template['front_page']['content'].
-'</div>';
-$mpdf->WriteHTML($front_page);
-$mpdf->AddPage();
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-front-page.php';
 
 // Render Table of content
 if ($report_template['is_include_toc'] == true) { 
-    // $mpdf->TOCpagebreak();
+    $mpdf->TOCpagebreak();
 }
 
 // Render All generic pages
-$count = 0;
-foreach ($report_template['generic_page'] as $index => $generic_page) {
-    $count++;
-    $page_content  = '';
-    $page_content .= '<div class="page">';
-    $page_content .=    '<h2>'. $generic_page['title'] .'</h2>';
-    $page_content .=    $generic_page['content'];
-    $page_content .= '</div>';
-
-    $mpdf->TOC_Entry($generic_page['title'],0);
-
-    // $mpdf->WriteHTML($page_content);
-
-    // Do not add page break to last page
-    // if ($index <div $count) {
-        // $mpdf->AddPage();
-    // }
-}
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-generic-page.php';
 
 // Render Key Recommendations
-$recom_table  = '<div class="page">';
-$recom_table .= '<h2>Key Recommendations</h2>';
-$mpdf->TOC_Entry('Key Recommendations' ,0);
-$recom_table .= '<p>The below table highlights the top priorities/opportunities identified through the evaluation process for each key area.</p>';
-$recom_table .= '<table class="recom-table" width="100%">
-                    <tr>
-                        <th width="40%">Key Area</th>
-                        <th width="60%">Priorities</th>
-                    </tr>';
-foreach ($recommentdation as $i => $section) {
-    $recom_table .= '<tr>
-                        <td width="40%">'
-                            .$section['key_area'].
-                        '</td>
-                        <td width="60%">
-                            <ul>';
-    foreach ($section['list'] as $j => $recom) {
-        if (!empty($recom)) {
-            $recom_table .=   '<p width="100%">'. $i.'.'.$j.' '.$recom .'</p><br>';
-        }
-    }
-    $recom_table .=         '</ul>';
-    $recom_table .=     '</td>';
-    $recom_table .= '</tr>';
-}
-$recom_table .= '</table>';
-$recom_table .= '<caption>Table 1 - Key Recommendations</caption>';
-$recom_table .= '</div>';
-
-// $mpdf->WriteHTML($recom_table);
-// $mpdf->AddPage();
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-key-recommendations.php';
 
 // Render Highlights table
-$highlights_table = 
-    '<div class="page">
-        <h2>Highlights</h2>
-        <p>The below table highlights existing strengths at [Organisation] 
-            identified through the evaluation process for each key area. 
-        </p>
-        <table class="recom-table" width="100%">
-            <tr>
-                <th width="40%">Key Area</th>
-                <th width="60%">Strengths</th>
-            </tr>';
-        foreach ($recommentdation as $section){
-            $highlights_table .= 
-            '<tr>
-                <td width="40%">'. $section['key_area'] .'</td>
-                <td width="60%"></td>
-            </tr>';
-        }
-$highlights_table .= 
-        '</table>
-        <caption>Table 2 - Highlights</caption>
-    </div>';
+// require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-highlights.php';
 
-$mpdf->WriteHTML($highlights_table);
-$mpdf->AddPage();
+//=========== Begin Part A - Organisation Dashboard =============//
+// Render Organisation Total Score
+// require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-org-total-score.php';
 
-// Begin Part A - Organisation Dashboard
-$total_org_score = get_post_meta($submission_id, 'total_submission_score', true);
-$overall_org_score = cal_overall_total_score($assessment_id, 'total_submission_score');
-$overall_and_score = cal_overall_total_score($assessment_id, 'total_and_score');
-$org_score_rank = $position_by_total_score[$org_data['Id']]['org_rank'];
-$org_industry_rank = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'];
-$average_industry = cal_average_industry_score($position_by_industry['by_indus_data'][$org_data['Industry']]);
+// Render Self-assessed score and final Australian Network on Disability score 
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-self-assessed-score.php';
 
-$total_index_score = 
-"<div class='page'>
-    <h2>Part A - Organisational Dashboard</h2>
-    <p>
-        This section contains an overview of your organisation's performance across
-        the nine key areas and the benchmarked data against all participating 
-        organisations in 2023.
-    </p>
-    <h3>Total Index Score</h3>
-    <table class='table-3'>
-        <tr>
-            <th></th>
-            <th>Organisation <br> self-assessment <br> (/100)</th>
-            <th>AND assessment <br> and final score <br> (/100)</th>
-            <th>Rank (/N)</th>
-            <th>Average of other <br> organisations</th>
-        </tr>
-        <tr>
-            <td style='text-align:right;border-bottom:none;background-color:none;'>
-                Total Index Score
-            </td>
-            <td>". $total_org_score['percent'] ."</td>
-            <td>". $overall_and_score['percent_average'] ."</td>
-            <td>". $org_score_rank ."</td>
-            <td>". $overall_org_score['percent_average'] ."</td>
-        </tr>
-    </table>
-    <caption class='table-caption'>Table 3 - Total Index Score and Benchmark</caption>
-    <p>". $org_data['Name'] ." scored ". $total_org_score['percent'] ."/100 in the Access and Inclusion Index, 
-        which ranked ". $org_score_rank ." overall. The average Access and Inclusion Index score 
-        for participating organisations is ". $overall_org_score['percent_average'] .
-    ".</p>
-
-    <h3>Industry Benchmark</h3>
-    <table class='table-3'>
-        <tr>
-            <th></th>
-            <th>Industry Rank (/N)</th>
-            <th>Industry Average</th>
-        </tr>
-        <tr>
-            <td style='text-align:right;border-bottom:none;background-color:none;'>
-                Industry Benchmark
-            </td>
-            <td>". $org_industry_rank ."</td>
-            <td>". $average_industry ."</td>
-        </tr>
-    </table>
-    <caption>Table 4 - Industry Benchmark</caption>
-    <p>". $org_data['Name'] ." was ranked ". $org_industry_rank ." against all submitting 
-        organisations in the ". $org_data['Industry'] ." industry. 
-        The average Access and Inclusion Index score for 
-        organisations in your industry is ". $average_industry .".</p>
-</div>";
-
-// Render Total Index Score section
-$mpdf->WriteHTML($total_index_score);
-
-// // Output a PDF file directly to the browser
+// Output a PDF file directly to the browser
 $mpdf->Output();
 
 
