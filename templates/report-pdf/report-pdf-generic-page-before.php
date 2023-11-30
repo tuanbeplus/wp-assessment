@@ -1,13 +1,13 @@
 <?php 
 /**
- * The template for displaying All Generic page Report PDF - Saturn
+ * The template for displaying All before Generic page Report PDF - Saturn
  *
  * @author Tuan
  * 
  */
 
 $count = 0;
-foreach ($report_template['generic_page'] as $index => $generic_page) {
+foreach ($report_template['generic_page_before'] as $index => $generic_page) {
     $count++;
     $page_content  = '';
     $page_content .= '<div class="page">';
@@ -19,7 +19,7 @@ foreach ($report_template['generic_page'] as $index => $generic_page) {
     $mpdf->WriteHTML($page_content);
 
     // Do not add page break to last page
-    if ($index < $count) {
+    // if ($index < $count) {
         $mpdf->AddPage();
-    }
+    // }
 }

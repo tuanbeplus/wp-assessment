@@ -1400,29 +1400,31 @@ jQuery(document).ready(function ($) {
 
     // Add Generic page to List
     var page_count = 0;
-    if ($('#generic-pages-list .generic-page').length) {
-        page_count = $('#generic-pages-list .generic-page').length;
+    if ($('.generic-pages-list .generic-page').length) {
+        page_count = $('.generic-pages-list .generic-page').length;
     }
     $(document).on('click', '.btn-add-generic-page', function(e){
-        let insert_position = $(this).data('insert')
+        let generic_page_wrapper = $(this).closest('.generic-page-wrapper')
+        let data_position = $(this).data('position')
+        let data_insert = $(this).data('insert')
         let textarea_id = 'generic-page-textarea-' + Date.now();
         page_count = page_count + 1;
         
         let generic_page_item  = '<li id="generic-page-'+ page_count +'" class="_section generic-page">'
             generic_page_item +=     '<h3 class="_heading">Generic page</h3>'
-            generic_page_item +=     '<input type="text" name="report_template[generic_page]['+ page_count +'][title]" placeholder="Add title">'
-            generic_page_item +=     '<textarea id="'+ textarea_id +'" class="generic-page-wpeditor" name="report_template[generic_page]['+ page_count +'][content]" rows="10"></textarea>'
+            generic_page_item +=     '<input type="text" name="report_template[generic_page_'+ data_position +']['+ page_count +'][title]" placeholder="Add title">'
+            generic_page_item +=     '<textarea id="'+ textarea_id +'" class="generic-page-wpeditor" name="report_template[generic_page_'+ data_position +']['+ page_count +'][content]" rows="10"></textarea>'
             generic_page_item +=     '<div class="add-row-block">'
             generic_page_item +=         '<a class="btn-remove-generic-page button_remove">Remove this row</a>'
             generic_page_item +=         '<a class="btn-add-generic-page button button-primary" data-insert="bottom">+ Add row</a>'
             generic_page_item +=     '</div>'
             generic_page_item += '</li>'
 
-        if (insert_position == 'top') {
-            $('.report-template #generic-pages-list').prepend(generic_page_item)
+        if (data_insert == 'top') {
+            generic_page_wrapper.find('.generic-pages-list').prepend(generic_page_item)
         }
         else {
-            $(this).closest('#generic-pages-list .generic-page').after(generic_page_item)
+            $(this).closest('.generic-pages-list .generic-page').after(generic_page_item)
         }
         // Append WP editor
         append_wpeditor('#'+ textarea_id, true)
@@ -1431,7 +1433,7 @@ jQuery(document).ready(function ($) {
     // Remove a Generic page row
     $(document).on('click', '.btn-remove-generic-page', function(e){
         e.preventDefault();
-        let currnet_row = $(this).closest('#generic-pages-list .generic-page')
+        let currnet_row = $(this).closest('.generic-pages-list .generic-page')
         
         currnet_row.addClass('removing')
         setTimeout(function() {

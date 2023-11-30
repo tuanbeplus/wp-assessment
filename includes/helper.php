@@ -562,6 +562,27 @@ function get_maturity_level_org($score)
 	}
 }
 
+function get_maturity_level_org_step_2($score) 
+{
+	if ($score != null) {
+		if ($score >= 1 && $score < 2) {
+			return 1;
+		}
+		else if ($score >= 2 && $score < 3) {
+			return 2;
+		}
+		else if ($score >= 3 && $score < 4) {
+			return 3;
+		}
+		else if ($score >= 4) {
+			return 4;
+		}
+	}
+	else {
+		return null;
+	}
+}
+
 /**
  * Get all submissions of an assessment
  * 
