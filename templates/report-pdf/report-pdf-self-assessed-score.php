@@ -20,14 +20,16 @@ $self_assessed_score =
             <th width="30%">Organisation self-assessment</th>
             <th width="30%">AND assessed level</th>
         </tr>';
-foreach ($position_by_framework as $key_area) {
+foreach ($position_by_framework as $index => $key_area) {
+    $and_assessed_score = array_sum($agreed_score[$index]) / count($agreed_score[$index]);
+    $and_assessed_level = get_maturity_level_org($and_assessed_score);
     $self_assessed_score .=
         '<tr>
-            <td width="40%" style="text-align:right; font-style:italic;">'
+            <td width="40%" style="font-style:italic;">'
                 . $key_area['title'] .
             '</td>
             <td width="30%">'. $key_area['parent_questions'][$org_data['Id']]['level'] .'</td>
-            <td width="30%"></td>
+            <td width="30%">'. $and_assessed_level .'</td>
         </tr>';
 }
 $self_assessed_score .=
@@ -43,4 +45,48 @@ $mpdf->WriteHTML($self_assessed_score);
 
 // Insert page break
 $mpdf->AddPage();
+
+$self_assessed_percent =
+'<div class="page">
+    <table class="table-5">
+        <tr>
+            <th width="40%">Key Area</th>
+            <th width="30%">Organisation self-assessment</th>
+            <th width="30%">AND assessed score</th>
+        </tr>';
+foreach ($recommentdation as $index => $key_area) {
+    // Average Org score in a Key area
+    $org_self_score = array_sum($org_score[$index]) / count($org_score[$index]);
+    $org_self_percent = round($org_self_score*100);
+
+    // Average Agreed score in a Key area
+    $and_assessed_score = array_sum($agreed_score[$index]) / count($agreed_score[$index]);
+    $and_assessed_percent = round($and_assessed_score*100);
+    $self_assessed_percent .=
+        '<tr>
+            <td width="40%" style="font-style:italic;">'
+                . $key_area['key_area'] .
+            '</td>
+            <td width="30%">'. $org_self_percent .' %</td>
+            <td width="30%">'. $and_assessed_percent .' %</td>
+        </tr>';
+}
+$self_assessed_percent .=
+    '</table>
+    <caption>Table 6 - Scorecard for the nine Key Areas shown as percentages</caption>
+    <p>Your self-assessed score and the AND evaluated score may have differed. This can be attributed to reasons such as:</p>
+    <ul style="list-style:upper-roman;">
+        <li>Insufficient evidence was provided to accurately validate your self-assessment.</li>
+        <li>We could not find the answer within the evidence provided.</li>
+        <li>Varying interpretation of the Index questions.</li>
+    </ul>
+</div>';
+
+// Render HTML
+$mpdf->WriteHTML($self_assessed_percent);
+
+// Insert page break
+$mpdf->AddPage();
 ?>
+
+

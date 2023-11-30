@@ -168,14 +168,21 @@ class Custom_Fields
         $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
 
         // Renew Index of generic page Report template array
-        $new_report_template = array();
-        $index = 1;
         if (!empty($report_template)) {
-            foreach ($report_template['generic_page'] as $generic_page) {
-                $new_report_template[$index] = $generic_page;
-                $index++;
+            $new_page_before = array();
+            $i = 1;
+            foreach ($report_template['generic_page_before'] as $page_before) {
+                $new_page_before[$i] = $page_before;
+                $i++;
             }
-            $report_template['generic_page'] = $new_report_template;
+            $new_page_after = array();
+            $j = 1;
+            foreach ($report_template['generic_page_after'] as $page_after) {
+                $new_page_after[$j] = $page_after;
+                $j++;
+            }
+            $report_template['generic_page_before'] = $new_page_before ?? null;
+            $report_template['generic_page_after'] = $new_page_after ?? null;
         }
 
         update_post_meta($post_id, 'report_template', $report_template);

@@ -56,42 +56,65 @@ $terms = get_assessment_terms($post->ID);
             </div>
         </div>
         <!-- /Front page -->
-
-        <div class="add-row-block-top">
-            <a class="btn-add-generic-page button button-primary" data-insert="top">+ Add row</a>
-        </div>
-        
-        <!-- Generic Pages List -->
-        <ul id="generic-pages-list">
-        <?php if (!empty($report_template['generic_page'])): ?>
-            <?php foreach ($report_template['generic_page'] as $index => $generic_page): ?>
-                <li id="generic-page-<?php echo $index; ?>" class="_section generic-page">
-                    <h3 class="_heading">Generic page</h3>
-                    <input type="text" name="report_template[generic_page][<?php echo $index; ?>][title]" 
-                            placeholder="Add title"
-                            value="<?php echo $generic_page['title'] ?? null; ?>">
-                    <?php
-                        $content   = $generic_page['content'] ?? null;
-                        $editor_id = 'report-generic-wpeditor-'. $index;
-                        $editor_settings = array(
-                            'textarea_name' => "report_template[generic_page][". $index ."][content]",
-                            'textarea_rows' => 12,
-                            'quicktags' => true, // Remove view as HTML button.
-                            'default_editor' => 'tinymce',
-                            'tinymce' => true,
-                        );
-                        wp_editor( $content, $editor_id, $editor_settings );
-                    ?>
-                    <div class="add-row-block">
-                        <a class="btn-remove-generic-page button_remove">Remove this row</a>
-                        <a class="btn-add-generic-page button button-primary" data-insert="bottom">+ Add row</a>
-                    </div>
-                </li>
-            <?php endforeach; ?>
-        <?php endif; ?>
-        </ul>
-        <!-- /Generic Pages List -->
-        
+        <?php 
+        $generic_page_type = array(
+            array(
+                'type' => 'before',
+                'description' => 'Add page to the front of the Document before generated content',
+            ),
+            array(
+                'type' => 'after',
+                'description' => 'Add page to the back of the Document after generated content',
+            ),
+        );
+        ?>
+        <?php foreach ($generic_page_type as $page_type): ?>
+            <div class="generic-page-wrapper">
+                <div class="add-row-block-top">
+                    <p class="_description"><?php echo $page_type['description']; ?></p>
+                    <a class="btn-add-generic-page button button-primary" 
+                        data-position="<?php echo $page_type['type']; ?>"
+                        data-insert="top">
+                        + Add row
+                    </a>
+                </div>
+                <!-- Generic Pages before List -->
+                <ul class="generic-pages-list" data-position="<?php echo $page_type['type']; ?>">
+                <?php if (!empty($report_template['generic_page_'.$page_type['type']])): ?>
+                    <?php foreach ($report_template['generic_page_'.$page_type['type']] as $index => $generic_page): ?>
+                        <li id="generic-page-<?php echo $index; ?>" class="_section generic-page">
+                            <h3 class="_heading">Generic page</h3>
+                            <input type="text" name="report_template[generic_page_<?php echo $page_type['type']; ?>][<?php echo $index; ?>][title]" 
+                                    placeholder="Add title"
+                                    value="<?php echo $generic_page['title'] ?? null; ?>">
+                            <?php
+                                $content   = $generic_page['content'] ?? null;
+                                $editor_id = 'report-generic-wpeditor-'.$page_type['type'].$index;
+                                $editor_settings = array(
+                                    'textarea_name' => "report_template[generic_page_".$page_type['type']."][". $index ."][content]",
+                                    'textarea_rows' => 12,
+                                    'quicktags' => true, // Remove view as HTML button.
+                                    'default_editor' => 'tinymce',
+                                    'tinymce' => true,
+                                );
+                                wp_editor( $content, $editor_id, $editor_settings );
+                            ?>
+                            <div class="add-row-block">
+                                <a class="btn-remove-generic-page button_remove">Remove this row</a>
+                                <a class="btn-add-generic-page button button-primary" 
+                                    data-position="<?php echo $page_type['type']; ?>"
+                                    data-insert="bottom">
+                                    + Add row
+                                </a>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </ul>
+                <!-- /Generic Pages before List -->
+            </div>
+        <?php endforeach; ?>
+            
         <!-- Report Footer -->
         <div id="report-footer" class="_section">
             <h3 class="_heading">Add Footer</h3>

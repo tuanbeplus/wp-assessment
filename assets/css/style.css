@@ -1458,6 +1458,18 @@ ul.dashboard-charts-list li.chart {
     font-size: 16px;
 }
 
+.generic-page-wrapper {
+    margin: 16px 0;
+    padding: 12px 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.generic-page-wrapper ._description {
+    font-size: 16px;
+    font-weight: 500;
+}
+
 .report-template ._section {
     margin-bottom: 24px;
     padding-bottom: 20px;
@@ -1476,7 +1488,9 @@ ul.dashboard-charts-list li.chart {
 
 .report-template .add-row-block-top {
     margin-bottom: 10px;
-    text-align: right;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .report-template ._section .add-row-block {
@@ -1502,7 +1516,7 @@ ul.dashboard-charts-list li.chart {
     border: none;
 }
 
-.report-template #generic-pages-list {
+.report-template .generic-pages-list {
     padding: 0;
 }
 

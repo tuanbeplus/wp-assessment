@@ -11,6 +11,9 @@ p, li {
     line-height: 150%;
     letter-spacing: 0.4px!important;
 }
+ul li, ol li {
+    margin-bottom: 10px;
+}
 .page {
     position: relative;
     padding-top: 40px;
@@ -146,4 +149,17 @@ table.table-3 td:first-child {
     text-align: right;
     border-bottom: none;
     background-color: none;
+}
+
+table.table-5 th {
+    padding: 10px 10px 20px 0;
+    text-align: right;
+    border: 1px solid #98c2ff;
+    line-height: 150%;
+}
+
+table.table-5 td {
+    padding: 10px 10px 20px 0;
+    text-align: right;
+    border: 1px solid #98c2ff;
 }
