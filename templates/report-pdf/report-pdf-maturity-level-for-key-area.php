@@ -36,14 +36,14 @@ foreach ($position_by_framework as $parent_id => $parent_question) {
         $innovation_lv = "Level ".$in_mat_lv ;
     }
     $table_html .= "<tr>
-                        <td style='text-align:right;border-bottom:none;background-color:none;'>
+                        <td width='20%' style='text-align:right;border-bottom:none;background-color:none;'>
                             ".$parent_question['title']."
                         </td>
-                        <td>". $framework_lv ."</td>
-                        <td>". $implementation_lv ."</td>
-                        <td>". $review_lv ."</td>
-                        <td>". $innovation_lv ."</td>
-                        <td>". $overall_lv ."</td>
+                        <td width='16%'>". $framework_lv ."</td>
+                        <td width='16%'>". $implementation_lv ."</td>
+                        <td width='16%'>". $review_lv ."</td>
+                        <td width='16%'>". $innovation_lv ."</td>
+                        <td width='16%'>". $overall_lv ."</td>
                  </tr>";
 }
 
@@ -51,14 +51,14 @@ $total_index_score =
 "<div class='page'>
     <h3>Maturity Level for Framework, Implementation, Review and Innovation</h3>
     <p>Questions within each of the Key Areas of the Index are grouped into four sections: Framework, Implementation, Review and Innovation (Employee Experience and Customer Experience only). Table 8 provides an overview of your maturity level for each of the four sections.</p>
-    <table class='table-3'>
+    <table class='table-5'>
         <tr>
-            <th>Key Area</th>
-            <th>Framework</th>
-            <th>Implementation</th>
-            <th>Review</th>
-            <th>Innovation</th>
-            <th>Overall</th>
+            <th width='20%'>Key Area</th>
+            <th width='16%'>Framework</th>
+            <th width='16%'>Implementation</th>
+            <th width='16%'>Review</th>
+            <th width='16%'>Innovation</th>
+            <th width='16%'>Overall</th>
         </tr>
         ".$table_html."
     </table>

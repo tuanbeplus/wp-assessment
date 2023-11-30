@@ -24,7 +24,7 @@ foreach ($position_by_framework as $parent_id => $parent_question) {
 
 $total_index_score = 
 "<div class='page'>
-    <h3>MatOverall Maturity Dashboard</h3>
+    <h3>Overall Maturity Dashboard</h3>
     <table class='table-3'>
         <tr>
           <th>Overall Maturity by Key Area</th>

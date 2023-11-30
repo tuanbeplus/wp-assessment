@@ -38,9 +38,14 @@ class Custom_Fields
         add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('report-dashboard-charts', 'Dashboard Charts', array($this, 'report_dashboard_chart_meta_box_callback'), 'reports', 'normal', 'default');
         // add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
+        add_meta_box('report-dashboard-share', 'Share this Report to Users', array($this, 'report_dashboard_share_meta_box_callback'), 'reports', 'side', 'default');
 
         // Attachments
         add_meta_box('attachment_uploader_info_view', 'Uploaded by member', array($this, 'attachment_uploader_info_section_admin'), 'attachment', 'side', 'default');
+    }
+
+    function report_dashboard_share_meta_box_callback(){
+      return include_once REPORT_DASHBOARD_SHARE_REPORTS;
     }
 
     function assessment_options_meta_box_callback()
@@ -87,12 +92,12 @@ class Custom_Fields
         return include_once ADMIN_SUBMISSION_SCORING_VIEW;
     }
 
-    function assessments_additional_profile_fields() 
+    function assessments_additional_profile_fields()
     {
         return include_once USER_ASSESSMENTS_PERCHASED_FIELDS;
     }
-    
-    function access_control_panel_meta_box_callback() 
+
+    function access_control_panel_meta_box_callback()
     {
         return include_once ADMIN_ACCESS_CONTROL_PANEL;
     }
@@ -218,11 +223,11 @@ class Custom_Fields
                 switch ($value) {
                     case 'Framework':
                         $framework_cnt++;
-                        $framework_vl += $org_score[$pr_key][$c_key]; 
+                        $framework_vl += $org_score[$pr_key][$c_key];
                         break;
                     case 'Implementation':
                         $implementation_cnt++;
-                        $implementation_vl += $org_score[$pr_key][$c_key]; 
+                        $implementation_vl += $org_score[$pr_key][$c_key];
                         break;
                     case 'Review':
                         $review_cnt++;
@@ -283,7 +288,7 @@ class Custom_Fields
         update_post_meta($post_id, 'total_agreed_score', $total_agreed_score);
         update_post_meta($post_id, 'key_area', $key_area);
         update_post_meta($post_id, 'maturity_level', $maturity_level);
-        $question_form->save_all_submission_feedback(); 
+        $question_form->save_all_submission_feedback();
     }
 
     function save_assigned_moderator($post_id): void

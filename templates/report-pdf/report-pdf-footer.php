@@ -16,7 +16,7 @@ if (!empty($report_template['footer'])) {
 else {
     $mpdf->SetHTMLFooter(
         '<div class="footer">
-            <a width="100%" href="https://and.org.au/">www.and.org.au</a>
+            <a width="100%" href="www.and.org.au/">www.and.org.au</a>
             <table class="hypelinks-list" width="100%">
                 <tr>
                     <td width="20%">

@@ -10,7 +10,7 @@ jQuery(document).ready(function ($) {
 
         let group_parent_repeater = $("#question-group-repeater")
         groupCount = groupCount + 1;
-                                    
+
         let group_questions_html  = '<div class="group-question-wrapper question" id="question-group-row-' + groupCount + '" data-id="' + groupCount + '">';
             group_questions_html += '    <input class="is_locked_input" type="hidden" name="group_questions[' + groupCount + '][is_locked]" value="0">';
             group_questions_html += '    <div class="question-wrapper-top">';
@@ -53,8 +53,8 @@ jQuery(document).ready(function ($) {
             group_questions_html += '           <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>';
             group_questions_html += '       </a>';
             group_questions_html += '    </div>';
-            group_questions_html += '</div>';                
-            
+            group_questions_html += '</div>';
+
         group_parent_repeater.append(group_questions_html)
   });
 
@@ -72,7 +72,7 @@ jQuery(document).ready(function ($) {
         }
         let wp_editor = 'wp-editor-question-' + Date.now();
         let wp_advice_editor = 'question-advice-row-' + Date.now();
-                                                    
+
         let question_row_html  = '<div class="question-row-container" id="question-main-row-' + rowCount + '" data-id="'+rowCount+'">';
             question_row_html += '    <input type="hidden" name="question_repeater[]"/>';
             question_row_html += '    <div class="remove-question-block">';
@@ -172,7 +172,7 @@ jQuery(document).ready(function ($) {
         let wpeditor_des_wrapper = $('#' + wp_editor)
         let wpeditor_advice_wrapper = $('#' + wp_advice_editor)
 
-        // Render WP Editor 
+        // Render WP Editor
         append_wpeditor(wpeditor_des_wrapper, false)
         append_wpeditor(wpeditor_advice_wrapper, false)
 
@@ -184,7 +184,7 @@ jQuery(document).ready(function ($) {
 
     function render_key_area_question(select_key_area) {
         let key_area_input = $('.key-areas-list .key-area-input')
-        
+
         key_area_input.each(function(e) {
             let option_item = '<option value="'+ $(this).val() +'">'+ $(this).val() +'</option>';
             select_key_area.append(option_item)
@@ -366,7 +366,7 @@ jQuery(document).ready(function ($) {
         else {
             btn.addClass('active')
             wrapper_top.addClass('active')
-        
+
             if (question_wrapper.hasClass('group-question-wrapper')) {
                 btn.find('.text').text('Collapse Group')
             }
@@ -716,7 +716,7 @@ jQuery(document).ready(function ($) {
             'user_id' : user_id,
         },
         beforeSend : function ( xhr ) {
-            
+
         },
         success:function(response){
             if (response == true) {
@@ -738,7 +738,7 @@ jQuery(document).ready(function ($) {
 
         let collaborator_id = $(this).data('id')
         let collaborator_name = $(this).text()
-                                            
+
         let selected_collab = '<li class="selected-collab-item" data-id="'+ collaborator_id +'">'
             selected_collab +=    '<label for="input-hiden">'+ collaborator_name +'</label>'
             selected_collab +=    '<input id="input-hiden" type="hidden" name="assigned_collaborator[]" value="'+ collaborator_id +'">'
@@ -839,7 +839,7 @@ jQuery(document).ready(function ($) {
         let count_report_item = report_section_wrapper.find('._section').length
 
         if (count_report_item == 0) { // if has data on report section editor
-        
+
             $(this).text('- Remove report section').addClass('remove')
             report_section_wrapper.append(report_sections);
 
@@ -881,19 +881,19 @@ jQuery(document).ready(function ($) {
 
         row_recom_index = row_recom_index + 1;
         let btn_position = $(this).data('position')
-        
+
         let row_recom = '<li id="row-key-area-'+ row_recom_index +'" class="row-key-area">'
             row_recom += '    <div class="key-title">'
             row_recom += '          <input type="text" class="form-control"'
             row_recom += '                  placeholder="Add key Area name"'
-            row_recom += '                  name="report_key_areas['+ row_recom_index +'][key]"'
+            row_recom += '                  name="report_key_areas['+ row_recom_index +']"'
             row_recom += '                  value="">'
             row_recom += '    </div>'
             row_recom += '    <div class="key-action">'
             row_recom += '        <span class="remove-row"><i class="fa-regular fa-circle-xmark"></i></span>'
             row_recom += '    </div>'
             row_recom += '</li>'
-        
+
         if (btn_position == 'top') {
             key_recom_container.prepend(row_recom)
         }
@@ -927,7 +927,7 @@ jQuery(document).ready(function ($) {
 
             item_dropdown.addClass('selected')
             list_selected_area.append(item_select_input)
-        }        
+        }
     });
 
     $(document).on('click', '.field-select2 .remove-item', function (e){
@@ -953,7 +953,7 @@ jQuery(document).ready(function ($) {
     });
 
     async function markFeedbackSubmissionAnswers(instance, type = "rejected") {
-        
+
         let quizId = instance.data("id");
         let parent_quiz_id = instance.data("group-id");
         let parent = $(`#main-container-${parent_quiz_id}_${quizId}`);
@@ -978,7 +978,7 @@ jQuery(document).ready(function ($) {
     }
 
     async function rejectSubmissionWithFeedback(instance, type, data = {}) {
-        
+
         let card_feedback = instance.closest('.feedback')
         let card_footer = card_feedback.find('.card-footer')
         let quiz_status = '<div class="quiz-status '+ type +'">Status: <strong>'+ type +'</strong></div>'
@@ -988,7 +988,7 @@ jQuery(document).ready(function ($) {
         ...data,
         };
 
-        let response = await $.ajax({ 
+        let response = await $.ajax({
             type: "POST",
             url: ajaxUrl,
             data: payload,
@@ -1039,9 +1039,9 @@ jQuery(document).ready(function ($) {
             type: feedbackType,
         };
 
-        let response = await $.ajax({ 
-            type: "POST", 
-            url: ajaxUrl, 
+        let response = await $.ajax({
+            type: "POST",
+            url: ajaxUrl,
             data: payload,
             beforeSend : function ( xhr ) {
                 parent_wrapper.find('.button').addClass('loading')
@@ -1111,7 +1111,7 @@ jQuery(document).ready(function ($) {
         await admin_upload_additional_files(file, that, count_file_item);
 
         new_file_id = filesList.find('.additional-file-id-'+ count_file_item).val()
-        
+
         wp.media.attachment(new_file_id).fetch().then(function (data) {
             // preloading finished
             // after this you can use your attachment normally
@@ -1138,7 +1138,7 @@ jQuery(document).ready(function ($) {
             'file_id' : file_ID,
         },
         beforeSend : function ( xhr ) {
-            
+
         },
         success:function(response){
             // alert('Delete file Successfully')
@@ -1178,7 +1178,7 @@ jQuery(document).ready(function ($) {
         if (status) {
             fileUploaderWrap.find('.additional-file-id-' + index).val(response?.attachment_id)
         } else {
-        
+
         }
     }
 
@@ -1321,7 +1321,7 @@ jQuery(document).ready(function ($) {
         member_item  = '<li class="member-item" data-id="'+ member_id +'">'
         member_item += '   <span>'
         member_item += '       <i class="fa-solid fa-user"></i>'
-        member_item += '       <span class="member-name">'+ member_name +' - '+ org_name +'</span>'       
+        member_item += '       <span class="member-name">'+ member_name +' - '+ org_name +'</span>'
         member_item += '   </span>'
         member_item += '   <span class="icon-delete-member"><i class="fa-regular fa-circle-xmark"></i></span>'
         member_item += '   <input type="hidden" name="assigned_members['+ members_count +'][id]" value="'+ member_id +'">'
@@ -1331,7 +1331,7 @@ jQuery(document).ready(function ($) {
 
         assigned_member_items.each(function (e) {
             assigned_members_arr.push($(this).data('id'));
-        })        
+        })
 
         if (jQuery.inArray(member_id, assigned_members_arr) == -1) {
             assigned_members_list.prepend(member_item);
@@ -1409,7 +1409,7 @@ jQuery(document).ready(function ($) {
         let data_insert = $(this).data('insert')
         let textarea_id = 'generic-page-textarea-' + Date.now();
         page_count = page_count + 1;
-        
+
         let generic_page_item  = '<li id="generic-page-'+ page_count +'" class="_section generic-page">'
             generic_page_item +=     '<h3 class="_heading">Generic page</h3>'
             generic_page_item +=     '<input type="text" name="report_template[generic_page_'+ data_position +']['+ page_count +'][title]" placeholder="Add title">'
@@ -1434,7 +1434,7 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '.btn-remove-generic-page', function(e){
         e.preventDefault();
         let currnet_row = $(this).closest('.generic-pages-list .generic-page')
-        
+
         currnet_row.addClass('removing')
         setTimeout(function() {
             currnet_row.remove();
@@ -1503,5 +1503,42 @@ jQuery(document).ready(function ($) {
     $('input.group-question-admin-title').prop('required',true);
     $('input.question-admin-title').prop('required',true);
     $('input.choice-item-answer').prop('required',true);
+
+    //Share Reports
+    if($('.post-type-reports').length > 0){
+      $('.select-users-report').select2({placeholder: "Select users",});
+      $('.btn-share-report').on('click',function(){
+         var users = $('.select-users-report').val();
+         var post_id = $('input[name="post_share"]').val();
+         //ajax send report to Users
+         sendReporttoUsers(this,users,post_id);
+      });
+      function sendReporttoUsers(ele,users,post_id){
+          //if(users.length > 0){
+            $.ajax({
+              type: 'POST',
+              url: ajaxUrl,
+              data:{
+                  'action' : 'send_report_to_users',
+                  'users' : users,
+                  'post_id' : post_id
+              },
+              beforeSend : function ( xhr ) {
+                $(ele).addClass('disabled');
+                $('.report-message').html();
+              },
+              success:function(res){
+                console.log(res);
+                if(res.status){
+                  $('.report-message').html('<span class="success">'+res.message+'</span>');
+                }else{
+                  $('.report-message').html('<span class="error">'+res.message+'</span>');
+                }
+                $(ele).removeClass('disabled');
+              }
+            });
+          }
+      //}
+    };
 
 });

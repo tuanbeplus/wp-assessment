@@ -28,12 +28,12 @@ class Question_Form
         add_action('wp_ajax_nopriv_final_accept_reject_assessment', array($this, 'final_accept_reject_assessment'));
 
         add_action('wp_ajax_and_insert_attachment', array($this, 'and_insert_attachment'));
-        add_action('wp_ajax_nopriv_and_insert_attachment', array($this, 'and_insert_attachment')); 
+        add_action('wp_ajax_nopriv_and_insert_attachment', array($this, 'and_insert_attachment'));
 
         add_action('wp_ajax_upload_assessment_attachment', array($this, 'upload_assessment_attachment'));
         add_action('wp_ajax_nopriv_upload_assessment_attachment', array($this, 'upload_assessment_attachment'));
 
-        add_action('wp_ajax_delete_additional_file_assessment', array($this, 'delete_additional_file_assessment')); 
+        add_action('wp_ajax_delete_additional_file_assessment', array($this, 'delete_additional_file_assessment'));
         add_action('wp_ajax_nopriv_delete_additional_file_assessment', array($this, 'delete_additional_file_assessment'));
 
         add_action('wp_ajax_send_invite_to_collaborator', array($this, 'send_invite_to_collaborator'));
@@ -42,7 +42,10 @@ class Question_Form
         add_action('wp_ajax_send_invite_to_colleagues', array($this, 'send_invite_to_colleagues'));
         add_action('wp_ajax_nopriv_send_invite_to_colleagues', array($this, 'send_invite_to_colleagues'));
 
-        $this->user_id = get_current_user_id(); 
+        //Share report to users
+        add_action('wp_ajax_send_report_to_users', array($this, 'share_report_to_users'));
+
+        $this->user_id = get_current_user_id();
 
     }
 
@@ -159,14 +162,14 @@ class Question_Form
                         else {
                             $input['description'] = null;
                         }
-                        
+
                         if (!empty($attachment_id))
                             $input['attachment_id'] = $attachment_id;
 
                         if (!empty($attachmentIDs))
                             $input['attachment_ids'] = json_encode($attachmentIDs);
 
-                        if ($quiz_point != null) 
+                        if ($quiz_point != null)
                             $input['quiz_point'] = $quiz_point;
 
                         if($submission_id){
@@ -188,7 +191,7 @@ class Question_Form
                             );
                         }
 
-                        if (!$quiz_data) { 
+                        if (!$quiz_data) {
                             // Insert Quiz record if quiz_data not exist
                             $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                         } else {
@@ -259,7 +262,7 @@ class Question_Form
                     );
                 }
 
-                if (!$quiz_data) { 
+                if (!$quiz_data) {
                     // Insert Quiz record if quiz_data not exist
                     $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                 } else {
@@ -303,10 +306,10 @@ class Question_Form
             // $submission_id = $this->is_submission_progress_exist($user_id, $assessment_id);
             $submission_id = $this->is_submission_progress_exist($organisation_id, $assessment_id);
 
-            if($type_quiz == 'Comprehensive Assessment'){ 
+            if($type_quiz == 'Comprehensive Assessment'){
 
                 $list_quiz = array();
-                
+
                 foreach ($data_quiz as $id => $f) {
                     $exp   = explode('_',$f['name']);
                     $value = $f['value'];
@@ -388,7 +391,7 @@ class Question_Form
                         if (!empty($attachmentIDs))
                             $input['attachment_ids'] = json_encode($attachmentIDs);
 
-                        if ($quiz_point != null) 
+                        if ($quiz_point != null)
                             $input['quiz_point'] = $quiz_point;
 
                         // if (count($input) === 0)
@@ -413,7 +416,7 @@ class Question_Form
                             );
                         }
 
-                        if (!$quiz_data) { 
+                        if (!$quiz_data) {
                             // Insert Quiz record if quiz_data not exist
                             $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                         } else {
@@ -484,7 +487,7 @@ class Question_Form
                     );
                 }
 
-                if (!$quiz_data) { 
+                if (!$quiz_data) {
                     // Insert Quiz record if quiz_data not exist
                     $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                 } else {
@@ -828,14 +831,14 @@ class Question_Form
 
     /**
      * upload file form Admin to WP media
-     * 
+     *
      */
     function upload_assessment_attachment()
     {
         try {
             if (!isset($_FILES["file"]))
                 throw new Exception('File not found.');
-                            
+
             $file = $_FILES["file"];
             $path = $file["tmp_name"];
             $max_file_size = wp_max_upload_size();
@@ -1013,7 +1016,7 @@ class Question_Form
             $post_edit_link = home_url() .'/wp-admin/post.php?post='. $post_id .'&action=edit';
             $post_title = get_the_title($post_id);
             $content = '<p>Click here to view the <a href=' . $post_edit_link . '>'. $post_title  .'</a></p>';
-                
+
             foreach ($user_id_arr as $user_id) {
 
                 $user = get_user_by('id', $user_id['id']);
@@ -1024,6 +1027,38 @@ class Question_Form
             }
 
             return wp_send_json(array('message' => 'Invite has been send to the Collaborator', 'status' => true));
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+
+    function share_report_to_users()
+    {
+        try {
+            $users = $_POST['users'];
+            $post_id = intval($_POST['post_id']);
+
+            if(empty($users)){
+              return wp_send_json(array('message' => 'You don\'t not to choose any users yet!', 'status' => false));
+            }
+
+            $link_post = get_permalink($post_id);
+            $post_title = get_the_title($post_id);
+            $content = '<p>Click here to view the <a href=' . $link_post . '>'. $post_title  .'</a></p>';
+            $headers = array('Content-Type: text/html; charset=UTF-8');
+
+            foreach ($users as $user_id) {
+
+                $user = get_user_by('id', $user_id);
+
+                $email = $user->user_email;
+                $sent = wp_mail($email , 'You got an share of the report on the '.$post_title, $content , $headers);
+
+                if (!$sent) throw new Exception($sent, 1);
+
+            }
+
+            return wp_send_json(array('message' => 'Report has been send to the users!', 'status' => true, 'user' => $user));
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }
@@ -1075,7 +1110,7 @@ class Question_Form
             $assessment_link = get_permalink($assessment_id);
             $assessment_title = get_the_title($assessment_id);
             $assessment_title = str_replace('&#8211;', '-', $assessment_title); //Remove special character code to dash(-)
-            
+
             // Filter mail from
             add_filter( 'wp_mail_from', 'sf_user_mail_from' );
             add_filter( 'wp_mail_from_name', 'sf_user_mail_from_name' );
@@ -1083,7 +1118,7 @@ class Question_Form
             foreach ($emails as $email) {
                 $email = trim($email);
                 $email = preg_replace('/\s+/', '', $email); //Remove all white space from email
-                $email_name = strstr($email, '@', true); 
+                $email_name = strstr($email, '@', true);
 
                 $content  = '<p style="font-size:15px;">Hello <strong>'. $email_name .'</strong></p>';
                 $content .= '<p style="font-size:15px;">You have an invitation to work on the '. $assessment_title .'<br>';
@@ -1096,7 +1131,7 @@ class Question_Form
 
                 // Add users ID to Array
                 $user = getUserFromEmail($email);
-                if (!empty($user)) {                    
+                if (!empty($user)) {
                     $invite_members_arr[] = $user[0]->Id;
                 }
             }
@@ -1113,14 +1148,14 @@ class Question_Form
                     $updated_meta = update_post_meta($assessment_id, 'invited_members', $invite_members_arr);
                 }
             }
-            
+
             // Remove filter mail from
             remove_filter( 'wp_mail_from', 'sf_user_mail_from' );
             remove_filter( 'wp_mail_from_name', 'sf_user_mail_from_name' );
 
             return wp_send_json(array(
-                    'message' => 'Invitations has been send', 
-                    'emails' => $emails_sent, 
+                    'message' => 'Invitations has been send',
+                    'emails' => $emails_sent,
                     'updated_meta' => $updated_meta,
                     'status' => true
                 ));

@@ -32,7 +32,7 @@ foreach ($position_by_framework as $index => $key_area) {
     $org_at_levels = $key_area['org_at_levels'];
     $benchmark_results .=
         '<tr>
-            <td width="25%" style="font-style:italic;">'
+            <td width="25%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'
                 . $key_area['title'] .
             '</td>
             <td width="20%">Level '. $maturity_level .'</td>

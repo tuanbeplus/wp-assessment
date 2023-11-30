@@ -1478,8 +1478,14 @@ ul.dashboard-charts-list li.chart {
     transition: all 0.3s;
 }
 
+.report-template ._section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
 .report-template ._section .wp-editor-wrap iframe {
-    min-height: 200px;
+    min-height: 300px;
 }
 
 .report-template ._section.removing {
@@ -1573,6 +1579,10 @@ ul.dashboard-charts-list li.chart {
 
 #btn-remove-logo.active {
     display: block;
+}
+
+#report-dashboard-share .select2-container {
+    width: 100%!important;
 }
 
 @keyframes rotating {

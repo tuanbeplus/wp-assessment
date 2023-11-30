@@ -562,19 +562,19 @@ function get_maturity_level_org($score)
 	}
 }
 
-function get_maturity_level_org_step_2($score) 
+function get_maturity_level_org_step_2($level) 
 {
-	if ($score != null) {
-		if ($score >= 1 && $score < 2) {
+	if ($level != null) {
+		if ($level >= 1 && $level < 2) {
 			return 1;
 		}
-		else if ($score >= 2 && $score < 3) {
+		else if ($level >= 2 && $level < 3) {
 			return 2;
 		}
-		else if ($score >= 3 && $score < 4) {
+		else if ($level >= 3 && $level < 4) {
 			return 3;
 		}
-		else if ($score >= 4) {
+		else if ($level >= 4) {
 			return 4;
 		}
 	}
