@@ -6,39 +6,48 @@
  * 
  */
 
-$total_org_score = get_post_meta($submission_id, 'total_submission_score', true);
-$overall_org_score = cal_overall_total_score($assessment_id, 'total_submission_score');
-$overall_and_score = cal_overall_total_score($assessment_id, 'total_and_score');
-$org_score_rank = $position_by_total_score[$org_data['Id']]['org_rank'];
-$org_industry_rank = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'];
-$average_industry = cal_average_industry_score($position_by_industry['by_indus_data'][$org_data['Industry']]);
+$maturity_level = get_post_meta($submission_id, 'maturity_level', true);
+
+$wp_ass = new WP_Assessment();
+$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+$questions = $wp_ass->wpa_unserialize_metadata($questions);
+$table_html = "";
+foreach ($questions as $parent_id => $parent_question) {
+    $parent_title = htmlentities(stripslashes(utf8_decode( $parent_question['title'] )));
+    $parent_title = $parent_title;
+
+    $framework_lv = ( $maturity_level[$parent_id]['Framework'] ) ? "Level ". $maturity_level[$parent_id]['Framework'] : "";
+    $implementation_lv = ( $maturity_level[$parent_id]['Implementation'] ) ? "Level ". $maturity_level[$parent_id]['Implementation'] : "";
+    $review_lv = ( $maturity_level[$parent_id]['Review'] ) ? "Level ". $maturity_level[$parent_id]['Review'] : "";
+    $innovation_lv = ( $maturity_level[$parent_id]['Innovation'] ) ? "Level ". $maturity_level[$parent_id]['Innovation'] : "";
+    $table_html .= "<tr>
+                        <td style='text-align:right;border-bottom:none;background-color:none;'>
+                            ".$parent_title."
+                        </td>
+                        <td>". $framework_lv ."</td>
+                        <td>". $implementation_lv ."</td>
+                        <td>". $review_lv ."</td>
+                        <td>". $innovation_lv ."</td>
+                        <td>Tomorrow do this</td>
+                 </tr>";
+}
 
 $total_index_score = 
 "<div class='page'>
     <h3>Maturity Level for Framework, Implementation, Review and Innovation</h3>
+    <p>Questions within each of the Key Areas of the Index are grouped into four sections: Framework, Implementation, Review and Innovation (Employee Experience and Customer Experience only). Table 8 provides an overview of your maturity level for each of the four sections.</p>
     <table class='table-3'>
         <tr>
-            <th></th>
-            <th>Organisation <br> self-assessment <br> (/100)</th>
-            <th>AND assessment <br> and final score <br> (/100)</th>
-            <th>Rank (/N)</th>
-            <th>Average of other <br> organisations</th>
+            <th>Key Area</th>
+            <th>Framework</th>
+            <th>Implementation</th>
+            <th>Review</th>
+            <th>Innovation</th>
+            <th>Overall</th>
         </tr>
-        <tr>
-            <td style='text-align:right;border-bottom:none;background-color:none;'>
-                Total Index Score
-            </td>
-            <td>". $total_org_score['percent'] ."</td>
-            <td>". $overall_and_score['percent_average'] ."</td>
-            <td>". $org_score_rank ."</td>
-            <td>". $overall_org_score['percent_average'] ."</td>
-        </tr>
+        ".$table_html."
     </table>
-    <caption class='table-caption'>Table 3 - Total Index Score and Benchmark</caption>
-    <p>". $org_data['Name'] ." scored ". $total_org_score['percent'] ."/100 in the Access and Inclusion Index, 
-        which ranked ". $org_score_rank ." overall. The average Access and Inclusion Index score 
-        for participating organisations is ". $overall_org_score['percent_average'] .
-    ".</p>
+    <caption class='table-caption'>Table 8 - Maturity level for Framework, Implementation and Review</caption>
 </div>";
 
 // Add to table of contents
