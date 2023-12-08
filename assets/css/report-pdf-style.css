@@ -4,7 +4,7 @@
     line-height: 150%;
 }
 
-h1, h2, h3 h4, h5, h6 {
+h1, h2, h3, h4, h5, h6 {
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -13,6 +13,10 @@ p, li {
     font-size: 14px;
     line-height: 150%;
     letter-spacing: 0.4px!important;
+}
+
+table th, table td {
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 ul li, ol li {
@@ -25,8 +29,8 @@ a {
 
 .page {
     position: relative;
-    /* padding-top: 40px;
-    padding-bottom: 40px; */
+    /* padding-top: 40px; */
+    /* padding-bottom: 40px; */
     width: 100%;
     height: 100%;
     /* background-image: url("/wp-content/plugins/wp-assessment/assets/images/and-bg-gray-shape.png"); */
@@ -172,4 +176,10 @@ table.table-5 td {
     border: 1px solid #98c2ff;
     border-left: none;
     background-color: azure;
+}
+
+img.chart {
+    margin: auto;
+    width: 100%;
+    max-width: 100%;
 }

@@ -34,12 +34,12 @@ $questions = $main->wpa_unserialize_metadata($questions);
 <div class="scoring-wrapper">
     <div class="maturity-level _field">
         <p><strong>Maturity Level</strong></p>
-        <p class="org-score">Org Score: <strong><?php echo $total_org_score['percent']; ?>%</strong></p>
+        <p class="org-score">Org Score: <strong><?php echo $total_org_score['percent'] ?? 0; ?>%</strong></p>
     </div>
     <div class="key-area _field">
         <p><strong>Key Area</strong></p>
         <ol class="key-area-list">
-        <?php if (!empty($questions)): ?>
+        <?php if (!empty($questions) && !empty($org_section_score)): ?>
             <?php foreach ($questions as $index => $key_area): ?>
                 <li><?php echo $key_area['title']; ?>: 
                     <strong><?php echo 'Level '. get_maturity_level_org($org_section_score[$index]); ?></strong>

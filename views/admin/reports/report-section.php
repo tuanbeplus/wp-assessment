@@ -79,10 +79,12 @@ $terms = get_assessment_terms($post->ID);
                     </a>
                 </div>
                 <!-- Generic Pages before List -->
-                <ul class="generic-pages-list" data-position="<?php echo $page_type['type']; ?>">
+                <ul class="generic-pages-list <?php echo $page_type['type']; ?>" 
+                    data-position="<?php echo $page_type['type']; ?>">
                 <?php if (!empty($report_template['generic_page_'.$page_type['type']])): ?>
                     <?php foreach ($report_template['generic_page_'.$page_type['type']] as $index => $generic_page): ?>
-                        <li id="generic-page-<?php echo $index; ?>" class="_section generic-page">
+                        <li id="generic-page-<?php echo $page_type['type']; ?>-<?php echo $index; ?>" 
+                            class="_section generic-page">
                             <h3 class="_heading">Generic page</h3>
                             <input type="text" name="report_template[generic_page_<?php echo $page_type['type']; ?>][<?php echo $index; ?>][title]" 
                                     placeholder="Add title"

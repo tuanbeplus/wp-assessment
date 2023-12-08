@@ -34,13 +34,13 @@ $quiz_title = get_the_title($post_id);
 $i = 0;
 $j = 0;
 
-$submission_id = $main->get_submission_id($post_id, $organisation_id);
-$submission_id_save_quiz = $main->is_check_save_progress_quiz($post_id, $organisation_id);
+$submission_id = $main->get_latest_submission_id($post_id, $organisation_id);
 
-$quiz = $main->get_user_quiz_by_assessment_id($post_id, $organisation_id);
-
-if($submission_id_save_quiz){
-    $quiz = $main->get_user_quiz_by_assessment_id_and_submissions($post_id, $submission_id_save_quiz, $organisation_id);
+if (isset($submission_id)) {
+    $quiz = $main->get_user_quiz_by_assessment_id_and_submissions($post_id, $submission_id, $organisation_id);
+}
+else {
+    $quiz = $main->get_user_quiz_by_assessment_id($post_id, $organisation_id);
 }
 
 $show_first_active_view = false;

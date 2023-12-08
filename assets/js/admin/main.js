@@ -1400,17 +1400,28 @@ jQuery(document).ready(function ($) {
 
     // Add Generic page to List
     var page_count = 0;
-    if ($('.generic-pages-list .generic-page').length) {
-        page_count = $('.generic-pages-list .generic-page').length;
+    var page_before_count = 0;
+    var page_after_count = 0;
+    if ($('.generic-pages-list.before .generic-page').length) {
+        page_before_count = $('.generic-pages-list.before .generic-page').length;
+    }
+    if ($('.generic-pages-list.after .generic-page').length) {
+        page_after_count = $('.generic-pages-list.after .generic-page').length;
     }
     $(document).on('click', '.btn-add-generic-page', function(e){
         let generic_page_wrapper = $(this).closest('.generic-page-wrapper')
         let data_position = $(this).data('position')
         let data_insert = $(this).data('insert')
         let textarea_id = 'generic-page-textarea-' + Date.now();
-        page_count = page_count + 1;
 
-        let generic_page_item  = '<li id="generic-page-'+ page_count +'" class="_section generic-page">'
+        if (data_position == 'before') {
+            page_count = page_before_count + 1;
+        }
+        else if (data_position == 'after') {
+            page_count = page_after_count + 1;
+        }
+
+        let generic_page_item  = '<li id="generic-page-'+ data_position +'-'+ page_count +'" class="_section generic-page">'
             generic_page_item +=     '<h3 class="_heading">Generic page</h3>'
             generic_page_item +=     '<input type="text" name="report_template[generic_page_'+ data_position +']['+ page_count +'][title]" placeholder="Add title">'
             generic_page_item +=     '<textarea id="'+ textarea_id +'" class="generic-page-wpeditor" name="report_template[generic_page_'+ data_position +']['+ page_count +'][content]" rows="10"></textarea>'
@@ -1458,14 +1469,49 @@ jQuery(document).ready(function ($) {
         }
     });
 
+    // Click to Add all Chart Image to Report PDF file
+    $(document).on('click', '#btn-add-charts-report', function(e){
+        e.preventDefault();
+        let btn = $(this)
+        let all_canvas = $('.dashboard-charts-list .chart canvas')
+        let data_img_arr = [];
+        let reportId = $('input#post_ID').val()
+        
+        all_canvas.each(function(e) {
+            let img_data = $(this)[0].toDataURL("image/png", 1.0);
+            data_img_arr.push({
+                name: $(this).data('key'),
+                data: img_data,
+            });
+        })
+
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'save_dashboard_charts_image_url',
+                'data_imgs' : data_img_arr,
+                'report_id' : reportId,
+            },
+            beforeSend : function ( xhr ) {
+                btn.addClass('loading')
+            },
+            success:function(response){
+                btn.removeClass('loading')
+                console.log(response);
+                alert(response.message);
+            }
+        });
+    });
+
     // Click to Download Framework Chart Image
     $(document).on('click', '.btn-download-chart', function(e){
         e.preventDefault();
         let canvas = $(this).closest('.chart').find('canvas');
         let key_area = canvas.data('key');
-        image = canvas[0].toDataURL("image/jpg", 1.0);
+        image = canvas[0].toDataURL("image/png", 1.0);
         let link = document.createElement('a');
-        link.download = key_area+'-dashboard-chart.jpg';
+        link.download = key_area+'-dashboard-chart.png';
         link.href = image;
         link.click();
     });

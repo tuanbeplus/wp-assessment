@@ -8,6 +8,7 @@ class CustomPostType
         add_action('init', array($this, 'register_submissions_custom_post_type'));
         add_action('init', array($this, 'register_reports_custom_post_type'));
         add_action('init', array($this, 'register_assessment_categories'));
+        add_action('init', array($this, 'register_submission_categories'));
 
         add_filter('manage_assessments_posts_columns', array($this, 'customize_assessments_admin_column'));
         add_action('manage_assessments_posts_custom_column', array($this, 'customize_assessments_admin_column_value'), 10, 2);
@@ -93,6 +94,8 @@ class CustomPostType
             array(
                 'hierarchical' => true,
                 'label' => 'Categories', 
+                'show_ui'=> true,
+                'show_admin_column' => true,
                 'query_var' => true,
             )
         );
@@ -146,6 +149,22 @@ class CustomPostType
         );
 
         register_post_type('submissions', $args);
+    }
+
+    function register_submission_categories() {
+        register_taxonomy(
+            'subm_category', 
+            'submissions', 
+            array(
+                'hierarchical' => true,
+                'label' => 'Categories', 
+                'show_ui'=> true,
+                'show_in_menu' => true,
+                'show_admin_column' => true,
+                'query_var' => true,
+                'show_in_quick_edit' => true,
+            )
+        );
     }
 
     function register_reports_custom_post_type(): void
@@ -242,11 +261,13 @@ class CustomPostType
     function customize_submissions_admin_column($columns)
     {
         $columns['user_id'] = 'Submitted by';
+        $columns['organisation'] = 'Organisation';
         return $columns;
     }
 
     function customize_submissions_admin_column_value($column_key, $post_id): void
     {
+        // Column "Submitted by"
         if ($column_key == 'user_id') {
             $user_id = get_post_meta($post_id, 'user_id', true);
             $sf_user_id = get_post_meta($post_id, 'sf_user_id', true);
@@ -256,6 +277,14 @@ class CustomPostType
             } else {
                 $user = get_user_by('id', $user_id);
                 if (isset ($user->display_name)) echo $user->display_name;
+            }
+        }
+
+        // Column "Organisation"
+        if ($column_key == 'organisation') {
+            $org_metadata = get_post_meta($post_id, 'org_data', true);
+            if (!empty($org_metadata)) {
+                echo $org_metadata['Name'];
             }
         }
     }

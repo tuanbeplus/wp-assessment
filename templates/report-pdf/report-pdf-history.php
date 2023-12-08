@@ -1,0 +1,105 @@
+<?php
+/**
+ * The template for displaying Histoty Year on Year Dashboard Report PDF - Saturn
+ *
+ * @author Tuan
+ * 
+ */
+
+$pages_history = array('Framework', 'Implementation', 'Review', 'Overall');
+$dashboard_chart_imgs = get_post_meta($post_id, 'dashboard_chart_imgs', true);
+$framework_dashboard      = get_field('framework_dashboard',$post_id);
+$implementation_dashboard = get_field('implementation_dashboard',$post_id);
+$review_dashboard         = get_field('review_dashboard',$post_id);
+$overall_dashboard        = get_field('overall_dashboard',$post_id);
+$data_dashboard = '';
+
+foreach ($pages_history as $page) {
+    if ($page == 'Framework') {
+        $data_dashboard = $framework_dashboard;
+        $caption = 'Table 10 - Framework Dashboard - History';
+        $img_alt = 'Figure 1 - Framework Dashboard - comparative';
+    }       
+    if ($page == 'Implementation') {
+        $data_dashboard = $implementation_dashboard;
+        $caption = 'Table 11 - Implementation Dashboard - History';
+        $img_alt = 'Figure 2 - Implementation Dashboard - comparative';
+    }  
+    if ($page == 'Review') {
+        $data_dashboard = $review_dashboard;
+        $caption = 'Table 12 - Review Dashboard - History';
+        $img_alt = 'Figure 3 - Review Dashboard - comparative';
+    }          
+    if ($page == 'Overall') {
+        $data_dashboard = $overall_dashboard;
+        $caption = 'Table 13 - Overall Dashboard - History';
+        $img_alt = 'Figure 4 - Overall Dashboard - comparative';
+    }         
+
+    $chart_img_url = wp_get_attachment_url($dashboard_chart_imgs[$page]);
+    if (isset($chart_img_url)) {
+        $chart_img = '<img class="chart" src="'. $chart_img_url .'"><p>'. $img_alt .'</p>';
+    }
+    else {
+        $chart_img = '';
+    }
+
+    if (!empty($data_dashboard)) {
+        $years = array();
+        foreach ($data_dashboard as $record) {
+            $years[] = $record['year'];
+        }
+        $history_scores = get_history_dashboard_scores($data_dashboard);
+        $page_heading = 'Year-on-year: '. $page .' Dashboard '. min($years) . '-'.max($years);
+
+        $dashboard_chart_html = 
+        '<div class="page">
+            <h3>'. $page_heading .'</h3>
+            <div style="text-align:center;">'. $chart_img .'</div>
+        </div>';
+
+        // Add to table of contents
+        $mpdf->TOC_Entry($page_heading ,1);
+
+        // Render HTML
+        $mpdf->WriteHTML($dashboard_chart_html);
+
+        $history_dashboard_html =
+        '<div class="page">
+            <table class="table-3 table-5">
+                <tr>
+                    <th>Key Area</th>';
+            foreach ($years as $year) {
+                $history_dashboard_html .=
+                    '<th>'. $year .'</th>';
+            }
+                $history_dashboard_html .=
+                '</tr>';
+            foreach ($history_scores as $key_area) {
+                $history_dashboard_html .=
+                '<tr>';
+                foreach ($key_area as $value) {
+                    $history_dashboard_html .=
+                    '<td>'. $value .'</td>';
+                }
+                $history_dashboard_html .=
+                '</tr>';
+            }
+
+        $history_dashboard_html .=
+            '</table>
+            <caption>'. $caption .'</caption>
+        </div>';
+
+        // Render HTML
+        $mpdf->WriteHTML($history_dashboard_html);
+
+        // Insert page break
+        $mpdf->AddPage();
+    }
+}
+?>
+
+
+
+

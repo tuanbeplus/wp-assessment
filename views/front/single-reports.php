@@ -77,6 +77,9 @@ require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-maturity-level-for-k
 
 // Render Overall Maturity Dashboard 
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-overall-maturity-dashboard.php';
+
+// Render All Year on Year history dashboard
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-history.php';
 //============== End Part A - Organisation Dashboard =============//
 
 //============== Begin Part B - Evaluation Findings =============//

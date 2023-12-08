@@ -521,15 +521,17 @@ function is_report_of_submission_exist($submission_id)
 		),
 	);
 	$reports = get_posts($args);
-	return $reports[0]->ID;
+	if (!empty($reports)) {
+		return $reports[0]->ID;
+	}
 }
 
 /**
- * Get Maturity Level from Organisation Score
+ * Get Maturity Level step 1 from Organisation Score
  * 
  * @param $score 
  *
- * @return int Maturity Level  
+ * @return int Maturity Level step 1
  * 
  */
 function get_maturity_level_org($score) 
@@ -562,6 +564,14 @@ function get_maturity_level_org($score)
 	}
 }
 
+/**
+ * Get Maturity Level step 2 from step 1
+ * 
+ * @param $level 
+ *
+ * @return int Maturity Level step 2
+ * 
+ */
 function get_maturity_level_org_step_2($level) 
 {
 	if ($level != null) {
@@ -653,7 +663,9 @@ function cal_overall_total_score($assessment_id, $post_meta)
 	if (!empty($submissions)) {
 		foreach ($submissions as $submission){
 			$total_score = get_post_meta($submission->ID, $post_meta, true) ?? 0;
-			$overall_scores[] = $total_score['sum'];
+			if (isset($total_score['sum'])) {
+				$overall_scores[] = $total_score['sum'];
+			}
 		}
 		if (!empty($overall_scores) && is_array($overall_scores)) {
 			$result['sum_average'] = number_format(array_sum($overall_scores)/count($overall_scores), 1);
@@ -696,4 +708,98 @@ function cal_average_industry_score($industry_score_data=[])
 	}
 }
 
+function set_term_to_all_submissions() {
+	$question_form = new Question_Form();
+    $args = array(
+		'post_type' => 'submissions',
+		'posts_per_page' => -1,
+		'post_status' => 'any',
+	);
+	$all_submissions = get_posts($args);
+
+	foreach ($all_submissions as $submission) {
+		$assessment_id = get_post_meta($submission->ID, 'assessment_id', true);
+		if (isset($assessment_id)) {
+			$question_form->set_submission_terms($submission->ID, $assessment_id);
+		}
+	}
+} 
+
+
+function set_org_data_to_all_submissions() {
+    $args = array(
+		'post_type' => 'submissions',
+		'posts_per_page' => -1,
+		'post_status' => 'any',
+	);
+	$all_submissions = get_posts($args);
+
+	foreach ($all_submissions as $submission) {
+		$user_id = get_post_meta($submission->ID, 'user_id', true);
+		$organisation_id = get_post_meta($submission->ID, 'organisation_id', true);
+
+		if (isset($user_id) && isset($organisation_id)) {
+			$org_metadata = get_post_meta($submission->ID, 'org_data', true);
+
+			if (empty($org_metadata)) {
+				$sf_org_data = get_sf_organisation_data($user_id, $organisation_id);
+    			update_post_meta($submission->ID, 'org_data', $sf_org_data);
+			}
+		}
+	}
+} 
+
+// Function to merge arrays by a common value
+function merge_array_score_by_value($arrays, $key)
+{
+    // Use array_reduce to merge arrays based on the specified key
+    $result = array_reduce($arrays, function ($carry, $item) use ($key) {
+        $index = $item[$key];
+        if (!isset($carry[$index])) {
+            $carry[$index] = $item;
+        } else {
+            // Sum the numeric values for each "key_area"
+            foreach ($item as $subKey => $value) {
+                if (is_numeric($value) && isset($carry[$index][$subKey])) {
+                    $carry[$index][$subKey] += $value;
+                } else {
+                    // Set the value for the new year
+                    $carry[$index][$subKey] = $value;
+                }
+            }
+        }
+        return $carry;
+    }, []);
+
+    // Use array_values to reset the array keys
+    return array_values($result);
+}
+
+/**
+ * Get history dashboard score fields 
+ * 
+ * @param array $data_score		Scores each year from report ACF dashboard fields 
+ *
+ * @return array Data score by years
+ * 
+ */
+function get_history_dashboard_scores($data_score) {
+	$data_score_by_year = array();
+	$index = 0;
+	if (is_array($data_score) && count($data_score) > 0) {
+		foreach ($data_score as $record) {
+			if (isset($record['data_values'])) {
+				foreach ($record['data_values'] as $key_area) {
+					$data_score_by_year[$index]['key_area'] = $key_area['key_area'];
+					$data_score_by_year[$index][$record['year']] = $key_area['value'];
+					$index++;
+				}
+			}
+		}
+	}
+	if (!empty($data_score_by_year)) {
+		$result = merge_array_score_by_value($data_score_by_year, 'key_area');
+		return $result;
+	}
+}
 

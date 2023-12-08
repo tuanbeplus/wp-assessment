@@ -9,30 +9,27 @@
 global $post;
 $report_id = $post->ID;
 $post_meta = get_post_meta($report_id);
+$submission_id = get_post_meta($report_id, 'submission_id', true);
+$org_data = get_post_meta($report_id, 'org_data', true);
+$user_id = get_post_meta($submission_id, 'user_id', true);
+$sf_user_name = get_post_meta($submission_id, 'sf_user_name', true);
+$dashboard_chart_imgs = get_post_meta($report_id, 'dashboard_chart_imgs', true);
 $framework_dashboard      = get_field('framework_dashboard',$report_id);
 $implementation_dashboard = get_field('implementation_dashboard',$report_id);
 $review_dashboard         = get_field('review_dashboard',$report_id);
 $overall_dashboard        = get_field('overall_dashboard',$report_id);
-
 $canvas_id = rand(1, 9999);
 $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
-// $sections = "[
-//     'Commitment',
-//     'Premises',
-//     'Workplace',
-//     'Adjustments',
-//     'Communication and Marketing',
-//     'Products and Services',
-//     'ICT',
-//     'Recruitment and Selection',
-//     'Career Development',
-//     'Suppliers and Partners',
-// ]";
-// $dataset_2020 = '[4.0, 2.5, 3.0, 2.0, 3.0, 2.0, 1.5, 1, 2.5, 3.0]';
-// $dataset_2021 = '[3.5, 2.5, 4.0, 3.0, 3.5, 3.0, 4.0, 4.0, 3.0, 3.5]';
 ?>
 
 <div class="dashboard-charts-wrapper">
+    <div class="_action">
+      <p>Click to add all dashboard charts to this Report PDF file</p>
+      <a id="btn-add-charts-report" class="button button-primary">
+        Add Charts to Report
+        <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
+      </a>
+    </div>
     <ul class="dashboard-charts-list">
     <?php foreach ($key_areas as $key):
 
@@ -41,6 +38,7 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
         if($key == 'Review' and empty($review_dashboard)) continue;
         if($key == 'Overall' and empty($overall_dashboard)) continue;
 
+        $img_url = $charts_img_url[$key] ?? null;
         $data_dashboard = array();
         if($key == 'Framework') $data_dashboard = $framework_dashboard;
         if($key == 'Implementation') $data_dashboard = $implementation_dashboard;
@@ -140,7 +138,7 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
       var data_values = [];
       var myIntervalData;
       var ele_repeater;
-      var row = 1;
+      var row = 0;
       function getDataValues(){
         jQuery('td.acf-field[data-name="key_area"]').each(function(index){
           var value = jQuery(this).find('input').val();
@@ -160,7 +158,7 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
             jQuery(this).find('.acf-repeater-add-row').click();
             temp = jQuery(this);
             jQuery(this).find('.acf-row').each(function(index){
-              if(index == (row - 1)){
+              if(index == (row)){
                 jQuery(this).find('td[data-name="key_area"]').find('input').val(data_values[index]);
               }
             });
@@ -168,7 +166,7 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
           }
         });
         if(row >= data_values.length){
-          row = 1;
+          row = 0;
           temp.addClass('added');
           clearInterval(myIntervalData);
         }

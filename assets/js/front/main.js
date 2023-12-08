@@ -70,6 +70,8 @@ jQuery(document).ready(function ($) {
             var all_sub_question_wrapper = $('#main-quiz-form .quiz.active .fieldsWrapper').length
             var incomplete_sub_question = (all_sub_question_wrapper - count_checked_choices)
 
+            await submitAssessmentProgressByContinue();
+
             let isQuestionSaved = await saveQuestion(checkAnswers);
 
             if (isQuestionSaved) {
@@ -89,8 +91,6 @@ jQuery(document).ready(function ($) {
             }
 
             let current_step = $(`.step-${current_quiz_id}`);
-
-            await submitAssessmentProgressByContinue();
 
             $('.formController button').css('opacity', '1')
             $('#saving-spinner').hide()
@@ -316,12 +316,13 @@ jQuery(document).ready(function ($) {
         activeQuiz = activeQuiz? activeQuiz : 1;
         let currentQuiz = $(`#quiz-item-${activeQuiz}`);
 		let checkAnswers = getCheckAnswers(currentQuiz);
-        let isQuestionSaved = await saveQuestionProgress(checkAnswers);
+
+        await submitAssessmentProgress();
+
+        let isQuestionSaved = await saveQuestion(checkAnswers);
         $(this).removeClass('loading')
 
         if (!isQuestionSaved) return;
-        await submitAssessmentProgress();
-       
     });
 
     bodySelector.on('click', '#go-back-quiz-btn', function (e) {
@@ -886,43 +887,6 @@ jQuery(document).ready(function ($) {
         return status;
     }
 
-    var submission_id = 0;
-    async function saveQuestionProgress(answers) {
-        let assessmentId = assessmentIdInstance.val();
-        let organisationId = organisationIdInstance.val();
-        let answerDescription = getDescriptionValue();
-        let attachmentIdValue = getAttachmentIdInput().val();
-        let data_form = $('#form_submit_quiz');
-        let type_quiz = $('input[name="type_quiz"]').val();
-
-        const data = {
-            'action': 'save_question_progress',
-            'answers': answers,
-            'quiz_id': activeQuiz,
-            'organisation_id' : organisationId,
-            'assessment_id': assessmentId,
-            'submission_id': submission_id,
-            'description': answerDescription,
-            'attachment_id': attachmentIdValue,
-            'data_quiz' : data_form.serializeArray(),
-            'type_quiz' : type_quiz
-        };
-
-        let response = await $.ajax({
-            type: 'POST',
-            url: ajax_object.ajax_url,
-            data: data,
-        });
-        const {status, message} = response;
-
-        console.log(response);
-
-        if (status == false) {
-            alert(message)
-        }
-        return status;
-    }
-
     async function getQuizDetails() {
         let assessmentId = assessmentIdInstance.val();
 
@@ -1009,6 +973,8 @@ jQuery(document).ready(function ($) {
             data: data
         });
         const {status, message, submission_id} = response;
+
+        console.log(response);
 
         return status;
     }

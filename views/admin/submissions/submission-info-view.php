@@ -21,48 +21,6 @@ if (empty($org_metadata)) {
     $sf_org_data = get_sf_organisation_data($user_id, $organisation_id);
     update_post_meta($post_id, 'org_data', $sf_org_data);
 }
-
-$main = new WP_Assessment();
-
-$quiz = $main->get_user_quiz_by_assessment_id_and_submissions($assessment_id, $user_id, $post_id );
-$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
-$questions = $main->wpa_unserialize_metadata($questions);
-$group_quiz_points = unserialize(get_post_meta($post_id, 'group_quiz_point', true));
-
-if (empty($user_id) || empty($assessment_id)) return;
-
-$sub_score_points_arr = array();
-$sub_total_points_arr = array();
-
-foreach ($questions as $group_id => $group_field) {
-    $group_point = $group_field['point'] ?? null;
-    $sub_point_list = $group_field['list'] ?? null;
-
-    $group_point_input = $group_quiz_points[$group_id]['point'] ?? null;
-    $group_point_input_list = $group_quiz_points[$group_id]['sub_list'] ?? null;
-
-    if (!empty($quiz)) {
-        foreach ($quiz as $field) {
-            if ($field->parent_id == $group_id) {
-                $sub_point = $sub_point_list[$field->quiz_id]['point'];
-                if (!empty($sub_point) && $group_point) {
-                    $sub_total_points_arr[] = $sub_point * $group_point;
-                }
-    
-                $sub_point_input = $group_point_input_list[$field->quiz_id]['point'];
-                if (!empty($sub_point_input) && $group_point) {
-                    $sub_score_points_arr[] = $sub_point_input * $group_point_input;
-                }
-            }        
-        }
-    }
-}
-
-$total_score_point = array_sum($sub_score_points_arr);
-$total_points = array_sum($sub_total_points_arr);
-
-update_post_meta($post_id, 'assessment_total_score', $total_score_point);
-update_post_meta($post_id, 'assessment_total_point', $total_points);
 ?>
 
 <div class="submission-info-container">
@@ -93,8 +51,8 @@ update_post_meta($post_id, 'assessment_total_point', $total_points);
             <p class="post-status-display">
                 Total Org Score: 
                 <strong class="total-submission-score">
-                    <?php echo $total_submission_score['sum']; ?>
-                    (<?php echo $total_submission_score['percent']; ?>%)
+                    <?php echo $total_submission_score['sum'] ?? 0; ?>
+                    (<?php echo $total_submission_score['percent'] ?? 0; ?>%)
                 </strong>
             </p>
         <?php endif; ?>

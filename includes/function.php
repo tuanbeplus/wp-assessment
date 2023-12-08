@@ -451,11 +451,6 @@ class WP_Assessment
         return $data;
     }
 
-    function is_section_completed()
-    {
-
-    }
-
     function is_quiz_exist_in_object($quiz_id, $obj, $organisation_id)
     {
         if (isset($_COOKIE['userId'])) {
@@ -533,17 +528,14 @@ class WP_Assessment
     function is_check_save_progress_quiz($assessment_id, $organisation_id = null)
     {
         $submission_id = null;
-        global $post;
 
         $args = array(
             'post_type' => 'submissions',
             'posts_per_page' => 1,
             'post_status' => 'draft',
+            'orderby' => 'date',
+            'order' => 'DESC',
             'meta_query' => array(
-                // array(
-                //     'key' => 'user_id',
-                //     'value' => $user_id,
-                // ),
                 array(
                     'key' => 'organisation_id',
                     'value' => $organisation_id,
@@ -554,17 +546,17 @@ class WP_Assessment
                 ),
             ),
         );
-        $the_query = new WP_Query($args);
-        if ( $the_query->have_posts() ) :
-            while ( $the_query->have_posts() ) : $the_query->the_post();
-                $submission_id = $post->ID;
-                return $submission_id;
-            endwhile;
-        endif;
-
+        $submission = get_posts($args);
         // Reset Post Data
         wp_reset_postdata();
 
+        if (is_array($submission) && count($submission) > 0) {
+            $submission_id = $submission[0]->ID;
+            return $submission_id;
+        }
+        else {
+            return '';
+        }
     }
 
     function is_answer_exist($key, $answers): bool
@@ -629,20 +621,17 @@ class WP_Assessment
         return $array[$index][$key];
     }
 
-    function get_submission_id($assessment_id, $organisation_id)
+    function get_latest_submission_id($assessment_id, $organisation_id)
     {
         $submission_id = null;
-        global $post;
 
         $args = array(
             'post_type' => 'submissions',
             'posts_per_page' => 1,
+            'orderby' => 'date',
+            'order' => 'DESC',
             'post_status' => 'any',
             'meta_query' => array(
-                // array(
-                //     'key' => 'user_id',
-                //     'value' => $user_id,
-                // ),
                 array(
                     'key' => 'organisation_id',
                     'value' => $organisation_id,
@@ -653,26 +642,18 @@ class WP_Assessment
                 ),
             ),
         );
-        $the_query = new WP_Query($args);
-        if ( $the_query->have_posts() ) :
-            while ( $the_query->have_posts() ) : $the_query->the_post();
-                $submission_id = $post->ID;
-                return $submission_id;
-            endwhile;
-        endif;
-
+        $submission = get_posts($args);
         // Reset Post Data
         wp_reset_postdata();
 
+        if (is_array($submission) && count($submission) > 0) {
+            $submission_id = $submission[0]->ID;
+            return $submission_id;
+        }
     }
 
     function wpa_ptags_tinymce_fix($init)
     {
-        // global $post;
-        // $post_id = $post->ID;
-        // $post_type = get_post_type($post_id);
-        // if ($post_type !== "assessments") return;
-        
         //wpautop = yes
         $init['wpautop'] = false;
 

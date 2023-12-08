@@ -37,7 +37,7 @@ function get_submit_field($array, $index, $key)
 $submission_score_arr = array();
 
 // echo "<pre>";
-// print_r();
+// print_r($post_meta);
 // echo "</pre>";
 ?>
 
