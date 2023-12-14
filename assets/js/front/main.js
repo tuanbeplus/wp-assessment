@@ -887,19 +887,6 @@ jQuery(document).ready(function ($) {
         return status;
     }
 
-    async function getQuizDetails() {
-        let assessmentId = assessmentIdInstance.val();
-
-        const data = {
-            'action': 'get_quiz_detail',
-            'quiz_id': activeQuiz,
-            'assessment_id': assessmentId,
-        };
-
-        let res = await $.ajax({type: 'POST', url: ajax_object.ajax_url, data: data});
-        return res?.status;
-    }
-
     async function submitAssessment() {
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();

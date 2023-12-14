@@ -278,7 +278,7 @@ $submission_score_arr = array();
                                                 </div>
                                                 <div class="and-score">
                                                     <label for="and-score-input">
-                                                        AND Score
+                                                        Initial Score
                                                         <input id="and-score-input" type="number" step="0.1" 
                                                                 name="and_score[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]" 
                                                                 value="<?php echo $and_score[$group_id][$quiz_id] ?? null; ?>">
@@ -298,9 +298,9 @@ $submission_score_arr = array();
                                         <!-- Recommentdation -->
                                         <div class="recommentdation">
                                             <div class="_top">
-                                                <label><strong>Recommentdation</strong></label>
+                                                <label><strong>Recommendation</strong></label>
                                                 <a class="btn-add-recommentdation button button-medium">
-                                                    <span class="text">Add Recommentdation</span>
+                                                    <span class="text">Add Recommendation</span>
                                                     <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
                                                 </a>
                                             </div>
@@ -321,8 +321,8 @@ $submission_score_arr = array();
                                         </div>
                                         <!-- /Recommentdation -->
                                         <div class="key-area">
-                                            <label><strong>Key Area:</strong></label>
-                                            <h6 style="margin-top:10px;"><?php echo $key_area; ?></h6>
+                                            <label><strong>Section:</strong></label>
+                                            <h6 class="_name"><?php echo $key_area; ?></h6>
                                             <input class="org-score-input" type="hidden" 
                                             name="key_area[<?php echo $group_id; ?>][<?php echo $quiz_id; ?>]"
                                             value="<?php echo $key_area; ?>">
@@ -370,7 +370,7 @@ $submission_score_arr = array();
                         $submission_score_arr[] = $total_section_score;
                 ?>
                     <div class="total-section-score">
-                        <span>Section score: 
+                        <span>Key Area Score: 
                             <span class="total-section-score-val">
                                 <?php echo $section_score; ?>
                             </span>

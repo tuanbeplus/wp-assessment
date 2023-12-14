@@ -821,6 +821,11 @@
     width: fit-content;
 }
 
+.card .key-area ._name{
+    margin-top: 10px;
+    color: #663077;
+}
+
 #btn-create-report.loading {
     pointer-events: none;
     cursor: default;
@@ -1230,13 +1235,19 @@ ul.dashboard-charts-list li.chart:last-child {
 .dashboard-charts-wrapper canvas.dashboard-chart-canvas{
     max-width: 800px;
     max-height: 600px;
-    background-color: #fff;
 }
 
 .chart .btn-download-chart {
     position: absolute;
     right: 16px;
     bottom: 16px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-download-chart .icon-download {
+    margin-bottom: 3px;
+    margin-right: 4px;
 }
 
 /* .Report section */

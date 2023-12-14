@@ -708,23 +708,6 @@ function cal_average_industry_score($industry_score_data=[])
 	}
 }
 
-function set_term_to_all_submissions() {
-	$question_form = new Question_Form();
-    $args = array(
-		'post_type' => 'submissions',
-		'posts_per_page' => -1,
-		'post_status' => 'any',
-	);
-	$all_submissions = get_posts($args);
-
-	foreach ($all_submissions as $submission) {
-		$assessment_id = get_post_meta($submission->ID, 'assessment_id', true);
-		if (isset($assessment_id)) {
-			$question_form->set_submission_terms($submission->ID, $assessment_id);
-		}
-	}
-} 
-
 
 function set_org_data_to_all_submissions() {
     $args = array(

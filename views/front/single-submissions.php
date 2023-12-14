@@ -7,10 +7,6 @@ get_header();
 global $wpdb;
 $main = new WP_Assessment();
 $subs_id = get_the_ID();
-$table_name = $wpdb->prefix . "user_quiz_submissions";
-
-$sql_query = "SELECT * FROM $table_name WHERE submission_id = '{$subs_id}'";
-$submission_data = $wpdb->get_results($sql_query);
 $assessment_total_score = get_post_meta($subs_id, 'assessment_total_score', true);
 $assessment_total_point = get_post_meta($subs_id, 'assessment_total_point', true);
 $total_submission_score = get_post_meta($subs_id, 'total_submission_score', true);
@@ -21,7 +17,10 @@ $assessment_questions_data = $main->wpa_unserialize_metadata($assessment_questio
 $question_templates = get_post_meta($assessment_id, 'question_templates', true);
 $report_id = get_post_meta($subs_id, 'report_id', true);
 $user_id = get_post_meta($subs_id, 'user_id', true);
-$assessment_term_arr = get_assessment_terms($assessment_id);
+$assessment_terms = get_assessment_terms($assessment_id);
+$table_name = $main->get_quiz_submission_table_name($assessment_id);
+$sql_query = "SELECT * FROM $table_name WHERE submission_id = '{$subs_id}'";
+$submission_data = $wpdb->get_results($sql_query);
 
 $invalid_answers = array();
 
@@ -51,7 +50,7 @@ for($i = 0; $i < $count_quiz; $i++) {
 					<p>Thank you for the recent submission on <span style="font-family: 'Avenir-Medium';"><?php echo get_the_title($assessment_id); ?></span></p>
 					<p>We appreciate the time and effort you have put into this and your commitment to building a disability confident Australia.</p>
 					<h3>
-						<?php if (in_array('self-assessed', $assessment_term_arr)): ?>
+						<?php if (in_array('self-assessed', $assessment_terms)): ?>
 							Your Self-Assessed Score: 
 							<span class="status" style="font-family: Avenir-Heavy;">
 								<?php echo $self_assessed_score .' out of 100'; ?>
@@ -98,7 +97,7 @@ for($i = 0; $i < $count_quiz; $i++) {
 					<a href="mailto:info@and.org.au">info@and.org.au</a>
 					<a href="tel:(02) 8270 9200">(02) 8270 9200</a>
 
-					<?php //if (!in_array('index', $assessment_term_arr)): ?>
+					<?php //if (!in_array('index', $assessment_terms)): ?>
 						<!-- <a id="printSubmissionEntry" href="#Print">Print Preliminary Report (.PDF)</a> -->
 					<?php //endif; ?>
 				</div>

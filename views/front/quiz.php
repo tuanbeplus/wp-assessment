@@ -23,13 +23,12 @@ if (isset($_COOKIE['userId'])) {
 $main = new WP_Assessment();
 $question_form = new Question_Form();
 $azure = new WP_Azure_Storage();
-
 $organisation_id = getUser($_COOKIE['userId'])->records[0]->AccountId;
 $questions = get_post_meta($post_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
-
 $question_templates = get_post_meta($post_id, 'question_templates', true);
 $quiz_title = get_the_title($post_id);
+$terms = get_assessment_terms($assessment_id);
 
 $i = 0;
 $j = 0;

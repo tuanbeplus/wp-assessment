@@ -1476,7 +1476,21 @@ jQuery(document).ready(function ($) {
         let all_canvas = $('.dashboard-charts-list .chart canvas')
         let data_img_arr = [];
         let reportId = $('input#post_ID').val()
-        
+        let existing_chart_imgs = report_chart_imgs_meta;
+
+        if (existing_chart_imgs) {
+            if ( existing_chart_imgs.Framework 
+                || existing_chart_imgs.Implementation
+                || existing_chart_imgs.Review
+                || existing_chart_imgs.Overall ) {
+                    let userConfirmed = confirm('Chart images already exist in the Report. Would you like to replace them?');
+                    // user don't want to replace charts
+                    if (!userConfirmed) {
+                        return;
+                    }
+            }
+        }
+
         all_canvas.each(function(e) {
             let img_data = $(this)[0].toDataURL("image/png", 1.0);
             data_img_arr.push({
@@ -1484,7 +1498,6 @@ jQuery(document).ready(function ($) {
                 data: img_data,
             });
         })
-
         $.ajax({
             type: 'POST',
             url: ajaxUrl,
@@ -1498,7 +1511,7 @@ jQuery(document).ready(function ($) {
             },
             success:function(response){
                 btn.removeClass('loading')
-                console.log(response);
+                // console.log(response);
                 alert(response.message);
             }
         });
@@ -1509,9 +1522,9 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         let canvas = $(this).closest('.chart').find('canvas');
         let key_area = canvas.data('key');
-        image = canvas[0].toDataURL("image/png", 1.0);
+        image = canvas[0].toDataURL("image/jpg", 1.0);
         let link = document.createElement('a');
-        link.download = key_area+'-dashboard-chart.png';
+        link.download = key_area+'-dashboard-chart-'+ Date.now() +'.jpg';
         link.href = image;
         link.click();
     });

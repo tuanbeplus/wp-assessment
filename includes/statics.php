@@ -38,13 +38,14 @@ add_action('admin_enqueue_scripts', 'admin_enqueue_scripts');
 function admin_enqueue_scripts()
 {
     global $post_type;
-    if( $post_type == 'assessments' || $post_type == 'submissions' || $post_type == 'reports' || $post_type == 'attachment') {
+    if( $post_type == 'assessments' || $post_type == 'submissions' || $post_type == 'dcr_submissions' || $post_type == 'reports') {
         wp_enqueue_editor();
         wp_enqueue_media();
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
         wp_enqueue_script('chart-lib', 'https://cdn.jsdelivr.net/npm/chart.js');
         wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/main.js', true, WP_ASSESSMENT_VER);
+
         wp_localize_script(
             'admin-js',
             'ajax_object',
@@ -53,6 +54,11 @@ function admin_enqueue_scripts()
                 'security' => wp_create_nonce('assessment_attachment_upload'),
             )
         );
+
+        $dashboard_chart_imgs = get_post_meta(get_the_ID(), 'dashboard_chart_imgs', true);
+        // Pass the data to the script
+        wp_localize_script('admin-js', 'report_chart_imgs_meta', $dashboard_chart_imgs);
+
     }
     wp_enqueue_style('admin-css', WP_ASSESSMENT_ASSETS . '/css/style.css', false, WP_ASSESSMENT_VER);
 }
@@ -61,7 +67,7 @@ add_action('wp_enqueue_scripts', 'enqueue_scripts');
 function enqueue_scripts()
 {
     global $post_type;
-    if( $post_type == 'assessments' || $post_type == 'submissions' || $post_type == 'reports') {
+    if( $post_type == 'assessments' || $post_type == 'submissions' || $post_type == 'dcr_submissions' || $post_type == 'reports') {
         wp_enqueue_media();
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');

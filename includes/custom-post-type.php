@@ -5,16 +5,19 @@ class CustomPostType
     function __construct()
     {
         add_action('init', array($this, 'register_assessment_custom_post_type'));
-        add_action('init', array($this, 'register_submissions_custom_post_type'));
+        add_action('init', array($this, 'register_index_submissions_post_type'));
+        add_action('init', array($this, 'register_dcr_submissions_post_type'));
         add_action('init', array($this, 'register_reports_custom_post_type'));
         add_action('init', array($this, 'register_assessment_categories'));
-        add_action('init', array($this, 'register_submission_categories'));
 
         add_filter('manage_assessments_posts_columns', array($this, 'customize_assessments_admin_column'));
         add_action('manage_assessments_posts_custom_column', array($this, 'customize_assessments_admin_column_value'), 10, 2);
 
         add_filter('manage_submissions_posts_columns', array($this, 'customize_submissions_admin_column'));
         add_action('manage_submissions_posts_custom_column', array($this, 'customize_submissions_admin_column_value'), 10, 2);
+
+        add_filter('manage_dcr_submissions_posts_columns', array($this, 'customize_submissions_admin_column'));
+        add_action('manage_dcr_submissions_posts_custom_column', array($this, 'customize_submissions_admin_column_value'), 10, 2);
 
         add_filter('manage_reports_posts_columns', array($this, 'customize_reports_admin_column'));
         add_action('manage_reports_posts_custom_column', array($this, 'customize_reports_admin_column_value'), 10, 2);
@@ -36,6 +39,10 @@ class CustomPostType
         flush_rewrite_rules();
     }
 
+    /**
+     * Register Assessments post type
+     * 
+     */
     function register_assessment_custom_post_type(): void
     {
         $labels = array(
@@ -101,21 +108,27 @@ class CustomPostType
         );
     }
 
-    function register_submissions_custom_post_type(): void
+    /**
+     * Register Index submissions post type
+     * 
+     * @param Index
+     * 
+     */
+    function register_index_submissions_post_type(): void
     {
         $labels = array(
-            'name' => _x('Submissions', 'submission'),
-            'singular_name' => _x('Submission', 'submission'),
+            'name' => _x('Index submissions', 'submission'),
+            'singular_name' => _x('Index submission', 'submission'),
             'add_new' => _x('Add New', 'submission'),
-            'add_new_item' => _x('Add New Submission', 'submission'),
-            'edit_item' => _x('Edit Submission', 'submission'),
-            'new_item' => _x('New Submission', 'submission'),
-            'view_item' => _x('View Submission', 'submission'),
-            'search_items' => _x('Search Submissions', 'submission'),
-            'not_found' => _x('No submissions found', 'submission'),
-            'not_found_in_trash' => _x('No submissions found in Trash', 'submission'),
-            'parent_item_colon' => _x('Parent Submission:', 'submission'),
-            'menu_name' => _x('Submissions', 'submission'),
+            'add_new_item' => _x('Add New Index submission', 'submission'),
+            'edit_item' => _x('Edit Index submission', 'submission'),
+            'new_item' => _x('New Index submission', 'submission'),
+            'view_item' => _x('View Index submission', 'submission'),
+            'search_items' => _x('Search Index submissions', 'submission'),
+            'not_found' => _x('No Index submissions found', 'submission'),
+            'not_found_in_trash' => _x('No Index submissions found in Trash', 'submission'),
+            'parent_item_colon' => _x('Parent Index submission:', 'submission'),
+            'menu_name' => _x('Index submissions', 'submission'),
         );
 
         $args = array(
@@ -151,22 +164,68 @@ class CustomPostType
         register_post_type('submissions', $args);
     }
 
-    function register_submission_categories() {
-        register_taxonomy(
-            'subm_category', 
-            'submissions', 
-            array(
-                'hierarchical' => true,
-                'label' => 'Categories', 
-                'show_ui'=> true,
-                'show_in_menu' => true,
-                'show_admin_column' => true,
-                'query_var' => true,
-                'show_in_quick_edit' => true,
-            )
+    /**
+     * Register DCR submissions post type
+     * 
+     * @param DCR
+     * 
+     */
+    function register_dcr_submissions_post_type(): void
+    {
+        $labels = array(
+            'name' => _x('DCR submissions', 'submission'),
+            'singular_name' => _x('DCR submission', 'submission'),
+            'add_new' => _x('Add New', 'submission'),
+            'add_new_item' => _x('Add New DCR submission', 'submission'),
+            'edit_item' => _x('Edit DCR submission', 'submission'),
+            'new_item' => _x('New DCR submission', 'submission'),
+            'view_item' => _x('View DCR submission', 'submission'),
+            'search_items' => _x('Search DCR submissions', 'submission'),
+            'not_found' => _x('No DCR submissions found', 'submission'),
+            'not_found_in_trash' => _x('No DCR submissions found in Trash', 'submission'),
+            'parent_item_colon' => _x('Parent DCR submission:', 'submission'),
+            'menu_name' => _x('DCR submissions', 'submission'),
         );
+
+        $args = array(
+            'labels' => $labels,
+            'hierarchical' => false,
+            'supports' => array('title', 'thumbnail', 'author', 'comments'),
+            'show_ui' => true,
+            'show_in_menu' => true,
+            'show_in_nav_menus' => true,
+            'publicly_queryable' => true,
+            'exclude_from_search' => true,
+            'has_archive' => true,
+            'query_var' => true,
+            'can_export' => true,
+            'rewrite' => true,
+            'public' => true,
+            'map_meta_cap' => true,
+            'capabilities' => array(
+                'read_post' => 'read_submission',
+                'publish_posts' => 'publish_submissions',
+                'edit_posts' => 'edit_submissions',
+                'edit_others_posts' => 'edit_others_submissions',
+                'delete_posts' => 'delete_submissions',
+                'delete_others_posts' => 'delete_others_submissions',
+                'read_private_posts' => 'read_private_submissions',
+                'edit_post' => 'edit_submission',
+                'delete_post' => 'delete_submission',
+                'edit_published_post' => 'edit_published_submission',
+                'edit_published_posts' => 'edit_published_submissions',
+            ),
+        );
+
+        register_post_type('dcr_submissions', $args);
     }
 
+    /**
+     * Register Reports post type
+     * 
+     * @param Reports
+     * 
+     */
     function register_reports_custom_post_type(): void
     {
         $labels = array(

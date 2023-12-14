@@ -24,8 +24,13 @@ class WP_Assessment
         add_action('wp_ajax_get_quizs_status_submission', array($this, 'get_quizs_status_submission'));
         add_action('wp_ajax_nopriv_get_quizs_status_submission', array($this, 'get_quizs_status_submission'));
 
+        // Index table
         $this->set_quiz_table();
         $this->init_quiz_tables_for_users();
+
+        // DCR table
+        $this->set_dcr_quiz_table();
+        $this->init_dcr_quiz_submissions_table();
     }
 
     function set_email_content_type()
@@ -192,7 +197,7 @@ class WP_Assessment
         if ($post->post_type == 'reports')
             return SINGLE_REPORTS_TEMPLATE;
         
-        if ($post->post_type == 'submissions')
+        if ($post->post_type == 'submissions' || $post->post_type == 'dcr_submissions')
             return SINGLE_SUBMISSIONS_TEMPLATE;
         
         return $template;
@@ -215,6 +220,10 @@ class WP_Assessment
         return $this->quiz_table_name;
     }
 
+    /**
+     * Create Index quiz table
+     * 
+     */
     function init_quiz_tables_for_users()
     {
         global $wpdb;
@@ -246,14 +255,87 @@ class WP_Assessment
         dbDelta($sql);
     }
 
+    function set_dcr_quiz_table(): void
+    {
+        global $wpdb;
+        $this->dcr_quiz_table_name = $wpdb->prefix . "dcr_quiz_submissions";
+    }
+
+    function get_dcr_quiz_table()
+    {
+        return $this->dcr_quiz_table_name;
+    }
+
+    /**
+     * Create DCR quiz table
+     * 
+     */
+    function init_dcr_quiz_submissions_table()
+    {
+        global $wpdb;
+
+        $charset_collate = $wpdb->get_charset_collate();
+        $table_name = $this->get_dcr_quiz_table();
+
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+            user_id varchar(100) NOT NULL,
+            organisation_id varchar(100) NOT NULL,
+            quiz_id int(11) NOT NULL,
+            parent_id int(11) DEFAULT 0,
+            assessment_id int(11) NOT NULL,
+            submission_id int(11) NOT NULL,
+            attachment_ids JSON,
+            answers JSON,
+            description LONGTEXT,
+            status ENUM ('pending','completed','accepted','rejected') DEFAULT 'pending',
+            feedback LONGTEXT,
+            quiz_point int(11),
+            PRIMARY KEY  (id)
+            ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+    }
+
+    /**
+     * Get table name by Assessmnt first term
+     * 
+     * @param $assessment_id    Assessment ID
+     * @return Table_Name
+     * 
+     */
+    function get_quiz_submission_table_name($assessment_id) 
+    {
+        $table_name = '';
+        // Get all terms array
+        $assessment_terms = get_assessment_terms($assessment_id);
+
+        if (!empty($assessment_terms) && isset($assessment_terms[0])) {
+            if ($assessment_terms[0] == 'dcr') {
+                // Is DCR assessment
+                $table_name = $this->get_dcr_quiz_table();
+            }
+            else {
+                // Is Index & other assessment
+                $table_name = $this->get_quiz_table();
+            }
+        }
+        else {
+            // Is Index & other assessment
+            $table_name = $this->get_quiz_table();
+        }
+        return $table_name;
+    }
+
     function get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id)
     {
         try {
             global $wpdb;
 
-            $table = $this->get_quiz_table();
+            $table = $this->get_quiz_submission_table_name($assessment_id);
 
-            // $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND quiz_id = $quiz_id AND user_id = '$user_id' LIMIT 1";
             $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND quiz_id = $quiz_id AND organisation_id = '$organisation_id' LIMIT 1";
 
             $result = $wpdb->get_results($sql);
@@ -268,14 +350,13 @@ class WP_Assessment
         }
     }
 
-    function get_quiz_by_assessment_id_and_submisstion($assessment_id, $submission_id, $quiz_id, $organisation_id)
+    function get_quiz_by_assessment_id_and_submission($assessment_id, $submission_id, $quiz_id, $organisation_id)
     {
         try {
             global $wpdb;
 
-            $table = $this->get_quiz_table();
+            $table = $this->get_quiz_submission_table_name($assessment_id);
 
-            // $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND submission_id = $submission_id AND quiz_id = $quiz_id AND user_id = '$user_id' LIMIT 1";
             $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND submission_id = $submission_id AND quiz_id = $quiz_id AND organisation_id = '$organisation_id' LIMIT 1";
 
             $result = $wpdb->get_results($sql);
@@ -295,9 +376,8 @@ class WP_Assessment
         try {
             global $wpdb;
 
-            $table = $this->get_quiz_table();
+            $table = $this->get_quiz_submission_table_name($assessment_id);
 
-            // $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND parent_id = $parent_id AND quiz_id = $quiz_id AND user_id = '$user_id' LIMIT 1";
             $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND parent_id = $parent_id AND quiz_id = $quiz_id AND organisation_id = '$organisation_id' LIMIT 1";
 
             $result = $wpdb->get_results($sql);
@@ -312,14 +392,13 @@ class WP_Assessment
         }
     }
 
-    function get_quiz_by_assessment_id_and_submisstion_parent($assessment_id, $submission_id, $quiz_id, $organisation_id, $parent_id)
+    function get_quiz_by_assessment_id_and_submission_parent($assessment_id, $submission_id, $quiz_id, $organisation_id, $parent_id)
     {
         try {
             global $wpdb;
 
-            $table = $this->get_quiz_table();
+            $table = $this->get_quiz_submission_table_name($assessment_id);
 
-            // $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND submission_id = $submission_id AND parent_id = $parent_id AND quiz_id = $quiz_id AND user_id = '$user_id' LIMIT 1";
             $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND submission_id = $submission_id AND parent_id = $parent_id AND quiz_id = $quiz_id AND organisation_id = '$organisation_id' LIMIT 1";
 
             $result = $wpdb->get_results($sql);
@@ -334,12 +413,12 @@ class WP_Assessment
         }
     }
 
-    function get_user_quiz_by_assessment_id($assessment_id, $organisation_id = null)
+    function get_user_quiz_by_assessment_id($assessment_id, $organisation_id)
     {
         try {
             global $wpdb;
 
-            $table = $this->get_quiz_table();
+            $table = $this->get_quiz_submission_table_name($assessment_id);
 
             $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND organisation_id = '$organisation_id'";
             $result = $wpdb->get_results($sql);
@@ -359,10 +438,10 @@ class WP_Assessment
         try {
             global $wpdb;
 
-            $table = $this->get_quiz_table();
+            $table = $this->get_quiz_submission_table_name($assessment_id);
 
-            // $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND submission_id = $submission_id AND user_id = '$user_id'";
             $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND submission_id = $submission_id AND organisation_id = '$organisation_id'";
+            
             $result = $wpdb->get_results($sql);
 
             return !empty($result) ? $result : null;
@@ -380,7 +459,9 @@ class WP_Assessment
     {
         try {
             global $wpdb;
-            $table = $this->get_quiz_table();
+
+            $table = $this->get_quiz_submission_table_name($data['assessment_id']);
+
             $data['time'] = current_time( 'mysql' );
             $wpdb->insert( $table, $data, array( '%s', '%s', '%s', '%s', '%s', '%s', '%s' , '%s' , '%s', '%s', '%s' ) );
 
@@ -399,7 +480,9 @@ class WP_Assessment
     {
         try {
             global $wpdb;
-            $table = $this->get_quiz_table();
+            
+            $table = $this->get_quiz_submission_table_name($conditions['assessment_id']);
+
             $data['time'] = current_time( 'mysql' );
             $wpdb->update($table, $data, $conditions, array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' , '%s', '%s', '%s' ), array('%s', '%s', '%s', '%s') );
 
@@ -624,9 +707,22 @@ class WP_Assessment
     function get_latest_submission_id($assessment_id, $organisation_id)
     {
         $submission_id = null;
+        $assessment_terms = get_assessment_terms($assessment_id);
 
+        if (is_array($assessment_terms) && isset($assessment_terms[0])) {
+            if ($assessment_terms[0] == 'dcr') {
+                $post_type = 'dcr_submissions';
+            }
+            else {
+                $post_type = 'submissions';
+            }
+        }
+        else {
+            return null;
+        }
+        
         $args = array(
-            'post_type' => 'submissions',
+            'post_type' => $post_type,
             'posts_per_page' => 1,
             'orderby' => 'date',
             'order' => 'DESC',
@@ -776,7 +872,7 @@ class WP_Assessment
         try {
             global $wpdb;
 
-            $table = $this->get_quiz_table();
+            $table = $this->get_quiz_submission_table_name($assessment_id);
             // 
             $sql = "SELECT id FROM $table WHERE assessment_id = '$assessment_id' AND submission_id = '$submission_id' AND organisation_id = '$organisation_id' ";
             $result = $wpdb->get_results($sql);

@@ -9,7 +9,6 @@
 global $post;
 $post_id = $post->ID;
 $main = new WP_Assessment();
-$mpdf = new \Mpdf\Mpdf();
 $report = new WP_Report_PDF();
 $post_meta = get_post_meta($post_id);
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
@@ -29,6 +28,8 @@ $questions = $main->wpa_unserialize_metadata($questions);
 $position_by_total_score = json_decode(get_field('position_by_total_score', $ranking_id), true);
 $position_by_industry = json_decode(get_field('position_by_industry', $ranking_id), true);
 $position_by_framework = json_decode(get_field('position_by_framework', $ranking_id), true);
+
+$mpdf = new \Mpdf\Mpdf();
 
 // Include Stylesheet
 $pdf_stylesheet = file_get_contents(WP_ASSESSMENT_ASSETS . '/css/report-pdf-style.css');

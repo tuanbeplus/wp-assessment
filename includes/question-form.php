@@ -9,9 +9,6 @@ class Question_Form
         add_action('wp_ajax_save_question', array($this, 'save_question'));
         add_action('wp_ajax_nopriv_save_question', array($this, 'save_question'));
 
-        add_action('wp_ajax_get_quiz_detail', array($this, 'get_quiz_detail'));
-        add_action('wp_ajax_nopriv_get_quiz_detail', array($this, 'get_quiz_detail'));
-
         add_action('wp_ajax_create_assessment_submission', array($this, 'create_assessment_submission'));
         add_action('wp_ajax_nopriv_create_assessment_submission', array($this, 'create_assessment_submission'));
 
@@ -46,6 +43,10 @@ class Question_Form
         add_action('wp_ajax_save_dashboard_charts_image_url', array($this, 'save_dashboard_charts_image_url'));
     }
 
+    /**
+     * Save answers question by ajax
+     * 
+     */
     function save_question()
     {
         try {
@@ -69,11 +70,11 @@ class Question_Form
             $type_quiz = $_POST['type_quiz'];
             $quiz_id = intval($_POST['quiz_id']);
             if (empty($quiz_id) || !$quiz_id)
-                throw new Exception('Assessment not found.');
+                throw new Exception('Question not found.');
 
             $status_submisstion = '';
-            // $submission_id = $this->is_submission_progress_exist($user_id, $assessment_id);
             $submission_id = $this->is_submission_progress_exist($organisation_id, $assessment_id);
+            $assessment_terms = get_assessment_terms($assessment_id);
 
             if ($type_quiz == 'Comprehensive Assessment') {
 
@@ -127,12 +128,22 @@ class Question_Form
                         $attachmentIDs = $p['attachmentIDs'] ?? null;
                         $quiz_point = $p['point'] ?? null;
 
-                        if($submission_id){
-                            // $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $user_id , $parent_id);
-                            $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion_parent($assessment_id,$submission_id, $quiz_id, $organisation_id , $parent_id);
-                        }else{
-                            // $quiz_data = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $user_id , $parent_id);
-                            $quiz_data = $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id , $parent_id);
+                        if ($submission_id) {
+                            $quiz_data = $main->get_quiz_by_assessment_id_and_submission_parent(
+                                $assessment_id, 
+                                $submission_id, 
+                                $quiz_id, 
+                                $organisation_id, 
+                                $parent_id,
+                            );
+                        } 
+                        else {
+                            $quiz_data = $main->get_quiz_by_assessment_id_and_parent(
+                                $assessment_id, 
+                                $quiz_id, 
+                                $organisation_id , 
+                                $parent_id,
+                            );
                         }
 
                         $input = [];
@@ -188,12 +199,15 @@ class Question_Form
                             );
                         }
 
+                        $quiz_action = '';
                         if (!$quiz_data) {
                             // Insert Quiz record if quiz_data not exist
                             $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
+                            $quiz_action = 'Inserted';
                         } else {
                             // Update Quiz record if quiz_data exist
                             $main->update_quiz_assessment($input, $conditions);
+                            $quiz_action = 'Updated';
                         }
                     }
                 }
@@ -204,19 +218,22 @@ class Question_Form
                 $description = $_POST['description'] ?? null;
                 $attachment_id = $_POST['attachment_id'] ?? null;
 
-                //   $is_options_exist = $this->check_multiple_choice_exist_in_assessment($assessment_id, $quiz_id);
-
-                //   if ($is_options_exist && !is_array($answers))
-                //       throw new Exception('Invalid answers');
-
                 $main = new WP_Assessment();
 
-                if($submission_id){
-                    // $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $user_id);
-                    $quiz_data = $main->get_quiz_by_assessment_id_and_submisstion($assessment_id,$submission_id, $quiz_id, $organisation_id);
-                }else{
-                    // $quiz_data = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $user_id);
-                    $quiz_data = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id);
+                if ($submission_id) {
+                    $quiz_data = $main->get_quiz_by_assessment_id_and_submission(
+                        $assessment_id, 
+                        $submission_id, 
+                        $quiz_id, 
+                        $organisation_id,
+                    );
+                }
+                else {
+                    $quiz_data = $main->get_quiz_by_assessment_id(
+                        $assessment_id, 
+                        $quiz_id, 
+                        $organisation_id,
+                    );
                 }
 
                 $input = [];
@@ -230,8 +247,7 @@ class Question_Form
                 if (!empty($submission_id))
                     $input['submission_id'] = $submission_id;
 
-                //   if ($is_options_exist)
-                    $input['answers'] = json_encode($answers);
+                $input['answers'] = json_encode($answers);
 
                 if (!empty($description))
                     $input['description'] = $description;
@@ -280,38 +296,17 @@ class Question_Form
         }
     }
 
-    function get_quiz_detail()
-    {
-        try {
-            $assessment_id = intval($_POST['assessment_id']);
-            if (empty($assessment_id))
-                throw new Exception('Assessment not found.');
-
-            $quiz_id = intval($_POST['quiz_id']);
-
-            $main = new WP_Assessment();
-            $assessment = $main->get_quiz_by_assessment_id($assessment_id, $quiz_id);
-            if (!$assessment)
-                throw new Exception('Quiz not found.');
-
-            $assessment->answers = json_decode($assessment->answers);
-
-            return wp_send_json(array('message' => 'Progress has been updated', 'status' => true, 'data' => $assessment->answers));
-        } catch (Exception $exception) {
-            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
-        }
-    }
-
+    /**
+     * Create a publish Submission by ajax
+     * 
+     */
     function create_assessment_submission()
     {
         try {
             $assessment_id = intval($_POST['assessment_id']);
-            if (empty($assessment_id))
-                throw new Exception('Assessment not found.');
+            if (empty($assessment_id)) throw new Exception('Assessment not found.');
 
             $assessment = get_post($assessment_id);
-            $assessment_title = $assessment->post_title;
-            $assessment_terms = get_assessment_terms($assessment_id);
 
             if (isset($_COOKIE['userId'])) {
                 $user_id = $_COOKIE['userId'];
@@ -320,22 +315,45 @@ class Question_Form
             }
 
             $organisation_id = $_POST['organisation_id'];
-            if (empty($organisation_id))
-                throw new Exception('Organisation not found.');
+            if (empty($organisation_id)) throw new Exception('Organisation not found.');
 
             $is_submission_exist = $this->is_submission_exist($organisation_id, $assessment_id);
             $is_submission_progress_exist = $this->is_submission_progress_exist($organisation_id, $assessment_id);
-
             $post_id = $is_submission_exist;
+
+            // Get assessment terms
+            $assessment_terms = get_assessment_terms($assessment_id);
+            if (empty($assessment_terms)) throw new Exception('Assessment category not found.');
+
+            if (isset($assessment_terms[0])) {
+                if ($assessment_terms[0] == 'dcr') {
+                    $submission_type = 'dcr_submissions';
+                }
+                else {
+                    $submission_type = 'submissions';
+                }
+            }
+            
+            if ($is_submission_exist) {
+                $org_name = ' - '.get_post_meta($is_submission_exist, 'org_data', true)['Name'] ?? '';
+            }
+            else if ($is_submission_progress_exist) {
+                $org_name = ' - '.get_post_meta($is_submission_progress_exist, 'org_data', true)['Name'] ?? '';
+            }
+            else {
+                $org_name = '';
+            }
+
+            $submission_title = 'Submission on ' .$assessment->post_title.' - '.date('M d Y').$org_name;
 
             // If not exist any submissions
             if (!$is_submission_exist && !$is_submission_progress_exist) {
                 $submission = wp_insert_post(array(
-                    'post_type' => 'submissions',
-                    'post_title' => 'Submission on ' . $assessment_title,
+                    'post_type' => $submission_type,
+                    'post_title' => $submission_title,
                     'post_status' => 'publish'
                 ));
-                if (!$submission) throw new Exception('Cannot submit assessment - Error 1!');
+                if (!$submission) throw new Exception('Failed to created a new submission!');
 
                 $post_id = $submission;
             }
@@ -343,41 +361,40 @@ class Question_Form
             elseif ($is_submission_progress_exist) {
                 $submission = wp_update_post(array(
                     'ID'        => $is_submission_progress_exist,
-                    'post_type' => 'submissions',
-                    'post_title' => 'Submission on ' . $assessment_title,
+                    'post_type' => $submission_type,
+                    'post_title' => $submission_title,
                     'post_status' => 'publish'
                 ));
-                if (!$submission) throw new Exception('Cannot submit assessment - Error 2!');
-
+                if (!$submission) throw new Exception('Failed to updated progress on submission!');
                 $post_id = $submission;
             }
             // If existing Submit on Submission
             elseif ($is_submission_exist) {
-                if (in_array('dcr', $assessment_terms)) {
+                // Is DCR submission
+                if ($assessment_terms[0] == 'dcr') {
                     $new_submission = wp_insert_post(array(
-                        'post_type' => 'submissions',
-                        'post_title' => 'Submission on ' . $assessment_title,
+                        'post_type' => $submission_type,
+                        'post_title' => $submission_title,
                         'post_status' => 'publish'
                     ));
-                    if (!$new_submission) throw new Exception('Cannot resubmit progress to this assessment!');
+                    if (!$new_submission) throw new Exception('Failed to resubmit submission!');
                     $post_id = $new_submission;
                 }
+                // Is Index & other submission
                 else {
                     $submission = wp_update_post(array(
                         'ID'        => $is_submission_exist,
-                        'post_type' => 'submissions',
-                        'post_title' => 'Submission on ' . $assessment_title,
+                        'post_type' => $submission_type,
+                        'post_title' => $submission_title,
                         'post_status' => 'publish'
                     ));
+                    if (!$submission) throw new Exception('Failed to updated submission!');
                     $post_id = $is_submission_exist;
                 }
             }
 
             // Update post meta
-            $this->update_submission_meta_data($user_id, $organisation_id, $assessment_id, $post_id, 'pending'); 
-
-            // Set term
-            $this->set_submission_terms($post_id, $assessment_id); 
+            $this->update_submission_meta_data($user_id, $organisation_id, $assessment_id, $post_id, 'pending');  
 
             // Get submission url
             $submission_url = get_permalink( $post_id );
@@ -388,16 +405,19 @@ class Question_Form
         }
     }
 
+    /**
+     * Create a draft Submission by ajax
+     * 
+     */
     function submit_assessment_progress()
     {
         try {
+            $main = new WP_Assessment();
             $assessment_id = intval($_POST['assessment_id']);
             if (empty($assessment_id))
                 throw new Exception('Assessment not found.');
 
-            $assessment = get_post($assessment_id);
-            $assessment_title = $assessment->post_title;
-            $assessment_terms = get_assessment_terms($assessment_id);
+            $assessment = get_post($assessment_id);            
 
             if (isset($_COOKIE['userId'])) {
                 $user_id = $_COOKIE['userId'];
@@ -411,14 +431,38 @@ class Question_Form
 
             $is_submission_exist = $this->is_submission_exist($organisation_id, $assessment_id);
             $is_submission_progress_exist = $this->is_submission_progress_exist($organisation_id, $assessment_id);
-
             $post_id = $is_submission_exist;
+
+            // Get assessment term
+            $assessment_terms = get_assessment_terms($assessment_id);
+            if (empty($assessment_terms)) throw new Exception('Assessment category not found.');
+
+            if (isset($assessment_terms[0])) {
+                if ($assessment_terms[0] == 'dcr') {
+                    $submission_type = 'dcr_submissions';
+                }
+                else {
+                    $submission_type = 'submissions';
+                }
+            }
+            
+            if ($is_submission_exist) {
+                $org_name = ' - '.get_post_meta($is_submission_exist, 'org_data', true)['Name'] ?? '';
+            }
+            else if ($is_submission_progress_exist) {
+                $org_name = ' - '.get_post_meta($is_submission_progress_exist, 'org_data', true)['Name'] ?? '';
+            }
+            else {
+                $org_name = '';
+            }
+            
+            $submission_title = 'Progress on ' .$assessment->post_title.' - '.date('M d Y').$org_name;
 
             // Not exist any submissions
             if (!$is_submission_exist && !$is_submission_progress_exist) {
                 $submission = wp_insert_post(array(
-                    'post_type' => 'submissions',
-                    'post_title' => 'Progress on ' . $assessment_title,
+                    'post_type' => $submission_type,
+                    'post_title' => $submission_title,
                     'post_status' => 'draft'
                 ));
 
@@ -428,24 +472,32 @@ class Question_Form
             }
             // Exist a progress submission
             elseif ($is_submission_progress_exist) {
+                $submission = wp_update_post(array(
+                    'ID'        => $is_submission_progress_exist,
+                    'post_type' => $submission_type,
+                    'post_title' => $submission_title,
+                    'post_status' => 'draft'
+                ));
                 $post_id = $is_submission_progress_exist;
             }
             // Exist a submission
             elseif($is_submission_exist) {
-                if (in_array('dcr', $assessment_terms)) {
+                // Is DCR submission
+                if ($assessment_terms[0] == 'dcr') {
                     $new_submission = wp_insert_post(array(
-                        'post_type' => 'submissions',
-                        'post_title' => 'Progress on ' . $assessment_title,
+                        'post_type' => $submission_type,
+                        'post_title' => $submission_title,
                         'post_status' => 'draft'
                     ));
                     if (!$new_submission) throw new Exception('Cannot resubmit progress to this assessment!');
                     $post_id = $new_submission;
                 }
+                // Is Index & other submission
                 else {
                     $submission = wp_update_post(array(
                         'ID'        => $is_submission_exist,
-                        'post_type' => 'submissions',
-                        'post_title' => 'Progress on ' . $assessment_title,
+                        'post_type' => $submission_type,
+                        'post_title' => $submission_title,
                         'post_status' => 'draft'
                     ));
                     $post_id = $is_submission_exist;
@@ -455,14 +507,11 @@ class Question_Form
             // Update post meta
             $this->update_submission_meta_data($user_id, $organisation_id, $assessment_id, $post_id, 'draft'); 
 
-            // Set term
-            $this->set_submission_terms($post_id, $assessment_id); 
-
             //Update submission
             if ($post_id) {
                 // update submission_id
                 global $wpdb;
-                $table_name = $wpdb->prefix . 'user_quiz_submissions';
+                $table_name = $main->get_quiz_submission_table_name($assessment_id);
 
                 // Update Submission ID to table
                 $wpdb->query($wpdb->prepare(
@@ -478,56 +527,6 @@ class Question_Form
             return wp_send_json(array('message' => 'Submission progress has been saved', 'status' => true, 'submission_id' => $post_id));
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
-        }
-    }
-
-    /**
-     * Set term of category to Submission
-     *
-     * @param int $submission_id   	Submission ID
-     * @param int $assessment_id    Assessment ID
-     * 
-     */
-    function set_submission_terms($submission_id, $assessment_id) 
-    {
-        $current_terms = get_the_terms($submission_id , 'subm_category');
-        // Set term if Submission don't have any terms
-        if (empty($current_terms)) {
-            $assessment_terms = get_the_terms($assessment_id , 'category');
-                
-            // Get all terms of the submission category
-            $subm_terms = get_terms(array(
-                'taxonomy' => 'subm_category',
-                'hide_empty' => false, 
-            ));
-            $posible_terms = array();
-
-            if (!empty($subm_terms)) {
-                foreach ($subm_terms as $term) {
-                    $posible_terms[$term->slug] = $term->term_id;
-                }
-            }
-
-            if (!empty($assessment_terms) && !empty($posible_terms)) {
-                foreach ($assessment_terms as $term) {
-                    if ($term->slug == 'dcr') {
-                        $term_id = $posible_terms['dcr'];
-                    }
-                    elseif ($term->slug == 'index') {
-                        $term_id = $posible_terms['index'];
-                    }
-                    elseif ($term->slug == 'self-assessed') {
-                        $term_id = $posible_terms['self-assessed'];
-                    }
-                    else {
-                        $term_id = null;
-                    }
-                    // Set term if term ID exist
-                    if ($term_id != null) {
-                        wp_set_post_terms($submission_id, $term_id, 'subm_category', true);
-                    }
-                }
-            }
         }
     }
 
@@ -615,9 +614,22 @@ class Question_Form
     function is_submission_exist($organisation_id, $assessment_id)
     {
         $submission_id = null;
+        $assessment_terms = get_assessment_terms($assessment_id);
+
+        if (is_array($assessment_terms) && isset($assessment_terms[0])) {
+            if ($assessment_terms[0] == 'dcr') {
+                $post_type = 'dcr_submissions';
+            }
+            else {
+                $post_type = 'submissions';
+            }
+        }
+        else {
+            return null;
+        }
 
         $args = array(
-            'post_type' => 'submissions',
+            'post_type' => $post_type,
             'posts_per_page' => 1,
             'orderby' => 'date',
             'order' => 'DESC',
@@ -639,10 +651,9 @@ class Question_Form
         if (is_array($submission) && count($submission) > 0) {
             $submission_id = $submission[0]->ID;
             $status = get_post_meta($submission_id, 'assessment_status', true);
-            $assessment_terms = get_assessment_terms($assessment_id);
 
             // If it's DCR assessment
-            if (in_array('dcr', $assessment_terms)) {
+            if ($assessment_terms[0] == 'dcr') {
                 if($status != 'draft') {
                     return $submission_id;
                 }
@@ -657,9 +668,22 @@ class Question_Form
     function is_submission_progress_exist($organisation_id, $assessment_id)
     {
         $post_id = null;
+        $assessment_terms = get_assessment_terms($assessment_id);
+
+        if (is_array($assessment_terms) && isset($assessment_terms[0])) {
+            if ($assessment_terms[0] == 'dcr') {
+                $post_type = 'dcr_submissions';
+            }
+            else {
+                $post_type = 'submissions';
+            }
+        }
+        else {
+            return null;
+        }
 
         $args = array(
-            'post_type' => 'submissions',
+            'post_type' => $post_type,
             'posts_per_page' => 1,
             'post_status' => 'draft',
             'orderby' => 'date',
@@ -740,6 +764,8 @@ class Question_Form
             if (empty($quiz_id))
                 throw new Exception('Quiz not found.');
 
+            $assessment_terms = get_assessment_terms($assessment_id);
+
             // if (!empty($sf_user_id)) {
             //     $user_id = $sf_user_id;
             // }
@@ -775,7 +801,7 @@ class Question_Form
                 'submission_id' => $submission_id,
             );
 
-            $main->update_quiz_assessment($input, $conditions);
+            $main->update_quiz_assessment($assessment_terms[0], $input, $conditions);
 
             return wp_send_json(array('quiz_id' => $quiz_id, 'parent_id' => $parent_quiz_id, 'message' => 'Feedback for this quiz has been updated', 'status' => true));
         } catch (Exception $exception) {
@@ -791,6 +817,7 @@ class Question_Form
         $assessment_id = get_post_meta($submission_id, 'assessment_id', true) ?? null;
         $organisation_id = $_POST['organisation_id'] ?? null;
         $quiz_feedback_arr = $_POST['quiz_feedback'] ?? array();
+        $assessment_terms = get_assessment_terms($assessment_id);
 
         if (!empty($quiz_feedback_arr) && isset($submission_id) && isset($assessment_id) && isset($organisation_id)) {
             foreach ($quiz_feedback_arr as $i => $section) {
@@ -804,7 +831,7 @@ class Question_Form
                         'assessment_id' => $assessment_id,
                         'submission_id' => $submission_id,
                     );
-                    $main->update_quiz_assessment($input, $conditions);
+                    $main->update_quiz_assessment($assessment_terms[0], $input, $conditions);
                 }
             }
         }
@@ -892,14 +919,23 @@ class Question_Form
     {
         try {
             $data_imgs_arr = $_POST['data_imgs'];
-            if (empty($data_imgs_arr)) throw new Exception('Data Images not found.');
+            if (empty($data_imgs_arr)) throw new Exception('Chart images not found, please add scores to Dashboard first.');
 
             $report_id = $_POST['report_id'];
             if (empty($report_id)) throw new Exception('Report ID not found.');
             $org_data = get_post_meta($report_id, 'org_data', true);
             $org_name = $org_data['Name'] ?? null;
             $attachments_arr = array();
+            $dashboard_chart_imgs = get_post_meta($report_id, 'dashboard_chart_imgs', true);
 
+            // Delete all Chart images existing in Media
+            if (!empty($dashboard_chart_imgs)) {
+                foreach ($dashboard_chart_imgs as $img_id) {
+                    wp_delete_attachment( $img_id, true );
+                }
+            }
+
+            // Upload all new Chart images to Media
             foreach ($data_imgs_arr as $record) {
 
                 $img_data = $record['data'];

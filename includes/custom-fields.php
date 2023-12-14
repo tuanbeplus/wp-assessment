@@ -25,13 +25,13 @@ class Custom_Fields
         add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
         add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'side', 'default');
         if (current_user_can('administrator')) {
-            add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions'), 'normal', 'default');
+            add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
         }
         add_meta_box('report-key-areas-field', 'Add Key Areas', array($this, 'report_key_areas_meta_box_callback'), 'assessments', 'normal', 'default');
 
         // Submisions
-        add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'submission_list_card_section_admin'), 'submissions', 'normal', 'default');
-        add_meta_box('submitted_info_view', 'Submission by ', array($this, 'submission_info_section_admin'), 'submissions', 'side', 'default');
+        add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'submission_list_card_section_admin'), array('submissions', 'dcr_submissions'), 'normal', 'default');
+        add_meta_box('submitted_info_view', 'Submission by ', array($this, 'submission_info_section_admin'), array('submissions', 'dcr_submissions'), 'side', 'default');
         add_meta_box('submission-scoring-field', 'Submission Scoring ', array($this, 'submission_scoring_section_admin'), 'submissions', 'normal', 'default');
 
         // Reports
@@ -171,6 +171,31 @@ class Custom_Fields
 
         $report_template = isset($_POST['report_template']) ? $_POST['report_template'] : '';
         $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
+        $dashboard_chart_imgs = get_post_meta($post_id, 'dashboard_chart_imgs', true);
+        $framework_dashboard      = get_field('framework_dashboard',$post_id);
+        $implementation_dashboard = get_field('implementation_dashboard',$post_id);
+        $review_dashboard         = get_field('review_dashboard',$post_id);
+        $overall_dashboard        = get_field('overall_dashboard',$post_id);
+
+        // Renew chart images meta
+        if (!empty($dashboard_chart_imgs)) {
+            if (isset($dashboard_chart_imgs['Framework']) && empty($framework_dashboard)) {
+                wp_delete_attachment( $dashboard_chart_imgs['Framework'], true );
+                $dashboard_chart_imgs['Framework'] = null;
+            }
+            if (isset($dashboard_chart_imgs['Implementation']) && empty($implementation_dashboard)) {
+                wp_delete_attachment( $dashboard_chart_imgs['Implementation'], true );
+                $dashboard_chart_imgs['Implementation'] = null;
+            }
+            if (isset($dashboard_chart_imgs['Review']) && empty($review_dashboard)) {
+                wp_delete_attachment( $dashboard_chart_imgs['Review'], true );
+                $dashboard_chart_imgs['Review'] = null;
+            }
+            if (isset($dashboard_chart_imgs['Overall']) && empty($overall_dashboard)) {
+                wp_delete_attachment( $dashboard_chart_imgs['Overall'], true );
+                $dashboard_chart_imgs['Overall'] = null;
+            }
+        }
 
         // Renew Index of generic page Report template array
         if (!empty($report_template)) {
@@ -192,6 +217,7 @@ class Custom_Fields
 
         update_post_meta($post_id, 'report_template', $report_template);
         update_post_meta($post_id, 'report_key_areas', $report_key_areas);
+        update_post_meta($post_id, 'dashboard_chart_imgs', $dashboard_chart_imgs);
     }
 
     function on_save_submission_custom_fields($post_id): void

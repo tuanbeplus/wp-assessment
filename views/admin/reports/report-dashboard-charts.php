@@ -32,7 +32,7 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
     </div>
     <ul class="dashboard-charts-list">
     <?php foreach ($key_areas as $key):
-
+    
         if($key == 'Framework' and empty($framework_dashboard)) continue;
         if($key == 'Implementation' and empty($implementation_dashboard)) continue;
         if($key == 'Review' and empty($review_dashboard)) continue;
@@ -52,12 +52,16 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
                     data-key="<?php echo $key; ?>">
             </canvas>
             <a class="btn-download-chart button button-medium" role="button">
+                <svg fill="#2271b1" width="20" height="21" viewBox="0 0 24 24" class="icon-download" data-name="Flat Line" xmlns="http://www.w3.org/2000/svg" class="icon flat-line"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><line id="primary" x1="12" y1="3" x2="12" y2="16" style="fill: none; stroke: #2271b1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></line><polyline id="primary-2" data-name="primary" points="8 12 12 16 16 12" style="fill: none; stroke: #2271b1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></polyline><path id="primary-3" data-name="primary" d="M20,16v4a1.08,1.08,0,0,1-1.14,1H5.14A1.08,1.08,0,0,1,4,20V16" style="fill: none; stroke: #2271b1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path></g></svg>
                 Download as Image
             </a>
             <script>
+              
             // Render Report Framework Chart
             jQuery(document).on('ready', function(e){
+
                 let ctx = jQuery('#<?php echo $key; ?>-dashboard-chart-<?php echo $canvas_id; ?>');
+                // Set the background color of the canvas
                 let labels = [];
                 <?php
                   foreach ($data_dashboard as $dashboard) {
@@ -69,6 +73,18 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
                     break;
                   }
                  ?>
+                const plugin = {
+                  id: 'customCanvasBackgroundColor',
+                  beforeDraw: (chart, args, options) => {
+                    const {ctx} = chart;
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = options.color || '#fff';
+                    ctx.fillRect(0, 0, chart.width, chart.height);
+                    ctx.restore();
+                  }
+                };
+
                 let FrameworkChart = new Chart(ctx, {
                     type: 'radar',
                     options: {
@@ -82,7 +98,7 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
                             legend: {
                                 labels: {font:{size: 15,}}
                             },
-                            customCanvasBackgroundColor: {color: '#fff',}
+                            customCanvasBackgroundColor: {color: '#fff',},
                         },
                         scales: {
                             r: {
@@ -96,6 +112,7 @@ $key_areas = array('Framework', 'Implementation', 'Review', 'Overall');
                         scale: {ticks: {stepSize: 1.0,},
                         },
                     },
+                    plugins: [plugin],
                     data: {
                         labels: labels,
                         datasets: [

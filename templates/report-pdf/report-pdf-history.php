@@ -15,25 +15,30 @@ $overall_dashboard        = get_field('overall_dashboard',$post_id);
 $data_dashboard = '';
 
 foreach ($pages_history as $page) {
+    $count_figure = 0;
     if ($page == 'Framework') {
+        $count_figure++;
         $data_dashboard = $framework_dashboard;
         $caption = 'Table 10 - Framework Dashboard - History';
-        $img_alt = 'Figure 1 - Framework Dashboard - comparative';
+        $img_alt = 'Figure '.$count_figure.' - Framework Dashboard - comparative';
     }       
     if ($page == 'Implementation') {
+        $count_figure++;
         $data_dashboard = $implementation_dashboard;
         $caption = 'Table 11 - Implementation Dashboard - History';
-        $img_alt = 'Figure 2 - Implementation Dashboard - comparative';
+        $img_alt = 'Figure '.$count_figure.' - Implementation Dashboard - comparative';
     }  
     if ($page == 'Review') {
+        $count_figure++;
         $data_dashboard = $review_dashboard;
         $caption = 'Table 12 - Review Dashboard - History';
-        $img_alt = 'Figure 3 - Review Dashboard - comparative';
+        $img_alt = 'Figure '.$count_figure.' - Review Dashboard - comparative';
     }          
     if ($page == 'Overall') {
+        $count_figure++;
         $data_dashboard = $overall_dashboard;
         $caption = 'Table 13 - Overall Dashboard - History';
-        $img_alt = 'Figure 4 - Overall Dashboard - comparative';
+        $img_alt = 'Figure '.$count_figure.' - Overall Dashboard - comparative';
     }         
 
     $chart_img_url = wp_get_attachment_url($dashboard_chart_imgs[$page]);
@@ -45,27 +50,54 @@ foreach ($pages_history as $page) {
     }
 
     if (!empty($data_dashboard)) {
+        $history_scores = get_history_dashboard_scores($data_dashboard);
         $years = array();
         foreach ($data_dashboard as $record) {
             $years[] = $record['year'];
         }
-        $history_scores = get_history_dashboard_scores($data_dashboard);
-        $page_heading = 'Year-on-year: '. $page .' Dashboard '. min($years) . '-'.max($years);
+        if (!empty($years)) {
+            if (count($years) > 1) {
+                $year_on_year = min($years). '-' .max($years);
+            }
+            else {
+                $year_on_year = min($years);
+            }
+        }
+        else {
+            $year_on_year = null;
+        }
+        
+        $page_heading = 'Year-on-year: '. $page .' Dashboard '. $year_on_year;
 
-        $dashboard_chart_html = 
-        '<div class="page">
-            <h3>'. $page_heading .'</h3>
-            <div style="text-align:center;">'. $chart_img .'</div>
-        </div>';
+        // Render Chart image if attachment ID exist
+        if (isset($dashboard_chart_imgs[$page])) {
+            $chart_img_url = wp_get_attachment_url($dashboard_chart_imgs[$page]);
+            if (isset($chart_img_url)) {
+                $chart_img = '<img class="chart" src="'. $chart_img_url .'"><p>'. $img_alt .'</p>';
+            }
+            else {
+                $chart_img = '';
+            }
 
-        // Add to table of contents
-        $mpdf->TOC_Entry($page_heading ,1);
+            $dashboard_chart_html = 
+            '<div class="page">
+                <h3>'.$page_heading.'</h3>
+                <div style="text-align:center;">'. $chart_img .'</div>
+            </div>';
 
-        // Render HTML
-        $mpdf->WriteHTML($dashboard_chart_html);
+            // Add to table of contents
+            $mpdf->TOC_Entry($page_heading ,1);
 
+            // Render HTML
+            $mpdf->WriteHTML($dashboard_chart_html);
+
+            // Remove page heading
+            $page_heading = null;
+        }
+        
         $history_dashboard_html =
         '<div class="page">
+            <h3>'.$page_heading.'</h3>
             <table class="table-3 table-5">
                 <tr>
                     <th>Key Area</th>';
@@ -90,6 +122,11 @@ foreach ($pages_history as $page) {
             '</table>
             <caption>'. $caption .'</caption>
         </div>';
+
+        if (empty($dashboard_chart_imgs[$page])) {
+            // Add to table of contents
+            $mpdf->TOC_Entry($page_heading ,1);
+        }
 
         // Render HTML
         $mpdf->WriteHTML($history_dashboard_html);
