@@ -11,7 +11,6 @@ $quiz_id = get_post_meta($post_id, 'quiz_id', true);
 $assessment_meta = get_post_meta($assessment_id, 'question_templates', true);
 $report_template = get_post_meta($assessment_id, 'report_template', true);
 $is_required_answer_all = get_post_meta($assessment_id, 'is_required_answer_all', true);
-$quiz_feedbacks = get_post_meta($post_id, 'quiz_feedback', true);
 $quiz_answer_points = get_post_meta($post_id, 'quiz_answer_point', true);
 $org_score = get_post_meta($post_id, 'org_score', true);
 $and_score = get_post_meta($post_id, 'and_score', true);
@@ -174,10 +173,10 @@ $submission_score_arr = array();
                         }
                         ?>
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$quiz_id; ?>">
+                            <div class="card-header">
+                                <h4 class="quiz-title"><?php echo $group_id.'.'.$quiz_id.' - '.$sub_title; ?></h4>
+                            </div>
                             <div class="card content">
-                                <div class="card-header">
-                                    <h4 class="quiz-title"><?php echo $group_id.'.'.$quiz_id.' - '.$sub_title; ?></h4>
-                                </div>
                                 <div class="card-body">
                                     <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $quiz_id ?>" class="quiz-input"/>
                                     <?php if (is_array($answers) && count($answers) > 0) : ?>
@@ -329,31 +328,30 @@ $submission_score_arr = array();
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                                <div class="card-footer"></div>
                             </div>
                             <div class="card feedback">
                                 <div class="card-body">
                                     <textarea class="form-control-lg feedback-input" 
-                                            name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
-                                            placeholder="Add feedback here"
-                                            ><?php echo $feedback ?? null; ?></textarea>
-                                    <div class="card-action">
-                                        <a type="button" class="button button-primary accept-quiz-feedback" 
-                                            data-group-id="<?php echo $group_id ?>"
-                                            data-id="<?php echo $quiz_id ?>">
-                                            Accept
-                                        </a>
-                                        <a type="button" class="button reject-quiz-feedback" 
-                                            data-group-id="<?php echo $group_id ?>"
-                                            data-id="<?php echo $quiz_id ?>">
-                                            Reject
-                                        </a>
-                                    </div>
+                                        name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
+                                        placeholder="Add feedback here"
+                                        ><?php echo $feedback ?? null; ?></textarea>
                                 </div>
-                                <div class="card-footer">
-                                    <div class="quiz-status <?php echo $type; ?>">
-                                        Status: <strong><?php echo $type; ?></strong>
-                                    </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="card-action">
+                                    <a type="button" class="button button-primary accept-quiz-feedback" 
+                                        data-group-id="<?php echo $group_id ?>"
+                                        data-id="<?php echo $quiz_id ?>">
+                                        Accept
+                                    </a>
+                                    <a type="button" class="button reject-quiz-feedback" 
+                                        data-group-id="<?php echo $group_id ?>"
+                                        data-id="<?php echo $quiz_id ?>">
+                                        Reject
+                                    </a>
+                                </div>
+                                <div class="quiz-status <?php echo $type; ?>">
+                                    Status: <strong><?php echo $type; ?></strong>
                                 </div>
                             </div>
                         </div>
@@ -361,7 +359,7 @@ $submission_score_arr = array();
                     <?php endforeach; ?>
 
                 <?php endif; ?>
-                <!--  -->
+
                 <?php 
                     if ($section_score_arr != null): 
                         $total_section_score = array_sum($section_score_arr);

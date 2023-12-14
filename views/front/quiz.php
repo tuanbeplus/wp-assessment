@@ -47,7 +47,6 @@ $total_quiz = is_array($questions) ? count($questions) : 0;
 
 $is_submission_exist = $question_form->is_submission_exist($user_id, $post_id);
 $status = get_post_meta($submission_id, 'assessment_status', true);
-$quiz_feedbacks = get_post_meta($submission_id, 'quiz_feedback', true);
 $is_required_answer_all = get_post_meta($post_id, 'is_required_answer_all', true);
 $is_required_document_all = get_post_meta($post_id, 'is_required_document_all', true);
 $is_invite_colleagues = get_post_meta($post_id, 'is_invite_colleagues', true);
@@ -670,7 +669,7 @@ $is_accepted = $status === 'accepted';
                                                 <?php if ($status == 'rejected') : ?>
                                                     <div class="quizAdvice feedback-area">
                                                         <p>Feedback</p>
-                                                        <div><?php echo $quiz_feedbacks[$j][$sub_id]; ?></div>
+                                                        <div><?php echo $feedback; ?></div>
                                                     </div>
                                                 <?php endif; ?>
                                             </div>

@@ -237,7 +237,6 @@ class Custom_Fields
 
         $question_form = new Question_Form();
         $group_quiz_points = $_POST['group_quiz_point'] ?? null;
-        $quiz_feedbacks = $_POST['quiz_feedback'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
         $total_submission_score = $_POST['total_submission_score'] ?? null;
         $org_score = $_POST['org_score'] ?? null;
@@ -308,7 +307,6 @@ class Custom_Fields
         $total_agreed_score['percent'] = round((array_sum_submission_score($agreed_score))/268.8*100);
 
         update_post_meta($post_id, 'group_quiz_point', $new_group_quiz_points);
-        update_post_meta($post_id, 'quiz_feedback', $quiz_feedbacks);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);
         update_post_meta($post_id, 'total_submission_score', $total_submission_score);
         update_post_meta($post_id, 'org_score', $org_score);
@@ -320,7 +318,10 @@ class Custom_Fields
         update_post_meta($post_id, 'total_agreed_score', $total_agreed_score);
         update_post_meta($post_id, 'key_area', $key_area);
         update_post_meta($post_id, 'maturity_level', $maturity_level);
-        $question_form->save_all_submission_feedback();
+
+        if ( get_post_type($post_id) != 'dcr_submissions') {
+            $question_form->save_all_submission_feedback();
+        }
     }
 
     function save_assigned_moderator($post_id): void
