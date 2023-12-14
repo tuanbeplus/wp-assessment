@@ -30,7 +30,8 @@ class Custom_Fields
         add_meta_box('report-key-areas-field', 'Add Key Areas', array($this, 'report_key_areas_meta_box_callback'), 'assessments', 'normal', 'default');
 
         // Submisions
-        add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'submission_list_card_section_admin'), array('submissions', 'dcr_submissions'), 'normal', 'default');
+        add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'index_submission_list_card_section_admin'), array('submissions'), 'normal', 'default');
+        add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'dcr_submission_list_card_section_admin'), array('dcr_submissions'), 'normal', 'default');
         add_meta_box('submitted_info_view', 'Submission by ', array($this, 'submission_info_section_admin'), array('submissions', 'dcr_submissions'), 'side', 'default');
         add_meta_box('submission-scoring-field', 'Submission Scoring ', array($this, 'submission_scoring_section_admin'), 'submissions', 'normal', 'default');
 
@@ -78,9 +79,14 @@ class Custom_Fields
         return include_once MODERATOR_LIST_ADMIN_SELECT;
     }
 
-    function submission_list_card_section_admin()
+    function index_submission_list_card_section_admin()
     {
-        return include_once ADMIN_SUBMISSION_VIEW;
+        return include_once ADMIN_SUBMISSION_INDEX_VIEW;
+    }
+
+    function dcr_submission_list_card_section_admin()
+    {
+        return include_once ADMIN_SUBMISSION_DCR_VIEW;
     }
 
     function submission_info_section_admin()

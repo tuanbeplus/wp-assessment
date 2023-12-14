@@ -13,7 +13,8 @@ const ADMIN_REPORT_SECTION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/rep
 const ADMIN_REPORT_KEY_AREAS_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-key-areas.php';
 
 // define admin views Submissions
-const ADMIN_SUBMISSION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-view.php';
+const ADMIN_SUBMISSION_INDEX_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-index-view.php';
+const ADMIN_SUBMISSION_DCR_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-dcr-view.php';
 const ADMIN_SUBMISSION_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-info-view.php';
 const ADMIN_SUBMISSION_SCORING_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-scoring.php';
 
