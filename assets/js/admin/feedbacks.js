@@ -7,39 +7,105 @@
       await and_add_submission_feedback($(this));
     });
 
-    async function and_add_submission_feedback(btn) {
-      let assessment_id = $("#assessment_id").val();
-      let user_id = $("#user_id").val();
-      let submission_id = $("#submission_id").val();
-      let organisation_id = $("#organisation_id").val();
+    $("body").on("click", ".ic-delete-feedback", function (e) {
+      e.preventDefault();
+      and_remove_submission_feedback($(this));
+    });
 
-      console.log(assessment_id, user_id, submission_id, organisation_id);
+    /**
+     * Create a submission feedback
+     */
+    async function and_add_submission_feedback(instance) {
+      let quizId = instance.data("id");
+      let parent_quiz_id = instance.data("group-id");
+      let parent = $(`#main-container-${parent_quiz_id}_${quizId}`);
+      let feedback_el = parent.find(".feedback-input");
+      let feedback_vl = feedback_el.val();
+      let assessmentId = $(`[name="assessment_id"]`).val();
+      let submissionId = $("#submission_id").val();
+      let organisationId = $("#organisation_id").val();
 
-      // const payload = {
-      //   action: "final_accept_reject_assessment",
-      //   assessment_id: assessment_id,
-      //   // user_id: user_id,
-      //   submission_id: submission_id,
-      //   organisation_id: organisation_id,
-      //   type: feedbackType,
-      // };
+      let card_feedback = instance.closest(".feedback");
+      let feedback_lst = card_feedback.find(".feedback-lst");
 
-      // let response = await $.ajax({
-      //   type: "POST",
-      //   url: fb_object.ajax_url,
-      //   data: payload,
-      //   beforeSend: function (xhr) {},
-      //   success: function (response) {},
-      // });
-      // const { quiz_point, status, message } = response;
-      // //console.log(response);
-      // //alert(message);
+      feedback_el.next(".fb-error-msg").text("");
+      feedback_el.removeClass("error");
+      if (!feedback_vl) {
+        feedback_el.next(".fb-error-msg").text("Must add feedback above!!");
+        feedback_el.addClass("error");
+        return false;
+      }
 
-      // if (status) {
-      //   // location.reload()
+      let response = await $.ajax({
+        type: "POST",
+        url: fb_object.ajax_url,
+        data: {
+          action: "and_add_a_submission_feedback",
+          feedback: feedback_vl,
+          assessment_id: assessmentId,
+          submission_id: submissionId,
+          organisation_id: organisationId,
+          quiz_id: quizId,
+          parent_quiz_id: parent_quiz_id,
+        },
+        beforeSend: function (xhr) {
+          instance.addClass("disabled").html('<div class="and-spinner-loading"></div>');
+        },
+        success: function (response) {
+          instance.removeClass("disabled").html("Add feedback");
+        },
+      });
+      const { feedback_id, user_name, status, message } = response;
+      // console.log(status, feedback_id, message);
 
-      //   return true;
-      // }
+      if (status) {
+        feedback_el.val("");
+
+        let added_fb_html = '<div class="fd-row">';
+        added_fb_html += ' <div class="fb-content">';
+        added_fb_html +=
+          '  <span class="ic-delete-feedback" data-fb-id="' + feedback_id + '" title="Remove this feedback">';
+        added_fb_html += '    <i class="fa fa-trash-o"></i>';
+        added_fb_html += "  </span>";
+        added_fb_html += '  <div class="author"><strong>' + user_name + "</strong></div>";
+        added_fb_html += '  <div class="fb">' + feedback_vl + "</div>";
+        added_fb_html += " </div>";
+        added_fb_html += "</div>";
+        feedback_lst.prepend(added_fb_html);
+      } else {
+        feedback_el.next(".fb-error-msg").text(message);
+      }
+      return status;
+    }
+
+    /**
+     * Remove a submission feedback
+     */
+    function and_remove_submission_feedback(instance) {
+      let fb_id = instance.data("fb-id");
+      let parent_el = instance.closest(".fd-row");
+
+      if (!fb_id) {
+        return false;
+      }
+
+      $.ajax({
+        type: "POST",
+        url: fb_object.ajax_url,
+        data: {
+          action: "and_remove_a_submission_feedback",
+          feedback_id: fb_id,
+        },
+        beforeSend: function (xhr) {
+          parent_el.addClass("loading").append('<div class="and-spinner-loading"></div>');
+        },
+        success: function (response) {
+          if (response.status) {
+            parent_el.remove();
+          } else {
+          }
+        },
+      });
     }
   });
 })(window, jQuery);

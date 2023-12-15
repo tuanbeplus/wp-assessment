@@ -2,6 +2,7 @@
 global $post;
 global $wpdb;
 
+$current_user = wp_get_current_user();
 $post_id = $post->ID;
 $post_meta = get_post_meta($post_id);
 $user_id = get_post_meta($post_id, 'user_id', true);
@@ -21,11 +22,28 @@ $terms = get_assessment_terms($assessment_id);
 
 $main = new WP_Assessment();
 $azure = new WP_Azure_Storage();
+$feedback_cl = new AndSubmissionFeedbacks();
 $quiz = $main->get_user_quiz_by_assessment_id_and_submissions($assessment_id, $post_id, $organisation_id);
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $group_quiz_points = unserialize(get_post_meta($post_id, 'group_quiz_point', true));
 $get_quiz_accepted = $main->get_quiz_accepted($assessment_id, $post_id, $organisation_id);
+
+// Get all feedbacks for assessment
+$question_feedbacks = array();
+$all_feedbacks = $feedback_cl->get_all_feedbacks_by_assessment_and_organisation($assessment_id, $organisation_id);
+if ($all_feedbacks && is_array($all_feedbacks)) {
+    foreach ($all_feedbacks as $key => $fb) {
+        $question_feedbacks[$fb['parent_id']][$fb['quiz_id']][] = array(
+            'fb_id' => $fb['id'],
+            'time' => $fb['time'],
+            'user_id' => $fb['user_id'],
+            'user_name' => $fb['user_name'],
+            'feedback' => $fb['feedback']
+        );
+    }
+}
+
 
 $i = 0;
 function get_submit_field($array, $index, $key)
@@ -36,7 +54,7 @@ function get_submit_field($array, $index, $key)
 $submission_score_arr = array();
 
 // echo "<pre>";
-// print_r($post_meta);
+// print_r($question_feedbacks);
 // echo "</pre>";
 ?>
 
@@ -335,12 +353,34 @@ $submission_score_arr = array();
                                         name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
                                         placeholder="Add feedback here"
                                         ><?php echo $feedback ?? null; ?></textarea>
+                                    <p class="fb-error-msg"></p>
                                     <div class="feedback-actions">
-                                        <a type="button" class="button button-primary and-add-feedback" 
+                                        <a type="button" class="button button-primary and-add-feedback and-btn" 
                                             data-group-id="<?php echo $group_id ?>"
                                             data-id="<?php echo $quiz_id ?>">
                                             Add feedback
                                         </a>
+                                    </div>
+                                    <div class="feedback-lst">
+                                        <?php 
+                                        $q_fb_lst = $question_feedbacks[$group_id][$quiz_id];
+                                        if ( $q_fb_lst ) $q_fb_lst = array_reverse($q_fb_lst);
+                                         foreach ($q_fb_lst as $key => $q_fb) {
+                                            ?>
+                                            <div class="fd-row">
+                                                <div class="fb-content">
+                                                    <?php if ( $current_user->ID == $q_fb['user_id'] ) { ?>
+                                                    <span class="ic-delete-feedback" data-fb-id="<?php echo $q_fb['fb_id']; ?>" title="Remove this feedback">
+                                                        <i class="fa fa-trash-o"></i>
+                                                    </span>
+                                                    <?php } ?>
+                                                    <div class="author"><strong><?php echo $q_fb['user_name']; ?></strong></div>
+                                                    <div class="fb"><?php echo $q_fb['feedback']; ?></div>
+                                                </div>
+                                            </div>
+                                            <?php
+                                        }
+                                        ?>
                                     </div>
                                 </div>
                             </div>
