@@ -786,3 +786,4 @@ function get_history_dashboard_scores($data_score) {
 	}
 }
 
+
