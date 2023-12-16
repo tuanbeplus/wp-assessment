@@ -1056,8 +1056,8 @@ jQuery(document).ready(function ($) {
 
         alert(message);
 
-        if (status) {
-            location.reload()
+        if (status == true) {
+            $('#submitpost input[name="save"]').click();
             return true;
         }
     }

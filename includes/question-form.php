@@ -765,6 +765,7 @@ class Question_Form
                 throw new Exception('Quiz not found.');
 
             $assessment_terms = get_assessment_terms($assessment_id);
+            $post_type = get_post($submission_id)->post_type;
 
             // if (!empty($sf_user_id)) {
             //     $user_id = $sf_user_id;
@@ -777,8 +778,6 @@ class Question_Form
             //     throw new Exception('User not found.');
 
             $feedback = $_POST['feedback'] ?? null;
-            // if (empty($feedback))
-            //     throw new Exception('Please add your feedback');
 
             $type = $_POST['type'];
             if (empty($type))
@@ -789,7 +788,11 @@ class Question_Form
                 throw new Exception('Invalid Group ID');
 
             $input = [];
-            $input['feedback'] = $feedback;
+            
+            if ($post_type == 'submissions') {
+                $input['feedback'] = $feedback;
+            }
+            
             $input['status'] = $type;
 
             $conditions = array(
@@ -801,9 +804,15 @@ class Question_Form
                 'submission_id' => $submission_id,
             );
 
-            $main->update_quiz_assessment($assessment_terms[0], $input, $conditions);
+            $main->update_quiz_assessment($input, $conditions);
 
-            return wp_send_json(array('quiz_id' => $quiz_id, 'parent_id' => $parent_quiz_id, 'message' => 'Feedback for this quiz has been updated', 'status' => true));
+            return wp_send_json(array(
+                'quiz_id' => $quiz_id, 
+                'parent_id' => $parent_quiz_id, 
+                'message' => 'Feedback for this quiz has been updated', 
+                'status' => true
+            ));
+        
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }
@@ -831,7 +840,7 @@ class Question_Form
                         'assessment_id' => $assessment_id,
                         'submission_id' => $submission_id,
                     );
-                    $main->update_quiz_assessment($assessment_terms[0], $input, $conditions);
+                    $main->update_quiz_assessment($input, $conditions);
                 }
             }
         }
@@ -879,7 +888,12 @@ class Question_Form
 
             if (!$sent) throw new Exception($sent, 1);
 
-            return wp_send_json(array('message' => 'Feedback has been updated and send to: '.$sf_user_email, 'status' => true));
+            return wp_send_json(array(
+                'message' => ucfirst($type).', feedback has been updated and send to: '.$sf_user_email, 
+                'submission_status' => $type,
+                'status' => true,
+            ));
+
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }
