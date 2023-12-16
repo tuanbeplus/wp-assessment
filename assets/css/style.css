@@ -559,14 +559,16 @@
   border-radius: 2px;
 }
 
-.submission-view-item-row .card textarea.feedback-input {
+.submission-view-item-row .card textarea.feedback-input,
+.submission-view-item-row .card textarea.and-feedback-input {
   min-height: 140px;
   font-size: 0.9rem;
   padding: 8px;
   width: 100%;
 }
 
-.card textarea.feedback-input::placeholder {
+.card textarea.feedback-input::placeholder,
+.card textarea.and-feedback-input::placeholder {
   opacity: 0.6;
 }
 
@@ -1709,6 +1711,10 @@ ul.dashboard-charts-list li.chart:last-child {
   width: 100%;
   position: relative;
 }
+.feedback-lst .fd-row .fb {
+  white-space: pre-wrap;
+  margin-top: 4px;
+}
 .feedback-lst .fd-row .and-spinner-loading {
   margin: 0;
   position: absolute;
@@ -1730,7 +1736,7 @@ ul.dashboard-charts-list li.chart:last-child {
   top: 0;
   border-radius: 5px;
 }
-.submission-view-item-row .card .feedback-input.error {
+.submission-view-item-row .card .and-feedback-input.error {
   border-color: red !important;
 }
 .fb-error-msg {
@@ -1755,4 +1761,11 @@ ul.dashboard-charts-list li.chart:last-child {
 }
 .ic-delete-feedback:hover i {
   color: red;
+}
+.private-note {
+  margin-top: 12px;
+}
+.private-note .heading {
+  font-weight: bold;
+  font-size: 16px;
 }

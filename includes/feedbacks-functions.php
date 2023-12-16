@@ -112,10 +112,10 @@ class AndSubmissionFeedbacks {
       if (empty($parent_quiz_id))
         throw new Exception('Invalid Group ID');
 
+      $current_time = current_time( 'mysql' );
       $current_user = wp_get_current_user();
-
       $input_data = array(
-        'time' => current_time( 'mysql' ),
+        'time' => $current_time,
         'user_id' => $current_user->ID,
         'user_name' => $current_user->display_name,
         'quiz_id' => $quiz_id,
@@ -132,6 +132,7 @@ class AndSubmissionFeedbacks {
       if ($wpdb->last_error) throw new Exception($wpdb->last_error);
 
       return wp_send_json(array(
+        'time' => date("M d Y H:i", strtotime($current_time)),
         'feedback_id' => $wpdb->insert_id, 
         'user_name' => $current_user->display_name,
         'message' => 'Feedback for this quiz has been added', 

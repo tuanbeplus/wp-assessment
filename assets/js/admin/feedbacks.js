@@ -19,7 +19,7 @@
       let quizId = instance.data("id");
       let parent_quiz_id = instance.data("group-id");
       let parent = $(`#main-container-${parent_quiz_id}_${quizId}`);
-      let feedback_el = parent.find(".feedback-input");
+      let feedback_el = parent.find(".and-feedback-input");
       let feedback_vl = feedback_el.val();
       let assessmentId = $(`[name="assessment_id"]`).val();
       let submissionId = $("#submission_id").val();
@@ -31,7 +31,11 @@
       feedback_el.next(".fb-error-msg").text("");
       feedback_el.removeClass("error");
       if (!feedback_vl) {
-        feedback_el.next(".fb-error-msg").text("Must add feedback above!!");
+        if (instance.hasClass("private-note")) {
+          feedback_el.next(".fb-error-msg").text("Must add private note above!!");
+        } else {
+          feedback_el.next(".fb-error-msg").text("Must add feedback above!!");
+        }
         feedback_el.addClass("error");
         return false;
       }
@@ -52,10 +56,14 @@
           instance.addClass("disabled").html('<div class="and-spinner-loading"></div>');
         },
         success: function (response) {
-          instance.removeClass("disabled").html("Add feedback");
+          if (instance.hasClass("private-note")) {
+            instance.removeClass("disabled").html("Add private note");
+          } else {
+            instance.removeClass("disabled").html("Add feedback");
+          }
         },
       });
-      const { feedback_id, user_name, status, message } = response;
+      const { time, feedback_id, user_name, status, message } = response;
       // console.log(status, feedback_id, message);
 
       if (status) {
@@ -67,7 +75,7 @@
           '  <span class="ic-delete-feedback" data-fb-id="' + feedback_id + '" title="Remove this feedback">';
         added_fb_html += '    <i class="fa fa-trash-o"></i>';
         added_fb_html += "  </span>";
-        added_fb_html += '  <div class="author"><strong>' + user_name + "</strong></div>";
+        added_fb_html += '  <div class="author"><strong>' + user_name + "</strong> - " + time + "</div>";
         added_fb_html += '  <div class="fb">' + feedback_vl + "</div>";
         added_fb_html += " </div>";
         added_fb_html += "</div>";

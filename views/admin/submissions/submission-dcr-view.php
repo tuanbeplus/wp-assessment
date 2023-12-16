@@ -44,7 +44,6 @@ if ($all_feedbacks && is_array($all_feedbacks)) {
     }
 }
 
-
 $i = 0;
 function get_submit_field($array, $index, $key)
 {
@@ -349,10 +348,9 @@ $submission_score_arr = array();
                             </div>
                             <div class="card feedback">
                                 <div class="card-body">
-                                    <textarea class="form-control-lg feedback-input" 
-                                        name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
-                                        placeholder="Add feedback here"
-                                        ><?php echo $feedback ?? null; ?></textarea>
+                                    <textarea class="form-control-lg and-feedback-input" 
+                                        name="quiz_and_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
+                                        placeholder="Add feedback here"></textarea>
                                     <p class="fb-error-msg"></p>
                                     <div class="feedback-actions">
                                         <a type="button" class="button button-primary and-add-feedback and-btn" 
@@ -374,7 +372,7 @@ $submission_score_arr = array();
                                                         <i class="fa fa-trash-o"></i>
                                                     </span>
                                                     <?php } ?>
-                                                    <div class="author"><strong><?php echo $q_fb['user_name']; ?></strong></div>
+                                                    <div class="author"><strong><?php echo $q_fb['user_name']; ?></strong> - <?php echo date("M d Y H:i", strtotime($q_fb['time'])); ?></div>
                                                     <div class="fb"><?php echo $q_fb['feedback']; ?></div>
                                                 </div>
                                             </div>
