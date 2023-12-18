@@ -131,13 +131,15 @@ class AndAssessmentRanking {
           $industry_name = (isset($org_metadata['Industry'])) ? $org_metadata['Industry'] : '';
 
           if ( ! in_array($org_name, $org_list) && $org_name ) {
+            $total_score_sum = ( isset($total_score['sum']) ) ? $total_score['sum'] : 0;
+            $total_percent = ( isset($total_score['percent']) ) ? $total_score['percent'] : 0;
             $submissions_info[] = array(
               'sub_id' => $sub->ID,
               'org_id' => $org_id,
               'org_name' => $org_name,
               'industry_name' => $industry_name,
-              'total_score' => $total_score['sum'],
-              'total_percent' => $total_score['percent'],
+              'total_score' => $total_score_sum,
+              'total_percent' => $total_percent,
               'group_score' => $group_all_scores,
               'all_score' => $sub_all_scores
             );
@@ -208,7 +210,7 @@ class AndAssessmentRanking {
           $pr_total_score = $pr_items_cnt = 0;
           foreach ($parent_lst as $key=>$pr_item) {
             $pr_items_cnt++;
-            $pr_total_score += $pr_item['group_q_score'];
+            $pr_total_score += (float) $pr_item['group_q_score'];
             $level = get_maturity_level_org($pr_item['group_q_score']);
             $temp_item = $pr_item;
             $temp_item['org_rank'] = $key+1;
