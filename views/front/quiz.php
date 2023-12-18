@@ -450,6 +450,7 @@ echo "</pre>";
 
                                                     if (array_key_exists('description', $current_quiz_sub)) {
                                                         $description = $current_quiz_sub['description'];
+                                                        $description = htmlentities(stripslashes(utf8_decode($description)));
                                                     }
 
                                                     if (array_key_exists('attachment_id', $current_quiz_sub)) {

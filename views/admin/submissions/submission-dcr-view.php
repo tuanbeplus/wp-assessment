@@ -141,6 +141,7 @@ $submission_score_arr = array();
                         if ($field->parent_id == $group_id):
                         // $i++;
                         $answers = [];
+                        $description = null;
                         $attachment_id = null;
                         $attachment_type = null;
                         $url = null;
@@ -169,12 +170,14 @@ $submission_score_arr = array();
                         if ($field->feedback) {
                             $feedback = $field->feedback;
                         }
+                        if ($field->description) {
+                            $description = htmlentities(stripslashes(utf8_decode($field->description)));
+                        }
                         if ($field->status) {
                             $type = $field->status;
                         }
                         if ($field->attachment_ids) {
-                            $arr_attachmentID = $field->attachment_ids;
-                            $arr_attachmentID = json_decode($arr_attachmentID, true);
+                            $arr_attachmentID = json_decode($field->attachment_ids, true);
                         }
                         ?>
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$quiz_id; ?>">
@@ -194,10 +197,10 @@ $submission_score_arr = array();
                                             </ul>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if ($field->description): ?>
+                                    <?php if (!empty($description)): ?>
                                         <div class="user-comment-area">
                                             <p class="description-label"><strong>User Comment: </strong></p>
-                                            <div class="description-thin"><?php echo $field->description; ?></div>
+                                            <div class="description-thin"><?php echo $description; ?></div>
                                         </div>
                                     <?php endif; ?>
                                     <?php 

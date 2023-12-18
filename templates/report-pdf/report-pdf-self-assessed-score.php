@@ -21,7 +21,10 @@ $self_assessed_score =
             <th width="30%">AND assessed level</th>
         </tr>';
 foreach ($position_by_framework as $index => $key_area) {
-    $and_assessed_score = array_sum($agreed_score[$index]) / count($agreed_score[$index]);
+    $and_assessed_score = 0;
+    if (is_array($agreed_score[$index])) {
+        $and_assessed_score = array_sum($agreed_score[$index]) / count($agreed_score[$index]);
+    }
     $and_assessed_level = get_maturity_level_org($and_assessed_score);
     $self_assessed_score .=
         '<tr>
@@ -57,14 +60,23 @@ $self_assessed_percent_table =
 foreach ($questions as $index => $key_area) {
 
     $max_score = array();
+    $org_self_percent = 0;
+    $and_assessed_percent = 0;
+
     foreach ($key_area['list'] as $quiz) {
         $max_score[] = $quiz['point'] * 4;
     }
-    // Average Org score in a Key area
-    $org_self_percent = round(array_sum($org_score[$index]) / array_sum($max_score) * 100);
 
+    // Average Org score in a Key area
+    if (is_array($org_score[$index])) {
+        $org_self_percent = round(array_sum($org_score[$index]) / array_sum($max_score) * 100);
+    }
+    
     // Average Agreed score in a Key area
-    $and_assessed_percent = round(array_sum($agreed_score[$index]) / array_sum($max_score) * 100);
+    if (is_array($agreed_score[$index])) {
+        $and_assessed_percent = round(array_sum($agreed_score[$index]) / array_sum($max_score) * 100);
+    }
+    
     $self_assessed_percent_table .=
         '<tr>
             <td width="40%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'

@@ -52,10 +52,16 @@ foreach ($position_by_framework as $index => $key_area) {
     $mpdf->TOC_Entry($key_area['title'] ,1);
 
     $max_score = array();
+    $org_self_percent = 0;
+
     foreach ($questions[$index]['list'] as $quiz) {
         $max_score[] = $quiz['point'] * 4;
     }
-    $org_self_percent = round(array_sum($org_score[$index]) / array_sum($max_score) * 100);
+
+    if (is_array($org_score[$index])) {
+        $org_self_percent = round(array_sum($org_score[$index]) / array_sum($max_score) * 100);
+    }
+    
     $part_b_item .= 
     '<div class="page">
         <a name="'. $key_area['title'] .'"><h3>'. $key_area['title'] .'</h3></a>

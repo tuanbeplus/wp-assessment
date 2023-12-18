@@ -34,10 +34,10 @@ $total_index_score =
             <td style='text-align:right;border-bottom:none;background-color:none;'>
                 Total Index Score
             </td>
-            <td>". $total_org_score['percent'] ."</td>
-            <td>". $overall_and_score['percent_average'] ."</td>
-            <td>". $org_score_rank ."</td>
-            <td>". $overall_org_score['percent_average'] ."</td>
+            <td>". isset($total_org_score['percent']) ?? 0 ."</td>
+            <td>". $overall_and_score['percent_average'] ?? 0 ."</td>
+            <td>". $org_score_rank ?? null ."</td>
+            <td>". $overall_org_score['percent_average'] ?? 0 ."</td>
         </tr>
     </table>
     <caption class='table-caption'>Table 3 - Total Index Score and Benchmark</caption>
