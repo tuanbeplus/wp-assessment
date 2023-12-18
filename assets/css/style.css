@@ -483,6 +483,12 @@
   margin-top: 15px;
 }
 
+.submission-view-item-row.loading {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: default;
+}
+
 .submission-view-item-row strong {
   font-size: 14px;
   font-weight: 500;
@@ -496,11 +502,15 @@
   margin: 0;
 }
 
+.submission-view-item-row .card-header {
+  width: 100%;
+}
+
 .submission-view-item-row .card .quiz-title {
   font-size: 1.3rem;
 }
 
-.group-quiz-wrapper .submission-view-item-row .card .quiz-title {
+.group-quiz-wrapper .submission-view-item-row .card-header .quiz-title {
   margin: 0;
   font-size: 1.2rem;
 }
@@ -528,7 +538,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5em 0.8em;
+  padding: 10px;
   background-color: rgba(0, 0, 0, 0.06);
   width: 100%;
 }
@@ -596,6 +606,10 @@
   opacity: 0.6;
 }
 
+.feedbacks-area.loading {
+  opacity: 0.5;
+}
+
 .container .submission-admin-view-footer {
   margin: 16px 0;
 }
@@ -638,16 +652,16 @@
 }
 
 .quiz-status strong {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.card .quiz-status.accepted strong {
-  color: darkgreen;
+.quiz-status.accepted strong {
+  color: rgb(0, 145, 0);
 }
 
-.card .quiz-status.rejected strong {
-  color: darkred;
+.quiz-status.rejected strong {
+  color: #b32d2e;
 }
 
 .total-section-score {
@@ -1763,9 +1777,24 @@ ul.dashboard-charts-list li.chart:last-child {
   color: red;
 }
 .private-note {
-  margin-top: 12px;
+  margin-top: 20px;
 }
-.private-note .heading {
-  font-weight: bold;
+.card-body label.heading {
+  margin-bottom: 6px;
+  font-weight: 600;
   font-size: 16px;
+  line-height: 1;
+}
+
+.feedbacks-area .button.btn-save-feedback {
+  margin-top: 6px;
+  position: relative;
+}
+
+.btn-save-feedback .message {
+  display: none;
+  position: absolute;
+  color: #222;
+  right: -10px;
+  transform: translateX(100%);
 }

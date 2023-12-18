@@ -30,19 +30,7 @@ $group_quiz_points = unserialize(get_post_meta($post_id, 'group_quiz_point', tru
 $get_quiz_accepted = $main->get_quiz_accepted($assessment_id, $post_id, $organisation_id);
 
 // Get all feedbacks for assessment
-$question_feedbacks = array();
-$all_feedbacks = $feedback_cl->get_all_feedbacks_by_assessment_and_organisation($assessment_id, $organisation_id);
-if ($all_feedbacks && is_array($all_feedbacks)) {
-    foreach ($all_feedbacks as $key => $fb) {
-        $question_feedbacks[$fb['parent_id']][$fb['quiz_id']][] = array(
-            'fb_id' => $fb['id'],
-            'time' => $fb['time'],
-            'user_id' => $fb['user_id'],
-            'user_name' => $fb['user_name'],
-            'feedback' => $fb['feedback']
-        );
-    }
-}
+$question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id, $organisation_id);
 
 $i = 0;
 function get_submit_field($array, $index, $key)
@@ -348,11 +336,20 @@ $submission_score_arr = array();
                             </div>
                             <div class="card feedback">
                                 <div class="card-body">
-                                    <textarea class="form-control-lg feedback-input" 
-                                        name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
-                                        placeholder="Add feedback here"
-                                        ><?php echo $feedback ?? null; ?></textarea>
-
+                                    <div class="feedbacks-area">
+                                        <label class="heading" for="">Feedbacks</label>
+                                        <textarea class="form-control-lg feedback-input" 
+                                            name="quiz_feedback[<?php echo $group_id ?>][<?php echo $quiz_id ?>]"
+                                            placeholder="Add feedback here"
+                                            ><?php echo $feedback ?? null; ?></textarea>
+                                        <a type="button" class="button button-primary btn-save-feedback and-btn" 
+                                            data-group-id="<?php echo $group_id ?>"
+                                            data-id="<?php echo $quiz_id ?>">
+                                            Save feedback
+                                            <span class="message">Saved</span>
+                                        </a>
+                                    </div>
+                                    
                                     <div class="private-note">
                                         <label class="heading" for="">Private notes</label>
                                         <textarea class="form-control-lg and-feedback-input" 

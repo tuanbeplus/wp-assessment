@@ -964,7 +964,7 @@ jQuery(document).ready(function ($) {
         // let userId = parent.find(`[name="user_id"]`).val();
         let quizPoint = parent.find(`[name="quiz_point"]`).val();
 
-        await rejectSubmissionWithFeedback(instance, type, {
+        await updateQuizStatusSusmission(instance, type, {
             feedback,
             assessment_id: assessmentId,
             submission_id: submissionId,
@@ -977,14 +977,13 @@ jQuery(document).ready(function ($) {
         });
     }
 
-    async function rejectSubmissionWithFeedback(instance, type, data = {}) {
+    async function updateQuizStatusSusmission(instance, type, data = {}) {
 
-        let card_feedback = instance.closest('.feedback')
-        let card_footer = card_feedback.find('.card-footer')
-        let quiz_status = '<div class="quiz-status '+ type +'">Status: <strong>'+ type +'</strong></div>'
+        let quiz_row = instance.closest('.submission-view-item-row')
+        let row_status = quiz_row.find('.quiz-status')
 
         const payload = {
-        action: "reject_submission_feedback",
+        action: "update_quiz_status_submission",
         ...data,
         };
 
@@ -993,25 +992,66 @@ jQuery(document).ready(function ($) {
             url: ajaxUrl,
             data: payload,
             beforeSend : function ( xhr ) {
-            card_feedback.addClass('loading')
+                quiz_row.addClass('loading')
             },
             success:function(response){
-            card_feedback.removeClass('loading')
+                quiz_row.removeClass('loading')
             }
         });
         const { quiz_id, parent_id, status, message } = response;
         console.log(response);
 
-        if (status) {
-            card_feedback.removeClass('loading')
-            card_footer.html(quiz_status)
+        if (status == true) {
+            row_status.removeClass('accepted')
+            row_status.removeClass('rejected')
+            row_status.addClass(type)
+            row_status.find('strong').text(type)
         }
         else {
-            console.log(response);
+            alert(response.message)
         }
 
         return status;
     }
+
+    $(".btn-save-feedback").on("click", function (e) {
+        e.preventDefault();
+        let btn = $(this)
+        let message = btn.find('.message')
+        let feedbacks_area = btn.closest('.feedbacks-area')
+        let quizId = btn.data("id");
+        let parent_quiz_id = btn.data("group-id");
+        let parent = $(`#main-container-${parent_quiz_id}_${quizId}`);
+        let feedback = parent.find(".feedback-input").val();
+        let assessmentId = $(`[name="assessment_id"]`).val();
+        let submissionId = $('#submission_id').val();
+        let organisationId = $('#organisation_id').val();
+
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'save_quiz_feedback_submission',
+                'feedback' : feedback,
+                'assessment_id': assessmentId,
+                'submission_id': submissionId,
+                'organisation_id': organisationId,
+                'quiz_id': quizId,
+                'parent_quiz_id': parent_quiz_id,
+            },
+            beforeSend : function ( xhr ) {
+                feedbacks_area.addClass('loading')
+            },
+            success:function(response){
+                console.log(response);
+                feedbacks_area.removeClass('loading')
+                message.html(response.message).show()
+            }
+        });
+        setTimeout(function() {
+            message.hide()
+        }, 10000)
+    });
 
     $(".reject-button").on("click", async function (e) {
         e.preventDefault();

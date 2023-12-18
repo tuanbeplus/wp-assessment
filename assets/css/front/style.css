@@ -732,6 +732,7 @@ body {
     padding: 24px 80px 30px;
     font-weight: normal;
     font-size: 1.125rem;
+    list-style: 140%;
     position: relative;
 }
 
@@ -787,9 +788,44 @@ body {
 }
 
 .quizAdvice > p {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     font-family: "Avenir-Heavy";
 }
+
+/* style Feedbacks area */
+
+.feedback-list .feedback-item {
+    margin-bottom: 30px;
+}
+
+.feedback-list .feedback-item:last-child {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.feedback-item ._info {
+    margin-bottom: 12px;
+}
+
+.feedback-item ._info .author {
+    text-decoration: underline;
+    font-size: 1rem;
+}
+
+.feedback-item ._info .datetime {
+    font-style: italic;
+    font-size: 0.925rem;
+}
+
+.feedback-item ._content {
+    margin-left: 16px;
+    font-size: 1.125rem;
+    line-height: 140%;
+    white-space: pre-wrap;
+}
+
+/* .style Feedbacks area */
 
 .fileUploaderWrap {
     width: fit-content;

@@ -188,7 +188,32 @@ class AndSubmissionFeedbacks {
       return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
     }
   }
-  
+
+  /**
+   * Format Feedbacks for Assessment to show
+   * 
+   * @author Tuan
+   * 
+   * @return array Feedbacks 
+   * 
+   */
+  function format_feedbacks_by_question($assessment_id, $organisation_id) {
+    $question_feedbacks = array();
+    $all_feedbacks = $this->get_all_feedbacks_by_assessment_and_organisation($assessment_id, $organisation_id);
+    if ($all_feedbacks && is_array($all_feedbacks)) {
+        foreach ($all_feedbacks as $key => $fb) {
+            $question_feedbacks[$fb['parent_id']][$fb['quiz_id']][] = array(
+                'fb_id' => $fb['id'],
+                'time' => $fb['time'],
+                'user_id' => $fb['user_id'],
+                'user_name' => $fb['user_name'],
+                'feedback' => htmlentities(stripslashes(utf8_decode($fb['feedback'])))
+            );
+        }
+        return $question_feedbacks;
+    }
+  }
+
 }
 
 new AndSubmissionFeedbacks();

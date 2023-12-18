@@ -15,8 +15,11 @@ class Question_Form
         add_action('wp_ajax_submit_assessment_progress', array($this, 'submit_assessment_progress'));
         add_action('wp_ajax_nopriv_submit_assessment_progress', array($this, 'submit_assessment_progress'));
 
-        add_action('wp_ajax_reject_submission_feedback', array($this, 'reject_submission_feedback'));
-        add_action('wp_ajax_nopriv_reject_submission_feedback', array($this, 'reject_submission_feedback'));
+        add_action('wp_ajax_update_quiz_status_submission', array($this, 'update_quiz_status_submission'));
+        add_action('wp_ajax_nopriv_update_quiz_status_submission', array($this, 'update_quiz_status_submission'));
+
+        add_action('wp_ajax_save_quiz_feedback_submission', array($this, 'save_quiz_feedback_submission'));
+        add_action('wp_ajax_nopriv_save_quiz_feedback_submission', array($this, 'save_quiz_feedback_submission'));
 
         add_action('wp_ajax_final_accept_reject_assessment', array($this, 'final_accept_reject_assessment'));
         add_action('wp_ajax_nopriv_final_accept_reject_assessment', array($this, 'final_accept_reject_assessment'));
@@ -743,14 +746,13 @@ class Question_Form
         }
     }
 
-    function reject_submission_feedback()
+    function update_quiz_status_submission()
     {
         try {
             global $post;
             $post_id = $post->ID;
             $main = new WP_Assessment();
             $submission_id = intval($_POST['submission_id']);
-            // $sf_user_id = get_post_meta($submission_id, 'sf_user_id', true);
 
             $assessment_id = intval($_POST['assessment_id']);
             if (empty($assessment_id))
@@ -764,21 +766,6 @@ class Question_Form
             if (empty($quiz_id))
                 throw new Exception('Quiz not found.');
 
-            $assessment_terms = get_assessment_terms($assessment_id);
-            $post_type = get_post($submission_id)->post_type;
-
-            // if (!empty($sf_user_id)) {
-            //     $user_id = $sf_user_id;
-            // }
-            // else {
-            //     $user_id = intval($_POST['user_id']);
-            // }
-
-            // if (empty($user_id))
-            //     throw new Exception('User not found.');
-
-            $feedback = $_POST['feedback'] ?? null;
-
             $type = $_POST['type'];
             if (empty($type))
                 throw new Exception('Invalid type');
@@ -787,16 +774,10 @@ class Question_Form
             if (empty($parent_quiz_id))
                 throw new Exception('Invalid Group ID');
 
-            $input = [];
-            
-            if ($post_type == 'submissions') {
-                $input['feedback'] = $feedback;
-            }
-            
+            $input = [];            
             $input['status'] = $type;
 
             $conditions = array(
-                // 'user_id' => $user_id,
                 'organisation_id' => $organisation_id,
                 'quiz_id' => $quiz_id,
                 'parent_id' => $parent_quiz_id,
@@ -809,10 +790,68 @@ class Question_Form
             return wp_send_json(array(
                 'quiz_id' => $quiz_id, 
                 'parent_id' => $parent_quiz_id, 
-                'message' => 'Feedback for this quiz has been updated', 
-                'status' => true
+                'message' => 'Quiz status '.$parent_quiz_id.'.'.$quiz_id.' has been updated', 
+                'quiz_status' => $type,
+                'status' => true,
             ));
         
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+
+    function save_quiz_feedback_submission()
+    {
+        try {
+            global $post;
+            $post_id = $post->ID;
+            $main = new WP_Assessment();
+            $submission_id = intval($_POST['submission_id']);
+
+            $assessment_id = intval($_POST['assessment_id']);
+            if (empty($assessment_id))
+                throw new Exception('Assessment not found.');
+
+            $organisation_id = $_POST['organisation_id'];
+            if (empty($organisation_id))
+                throw new Exception('Organisation not found.');
+
+            $quiz_id = intval($_POST['quiz_id']);
+            if (empty($quiz_id))
+                throw new Exception('Quiz not found.');
+
+            $post_type = get_post($submission_id)->post_type;
+
+            $feedback = $_POST['feedback'] ?? null;
+
+            $parent_quiz_id = intval($_POST['parent_quiz_id']);
+            if (empty($parent_quiz_id))
+                throw new Exception('Invalid Group ID');
+
+            $input = [];
+            
+            if ($post_type == 'submissions') {
+                $input['feedback'] = $feedback;
+
+                $conditions = array(
+                    // 'user_id' => $user_id,
+                    'organisation_id' => $organisation_id,
+                    'quiz_id' => $quiz_id,
+                    'parent_id' => $parent_quiz_id,
+                    'assessment_id' => $assessment_id,
+                    'submission_id' => $submission_id,
+                );
+    
+                $main->update_quiz_assessment($input, $conditions);
+    
+                return wp_send_json(array(
+                    'quiz_id' => $quiz_id, 
+                    'parent_id' => $parent_quiz_id, 
+                    'message' => 'Feedback has been saved', 
+                    'status' => true
+                ));
+            }
+                    
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }

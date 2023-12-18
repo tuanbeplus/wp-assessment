@@ -57,6 +57,12 @@ $is_user_can_access = check_access_salesforce_members($user_id, $post_id);
 $is_disabled = $status === 'pending';
 $is_publish = $status === 'publish';
 $is_accepted = $status === 'accepted';
+
+$feedback_cl = new AndSubmissionFeedbacks();
+$dcr_feedbacks = $feedback_cl->format_feedbacks_by_question($post_id, $organisation_id);
+echo "<pre>";
+// print_r($dcr_feedbacks);
+echo "</pre>";
 ?>
 
 <?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
@@ -666,11 +672,31 @@ $is_accepted = $status === 'accepted';
                                                         <div class="advice-area"><?php echo $question_advice; ?></div>
                                                     </div>
                                                 <?php endif; ?>
-                                                <?php if ($status == 'rejected') : ?>
-                                                    <div class="quizAdvice feedback-area">
-                                                        <p>Feedback</p>
-                                                        <div><?php echo $feedback; ?></div>
-                                                    </div>
+                                                <?php if ($terms[0] == 'dcr'): ?>
+                                                    <?php if (!empty($dcr_feedbacks[$j][$sub_id])): ?>
+                                                        <div class="quizAdvice feedback-area">
+                                                            <p>Feedbacks</p>
+                                                            <ul class="feedback-list">
+                                                                <?php $quiz_feedbacks = array_reverse($dcr_feedbacks[$j][$sub_id]); ?>
+                                                                <?php foreach ($quiz_feedbacks as $feedback): ?>
+                                                                    <li class="feedback-item">
+                                                                        <div class="_info">
+                                                                            <strong class="author"><?php echo $feedback['user_name'] ?></strong> - 
+                                                                            <span class="datetime"><?php echo date("M d Y H:i", strtotime($feedback['time'])); ?></span>
+                                                                        </div>
+                                                                        <div class="_content"><?php echo $feedback['feedback']; ?></div>
+                                                                    </li>
+                                                                <?php endforeach; ?>
+                                                            </ul>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                <?php else: ?>
+                                                    <?php if (!empty($feedback)) : ?>
+                                                        <div class="quizAdvice feedback-area">
+                                                            <p>Feedbacks</p>
+                                                            <div><?php echo $feedback; ?></div>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>
