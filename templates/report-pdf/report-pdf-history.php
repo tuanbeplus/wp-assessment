@@ -41,8 +41,8 @@ foreach ($pages_history as $page) {
         $img_alt = 'Figure '.$count_figure.' - Overall Dashboard - comparative';
     }         
 
-    $chart_img_url = wp_get_attachment_url($dashboard_chart_imgs[$page]);
-    if (isset($chart_img_url)) {
+    if (isset($dashboard_chart_imgs[$page])) {
+        $chart_img_url = wp_get_attachment_url($dashboard_chart_imgs[$page]);
         $chart_img = '<img class="chart" src="'. $chart_img_url .'"><p>'. $img_alt .'</p>';
     }
     else {

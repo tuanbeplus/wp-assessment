@@ -41,7 +41,7 @@ function get_submit_field($array, $index, $key)
 $submission_score_arr = array();
 
 // echo "<pre>";
-// print_r($question_feedbacks);
+// print_r($all_answer_desc);
 // echo "</pre>";
 ?>
 
@@ -132,7 +132,7 @@ $submission_score_arr = array();
                 $group_point = $group_quiz_points[$group_id]['point'] ?? null;
                 $section_score_arr = array();
             ?>
-            <div class="group-quiz-wrapper">
+            <div class="group-quiz-wrapper dcr">
                 <p class="group-title"><?php echo $group_id.' - '.$group_title; ?></p>
                 <input type="hidden" name="recommentdation[<?php echo $group_id; ?>][key_area]" value="<?php echo $group_title; ?>">
                 <!--  -->
@@ -197,10 +197,21 @@ $submission_score_arr = array();
                                             </ul>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if (!empty($description)): ?>
+                                    <?php $all_answer_desc = $main->get_dcr_quiz_answers_all_submissions($assessment_id, $organisation_id, $group_id, $quiz_id); ?>
+                                    <?php if (!empty($all_answer_desc)): ?>
                                         <div class="user-comment-area">
                                             <p class="description-label"><strong>User Comment: </strong></p>
-                                            <div class="description-thin"><?php echo $description; ?></div>
+                                            <?php foreach ($all_answer_desc as $row): 
+                                                $cmt_time = date("M d Y H:i", strtotime($row->time));
+                                                $cmt_desc = htmlentities(stripslashes(utf8_decode($row->description)));
+                                                $cmt_class = '';
+                                                if ($row->submission_id == $post_id) $cmt_class = 'current';
+                                                ?>
+                                                <div class="description-thin <?php echo $cmt_class; ?>">
+                                                    <span class="datetime"><?php echo $cmt_time; ?></span>
+                                                    <?php echo $cmt_desc; ?>
+                                                </div>
+                                            <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
                                     <?php 

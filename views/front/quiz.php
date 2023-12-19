@@ -23,6 +23,7 @@ if (isset($_COOKIE['userId'])) {
 $main = new WP_Assessment();
 $question_form = new Question_Form();
 $azure = new WP_Azure_Storage();
+$feedback_cl = new AndSubmissionFeedbacks();
 $organisation_id = getUser($_COOKIE['userId'])->records[0]->AccountId;
 $questions = get_post_meta($post_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
@@ -50,6 +51,7 @@ $status = get_post_meta($submission_id, 'assessment_status', true);
 $is_required_answer_all = get_post_meta($post_id, 'is_required_answer_all', true);
 $is_required_document_all = get_post_meta($post_id, 'is_required_document_all', true);
 $is_invite_colleagues = get_post_meta($post_id, 'is_invite_colleagues', true);
+$dcr_feedbacks = $feedback_cl->format_feedbacks_by_question($post_id, $organisation_id);
 
 // check user access to asessment
 $is_user_can_access = check_access_salesforce_members($user_id, $post_id);
@@ -57,12 +59,6 @@ $is_user_can_access = check_access_salesforce_members($user_id, $post_id);
 $is_disabled = $status === 'pending';
 $is_publish = $status === 'publish';
 $is_accepted = $status === 'accepted';
-
-$feedback_cl = new AndSubmissionFeedbacks();
-$dcr_feedbacks = $feedback_cl->format_feedbacks_by_question($post_id, $organisation_id);
-echo "<pre>";
-// print_r($dcr_feedbacks);
-echo "</pre>";
 ?>
 
 <?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>

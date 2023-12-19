@@ -347,7 +347,7 @@ class Question_Form
                 $org_name = '';
             }
 
-            $submission_title = 'Submission on ' .$assessment->post_title.' - '.date('M d Y').$org_name;
+            $submission_title = 'Submission on ' .$assessment->post_title . $org_name;
 
             // If not exist any submissions
             if (!$is_submission_exist && !$is_submission_progress_exist) {
@@ -459,7 +459,7 @@ class Question_Form
                 $org_name = '';
             }
             
-            $submission_title = 'Progress on ' .$assessment->post_title.' - '.date('M d Y').$org_name;
+            $submission_title = 'Progress on ' .$assessment->post_title . $org_name;
 
             // Not exist any submissions
             if (!$is_submission_exist && !$is_submission_progress_exist) {

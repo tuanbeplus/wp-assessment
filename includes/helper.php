@@ -237,22 +237,21 @@ function check_access_salesforce_members($user_id, $assessment_id)
 		$assigned_member_ids[] = $member['id'];
 	}
 
-	// $sf_product_id_opp = getProductIdByOpportunity();
-	// $drc_product_id = isset($sf_product_id_opp['dcr_product_id']) ? $sf_product_id_opp['dcr_product_id'] : null;
-	// $index_product_id = isset($sf_product_id_opp['index_product_id']) ? $sf_product_id_opp['index_product_id'] : null;
+	$sf_product_id_opp = getProductIdByOpportunity();
+	$drc_product_id = isset($sf_product_id_opp['dcr_product_id']) ? $sf_product_id_opp['dcr_product_id'] : null;
+	$index_product_id = isset($sf_product_id_opp['index_product_id']) ? $sf_product_id_opp['index_product_id'] : null;
 	
-
 	// check user access to asessment
-	// if ($drc_product_id && !empty($related_sf_products)) {
-	//     if (in_array('dcr', $terms_arr) && in_array($drc_product_id, $related_sf_products)) {
-	//         $is_user_can_access = true;
-	//     }
-	// }
-	// if ($index_product_id && !empty($related_sf_products)) {
-	//     if (in_array('index', $terms_arr) && in_array($index_product_id, $related_sf_products)) {
-	//         $is_user_can_access = true;
-	//     }
-	// }
+	if ($drc_product_id && !empty($related_sf_products)) {
+	    if (in_array('dcr', $terms_arr) && in_array($drc_product_id, $related_sf_products)) {
+	        $is_user_can_access = true;
+	    }
+	}
+	if ($index_product_id && !empty($related_sf_products)) {
+	    if (in_array('index', $terms_arr) && in_array($index_product_id, $related_sf_products)) {
+	        $is_user_can_access = true;
+	    }
+	}
 
 	// Accessible for all assigned members
 	if (is_array($assigned_member_ids)) {

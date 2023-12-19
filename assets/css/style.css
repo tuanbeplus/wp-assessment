@@ -531,6 +531,29 @@
   border-bottom: none;
 }
 
+.dcr .user-comment-area .description-label {
+  margin-bottom: 12px;
+}
+
+.dcr .user-comment-area .description-thin {
+  margin-bottom: 10px;
+}
+
+.dcr .user-comment-area .description-thin:last-child {
+  margin-bottom: 0;
+}
+.dcr .user-comment-area .description-thin.current {
+  background-color: #f6f6f6;
+  border: 1px solid #bbb;
+}
+
+.dcr .user-comment-area .description-thin .datetime {
+  display: block;
+  margin-bottom: 6px;
+  color: #888;
+  line-height: 110%;
+}
+
 /* .submission-view-item-row .card .card-footer { */
 .submission-view-item-row .card-footer {
   min-height: 40px;

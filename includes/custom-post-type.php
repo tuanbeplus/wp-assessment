@@ -269,15 +269,25 @@ class CustomPostType
     function customize_reports_admin_column($columns)
     {
         $columns['user'] = 'User';
+        $columns['organisation'] = 'Organisation';
         return $columns;
     }
 
     function customize_reports_admin_column_value($column_key, $post_id): void
     {
+        // Column "User"
         if ($column_key == 'user') {
             $sf_user_name = get_post_meta($post_id, 'sf_user_name', true);
             if ($sf_user_name) {
                 echo $sf_user_name;
+            }
+        }
+
+        // Column "Organisation"
+        if ($column_key == 'organisation') {
+            $org_metadata = get_post_meta($post_id, 'org_data', true);
+            if (!empty($org_metadata)) {
+                echo $org_metadata['Name'];
             }
         }
     }

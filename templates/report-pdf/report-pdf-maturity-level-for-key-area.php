@@ -11,27 +11,27 @@ $maturity_level = get_post_meta($submission_id, 'maturity_level', true);
 $table_html = "";
 foreach ($position_by_framework as $parent_id => $parent_question) {
     $overall_lv = "";
-    if ( $maturity_level[$parent_question['average_maturity_level']] ) {
+    if ( isset($maturity_level[$parent_question['average_maturity_level']]) ) {
         $ov_lv = get_maturity_level_org_step_2( $parent_question['average_maturity_level'] );
         $overall_lv = "Level ".$ov_lv ;
     }
     $framework_lv = "";
-    if ( $maturity_level[$parent_id]['Framework'] ) {
+    if ( isset($maturity_level[$parent_id]['Framework']) ) {
         $fr_mat_lv = get_maturity_level_org_step_2( $maturity_level[$parent_id]['Framework'] );
         $framework_lv = "Level ".$fr_mat_lv ;
     }
     $implementation_lv = "";
-    if ( $maturity_level[$parent_id]['Implementation'] ) {
+    if ( isset($maturity_level[$parent_id]['Implementation']) ) {
         $ip_mat_lv = get_maturity_level_org_step_2( $maturity_level[$parent_id]['Implementation'] );
         $implementation_lv = "Level ".$ip_mat_lv ;
     }
     $review_lv = "";
-    if ( $maturity_level[$parent_id]['Review'] ) {
+    if ( isset($maturity_level[$parent_id]['Review']) ) {
         $rv_mat_lv = get_maturity_level_org_step_2( $maturity_level[$parent_id]['Review'] );
         $review_lv = "Level ".$rv_mat_lv ;
     }
     $innovation_lv = "";
-    if ( $maturity_level[$parent_id]['Innovation'] ) {
+    if ( isset($maturity_level[$parent_id]['Innovation']) ) {
         $in_mat_lv = get_maturity_level_org_step_2( $maturity_level[$parent_id]['Innovation'] );
         $innovation_lv = "Level ".$in_mat_lv ;
     }

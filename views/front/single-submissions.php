@@ -36,6 +36,7 @@ for($i = 0; $i < $count_quiz; $i++) {
 		$invalid_answers[$i] = $submission_data_arr[$i]['parent_id'];
 	}
 }
+$invalid_answers = array();
 ?>
 
 <section id="primary">

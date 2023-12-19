@@ -454,6 +454,32 @@ class WP_Assessment
         }
     }
 
+    function get_dcr_quiz_answers_all_submissions($assessment_id, $organisation_id, $parent_id, $quiz_id)
+    {
+        try {
+            global $wpdb;
+
+            $table = $this->get_quiz_submission_table_name($assessment_id);
+
+            $sql = "SELECT time, description, submission_id 
+                    FROM $table 
+                    WHERE assessment_id = $assessment_id 
+                    AND organisation_id = '$organisation_id' 
+                    AND parent_id = $parent_id 
+                    AND quiz_id = $quiz_id
+                    ORDER BY time DESC";
+            
+            $result = $wpdb->get_results($sql);
+
+            return !empty($result) ? $result : null;
+
+            if ($wpdb->last_error) {
+                throw new Exception($wpdb->last_error);
+            }
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
 
     function insert_quiz_by_assessment_id($data)
     {

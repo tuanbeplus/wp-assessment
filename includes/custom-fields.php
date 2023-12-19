@@ -23,7 +23,7 @@ class Custom_Fields
         // Assessments
         add_meta_box('questions-repeater-field', 'Questions', array($this, 'question_repeatable_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
-        add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'side', 'default');
+        // add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'side', 'default');
         if (current_user_can('administrator')) {
             add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
         }
