@@ -377,7 +377,19 @@ $submission_score_arr = array();
                                                         </span>
                                                         <?php } ?>
                                                         <div class="author"><strong><?php echo $q_fb['user_name']; ?></strong> - <?php echo date("M d Y H:i", strtotime($q_fb['time'])); ?></div>
-                                                        <div class="fb"><?php echo $q_fb['feedback']; ?></div>
+                                                        <div class="fb"><?php 
+                                                        $feedback_str = strip_tags($q_fb['feedback']);
+                                                        if ( strlen($feedback_str) > 200 ) {
+                                                            $fb_cut = substr($feedback_str, 0, 150);
+                                                            $end_point = strrpos($fb_cut, ' ');
+                                                            $fb_str = $end_point ? substr($fb_cut, 0, $end_point) : substr($fb_cut, 0);
+                                                            $fb_str .= ' ... <a class="read-more-link" href="javascript:;">Read more</a>';
+
+                                                            echo '<div class="less">' . $fb_str . '</div>';
+                                                        } 
+                                                        echo '<div class="full">' . $feedback_str . '</div>';
+                                                        ?>
+                                                    </div>
                                                     </div>
                                                 </div>
                                                 <?php

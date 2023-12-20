@@ -1751,6 +1751,16 @@ ul.dashboard-charts-list li.chart:last-child {
 .feedback-lst .fd-row .fb {
   white-space: pre-wrap;
   margin-top: 4px;
+  display: flex;
+}
+.feedback-lst .fd-row .fb .less + .full {
+  display: none;
+}
+.feedback-lst .fd-row .fb.show-full .less {
+  display: none;
+}
+.feedback-lst .fd-row .fb.show-full .less + .full {
+  display: block;
 }
 .feedback-lst .fd-row .and-spinner-loading {
   margin: 0;

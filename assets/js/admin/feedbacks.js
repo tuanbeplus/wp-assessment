@@ -2,6 +2,10 @@
   "use strict";
 
   $(document).ready(function () {
+    $("a.read-more-link").on("click", function () {
+      $(this).closest(".fb").addClass("show-full");
+    });
+
     $("a.and-add-feedback").on("click", async function (e) {
       e.preventDefault();
       await and_add_submission_feedback($(this));
