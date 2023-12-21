@@ -3,7 +3,7 @@
 Plugin Name: WP Assessment
 Plugin URI: #
 Description: Custom plugin for Project Saturn
-Version: 1.4
+Version: 2.0
 Author: tom@ysnstudios.com
 Author URI: tom@ysnstudios.com
 Text Domain: wp-assessment

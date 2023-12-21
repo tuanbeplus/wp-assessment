@@ -679,7 +679,7 @@ $is_accepted = $status === 'accepted';
                                                                     <li class="feedback-item">
                                                                         <div class="_info">
                                                                             <strong class="author"><?php echo $feedback['user_name'] ?></strong> - 
-                                                                            <span class="datetime"><?php echo date("M d Y H:i", strtotime($feedback['time'])); ?></span>
+                                                                            <span class="datetime"><?php echo date("M d Y H:i a", strtotime($feedback['time'])); ?></span>
                                                                         </div>
                                                                         <div class="_content"><?php echo $feedback['feedback']; ?></div>
                                                                     </li>

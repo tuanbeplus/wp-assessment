@@ -132,7 +132,7 @@ class AndSubmissionFeedbacks {
       if ($wpdb->last_error) throw new Exception($wpdb->last_error);
 
       return wp_send_json(array(
-        'time' => date("M d Y H:i", strtotime($current_time)),
+        'time' => date("M d Y H:i a", strtotime($current_time)),
         'feedback_id' => $wpdb->insert_id, 
         'user_name' => $current_user->display_name,
         'message' => 'Feedback for this quiz has been added', 
@@ -207,7 +207,7 @@ class AndSubmissionFeedbacks {
                 'time' => $fb['time'],
                 'user_id' => $fb['user_id'],
                 'user_name' => $fb['user_name'],
-                'feedback' => htmlentities(stripslashes(utf8_decode($fb['feedback'])))
+                'feedback' => htmlentities(stripslashes($fb['feedback']))
             );
         }
         return $question_feedbacks;

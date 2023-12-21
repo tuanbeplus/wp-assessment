@@ -112,9 +112,23 @@ function get_assessments_related_sf_products($product_id, $term)
  */
 function get_submissions_completed($organisation_id, $assessment_id)
 {
+	$assessment_terms = get_assessment_terms($assessment_id);
+
+	if (is_array($assessment_terms) && isset($assessment_terms[0])) {
+		if ($assessment_terms[0] == 'dcr') {
+			$post_type = 'dcr_submissions';
+		}
+		else {
+			$post_type = 'submissions';
+		}
+	}
+	else {
+		return null;
+	}
+
     $args = array(
-		'post_type' => 'submissions',
-		'posts_per_page' => 1,
+		'post_type' => $post_type,
+		'posts_per_page' => -1,
 		'nopaging' => true, 
 		'post_status' => 'publish',
 		'orderby' => 'date',
@@ -133,18 +147,20 @@ function get_submissions_completed($organisation_id, $assessment_id)
             ),
         ),
 	);
-	$submissions = new WP_Query($args);
-	wp_reset_postdata();
+	// get all submissions completed
+	$submissions = get_posts($args);
+	$submissions_arr = array();
 
-	if (!empty($submissions->posts)) {
-		$submission_id = $submissions->posts[0]->ID;
-		$submission_status = get_post_meta($submission_id, 'assessment_status', true);
-
-		if ($submission_status != 'rejected') {
-			return $submissions->posts;
+	if (!empty($submissions)) {
+		foreach ($submissions as $submission) {
+			$status = get_post_meta($submission->ID, 'assessment_status', true);
+			if ($status != 'rejected' || $status != 'draft') {
+				$submissions_arr[] = $submission->ID;
+			}
 		}
 	}
-}
+	return $submissions_arr;
+} 
 
 /**
  * Get Assessments accessible for all logged in users

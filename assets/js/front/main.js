@@ -679,7 +679,7 @@ jQuery(document).ready(function ($) {
                 $('#btn-send-invite-colleagues').removeClass('sending')
                 console.log(response);
                 if (response.status == true) {
-                    send_message.text('Your invitation has been send.').show()
+                    send_message.text('Your invitation has been sent.').show()
                 }
                 else {
                     send_message.html('Unable to send invitation, ensure that emails are seperated by a comma.').show()

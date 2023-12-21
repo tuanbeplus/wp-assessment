@@ -150,7 +150,7 @@ $submission_score_arr = array();
 
                         $quiz_id = $field->quiz_id;
 
-                        if ($quiz_answer_points[$group_id][$quiz_id] != null) {
+                        if (isset($quiz_answer_points[$group_id][$quiz_id])) {
                             $quiz_point = $quiz_answer_points[$group_id][$quiz_id];
                         }
                         else {
@@ -202,15 +202,17 @@ $submission_score_arr = array();
                                         <div class="user-comment-area">
                                             <p class="description-label"><strong>User Comment: </strong></p>
                                             <?php foreach ($all_answer_desc as $row): 
-                                                $cmt_time = date("M d Y H:i", strtotime($row->time));
-                                                $cmt_desc = htmlentities(stripslashes(utf8_decode($row->description)));
+                                                $cmt_time = date("M d Y H:i a", strtotime($row->time));
+                                                $cmt_desc = htmlentities(stripslashes($row->description));
                                                 $cmt_class = '';
                                                 if ($row->submission_id == $post_id) $cmt_class = 'current';
                                                 ?>
-                                                <div class="description-thin <?php echo $cmt_class; ?>">
-                                                    <span class="datetime"><?php echo $cmt_time; ?></span>
-                                                    <?php echo $cmt_desc; ?>
-                                                </div>
+                                                <?php if ($cmt_desc != null): ?>
+                                                    <div class="description-thin <?php echo $cmt_class; ?>">
+                                                        <span class="datetime"><?php echo $cmt_time; ?></span>
+                                                        <?php echo $cmt_desc; ?>
+                                                    </div>
+                                                <?php endif; ?>
                                             <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
@@ -364,34 +366,38 @@ $submission_score_arr = array();
                                     </div>
                                     <div class="feedback-lst">
                                         <?php 
-                                        $q_fb_lst = $question_feedbacks[$group_id][$quiz_id];
-                                        if ( $q_fb_lst ) $q_fb_lst = array_reverse($q_fb_lst);
-                                         foreach ($q_fb_lst as $key => $q_fb) {
-                                            ?>
-                                            <div class="fd-row">
-                                                <div class="fb-content">
-                                                    <?php if ( $current_user->ID == $q_fb['user_id'] ) { ?>
-                                                    <span class="ic-delete-feedback" data-fb-id="<?php echo $q_fb['fb_id']; ?>" title="Remove this feedback">
-                                                        <i class="fa fa-trash-o"></i>
-                                                    </span>
-                                                    <?php } ?>
-                                                    <div class="author"><strong><?php echo $q_fb['user_name']; ?></strong> - <?php echo date("M d Y H:i", strtotime($q_fb['time'])); ?></div>
-                                                    <div class="fb"><?php 
-                                                        $feedback_str = strip_tags($q_fb['feedback']);
-                                                        if ( strlen($feedback_str) > 200 ) {
-                                                            $fb_cut = substr($feedback_str, 0, 150);
-                                                            $end_point = strrpos($fb_cut, ' ');
-                                                            $fb_str = $end_point ? substr($fb_cut, 0, $end_point) : substr($fb_cut, 0);
-                                                            $fb_str .= ' ... <a class="read-more-link" href="javascript:;">Read more</a>';
+                                        $q_fb_lst = $question_feedbacks[$group_id][$quiz_id] ?? null;
+                                        if ( !empty($q_fb_lst) ) {
+                                            $q_fb_lst = array_reverse($q_fb_lst);
+                                            foreach ($q_fb_lst as $key => $q_fb) {
+                                                if ($q_fb['feedback'] != null) {
+                                                ?>
+                                                    <div class="fd-row">
+                                                        <div class="fb-content">
+                                                            <?php if ( $current_user->ID == $q_fb['user_id'] ) { ?>
+                                                            <span class="ic-delete-feedback" data-fb-id="<?php echo $q_fb['fb_id']; ?>" title="Remove this feedback">
+                                                                <i class="fa fa-trash-o"></i>
+                                                            </span>
+                                                            <?php } ?>
+                                                            <div class="author"><strong><?php echo $q_fb['user_name']; ?></strong> - <?php echo date("M d Y H:i a", strtotime($q_fb['time'])); ?></div>
+                                                            <div class="fb"><?php 
+                                                                $feedback_str = strip_tags($q_fb['feedback']);
+                                                                if ( strlen($feedback_str) > 200 ) {
+                                                                    $fb_cut = substr($feedback_str, 0, 150);
+                                                                    $end_point = strrpos($fb_cut, ' ');
+                                                                    $fb_str = $end_point ? substr($fb_cut, 0, $end_point) : substr($fb_cut, 0);
+                                                                    $fb_str .= ' ... <a class="read-more-link" href="javascript:;">Read more</a>';
 
-                                                            echo '<div class="less">' . $fb_str . '</div>';
-                                                        } 
-                                                        echo '<div class="full">' . $feedback_str . '</div>';
-                                                        ?>
+                                                                    echo '<div class="less">' . $fb_str . '</div>';
+                                                                } 
+                                                                echo '<div class="full">' . $feedback_str . '</div>';
+                                                                ?>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <?php
+                                                <?php
+                                                }
+                                            }
                                         }
                                         ?>
                                     </div>

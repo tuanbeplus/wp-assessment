@@ -543,8 +543,8 @@
   margin-bottom: 0;
 }
 .dcr .user-comment-area .description-thin.current {
-  background-color: #f6f6f6;
-  border: 1px solid #bbb;
+  background-color: rgba(0,0,0,.03);
+  border: 1px solid #ccc;
 }
 
 .dcr .user-comment-area .description-thin .datetime {
@@ -561,7 +561,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: 8px 10px;
   background-color: rgba(0, 0, 0, 0.06);
   width: 100%;
 }
@@ -1752,6 +1752,11 @@ ul.dashboard-charts-list li.chart:last-child {
   white-space: pre-wrap;
   margin-top: 4px;
   display: flex;
+  line-height: 150%;
+}
+.feedback-lst .fd-row .fb .less,
+.feedback-lst .fd-row .fb .full {
+  width: 100%;
 }
 .feedback-lst .fd-row .fb .less + .full {
   display: none;
