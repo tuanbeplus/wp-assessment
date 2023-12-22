@@ -8,12 +8,6 @@ $dcr_terms = array('dcr');
 
 $index_accessible_list = get_assessments_accessible_members($user_id, $organisation_id, $index_terms);
 $dcr_accessible_list = get_assessments_accessible_members($user_id, $organisation_id, $dcr_terms); 
-// $sf_product_id_opp = getProductIdByOpportunity();
-// $drc_product_id = isset($sf_product_id_opp['dcr_product_id']) ? $sf_product_id_opp['dcr_product_id'] : null;
-// $index_product_id = isset($sf_product_id_opp['index_product_id']) ? $sf_product_id_opp['index_product_id'] : null;
-
-// $dcr_assessments_list = get_assessments_related_sf_products($drc_product_id, 'dcr') ?? null;
-// $index_assessments_list = get_assessments_related_sf_products($index_product_id, 'index') ?? null;
 ?>
 
 <h2>Assessments</h2>

@@ -25,9 +25,9 @@ $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 
 // Data position from Ranking
-$position_by_total_score = json_decode(get_field('position_by_total_score', $ranking_id), true);
-$position_by_industry = json_decode(get_field('position_by_industry', $ranking_id), true);
-$position_by_framework = json_decode(get_field('position_by_framework', $ranking_id), true);
+$position_by_total_score = $main->wpa_unserialize_metadata(get_field('position_by_total_score', $ranking_id));
+$position_by_industry = $main->wpa_unserialize_metadata(get_field('position_by_industry', $ranking_id));
+$position_by_framework = $main->wpa_unserialize_metadata(get_field('position_by_framework', $ranking_id));
 
 $mpdf = new \Mpdf\Mpdf();
 
@@ -46,12 +46,14 @@ require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-footer.php';
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-front-page.php';
 
 // Render Table of content
-if ($report_template['is_include_toc'] == true) { 
-    $mpdf->TOCpagebreakByArray(
-        array(
-            'links' => true,
-        ),
-    );
+if (isset($report_template['is_include_toc'])) {
+    if ($report_template['is_include_toc'] == true) { 
+        $mpdf->TOCpagebreakByArray(
+            array(
+                'links' => true,
+            ),
+        );
+    }
 }
 
 // Render All before generic pages

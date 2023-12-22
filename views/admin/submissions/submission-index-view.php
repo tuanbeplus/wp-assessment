@@ -33,11 +33,6 @@ $get_quiz_accepted = $main->get_quiz_accepted($assessment_id, $post_id, $organis
 $question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id, $organisation_id);
 
 $i = 0;
-function get_submit_field($array, $index, $key)
-{
-    if (!key_exists($index, $array) || !key_exists($key, $array[$index])) return;
-    return $array[$index][$key];
-}
 $submission_score_arr = array();
 
 // echo "<pre>";
@@ -77,14 +72,15 @@ $submission_score_arr = array();
                     $url = wp_get_attachment_url($attachment_id);
                     $attachment_type = get_post_mime_type($attachment_id);
                 }
-                $max_point = get_submit_field($questions, $i, 'question_point');
-                $question_title = $questions[$i]['title'];
+                $question_title = $questions[$i]['title'] ?? null;
+                $question_des = $questions[$i]['description'] ?? null;
                 ?>
                 <div class="submission-view-item-row" id="<?php echo $i ?>-main-container">
                     <div class="card">
                         <div class="card-body">
                             <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $i ?>" class="quiz-input" />
-                            <h4 class="quiz-title"><?php echo $i .' - '. $question_title; ?></h4>
+                            <h4 class="quiz-title"><?php echo $question_title; ?></h4>
+                            <div class="question-des"><?php echo $question_des; ?></div>
                             <?php if (is_array($answers) && count($answers) > 0) : ?>
                                 <div class="submission-answers-list">
                                     <strong>Selected Answer:</strong>
@@ -103,12 +99,6 @@ $submission_score_arr = array();
                             <?php endif; ?>
                             <?php if ($attachment_id) : ?>
                                 <a href="<?php echo $url ?>" target="_blank"><p>View Supporting Documentation</p></a>
-                            <?php endif; ?>
-                            <?php if ($assessment_meta == 'Comprehensive Assessment'): ?>
-                                <div class="row weighting">
-                                    <label class="weighting-label"><strong>Weighting: <?php echo $max_point ?></strong></label>
-                                    <input class="input-weighting" type="number" max="<?php echo $max_point ?>" placeholder="Points" name="quiz_point" value="<?php echo $field->quiz_point; ?>" />
-                                </div>
                             <?php endif; ?>
                         </div>
                     </div>

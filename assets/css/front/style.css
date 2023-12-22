@@ -707,7 +707,7 @@ body {
     height: 120px;
     border-radius: 8px;
     font-size: 1.125rem;
-    line-height: 130%;
+    line-height: 150%;
     border: 1px solid #979797;
     background-color: #d8d8d82e;
     transition: none;
@@ -814,7 +814,6 @@ body {
 }
 
 .feedback-item ._info .datetime {
-    font-style: italic;
     font-size: 0.925rem;
 }
 

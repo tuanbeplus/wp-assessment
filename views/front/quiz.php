@@ -676,13 +676,15 @@ $is_accepted = $status === 'accepted';
                                                             <ul class="feedback-list">
                                                                 <?php $quiz_feedbacks = array_reverse($dcr_feedbacks[$j][$sub_id]); ?>
                                                                 <?php foreach ($quiz_feedbacks as $feedback): ?>
-                                                                    <li class="feedback-item">
-                                                                        <div class="_info">
-                                                                            <strong class="author"><?php echo $feedback['user_name'] ?></strong> - 
-                                                                            <span class="datetime"><?php echo date("M d Y H:i a", strtotime($feedback['time'])); ?></span>
-                                                                        </div>
-                                                                        <div class="_content"><?php echo $feedback['feedback']; ?></div>
-                                                                    </li>
+                                                                    <?php if (!empty($feedback['feedback'])): ?>
+                                                                        <li class="feedback-item">
+                                                                            <div class="_info">
+                                                                                <strong class="author"><?php echo $feedback['user_name'] ?></strong> - 
+                                                                                <span class="datetime"><?php echo date("M d Y H:i a", strtotime($feedback['time'])); ?></span>
+                                                                            </div>
+                                                                            <div class="_content"><?php echo $feedback['feedback']; ?></div>
+                                                                        </li>
+                                                                    <?php endif; ?>
                                                                 <?php endforeach; ?>
                                                             </ul>
                                                         </div>

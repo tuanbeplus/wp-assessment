@@ -549,8 +549,9 @@
 
 .dcr .user-comment-area .description-thin .datetime {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: #888;
+  font-size: 13px;
   line-height: 110%;
 }
 
@@ -727,6 +728,7 @@
 
 #submitted_info_view .submission-info-container p {
   margin: 14px 0;
+  overflow-wrap: break-word;
 }
 
 #submitted_info_view .submission-info-container > *:last-child {
