@@ -156,7 +156,7 @@ class AndAssessmentRanking {
           $temp_item['org_rank'] = $key+1;
           $ranking_by_tt_sc[$rk_item['org_id']] = $temp_item;
         }
-        update_field('position_by_total_score', json_encode($ranking_by_tt_sc), $post_id );
+        update_field('position_by_total_score', base64_encode(serialize($ranking_by_tt_sc)), $post_id );
         // End - Position by Total Score
 
         // Start - Position by Industry
@@ -180,7 +180,7 @@ class AndAssessmentRanking {
           'by_indus_data' => $ranking_by_indus,
           'rank_data' => $indus_data
         );
-        update_field('position_by_industry', json_encode($ranking_by_indus_data), $post_id );
+        update_field('position_by_industry', base64_encode(serialize($ranking_by_indus_data)), $post_id );
         // End - Position by Industry
 
         // Start - Position by Framework
@@ -246,7 +246,7 @@ class AndAssessmentRanking {
               );
             }
             $child_questions[$child_id] = array(
-              'title' => $child_question['sub_title'],
+              'title' => $child_question['sub_title'] ,
               'subs' => $subs_lst
             );
           }
@@ -258,7 +258,7 @@ class AndAssessmentRanking {
             'child_questions' => $child_questions
           );
         }
-        update_field('position_by_framework', json_encode($ranking_by_framework), $post_id );
+        update_field('position_by_framework', base64_encode(serialize($ranking_by_framework)), $post_id );
         // End - Position by Framework
 
     }

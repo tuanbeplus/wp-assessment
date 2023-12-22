@@ -1,16 +1,18 @@
 <?php
 global $post;
 
+$wp_ass = new WP_Assessment();
+
 $assessment_id = get_field('assessment', $post->ID);
 
 $by_total_score = get_field('position_by_total_score', $post->ID);
-$ranking_by_total_score = json_decode($by_total_score, true);
+$ranking_by_total_score = $wp_ass->wpa_unserialize_metadata($by_total_score);
 
 $by_industry = get_field('position_by_industry', $post->ID);
-$ranking_by_industry = json_decode($by_industry, true);
+$ranking_by_industry = $wp_ass->wpa_unserialize_metadata($by_industry);
 
 $by_framework = get_field('position_by_framework', $post->ID);
-$ranking_by_framework = json_decode($by_framework, true);
+$ranking_by_framework = $wp_ass->wpa_unserialize_metadata($by_framework);
 ?>
 
 <div class="container">
