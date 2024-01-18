@@ -154,7 +154,7 @@ function get_submissions_completed($organisation_id, $assessment_id)
 	if (!empty($submissions)) {
 		foreach ($submissions as $submission) {
 			$status = get_post_meta($submission->ID, 'assessment_status', true);
-			if ($status != 'rejected' || $status != 'draft') {
+			if ($status == 'pending' || $status == 'completed' || $status == 'accepted') {
 				$submissions_arr[] = $submission->ID;
 			}
 		}
@@ -800,5 +800,6 @@ function get_history_dashboard_scores($data_score) {
 		return $result;
 	}
 }
+
 
 

@@ -289,8 +289,16 @@ jQuery(document).ready(function ($) {
                 step_ids.push($(this).data('id'))
             }
         })
-        // Add class active to first step pending
-        $('#main-quiz-form .step.step-'+ step_ids[0]).addClass('active')
+
+        if (step_ids.length > 0) {
+            // Add class active to first step pending
+            $('#main-quiz-form .step.step-'+ step_ids[0]).addClass('active')
+        }
+        else {
+            // Add class active to first step if all is completed
+            $('#main-quiz-form .step.step-1').addClass('active')
+            $('#go-back-quiz-btn').hide()
+        }
 
         // Add class active to first section pending
         all_section_wrapper.each(function (e) {
@@ -721,6 +729,25 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    $(document).on('click', '.btn-showmore-cmt', function (e){
+        let cmt = $(this).closest('.comment')
+        let show_less = cmt.find('.show_less');
+        let show_full = cmt.find('.show_full');
+
+        if ($(this).hasClass('active')) {
+            $(this).removeClass('active')
+            $(this).text('Show more')
+            show_less.show()
+            show_full.hide()
+        }
+        else {
+            $(this).addClass('active')
+            $(this).text('Show less')
+            show_full.show()
+            show_less.hide()
+        }
+    });
+
     function moveToNextQuizStep(instance, prev = false) {
         let prevQuiz = instance;
         let nextQuiz = prev ? instance.prev() : instance.next();
@@ -1077,4 +1104,29 @@ jQuery(document).ready(function ($) {
             messageWrap.html('');
         }, 8000)
     }
+
+    /**
+     * Auto save quiz after an action from user
+     * 
+     */
+    function autoSaveQuiz() {
+        // Auto save after click choice answer
+        $(document).on('click', '.checkBox .form-check-input', function (e){
+            let currentQuiz = $('.quiz.active');
+            let checkAnswers = getCheckAnswers(currentQuiz);
+            setTimeout(() => {
+                saveQuestion(checkAnswers);
+            }, 1000)
+        });
+
+        // Auto save after focus out of user comment
+        $(document).on('blur', '.quiz-description', function (e){
+            let currentQuiz = $('.quiz.active');
+            let checkAnswers = getCheckAnswers(currentQuiz);
+            setTimeout(() => {
+                saveQuestion(checkAnswers);
+            }, 1000)
+        });
+    }
+    // autoSaveQuiz();
 });

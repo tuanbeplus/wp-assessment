@@ -75,9 +75,6 @@ $is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', t
                 Tick as Completed
             </label>
         </div>
-    <?php endif; ?>
-
-    <input id="assessment_id" type="hidden" name="assessment_id" value="<?php echo $post->ID; ?>" />
-    
+    <?php endif; ?>    
 </div>
 

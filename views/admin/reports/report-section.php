@@ -1,10 +1,22 @@
 <?php 
 global $post;
-$report_template = get_post_meta($post->ID, 'report_template', true);
+
+if ($post->post_type == 'reports') {
+    $assessment_id = get_post_meta($post->ID, 'assessment_id', true);
+    $report_template = get_post_meta($post->ID, 'report_template', true);
+
+    if (empty($report_template)) {
+        $report_template = get_post_meta($assessment_id, 'report_template', true);
+    }
+} 
+else {
+    $report_template = get_post_meta($post->ID, 'report_template', true);
+}
+
 $report_logo_url = $report_template['front_page']['logo_url'] ?? null;
 $report_front_title = $report_template['front_page']['title'] ?? null;
 $report_front_content = $report_template['front_page']['content'] ?? null;
-$is_include_toc = $report_template['is_include_toc'] ?? true;
+$is_include_toc = $report_template['is_include_toc'] ?? null;
 $terms = get_assessment_terms($post->ID);
 ?>
 

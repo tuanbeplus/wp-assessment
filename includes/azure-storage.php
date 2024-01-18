@@ -10,6 +10,8 @@ use MicrosoftAzure\Storage\Common\Internal\Resources;
 
 class WP_Azure_Storage {
 
+    public $azure_table_name;
+
     public function __construct() 
     {
         add_action('wp_ajax_save_attachments_azure_storage_ajax', array($this, 'save_attachments_azure_storage_ajax'));

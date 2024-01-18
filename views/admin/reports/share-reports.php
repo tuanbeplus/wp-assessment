@@ -22,6 +22,9 @@ $users = get_users(array(
     color: red;
     font-weight: 600;
   }
+  .select2-container .select2-search--inline .select2-search__field {
+    padding: 0 6px;
+  }
 </style>
 <div id="report-dashboard-share">
    <p>

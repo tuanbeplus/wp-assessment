@@ -3,6 +3,7 @@
 class WP_Assessment
 {
     public $quiz_table_name;
+    public $dcr_quiz_table_name;
 
     public function __construct()
     {
@@ -454,19 +455,17 @@ class WP_Assessment
         }
     }
 
-    function get_dcr_quiz_answers_all_submissions($assessment_id, $organisation_id, $parent_id, $quiz_id)
+    function get_dcr_quiz_answers_all_submissions($assessment_id, $organisation_id)
     {
         try {
             global $wpdb;
 
             $table = $this->get_quiz_submission_table_name($assessment_id);
 
-            $sql = "SELECT time, description, submission_id 
+            $sql = "SELECT time, user_id, organisation_id, description, submission_id, parent_id, quiz_id
                     FROM $table 
                     WHERE assessment_id = $assessment_id 
                     AND organisation_id = '$organisation_id' 
-                    AND parent_id = $parent_id 
-                    AND quiz_id = $quiz_id
                     ORDER BY time DESC";
             
             $result = $wpdb->get_results($sql);

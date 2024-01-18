@@ -9,9 +9,13 @@
 $total_org_score = get_post_meta($submission_id, 'total_submission_score', true);
 $overall_org_score = cal_overall_total_score($assessment_id, 'total_submission_score');
 $overall_and_score = cal_overall_total_score($assessment_id, 'total_and_score');
-$org_score_rank = $position_by_total_score[$org_data['Id']]['org_rank'];
-$org_industry_rank = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'];
-$average_industry = cal_average_industry_score($position_by_industry['by_indus_data'][$org_data['Industry']]);
+$org_score_rank = $position_by_total_score[$org_data['Id']]['org_rank'] ?? '';
+$org_industry_rank = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'] ?? '';
+$average_industry = cal_average_industry_score($position_by_industry['by_indus_data'][$org_data['Industry']]) ?? '';
+
+$total_org_score_percent = isset($total_org_score['percent']) ? $total_org_score['percent'] : '';
+$overall_and_score_average = isset($overall_and_score['percent_average']) ? $overall_and_score['percent_average'] : '';
+$overall_org_score_average = isset($overall_org_score['percent_average']) ? $overall_org_score['percent_average'] : '';
 
 $total_index_score = 
 "<div class='page'>
@@ -34,14 +38,14 @@ $total_index_score =
             <td style='text-align:right;border-bottom:none;background-color:none;'>
                 Total Index Score
             </td>
-            <td>". $total_org_score['percent'] ."</td>
-            <td>". $overall_and_score['percent_average'] ."</td>
+            <td>". $total_org_score_percent ."</td>
+            <td>". $overall_and_score_average ."</td>
             <td>". $org_score_rank ."</td>
-            <td>". $overall_org_score['percent_average'] ."</td>
+            <td>". $overall_org_score_average ."</td>
         </tr>
     </table>
     <caption class='table-caption'>Table 3 - Total Index Score and Benchmark</caption>
-    <p>". $org_data['Name'] ." scored ". $total_org_score['percent'] ."/100 in the Access and Inclusion Index, 
+    <p>". $org_data['Name'] ." scored ". $total_org_score_percent ."/100 in the Access and Inclusion Index, 
         which ranked ". $org_score_rank ." overall. The average Access and Inclusion Index score 
         for participating organisations is ". $overall_org_score['percent_average'] .
     ".</p>

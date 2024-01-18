@@ -36,7 +36,7 @@ class Custom_Fields
         add_meta_box('submission-scoring-field', 'Submission Scoring ', array($this, 'submission_scoring_section_admin'), 'submissions', 'normal', 'default');
 
         // Reports
-        add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), 'assessments', 'normal', 'default');
+        add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), array('assessments', 'reports'), 'normal', 'default');
         add_meta_box('report-dashboard-charts', 'Dashboard Charts', array($this, 'report_dashboard_chart_meta_box_callback'), 'reports', 'normal', 'default');
         // add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
         add_meta_box('report-dashboard-share', 'Share this Report to Users', array($this, 'report_dashboard_share_meta_box_callback'), 'reports', 'side', 'default');

@@ -1487,6 +1487,47 @@ body.single-reports {
 }
 /* /Submission */
 
+/* Previous comments */
+.pre-comments {
+    margin-top: 20px;
+}
+
+.comment {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    margin-top: 10px;
+    padding: 10px 12px 10px;
+    font-size: 1rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    line-height: 140%;
+}
+
+.comment ._datetime {
+    width: 100%;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 0.9rem;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.comment ._content {
+    width: 100%;
+    white-space: pre-wrap;
+}
+
+.comment ._content .show_full {
+    display: none;
+}
+
+.comment a.btn-showmore-cmt {
+    width: fit-content;
+    color: #0d6efd!important;
+    text-decoration: underline!important;
+}
+
 @keyframes slide-down {
 	from {
 		transform: translateY(-100%);

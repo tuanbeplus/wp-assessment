@@ -18,11 +18,14 @@ $org_data = get_post_meta($post_id, 'org_data', true);
 $org_score = get_post_meta($submission_id, 'org_score', true);
 $agreed_score = get_post_meta($submission_id, 'agreed_score', true);
 $assessment_title = get_the_title($assessment_id);
-$report_template = get_post_meta($assessment_id, 'report_template', true);
 $col_key_areas = get_post_meta($assessment_id, 'report_key_areas', true);
 $recommentdation = get_post_meta($submission_id, 'recommentdation', true);
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
+$report_template = get_post_meta($post_id, 'report_template', true);
+if (empty($report_template)) {
+    $report_template = get_post_meta($assessment_id, 'report_template', true);
+}
 
 // Data position from Ranking
 $position_by_total_score = $main->wpa_unserialize_metadata(get_field('position_by_total_score', $ranking_id));

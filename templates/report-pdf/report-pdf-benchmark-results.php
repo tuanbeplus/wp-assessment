@@ -26,9 +26,9 @@ $benchmark_results =
         </tr>';
 foreach ($position_by_framework as $index => $key_area) {
 
-    $maturity_level = get_maturity_level_org_step_2($key_area['parent_questions'][$org_data['Id']]['level']);
-    $org_rank = $key_area['parent_questions'][$org_data['Id']]['org_rank'];
-    $org_at_levels = null;
+    $maturity_level = get_maturity_level_org_step_2($key_area['parent_questions'][$org_data['Id']]['level']) ?? '';
+    $org_rank = $key_area['parent_questions'][$org_data['Id']]['org_rank'] ?? '';
+    $org_at_levels = '';
     $org_at_levels = $key_area['org_at_levels'];
     $benchmark_results .=
         '<tr>

@@ -1292,7 +1292,7 @@ ul.dashboard-charts-list li.chart {
   width: 100%;
   padding: 12px;
   border-radius: 6px;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
 }
 
 ul.dashboard-charts-list li.chart:last-child {
@@ -1821,7 +1821,7 @@ ul.dashboard-charts-list li.chart:last-child {
 }
 .card-body label.heading {
   margin-bottom: 6px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 16px;
   line-height: 1;
 }

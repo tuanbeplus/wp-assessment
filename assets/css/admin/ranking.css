@@ -132,6 +132,7 @@ tr:nth-child(even) {
 }
 .pr-info h3 {
   margin: 0;
+  font-size: 1.5rem;
 }
 .pr-info .btn-expland-fr {
   display: flex;

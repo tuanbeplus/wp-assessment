@@ -32,6 +32,9 @@ $get_quiz_accepted = $main->get_quiz_accepted($assessment_id, $post_id, $organis
 // Get all feedbacks for assessment
 $question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id, $organisation_id);
 
+// Get all answers desciption of all submissions
+$all_answers_desc = $main->get_dcr_quiz_answers_all_submissions($assessment_id, $organisation_id);
+
 $i = 0;
 $submission_score_arr = array();
 
@@ -187,21 +190,23 @@ $submission_score_arr = array();
                                             </ul>
                                         </div>
                                     <?php endif; ?>
-                                    <?php $all_answer_desc = $main->get_dcr_quiz_answers_all_submissions($assessment_id, $organisation_id, $group_id, $quiz_id); ?>
-                                    <?php if (!empty($all_answer_desc)): ?>
+                                    <?php if (!empty($all_answers_desc)): ?>
                                         <div class="user-comment-area">
                                             <p class="description-label"><strong>User Comment: </strong></p>
-                                            <?php foreach ($all_answer_desc as $row): 
-                                                $cmt_time = date("M d Y H:i a", strtotime($row->time));
-                                                $cmt_desc = htmlentities(stripslashes($row->description));
-                                                $cmt_class = '';
-                                                if ($row->submission_id == $post_id) $cmt_class = 'current';
-                                                ?>
-                                                <?php if ($cmt_desc != null): ?>
-                                                    <div class="description-thin <?php echo $cmt_class; ?>">
-                                                        <span class="datetime"><?php echo $cmt_time; ?></span>
-                                                        <?php echo $cmt_desc; ?>
-                                                    </div>
+                                            <?php foreach ($all_answers_desc as $row): 
+                                                if (isset($row->parent_id) && isset($row->quiz_id)):
+                                                    if ($row->parent_id == $group_id && $row->quiz_id == $quiz_id):
+                                                        $cmt_time = date("M d Y H:i a", strtotime($row->time));
+                                                        $cmt_desc = htmlentities(stripslashes($row->description));
+                                                        $cmt_class = ($row->submission_id == $post_id) ? 'current' : '';
+                                                        ?>
+                                                        <?php if ($cmt_desc != null): ?>
+                                                            <div class="description-thin <?php echo $cmt_class; ?>">
+                                                                <span class="datetime"><?php echo $cmt_time; ?></span>
+                                                                <?php echo $cmt_desc; ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             <?php endforeach; ?>
                                         </div>

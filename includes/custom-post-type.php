@@ -26,7 +26,8 @@ class CustomPostType
         add_action('manage_attachment_posts_custom_column', array($this, 'customize_attachment_admin_column_value'), 10, 2);
 
         add_action('comment_post', array($this, 'submission_comments_post_hook'), 10, 2);
-        add_action('publish_submissions', array($this, 'on_assessment_created'), 10, 2);
+        add_action('publish_submissions', array($this, 'on_submissions_created'), 10, 2);
+        add_action('publish_dcr_submissions', array($this, 'on_submissions_created'), 10, 2);
     }
 
     function activate(): void
@@ -378,27 +379,42 @@ class CustomPostType
             }
         }
     }
-    function on_assessment_created($post_id)
+
+    function on_submissions_created($post_id)
     {
         $post = get_post($post_id); 
         $assessment_id = get_post_meta($post_id, 'assessment_id', true);
         $sf_user_name = get_post_meta($post_id, 'sf_user_name', true);
         $sf_user_email = get_post_meta($post_id, 'sf_user_email', true);
+        $org_data = get_post_meta($post_id, 'org_data', true);
+        $org_name = $org_data['Name'] ?? '';
 
-        if ($post->post_date == $post->post_modified && $post->post_type = 'submissions') {
-            $subject = 'Saturn - New Submission Added #' . $post_id;
-            $to = $this->get_all_users_email($assessment_id);
-            $message  = '<p>You have a new submission of <strong>'. get_the_title($assessment_id). '</strong>.</p>';
-            $message .= '<p>From:</p>';
-            $message .= '<ul style="padding:0;">';
-            $message .= '   <li>User: <strong>'. $sf_user_name .'</strong></li>';
-            $message .= '   <li>Email: '. $sf_user_email .'</li>';
-            $message .= '</ul>';
-            $message .= 'View <a href='. home_url() .'/wp-admin/post.php?post='. $post_id .'&action=edit>'.get_the_title($post_id).'</a>';
-            $sent = wp_mail($to, $subject, $message);
-            return $sent;
+        if ($post->post_date == $post->post_modified) {
+            if ($post->post_type = 'submissions' || $post->post_type = 'dcr_submissions') {
+
+                $to = $this->get_all_users_email($assessment_id);
+                $subject = 'Saturn - New Submission Added #' .$post_id. ' - ' .$org_name;
+                $message  = '<p>You have a new submission of <strong>'. get_the_title($assessment_id). '</strong>.</p>';
+                $message .= '<p>From:</p>';
+                $message .= '<ul style="padding:0;">';
+                if (isset($sf_user_name)) {
+                    $message .= '<li>User: <strong>'. $sf_user_name .'</strong></li>';
+                }
+                if (isset($sf_user_email)) {
+                    $message .= '<li>Email: '. $sf_user_email .'</li>';
+                }
+                if (isset($org_name)) {
+                    $message .= '<li>Organisation: '. $org_name .'</li>';
+                }
+                $message .= '</ul>';
+                $message .= 'View <a href='. home_url() .'/wp-admin/post.php?post='. $post_id .'&action=edit>'.get_the_title($post_id).'</a>';
+
+                $sent = wp_mail($to, $subject, $message);
+                return $sent;
+            }
         }
     }
+
     function get_all_users_email($assessment_id)
     {
         $users_id = array();

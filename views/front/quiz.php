@@ -56,9 +56,13 @@ $dcr_feedbacks = $feedback_cl->format_feedbacks_by_question($post_id, $organisat
 // check user access to asessment
 $is_user_can_access = check_access_salesforce_members($user_id, $post_id);
 
+// Get all answers desciption of all submissions
+$all_quiz_pre_cmts = $main->get_dcr_quiz_answers_all_submissions($post_id, $organisation_id);
+
 $is_disabled = $status === 'pending';
 $is_publish = $status === 'publish';
 $is_accepted = $status === 'accepted';
+
 ?>
 
 <?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
@@ -402,6 +406,10 @@ $is_accepted = $status === 'accepted';
                                         if (array_key_exists('feedback', $current_quiz)) {
                                             $feedback = $current_quiz['feedback'];
                                         }
+
+                                        if (array_key_exists('submission_id', $current_quiz)) {
+                                            $submission_id = $current_quiz['submission_id'];
+                                        }
                                     } 
                                     else {
                                         if (!$show_first_active_view) {
@@ -505,8 +513,55 @@ $is_accepted = $status === 'accepted';
                                                                 <?php echo $is_disabled ? 'disabled' : '' ?> 
                                                                 class="quiz-description textarea medium" 
                                                                 placeholder="Enter comments"
-                                                                rows="10"><?php if (isset($current_quiz_sub['description'])) echo $description; ?></textarea>
+                                                                rows="10"><?php 
+                                                                    if (isset($current_quiz_sub['description'])) {
+                                                                        if ($terms[0] == 'dcr') { 
+                                                                            $submission_status = get_post_meta($submission_id, 'assessment_status', true);
+                                                                            if ($submission_status == 'draft') {
+                                                                                echo $description; 
+                                                                            }
+                                                                        }
+                                                                        else {
+                                                                            echo $description; 
+                                                                        }
+                                                                    }
+                                                                ?></textarea>
                                                     </div>
+                                                    <?php if (!empty($all_quiz_pre_cmts) && $terms[0] == 'dcr'): ?>
+                                                        <div class="pre-comments">
+                                                            <p>Previous comments:</p>
+                                                            <ul class="pre-comments-list">
+                                                            <?php foreach ($all_quiz_pre_cmts as $row): 
+                                                                $submission_status = get_post_meta($row->submission_id, 'assessment_status', true);
+                                                                if (isset($row->parent_id) && isset($row->quiz_id)):
+                                                                    if ($row->parent_id == $j && $row->quiz_id == $sub_id && $submission_status != 'draft'):
+                                                                        $cmt_time = date("M d Y H:i a", strtotime($row->time));
+                                                                        $cmt_desc = htmlentities(stripslashes($row->description));
+                                                                        $cmt_class = (strlen($cmt_desc) > 400) ? 'show_less' : '';
+                                                                        ?>
+                                                                        <?php if ($cmt_desc != null): ?>
+                                                                            <li class="comment <?php echo $cmt_class; ?>">
+                                                                                <span class="_datetime"><?php echo $cmt_time; ?></span>
+                                                                                <div class="_content">
+                                                                                <?php 
+                                                                                    if (strlen($cmt_desc) > 400) {
+                                                                                        echo '<div class="show_less">'.substr($cmt_desc, 0, 400).'...</div>';
+                                                                                        echo '<div class="show_full">'.$cmt_desc.'</div>';
+                                                                                    }
+                                                                                    else {
+                                                                                        echo $cmt_desc;
+                                                                                    }
+                                                                                ?>
+                                                                                </div>
+                                                                                <?php if (strlen($cmt_desc) > 400) echo '<a class="btn-showmore-cmt">Show more</a>';?>
+                                                                            </li>
+                                                                        <?php endif; ?>
+                                                                    <?php endif; ?>
+                                                                <?php endif; ?>
+                                                            <?php endforeach; ?>
+                                                            </ul>
+                                                        </div>
+                                                    <?php endif; ?>
                                                 <?php else: ?>
                                                     <!-- For NULL description if assessment don't required -->
                                                     <div class="textAreaWrap" style="display:none;">

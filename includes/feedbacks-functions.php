@@ -5,6 +5,8 @@
  */
 class AndSubmissionFeedbacks {
 
+  public $submission_feedbacks_table_name;
+
   /**
    * Construct function
    */
