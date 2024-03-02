@@ -6,6 +6,9 @@
  * 
  */
 
+$cal_agreed_score = cal_scores_with_weighting($assessment_id, $agreed_score, 'sub');
+$cal_agreed_score = isset($cal_agreed_score) ? $cal_agreed_score : array();
+
 $self_assessed_score =
 '<div class="page">
     <h3>Self-assessed score and final Australian Network on Disability score</h3>
@@ -21,9 +24,16 @@ $self_assessed_score =
             <th width="30%">AND assessed level</th>
         </tr>';
 foreach ($position_by_framework as $index => $key_area) {
+    $org_self_score = 0;
     $and_assessed_score = 0;
-    if (is_array($agreed_score[$index])) {
-        $and_assessed_score = array_sum($agreed_score[$index]) / count($agreed_score[$index]);
+
+    // Average Org score in a Key area
+    if (isset($org_section_score[$index ])) {
+        $org_self_score = get_maturity_level_org($org_section_score[$index]);
+    }
+
+    if (is_array($cal_agreed_score[$index])) {
+        $and_assessed_score = array_sum($cal_agreed_score[$index]) / count($cal_agreed_score[$index]);
     }
     $and_assessed_level = get_maturity_level_org($and_assessed_score);
     $self_assessed_score .=
@@ -31,7 +41,7 @@ foreach ($position_by_framework as $index => $key_area) {
             <td width="40%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'
                 . $key_area['title'] .
             '</td>
-            <td width="30%">'. $key_area['parent_questions'][$org_data['Id']]['level'] .'</td>
+            <td width="30%">'. $org_self_score .'</td>
             <td width="30%">'. $and_assessed_level .'</td>
         </tr>';
 }
@@ -73,8 +83,8 @@ foreach ($questions as $index => $key_area) {
     }
     
     // Average Agreed score in a Key area
-    if (is_array($agreed_score[$index])) {
-        $and_assessed_percent = round(array_sum($agreed_score[$index]) / array_sum($max_score) * 100);
+    if (is_array($cal_agreed_score[$index])) {
+        $and_assessed_percent = round(array_sum($cal_agreed_score[$index]) / array_sum($max_score) * 100);
     }
     
     $self_assessed_percent_table .=

@@ -35,9 +35,11 @@ $question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id,
 $i = 0;
 $submission_score_arr = array();
 
-// echo "<pre>";
-// print_r();
-// echo "</pre>";
+if (($_GET['test'] == 'test')) {
+    echo "<pre>";
+    print_r($questions);
+    echo "</pre>";
+}
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -94,7 +96,7 @@ $submission_score_arr = array();
                             <?php if ($field->description): ?>
                                 <div class="user-comment-area">
                                     <p class="description-label"><strong>User Comment: </strong></p>
-                                    <p class="description-thin"><?php echo $field->description; ?></p>
+                                    <div class="description-thin"><?php echo htmlentities(stripslashes($field->description)); ?></div>
                                 </div>
                             <?php endif; ?>
                             <?php if ($attachment_id) : ?>
@@ -187,7 +189,7 @@ $submission_score_arr = array();
                                     <?php if ($field->description): ?>
                                         <div class="user-comment-area">
                                             <p class="description-label"><strong>User Comment: </strong></p>
-                                            <div class="description-thin"><?php echo $field->description; ?></div>
+                                            <div class="description-thin"><?php echo htmlentities(stripslashes($field->description)); ?></div>
                                         </div>
                                     <?php endif; ?>
                                     <?php 
@@ -438,7 +440,7 @@ $submission_score_arr = array();
         
         <!-- Save Total Submission Score -->
         <input type="hidden" name="total_submission_score[sum]" value="<?php echo array_sum($submission_score_arr); ?>">
-        <input type="hidden" name="total_submission_score[percent]" value="<?php echo round(array_sum($submission_score_arr)/268.8*100); ?>">
+        <input type="hidden" name="total_submission_score[percent]" value="<?php echo round(array_sum($submission_score_arr)/272*100); ?>">
 
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">

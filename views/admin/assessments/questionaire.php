@@ -5,7 +5,7 @@ $single_repeater_group = get_post_meta($post->ID, 'question_group_repeater', tru
 $single_repeater_group = $main->wpa_unserialize_metadata($single_repeater_group);
 $question_templates = get_post_meta($post->ID, 'question_templates', true);
 $is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', true);
-$report_key_areas = get_post_meta($post->ID, 'report_key_areas', true);
+$report_key_areas = get_assessment_key_areas($post->ID);
 $i = 0; $j = 0;
 ?>
 <div id="question-template-wrapper" class="question-template-wrapper">

@@ -16,9 +16,12 @@ if (!in_array('index', $terms)) return;
 
 $total_org_score = get_post_meta($post_id, 'total_submission_score', true);
 $org_section_score = get_post_meta($post_id, 'org_section_score', true);
-$report_key_areas = get_post_meta($assessment_id, 'report_key_areas', true);
+$report_key_areas = get_assessment_key_areas($assessment_id);
 $and_score = get_post_meta($post_id, 'and_score', true);
 $agreed_score = get_post_meta($post_id, 'agreed_score', true);
+$total_submission_score = get_post_meta($post_id, 'total_submission_score', true);
+$total_and_score = get_post_meta($post_id, 'total_and_score', true);
+$total_agreed_score = get_post_meta($post_id, 'total_agreed_score', true);
 $overall_org_score = cal_overall_total_score($assessment_id, 'total_submission_score');
 $overall_and_score =  cal_overall_total_score($assessment_id, 'total_and_score');
 $overall_agreed_score =  cal_overall_total_score($assessment_id, 'total_agreed_score');
@@ -26,10 +29,13 @@ $report_id = is_report_of_submission_exist($post_id);
 $report_url = home_url() . '/wp-admin/post.php?post='. $report_id .'&action=edit';
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
+$is_ranking_exist = get_ranking_of_assessment($assessment_id);
 
-// echo "<pre>";
-// print_r($overall_org_score);
-// echo "</pre>";
+// if (($_GET['test'] == 'test')) {
+//     echo "<pre>";
+//     print_r();
+//     echo "</pre>";
+// }
 ?>
 <div class="scoring-wrapper">
     <div class="maturity-level _field">
@@ -54,30 +60,38 @@ $questions = $main->wpa_unserialize_metadata($questions);
         <p><strong>Overall total score</strong></p>
         <ul class="overall-list">
             <li>Overall Organisation Total Score: 
-                <strong><?php echo $overall_org_score['sum_average']; ?></strong> 
-                <strong>(<?php echo $overall_org_score['percent_average']; ?>%)</strong>
+                <strong><?php echo $total_submission_score['sum'] ?? 0; ?></strong> 
+                <strong>(<?php echo $total_submission_score['percent'] ?? 0; ?>%)</strong>
             </li>
             <li>Overall AND Total Score: 
-                <strong><?php echo $overall_and_score['sum_average']; ?></strong> 
-                <strong>(<?php echo $overall_and_score['percent_average']; ?>%)</strong>
+                <strong><?php echo $total_and_score['sum'] ?? 0; ?></strong> 
+                <strong>(<?php echo $total_and_score['percent'] ?? 0; ?>%)</strong>
             </li>
             <li>Overall Agreed Total Score: 
-                <strong><?php echo $overall_agreed_score['sum_average']; ?></strong> 
-                <strong>(<?php echo $overall_agreed_score['percent_average']; ?>%)</strong>
+                <strong><?php echo $total_agreed_score['sum'] ?? 0; ?></strong> 
+                <strong>(<?php echo $total_agreed_score['percent'] ?? 0; ?>%)</strong>
             </li>
         </ul>
     </div>
     <div class="report _field">
         <p><strong>Report</strong></p>
         <div class="report-action">
-            <a id="btn-create-report" class="button button-primary">
-                Create Preliminary Report
-                <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
-            </a>
-            <a id="btn-view-report" href="<?php echo $report_url; ?>" target="_blank"
-                class="button button-medium <?php if (!empty($report_id)) echo 'show'; ?>">
-                View Report
-            </a>
+            <?php if ($is_ranking_exist): ?>
+                <a id="btn-create-report" class="button button-primary">
+                    Create Preliminary Report
+                    <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
+                </a>
+                <a id="btn-view-report" href="<?php echo $report_url; ?>" target="_blank"
+                    class="button button-medium <?php if (!empty($report_id)) echo 'show'; ?>">
+                    Edit Report
+                </a>
+            <?php else: ?>
+                <div class="add-ranking-box">
+                    <p>The ranking of assessments does not exist!</p>
+                    <p>You must add the ranking before creating the preliminary report.</p>
+                    <a href="/wp-admin/post-new.php?post_type=ranking" target="_blank">Add new Ranking here</a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

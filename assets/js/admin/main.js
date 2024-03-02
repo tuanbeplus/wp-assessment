@@ -299,14 +299,14 @@ jQuery(document).ready(function ($) {
         wp.editor.initialize(
             editor_id,
             {
-            tinymce: {
-                wpautop: true,
-                plugins : 'charmap colorpicker compat3x directionality fullscreen hr image lists media paste tabfocus textcolor wordpress wpautoresize wpdialogs wpeditimage wpemoji wpgallery wplink wptextpattern wpview',
-                toolbar1: 'bold italic underline strikethrough | bullist numlist | blockquote hr wp_more | alignleft aligncenter alignright | link unlink | fullscreen | wp_adv',
-                toolbar2: 'formatselect alignjustify forecolor | pastetext removeformat charmap | outdent indent | undo redo | wp_help'
-            },
-            quicktags: true,
-            mediaButtons: is_media_button,
+                tinymce: {
+                    wpautop: true,
+                    plugins : 'charmap colorpicker compat3x directionality fullscreen hr image lists media paste tabfocus textcolor wordpress wpautoresize wpdialogs wpeditimage wpemoji wpgallery wplink wptextpattern wpview',
+                    toolbar1: 'bold italic underline strikethrough | bullist numlist | blockquote hr wp_more | alignleft aligncenter alignright | link unlink | fullscreen | wp_adv',
+                    toolbar2: 'formatselect alignjustify forecolor | pastetext removeformat charmap | outdent indent | undo redo | wp_help'
+                },
+                quicktags: true,
+                mediaButtons: is_media_button,
             }
         );
 
@@ -1439,27 +1439,12 @@ jQuery(document).ready(function ($) {
     });
 
     // Add Generic page to List
-    var page_count = 0;
-    var page_before_count = 0;
-    var page_after_count = 0;
-    if ($('.generic-pages-list.before .generic-page').length) {
-        page_before_count = $('.generic-pages-list.before .generic-page').length;
-    }
-    if ($('.generic-pages-list.after .generic-page').length) {
-        page_after_count = $('.generic-pages-list.after .generic-page').length;
-    }
     $(document).on('click', '.btn-add-generic-page', function(e){
         let generic_page_wrapper = $(this).closest('.generic-page-wrapper')
         let data_position = $(this).data('position')
         let data_insert = $(this).data('insert')
         let textarea_id = 'generic-page-textarea-' + Date.now();
-
-        if (data_position == 'before') {
-            page_count = page_before_count + 1;
-        }
-        else if (data_position == 'after') {
-            page_count = page_after_count + 1;
-        }
+        let page_count = Date.now();
 
         let generic_page_item  = '<li id="generic-page-'+ data_position +'-'+ page_count +'" class="_section generic-page">'
             generic_page_item +=     '<h3 class="_heading">Generic page</h3>'
@@ -1467,7 +1452,7 @@ jQuery(document).ready(function ($) {
             generic_page_item +=     '<textarea id="'+ textarea_id +'" class="generic-page-wpeditor" name="report_template[generic_page_'+ data_position +']['+ page_count +'][content]" rows="10"></textarea>'
             generic_page_item +=     '<div class="add-row-block">'
             generic_page_item +=         '<a class="btn-remove-generic-page button_remove">Remove this row</a>'
-            generic_page_item +=         '<a class="btn-add-generic-page button button-primary" data-insert="bottom">+ Add row</a>'
+            generic_page_item +=         '<a class="btn-add-generic-page button button-primary" data-position='+ data_position +' data-insert="bottom">+ Add row</a>'
             generic_page_item +=     '</div>'
             generic_page_item += '</li>'
 
@@ -1573,13 +1558,14 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '#btn-create-report', function(e){
         e.preventDefault();
         let btn = $(this)
-        let submission_id = $("#submission_id").val();
+        let submissionId = $("#submission_id").val();
+
         $.ajax({
             type: 'POST',
             url: ajaxUrl,
             data:{
                 'action' : 'create_comprehensive_report',
-                'submission_id': submission_id,
+                'submission_id': submissionId,
             },
             beforeSend : function ( xhr ) {
                 btn.addClass('loading')

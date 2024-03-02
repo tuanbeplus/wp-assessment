@@ -271,6 +271,7 @@ class CustomPostType
     {
         $columns['user'] = 'User';
         $columns['organisation'] = 'Organisation';
+        $columns['assessment'] = 'Assessment';
         return $columns;
     }
 
@@ -289,6 +290,16 @@ class CustomPostType
             $org_metadata = get_post_meta($post_id, 'org_data', true);
             if (!empty($org_metadata)) {
                 echo $org_metadata['Name'];
+            }
+        }
+
+        // Column "Assessment"
+        if ($column_key == 'assessment') {
+            $assessment_id = get_post_meta($post_id, 'assessment_id', true);
+            if (isset($assessment_id)) {
+                echo '<a href="/wp-admin/post.php?post='.$assessment_id.'&action=edit" target="_blank">'
+                        .get_the_title($assessment_id).
+                    '</a>';
             }
         }
     }

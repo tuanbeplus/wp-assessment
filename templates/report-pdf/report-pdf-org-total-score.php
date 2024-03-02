@@ -17,6 +17,18 @@ $total_org_score_percent = isset($total_org_score['percent']) ? $total_org_score
 $overall_and_score_average = isset($overall_and_score['percent_average']) ? $overall_and_score['percent_average'] : '';
 $overall_org_score_average = isset($overall_org_score['percent_average']) ? $overall_org_score['percent_average'] : '';
 
+$count_org_industry = 0;
+if (isset($position_by_industry['rank_data']) && !empty($position_by_industry['rank_data'])) {
+    foreach ($position_by_industry['rank_data'] as $org_industry_data) {
+        if ($org_industry_data['industry_name'] == $org_data['Industry']) {
+            $count_org_industry++;
+        }
+    }
+}
+else {
+    $count_org_industry = 'N';
+}
+
 $total_index_score = 
 "<div class='page'>
     <h2>Part A - Organisational Dashboard</h2>
@@ -31,7 +43,7 @@ $total_index_score =
             <th></th>
             <th>Organisation <br> self-assessment <br> (/100)</th>
             <th>AND assessment <br> and final score <br> (/100)</th>
-            <th>Rank (/N)</th>
+            <th>Rank (/".$count_index.")</th>
             <th>Average of other <br> organisations</th>
         </tr>
         <tr>
@@ -54,7 +66,7 @@ $total_index_score =
     <table class='table-3'>
         <tr>
             <th></th>
-            <th>Industry Rank (/N)</th>
+            <th>Industry Rank (/".$count_org_industry.")</th>
             <th>Industry Average</th>
         </tr>
         <tr>

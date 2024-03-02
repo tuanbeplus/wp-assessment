@@ -1005,12 +1005,14 @@ body {
     padding: 8px 12px;
     display: inline-flex;
     align-items: baseline;
+    text-align: left;
     font-size: 1rem;
-    line-height: 130%;
+    line-height: 140%;
     color: #333;
     cursor: default;
     border: 2px solid #fff;
     border-radius: 4px;
+    word-break: break-all;
 }
 
 .file-item > button.name {
@@ -1039,8 +1041,9 @@ body {
 }
 
 .file-item .file-delete:focus {
-    border: 2px dashed #666!important;
+    border: none!important;
     background-color: inherit;
+    box-shadow: 0px 0px 0px 2px #65a3ff!important;
 }
 
 .upload-files-top {
@@ -1515,7 +1518,6 @@ body.single-reports {
 
 .comment ._content {
     width: 100%;
-    white-space: pre-wrap;
 }
 
 .comment ._content .show_full {

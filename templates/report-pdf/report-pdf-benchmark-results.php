@@ -18,7 +18,7 @@ $benchmark_results =
         <tr>
             <th width="25%">Key Area</th>
             <th width="20%">Maturity Level</th>
-            <th width="15%">Rank<br>(/N )</th>
+            <th width="15%">Rank<br>(/'.$count_index.' )</th>
             <th width="10%">Orgs<br>at<br>Level<br>1</th>
             <th width="10%">Orgs<br>at<br>Level<br>2</th>
             <th width="10%">Orgs<br>at<br>Level<br>3</th>
@@ -27,6 +27,7 @@ $benchmark_results =
 foreach ($position_by_framework as $index => $key_area) {
 
     $maturity_level = get_maturity_level_org_step_2($key_area['parent_questions'][$org_data['Id']]['level']) ?? '';
+    if (!empty($maturity_level)) $maturity_level = 'Level '.$maturity_level;
     $org_rank = $key_area['parent_questions'][$org_data['Id']]['org_rank'] ?? '';
     $org_at_levels = '';
     $org_at_levels = $key_area['org_at_levels'];
@@ -35,7 +36,7 @@ foreach ($position_by_framework as $index => $key_area) {
             <td width="25%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'
                 . $key_area['title'] .
             '</td>
-            <td width="20%">Level '. $maturity_level .'</td>
+            <td width="20%">'. $maturity_level .'</td>
             <td width="15%">'. $org_rank .'</td>
             <td width="10%">'. $org_at_levels['level1'] .'</td>
             <td width="10%">'. $org_at_levels['level2'] .'</td>

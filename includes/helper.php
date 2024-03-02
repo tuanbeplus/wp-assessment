@@ -464,18 +464,70 @@ function save_option_members_data_ajax()
  * @return string Total Score 
  * 
  */
-function array_sum_submission_score($score_array=[]) 
+function array_sum_submission_score($assessment_id, $score_array=[]) 
 {
+	$main = new WP_Assessment();
+	$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+	$questions = $main->wpa_unserialize_metadata($questions);
 	$total_score = array();
+
 	if (is_array($score_array) && !empty($score_array)) {
 		foreach ($score_array as $i => $group) {
 			foreach ($group as $j => $quiz) {
-				$total_score[] = $quiz;
+				$weighting = $questions[$i]['list'][$j]['point'];
+				if (!empty($quiz)) {
+					$total_score[] = $quiz * $weighting;
+				}
 			}
 		}
+		if (!empty($total_score)) {
+			return array_sum($total_score) ?? 0;
+		}
+		else {
+			return 0;
+		}
 	}
-	$result = array_sum($total_score) ?? 0;
-	return $result;
+	else {
+		return 0;
+	}
+}
+
+/**
+ * Calculator Submission score array
+ *
+ * @param array $scores_arr   Submission Score Array
+ * 
+ * @return array Array Score after cal with weighting
+ * 
+ */
+function cal_scores_with_weighting($assessment_id, $scores_arr, $arr_type = 'sub'){
+	$main = new WP_Assessment();
+	$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+	$questions = $main->wpa_unserialize_metadata($questions);
+	$cal_scores_array = array();
+	if (is_array($scores_arr) && !empty($scores_arr)) {
+		foreach ($scores_arr as $i => $group) {
+			foreach ($group as $j => $quiz) {
+				$weighting = $questions[$i]['list'][$j]['point'];
+				if (!empty($quiz)) {
+					$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
+				}
+			}
+		}
+
+		if ($arr_type != 'group') return $cal_scores_array;
+
+		$average_group_scores = array();
+		if (!empty($cal_scores_array)) {
+			foreach ($cal_scores_array as $i => $group) {
+				if (is_array($group) && !empty($group)) {
+					$average_group_scores[$i] = number_format(round(array_sum($group) / count($group), 1), 1);
+				}
+			}
+
+			return $average_group_scores;
+		}
+	}
 }
 
 /**
@@ -634,6 +686,34 @@ function get_all_submissions_of_assessment($assessment_id)
 }
 
 /**
+ * Get all submissions that have been finalised(published)
+ * 
+ * @param $assessment_id 
+ *
+ * @return string Number of Submissions
+ * 
+ */
+function count_all_index_submissions_finalised($assessment_id)
+{
+	$args = array(
+		'post_type' => 'submissions',
+		'posts_per_page' => -1,
+		'post_status' => 'publish',
+		'meta_query' => array(
+			array(
+				'key' => 'assessment_id',
+				'value' => $assessment_id,
+			)
+		),
+	);
+	$index_query = new WP_Query($args);
+	
+	$index_count = $index_query->post_count;
+
+	return $index_count;
+}
+
+/**
  * Get ranking of an assessment
  * 
  * @param $assessment_id 
@@ -684,7 +764,7 @@ function cal_overall_total_score($assessment_id, $post_meta)
 		}
 		if (!empty($overall_scores) && is_array($overall_scores)) {
 			$result['sum_average'] = number_format(array_sum($overall_scores)/count($overall_scores), 1);
-			$result['percent_average'] = round($result['sum_average']/268.8*100);
+			$result['percent_average'] = round($result['sum_average']/272*100);
 			return $result;
 		}
 		else {
@@ -714,7 +794,7 @@ function cal_average_industry_score($industry_score_data=[])
 
 		if (is_array($total_industry_score)) {
 			$average = array_sum($total_industry_score) / count($total_industry_score);
-			$average_percent = round($average/268.8*100);
+			$average_percent = round($average/272*100);
 			return $average_percent;
 		}
 		else {
@@ -799,6 +879,26 @@ function get_history_dashboard_scores($data_score) {
 		$result = merge_array_score_by_value($data_score_by_year, 'key_area');
 		return $result;
 	}
+}
+
+/**
+ * Get the Key areas of Assessment
+ * 
+ * @param int $assessment_id	Assessment ID
+ *
+ * @return array Key Areas
+ * 
+ */
+function get_assessment_key_areas($assessment_id) {
+	// get key areas from post meta
+	$key_areas = get_post_meta($assessment_id, 'report_key_areas', true);
+	
+	if (empty($key_areas)) {
+		// set default key areas if it not exist
+		$key_areas = array('Framework', 'Implementation', 'Review', 'Innovation');
+	}
+
+	return $key_areas;
 }
 
 

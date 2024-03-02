@@ -1147,24 +1147,24 @@ class Question_Form
                 if (!$sent) throw new Exception($sent, 1);
 
                 // Add users ID to Array
-                $user = getUserFromEmail($email);
-                if (!empty($user)) {
-                    $invite_members_arr[] = $user[0]->Id;
-                }
+                // $user = getUserFromEmail($email);
+                // if (!empty($user)) {
+                //     $invite_members_arr[] = $user[0]->Id;
+                // }
             }
 
-            if (!empty($invite_members_arr)) {
-                $invited_members = get_post_meta($assessment_id, 'invited_members', true);
-                if (!empty($invited_members)) {
-                    // Merge old & new invite members array and update to post meta
-                    $new_invited_members = array_unique(array_merge($invited_members, $invite_members_arr));
-                    $updated_meta = update_post_meta($assessment_id, 'invited_members', $new_invited_members);
-                }
-                else {
-                    // Update new invite members to post meta
-                    $updated_meta = update_post_meta($assessment_id, 'invited_members', $invite_members_arr);
-                }
-            }
+            // if (!empty($invite_members_arr)) {
+            //     $invited_members = get_post_meta($assessment_id, 'invited_members', true);
+            //     if (!empty($invited_members)) {
+            //         // Merge old & new invite members array and update to post meta
+            //         $new_invited_members = array_unique(array_merge($invited_members, $invite_members_arr));
+            //         $updated_meta = update_post_meta($assessment_id, 'invited_members', $new_invited_members);
+            //     }
+            //     else {
+            //         // Update new invite members to post meta
+            //         $updated_meta = update_post_meta($assessment_id, 'invited_members', $invite_members_arr);
+            //     }
+            // }
 
             // Remove filter mail from
             remove_filter( 'wp_mail_from', 'sf_user_mail_from' );

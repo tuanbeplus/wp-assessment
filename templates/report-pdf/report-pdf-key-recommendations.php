@@ -11,28 +11,29 @@ if (!empty($recommentdation)) {
     $recom_table .= '<h2>Key Recommendations</h2>';
     $recom_table .= '<p>The below table highlights the top priorities/opportunities identified through the evaluation 
                         process for each key area.</p>';
-    $recom_table .= '<table class="recom-table" width="100%">
-                        <tr>
-                            <th width="40%">Key Area</th>
-                            <th width="60%">Priorities</th>
-                        </tr>';
+    $recom_table .= '<div class="recommendations-table">
+                        <div>
+                            <div class="col" style="float:left;width:30%;"><strong>Key Area</strong></div>
+                            <div class="col" style="float:right;border-left:1px solid #333"><strong>Priorities</strong></div>
+                        </div>';
     foreach ($recommentdation as $i => $section) {
-        $recom_table .= '<tr>
-                            <td width="40%">'
+        $recom_table .= '<div>
+                            <div class="col" style="float:left;width:30%;">'
                                 .$section['key_area'].
-                            '</td>
-                            <td width="60%">
-                                <ul>';
+                            '</div>
+                            <div class="col" style="float:right;border-left:1px solid #333">';
         foreach ($section['list'] as $j => $recom) {
             if (!empty($recom)) {
-                $recom_table .=   '<p width="100%">'. $i.'.'.$j.' '.$recom .'</p><br>';
+                $recom_table .= '<div>'. $i.'.'.$j.' '.$recom .'</div><br>';
+            }
+            else {
+                $recom_table .= '<span>&nbsp;</span>';
             }
         }
-        $recom_table .=         '</ul>';
-        $recom_table .=     '</td>';
-        $recom_table .= '</tr>';
+        $recom_table .=     '</div>';
+        $recom_table .= '</div>';
     }
-    $recom_table .= '</table>';
+    $recom_table .= '</div>';
     $recom_table .= '<caption>Table 1 - Key Recommendations</caption>';
     $recom_table .= '</div>';
 

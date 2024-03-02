@@ -236,12 +236,13 @@ class Custom_Fields
             return;
 
         $question_form = new Question_Form();
+        $assessment_id = get_post_meta($post_id, 'assessment_id', true);
         $group_quiz_points = $_POST['group_quiz_point'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
         $total_submission_score = $_POST['total_submission_score'] ?? null;
-        $org_score = $_POST['org_score'] ?? null;
-        $and_score = $_POST['and_score'] ?? null;
-        $agreed_score = $_POST['agreed_score'] ?? null;
+        $org_score = $_POST['org_score'] ?? array();
+        $and_score = $_POST['and_score'] ?? array();
+        $agreed_score = $_POST['agreed_score'] ?? array();
         $org_section_score = $_POST['org_section_score'] ?? null;
         $recommentdation = $_POST['recommentdation'] ?? null;
         $key_area = $_POST['key_area'] ?? null;
@@ -284,10 +285,6 @@ class Custom_Fields
             );
         }
 
-        // echo '<pre>';
-        // print_r();
-        // echo '</pre>';
-
         $new_group_quiz_points = array();
         $item = 1;
         foreach ($group_quiz_points as $value) {
@@ -298,13 +295,13 @@ class Custom_Fields
 
         // Save total AND Score
         $total_and_score = array();
-        $total_and_score['sum'] = array_sum_submission_score($and_score);
-        $total_and_score['percent'] = round((array_sum_submission_score($and_score))/268.8*100);
+        $total_and_score['sum'] = array_sum_submission_score($assessment_id, $and_score);
+        $total_and_score['percent'] = round((array_sum_submission_score($assessment_id, $and_score))/272*100);
 
         // Save total Agreed Score
         $total_agreed_score = array();
-        $total_agreed_score['sum'] = array_sum_submission_score($agreed_score);
-        $total_agreed_score['percent'] = round((array_sum_submission_score($agreed_score))/268.8*100);
+        $total_agreed_score['sum'] = array_sum_submission_score($assessment_id, $agreed_score);
+        $total_agreed_score['percent'] = round((array_sum_submission_score($assessment_id, $agreed_score))/272*100);
 
         update_post_meta($post_id, 'group_quiz_point', $new_group_quiz_points);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);

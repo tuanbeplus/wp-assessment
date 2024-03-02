@@ -16,12 +16,14 @@ $submission_id = get_post_meta($post_id, 'submission_id', true);
 $ranking_id = get_ranking_of_assessment($assessment_id);
 $org_data = get_post_meta($post_id, 'org_data', true);
 $org_score = get_post_meta($submission_id, 'org_score', true);
+$org_section_score = get_post_meta($submission_id, 'org_section_score', true);
 $agreed_score = get_post_meta($submission_id, 'agreed_score', true);
 $assessment_title = get_the_title($assessment_id);
-$col_key_areas = get_post_meta($assessment_id, 'report_key_areas', true);
+$col_key_areas = get_assessment_key_areas($assessment_id);
 $recommentdation = get_post_meta($submission_id, 'recommentdation', true);
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
+$count_index = count_all_index_submissions_finalised($assessment_id);
 $report_template = get_post_meta($post_id, 'report_template', true);
 if (empty($report_template)) {
     $report_template = get_post_meta($assessment_id, 'report_template', true);
@@ -32,7 +34,9 @@ $position_by_total_score = $main->wpa_unserialize_metadata(get_field('position_b
 $position_by_industry = $main->wpa_unserialize_metadata(get_field('position_by_industry', $ranking_id));
 $position_by_framework = $main->wpa_unserialize_metadata(get_field('position_by_framework', $ranking_id));
 
-$mpdf = new \Mpdf\Mpdf();
+$mpdf = new \Mpdf\Mpdf([
+    'margin_bottom' => 24,
+]);
 
 // Include Stylesheet
 $pdf_stylesheet = file_get_contents(WP_ASSESSMENT_ASSETS . '/css/report-pdf-style.css');

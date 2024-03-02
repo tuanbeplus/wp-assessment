@@ -537,11 +537,17 @@
 
 .dcr .user-comment-area .description-thin {
   margin-bottom: 10px;
+  white-space: unset!important;
+}
+
+.dcr .user-comment-area .description-thin .description {
+  white-space: break-spaces;
 }
 
 .dcr .user-comment-area .description-thin:last-child {
   margin-bottom: 0;
 }
+
 .dcr .user-comment-area .description-thin.current {
   background-color: rgba(0,0,0,.03);
   border: 1px solid #ccc;
@@ -591,6 +597,7 @@
   border: 1px solid #ccc;
   padding: 6px 10px;
   border-radius: 2px;
+  white-space: break-spaces;
 }
 
 .submission-view-item-row .card textarea.feedback-input,
@@ -1806,8 +1813,7 @@ ul.dashboard-charts-list li.chart:last-child {
   transition: ease 0.25s all;
 }
 .ic-delete-feedback:hover {
-  zoom: 1.3;
-  top: 6px;
+  transform: scale(1.3);
 }
 .ic-delete-feedback i {
   color: rgb(214 54 56 / 60%);

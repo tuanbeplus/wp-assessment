@@ -1,7 +1,7 @@
 <?php 
 global $post;
 $post_id = $post->ID;
-$report_key_areas = get_post_meta($post_id, 'report_key_areas', true);
+$report_key_areas = get_assessment_key_areas($post_id);
 ?>
 <div class="key-areas-container">
     <input id="key-areas-json" type="hidden" value='<?php echo json_encode($report_key_areas); ?>'>

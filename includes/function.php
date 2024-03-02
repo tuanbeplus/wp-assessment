@@ -811,7 +811,7 @@ class WP_Assessment
         try {
             $post_id = intval($_POST['submission_id']);
             $is_report_exist = is_report_of_submission_exist($post_id);
-
+            
             if (!$is_report_exist) {
                 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
                 $user_id = get_post_meta($post_id, 'user_id', true);
@@ -822,8 +822,6 @@ class WP_Assessment
                 $report_id = wp_insert_post(array(
                     'post_type' => 'reports',
                     'post_title' => 'Report on ' .$assessment_title. ' - ' .$org_data['Name'],
-                    // 'post_content'  => $this->wpa_get_report_content($post_id),
-                    // 'post_status' => 'draft',
                     'post_status' => 'publish',
                 ));
 

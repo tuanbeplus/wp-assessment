@@ -13,29 +13,26 @@ $implementation_dashboard = get_field('implementation_dashboard',$post_id);
 $review_dashboard         = get_field('review_dashboard',$post_id);
 $overall_dashboard        = get_field('overall_dashboard',$post_id);
 $data_dashboard = '';
+$count_figure = 0;
 
 foreach ($pages_history as $page) {
-    $count_figure = 0;
+    $count_figure++;
     if ($page == 'Framework') {
-        $count_figure++;
         $data_dashboard = $framework_dashboard;
         $caption = 'Table 10 - Framework Dashboard - History';
         $img_alt = 'Figure '.$count_figure.' - Framework Dashboard - comparative';
     }       
     if ($page == 'Implementation') {
-        $count_figure++;
         $data_dashboard = $implementation_dashboard;
         $caption = 'Table 11 - Implementation Dashboard - History';
         $img_alt = 'Figure '.$count_figure.' - Implementation Dashboard - comparative';
     }  
     if ($page == 'Review') {
-        $count_figure++;
         $data_dashboard = $review_dashboard;
         $caption = 'Table 12 - Review Dashboard - History';
         $img_alt = 'Figure '.$count_figure.' - Review Dashboard - comparative';
     }          
     if ($page == 'Overall') {
-        $count_figure++;
         $data_dashboard = $overall_dashboard;
         $caption = 'Table 13 - Overall Dashboard - History';
         $img_alt = 'Figure '.$count_figure.' - Overall Dashboard - comparative';
