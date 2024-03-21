@@ -30,13 +30,9 @@ $report_url = home_url() . '/wp-admin/post.php?post='. $report_id .'&action=edit
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $is_ranking_exist = get_ranking_of_assessment($assessment_id);
-
-// if (($_GET['test'] == 'test')) {
-//     echo "<pre>";
-//     print_r();
-//     echo "</pre>";
-// }
+$agreed_gr_score_with_weighting = cal_scores_with_weighting($assessment_id, $agreed_score, 'group') ?? array();
 ?>
+
 <div class="scoring-wrapper">
     <div class="maturity-level _field">
         <p><strong>Maturity Level</strong></p>
@@ -46,9 +42,9 @@ $is_ranking_exist = get_ranking_of_assessment($assessment_id);
         <p><strong>Key Area</strong></p>
         <ol class="key-area-list">
         <?php if (!empty($questions) && !empty($org_section_score)): ?>
-            <?php foreach ($questions as $index => $key_area): ?>
-                <li><?php echo $key_area['title']; ?>: 
-                    <strong><?php echo 'Level '. get_maturity_level_org($org_section_score[$index]); ?></strong>
+            <?php foreach ($questions as $gr_id => $gr_field): ?>
+                <li><?php echo $gr_field['title']; ?>: 
+                    <strong><?php echo 'Level '.get_maturity_level_org($agreed_gr_score_with_weighting[$gr_id]) ?? ''; ?></strong>
                 </li>
             <?php endforeach; ?>
         <?php else: ?>

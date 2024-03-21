@@ -19,25 +19,25 @@ else {
             <a width="100%" href="www.and.org.au/">www.and.org.au</a>
             <table class="hypelinks-list" width="100%">
                 <tr>
-                    <td width="20%">
+                    <td style="width: 29%;">
                         <a href="https://www.linkedin.com//ANDisability" style="color:#333;">
                             <img width="20" style="margin-bottom:-2px;" src="/wp-content/plugins/wp-assessment/assets/images/and-linked.png" alt="">
-                            /ANDisability
+                            /ausdisabilitynetwork
                         </a>
                     </td>
-                    <td width="20%">
+                    <td style="width: 17%;">
                         <a href="https://twitter.com/ANDisability" style="color:#333;">
                             <img width="20" style="margin-bottom:-2px;" src="/wp-content/plugins/wp-assessment/assets/images/and-twitter.png" alt="">
-                            /ANDisability
+                            /Aus_DN
                         </a>
                     </td>
-                    <td width="20%">
+                    <td style="width: 32%;">
                         <a href="https://www.facebook.com/ANDisability" style="color:#333;">
                             <img width="20" style="margin-bottom:-2px;" src="/wp-content/plugins/wp-assessment/assets/images/and-facebook.png" alt="">
-                            /ANDisability
+                            /AusDisabilityNetwork
                         </a>
                     </td>
-                    <td width="40%" style="text-align: right;">
+                    <td style="text-align: right; width: 22%;">
                         Page <strong>{PAGENO}</strong> of <strong>{nbpg}</strong>
                     </td>
                 </tr>

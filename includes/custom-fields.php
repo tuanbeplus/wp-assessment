@@ -230,10 +230,9 @@ class Custom_Fields
     {
         $post_type = get_post_type($post_id);
         if ($post_type != 'submissions') return;
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
-            return;
-        if (!current_user_can('edit_post', $post_id))
-            return;
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+        if (!current_user_can('edit_post', $post_id)) return;
+        if (is_single() || is_page()) return;
 
         $question_form = new Question_Form();
         $assessment_id = get_post_meta($post_id, 'assessment_id', true);
@@ -248,6 +247,7 @@ class Custom_Fields
         $key_area = $_POST['key_area'] ?? null;
 
         $maturity_level = array();
+        $agreed_score_with_weighting = cal_scores_with_weighting($assessment_id, $agreed_score, 'sub') ?? array();
         foreach ($key_area as $pr_key => $ka) {
             $framework_cnt = $implementation_cnt = $review_cnt = $innovation_cnt = 0;
             $framework_vl = $implementation_vl = $review_vl = $innovation_vl = 0;
@@ -255,28 +255,28 @@ class Custom_Fields
                 switch ($value) {
                     case 'Framework':
                         $framework_cnt++;
-                        $framework_vl += $org_score[$pr_key][$c_key];
+                        $framework_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
                         break;
                     case 'Implementation':
                         $implementation_cnt++;
-                        $implementation_vl += $org_score[$pr_key][$c_key];
+                        $implementation_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
                         break;
                     case 'Review':
                         $review_cnt++;
-                        $review_vl += $org_score[$pr_key][$c_key];
+                        $review_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
                         break;
                     case 'Innovation':
                         $innovation_cnt++;
-                        $innovation_vl += $org_score[$pr_key][$c_key];
+                        $innovation_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
                         break;
                     default:
                         break;
                 }
             }
-            $framework_level = ($framework_cnt > 0) ? get_maturity_level_org($framework_vl/$framework_cnt) : 0;
-            $implementation_level = ($implementation_cnt > 0) ? get_maturity_level_org($implementation_vl/$implementation_cnt) : 0;
-            $review_level = ($review_cnt > 0) ? get_maturity_level_org($review_vl/$review_cnt) : 0;
-            $innovation_level = ($innovation_cnt > 0) ? get_maturity_level_org($innovation_vl/$innovation_cnt) : 0;
+            $framework_level = ($framework_cnt > 0) ? get_maturity_level_org($framework_vl/$framework_cnt) : 1;
+            $implementation_level = ($implementation_cnt > 0) ? get_maturity_level_org($implementation_vl/$implementation_cnt) : 1;
+            $review_level = ($review_cnt > 0) ? get_maturity_level_org($review_vl/$review_cnt) : 1;
+            $innovation_level = ($innovation_cnt > 0) ? get_maturity_level_org($innovation_vl/$innovation_cnt) : 1;
             $maturity_level[$pr_key] = array(
                 'Framework' => $framework_level,
                 'Implementation' => $implementation_level,
@@ -316,7 +316,7 @@ class Custom_Fields
         update_post_meta($post_id, 'key_area', $key_area);
         update_post_meta($post_id, 'maturity_level', $maturity_level);
 
-        if ( get_post_type($post_id) != 'dcr_submissions') {
+        if ( $post_type != 'dcr_submissions') {
             $question_form->save_all_submission_feedback();
         }
     }

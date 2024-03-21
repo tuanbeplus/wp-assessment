@@ -505,12 +505,16 @@ function cal_scores_with_weighting($assessment_id, $scores_arr, $arr_type = 'sub
 	$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 	$questions = $main->wpa_unserialize_metadata($questions);
 	$cal_scores_array = array();
+
 	if (is_array($scores_arr) && !empty($scores_arr)) {
 		foreach ($scores_arr as $i => $group) {
 			foreach ($group as $j => $quiz) {
 				$weighting = $questions[$i]['list'][$j]['point'];
 				if (!empty($quiz)) {
 					$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
+				}
+				else {
+					$cal_scores_array[$i][$j] = 0;
 				}
 			}
 		}
@@ -627,7 +631,7 @@ function get_maturity_level_org($score)
 		}
 	}
 	else {
-		return null;
+		return 1;
 	}
 }
 
@@ -673,7 +677,7 @@ function get_all_submissions_of_assessment($assessment_id)
 	$args = array(
 		'post_type' => 'submissions',
 		'posts_per_page' => -1,
-		'post_status' => 'any',
+		'post_status' => 'publish',
 		'meta_query' => array(
 			array(
 				'key' => 'assessment_id',
@@ -764,7 +768,7 @@ function cal_overall_total_score($assessment_id, $post_meta)
 		}
 		if (!empty($overall_scores) && is_array($overall_scores)) {
 			$result['sum_average'] = number_format(array_sum($overall_scores)/count($overall_scores), 1);
-			$result['percent_average'] = round($result['sum_average']/272*100);
+			$result['percent_average'] = round(array_sum($overall_scores)/count($overall_scores) / 272 * 100);
 			return $result;
 		}
 		else {
@@ -805,6 +809,7 @@ function cal_average_industry_score($industry_score_data=[])
 
 
 function set_org_data_to_all_submissions() {
+	$all_orgs = array();
     $args = array(
 		'post_type' => 'submissions',
 		'posts_per_page' => -1,
@@ -812,17 +817,28 @@ function set_org_data_to_all_submissions() {
 	);
 	$all_submissions = get_posts($args);
 
+	$index = 1;
 	foreach ($all_submissions as $submission) {
-		$user_id = get_post_meta($submission->ID, 'user_id', true);
+
 		$organisation_id = get_post_meta($submission->ID, 'organisation_id', true);
+		$org_metadata = get_post_meta($submission->ID, 'org_data', true);
 
-		if (isset($user_id) && isset($organisation_id)) {
-			$org_metadata = get_post_meta($submission->ID, 'org_data', true);
+		if (isset($organisation_id) && empty($org_metadata['Industry'])) {
+			
+			$new_org_data_obj = sf_get_object_metadata('Account', $organisation_id);
+			$new_org_data_arr = json_decode(json_encode($new_org_data_obj), true);
 
-			if (empty($org_metadata)) {
-				$sf_org_data = get_sf_organisation_data($user_id, $organisation_id);
-    			update_post_meta($submission->ID, 'org_data', $sf_org_data);
+			if (isset($new_org_data_arr['Industry'])) {
+				$update_status = update_post_meta($submission->ID, 'org_data', $new_org_data_arr);
+				if ($update_status) {
+					echo 'Update '.$submission->ID.' Successful!';
+				}
+				else {
+					echo 'Update '.$submission->ID.' Failed.';
+				}
+				echo '<br>';
 			}
+			$index++;
 		}
 	}
 } 
@@ -899,6 +915,25 @@ function get_assessment_key_areas($assessment_id) {
 	}
 
 	return $key_areas;
+}
+
+
+function get_maturity_level_key_area_submission($assessment_id, $submission_id) {
+	$wp_assessment = new WP_Assessment();
+	$key_areas = get_assessment_key_areas($assessment_id);
+	$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+	$questions = $wp_assessment->wpa_unserialize_metadata($questions);
+
+	if (!empty($questions)) {
+		foreach ($questions as $gr_id => $gr_field) {
+			$sub_question_list = $gr_field['list'] ?? array();
+			if (!empty($sub_question_list)) {
+				foreach ($sub_question_list as $sub_id => $sub_field) {
+
+				}
+			}
+		}
+	}
 }
 
 

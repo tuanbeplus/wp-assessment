@@ -742,22 +742,46 @@
   margin-bottom: 0;
 }
 
-.file-item {
+.submission-view-item-row .card .files-list {
+  padding: 0;
+  margin: 0;
+}
+
+.submission-view-item-row .card .files-list .file-item {
   border-radius: 12px;
   background-color: rgba(144, 163, 203, 0.1);
   margin: 5px;
   color: initial;
   display: inline-flex;
   border: 1px solid #ddd;
+  font-size: 13px;
 }
 
-.file-item > .name {
+.dcr .submission-view-item-row .card .files-list .file-item {
+  display: block;
+  margin-top: 8px;
+  width: fit-content;
+  padding: 2px;
+  border-radius: 6px;
+  min-width: 146px;
+}
+
+.files-list .file-item .datetime {
+  display: block;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 4px;
+  line-height: 1;
+  color: #888;
+}
+
+.files-list .file-item > .name {
   padding: 3px 6px;
   width: max-content;
   display: inline-flex;
 }
 
-.file-item > .name a {
+.files-list .file-item > .name a {
   text-decoration: none;
   cursor: pointer;
 }
@@ -1653,7 +1677,7 @@ ul.dashboard-charts-list li.chart:last-child {
 }
 
 .report-template .field-upload-logo {
-  max-width: 200px;
+  max-width: 220px;
   width: 100%;
   padding: 12px 14px;
   border: 1px solid #acacac;
@@ -1663,7 +1687,7 @@ ul.dashboard-charts-list li.chart:last-child {
 
 .field-upload-logo .logo-preview-block {
   margin-top: 12px;
-  min-height: 100px;
+  min-height: 130px;
   border: 1px solid #aaa;
   border-radius: 2px;
   background-color: #f5f5f5;

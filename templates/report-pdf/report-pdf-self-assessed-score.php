@@ -6,13 +6,10 @@
  * 
  */
 
-$cal_agreed_score = cal_scores_with_weighting($assessment_id, $agreed_score, 'sub');
-$cal_agreed_score = isset($cal_agreed_score) ? $cal_agreed_score : array();
-
 $self_assessed_score =
 '<div class="page">
-    <h3>Self-assessed score and final Australian Network on Disability score</h3>
-    <p>The self-assessed score and Australian Network on Disability score 
+    <h3>Self-assessed score and final Australian Disability Network score</h3>
+    <p>The self-assessed score and Australian Disability Network score 
         have been provided as maturity levels across the nine key areas 
         (Table 5) and percentage scores (Table 6). Please note the percentage 
         scores in Table 6 have been rounded up.
@@ -20,22 +17,19 @@ $self_assessed_score =
     <table class="table-3 table-5">
         <tr>
             <th width="40%">Key Area</th>
-            <th width="30%">Organisation self-assessment</th>
-            <th width="30%">AND assessed level</th>
+            <th width="30%">Organisation <br> self-assessment</th>
+            <th width="30%">AND <br> assessed level</th>
         </tr>';
 foreach ($position_by_framework as $index => $key_area) {
     $org_self_score = 0;
     $and_assessed_score = 0;
 
     // Average Org score in a Key area
-    if (isset($org_section_score[$index ])) {
+    if (isset($org_section_score[$index])) {
         $org_self_score = get_maturity_level_org($org_section_score[$index]);
     }
-
-    if (is_array($cal_agreed_score[$index])) {
-        $and_assessed_score = array_sum($cal_agreed_score[$index]) / count($cal_agreed_score[$index]);
-    }
-    $and_assessed_level = get_maturity_level_org($and_assessed_score);
+    // Final AND agreed score level
+    $and_assessed_level = get_maturity_level_org($agreed_gr_score_with_weighting[$index]) ?? '1';
     $self_assessed_score .=
         '<tr>
             <td width="40%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'
@@ -51,7 +45,7 @@ $self_assessed_score .=
 </div>';
 
 // Add to table of contents
-$mpdf->TOC_Entry('Self-assessed score and final Australian Network on Disability score' ,1);
+$mpdf->TOC_Entry('Self-assessed score and final Australian Disability Network score' ,1);
 
 // Render HTML
 $mpdf->WriteHTML($self_assessed_score);
@@ -59,13 +53,14 @@ $mpdf->WriteHTML($self_assessed_score);
 // Insert page break
 $mpdf->AddPage();
 
+$cal_agreed_score = cal_scores_with_weighting($assessment_id, $agreed_score, 'sub') ?? array();
 $self_assessed_percent_table =
 '<div class="page">
     <table class="table-3 table-5">
         <tr>
             <th width="40%">Key Area</th>
-            <th width="30%">Organisation self-assessment</th>
-            <th width="30%">AND assessed score</th>
+            <th width="30%">Organisation <br> self-assessment</th>
+            <th width="30%">AND <br> assessed score</th>
         </tr>';
 foreach ($questions as $index => $key_area) {
 
@@ -112,6 +107,5 @@ $mpdf->WriteHTML($self_assessed_percent_table);
 
 // Insert page break
 $mpdf->AddPage();
-?>
 
 

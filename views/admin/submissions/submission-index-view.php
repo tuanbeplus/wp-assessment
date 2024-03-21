@@ -34,12 +34,6 @@ $question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id,
 
 $i = 0;
 $submission_score_arr = array();
-
-if (($_GET['test'] == 'test')) {
-    echo "<pre>";
-    print_r($questions);
-    echo "</pre>";
-}
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -198,43 +192,51 @@ if (($_GET['test'] == 'test')) {
                                     <?php if ($azure_attachments_uploaded || $field->attachment_ids): ?>
                                         <div class="filesList_submission">
                                             <p><strong>Supporting Documentation</strong></p>
-                                            <!-- Old WP uploaded -->
-                                            <?php foreach($arr_attachmentID as $field): ?>
-                                                <?php
-                                                    $file = $field['value'];
-                                                    $file_url = wp_get_attachment_url($file);
-                                                    $file_name = get_the_title($file);
-                                                ?>
-                                                <?php if ($file_url): ?>
-                                                <span class="file-item">
-                                                    <span class="name">
-                                                        <a href="<?php echo $file_url; ?>" target="_blank">
-                                                            <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
-                                                            <?php echo $file_name; ?>
-                                                        </a>
-                                                    </span>
-                                                </span>
-                                                <?php endif; ?>
-                                            <?php endforeach; ?>
-
-                                            <!-- New Azure uploaded -->
+                                            <?php if (!empty($arr_attachmentID)): ?>
+                                                <!-- Old WP uploaded -->
+                                                <ul class="files-list">
+                                                <?php foreach($arr_attachmentID as $field): ?>
+                                                    <?php
+                                                        $file = $field['value'];
+                                                        $file_url = wp_get_attachment_url($file);
+                                                        $file_name = get_the_title($file);
+                                                    ?>
+                                                    <?php if ($file_url): ?>
+                                                    <li class="file-item">
+                                                        <span class="name">
+                                                            <a href="<?php echo $file_url; ?>" target="_blank">
+                                                                <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
+                                                                <?php echo $file_name; ?>
+                                                            </a>
+                                                        </span>
+                                                    </li>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                                </ul>
+                                                <!-- /Old WP uploaded -->
+                                            <?php endif; ?>
+                                            
                                             <?php if (!empty($azure_attachments_uploaded)): ?>
+                                                <!-- New Azure uploaded -->
+                                                <ul class="files-list">
                                                 <?php foreach($azure_attachments_uploaded as $field): ?>
                                                     <?php
                                                         $file_name = $field->attachment_name;
                                                         $file_url = $field->attachment_path;
                                                     ?>
                                                     <?php if ($file_url): ?>
-                                                    <span class="file-item">
+                                                    <li class="file-item">
                                                         <span class="name">
                                                             <a class="sas-blob-cta" data-blob="<?php echo $file_url; ?>">
                                                                 <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
                                                                 <?php echo $file_name; ?>
                                                             </a>
                                                         </span>
-                                                    </span>
+                                                    </li>
                                                     <?php endif; ?>
                                                 <?php endforeach; ?>
+                                                </ul>
+                                                <!-- /New Azure uploaded -->
                                             <?php endif; ?>
                                         </div>
                                     <?php endif; ?>

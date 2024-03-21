@@ -8,8 +8,9 @@
  */
 
 $mpdf->SetHTMLHeader(
-    '<div class="header" style="font-family:"Avenir-Roman";">
-        <img class="logo" src="/wp-content/plugins/wp-assessment/assets/images/and-logo-hor.png" 
-            style="width:200px;opacity:0.6;">
+    '<div class="header">
+        <img class="logo" src="/wp-content/plugins/wp-assessment/assets/images/new-and-logo-min.png" 
+            alt="Australian Disability Network logo"
+            style="width:120px;opacity:0.6;">
     </div>'
 );

@@ -1,22 +1,59 @@
 /* Saturn - Report PDF Stylesheet */
 * {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: avenir-roman;
     line-height: 150%;
+    letter-spacing: 0.3px!important;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: Arial, Helvetica, sans-serif;
+h1 {
+    font-size: 20pt;
+    font-family: avenir-heavy;
+    font-weight: 900;
+}
+h2 {
+    font-size: 16pt;
+    font-family: avenir-medium;
+    font-weight: 800;
+}
+h3 {
+    font-size: 15pt;
+    font-family: avenir-medium;
+    font-weight: 800;
+}
+h4 {
+    font-size: 14pt;
+    font-family: avenir-medium;
+    font-weight: 800;
+}
+h5 {
+    font-size: 13pt;
+    font-family: avenir-medium;
+    font-weight: 800;
+}
+h6 {
+    font-size: 12pt;
+    font-family: avenir-medium;
+    font-weight: 800;
 }
 
 p, li {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 14px;
+    font-family: avenir-roman;
+    font-weight: 400;
+    font-size: 11pt;
     line-height: 150%;
-    letter-spacing: 0.4px!important;
+    letter-spacing: 0.3px!important;
 }
 
-table th, table td {
-    font-family: Arial, Helvetica, sans-serif;
+table th {
+    font-size: 11pt;
+    font-family: avenir-medium;
+    font-weight: 800;
+}
+
+table td {
+    font-size: 11pt;
+    font-family: avenir-roman;
+    font-weight: 400;
 }
 
 ul li, ol li {
@@ -24,24 +61,42 @@ ul li, ol li {
 }
 
 a {
+    font-family: avenir-roman;
     text-decoration: none!important;
 }
 
+span {
+    font-family: avenir-roman;
+    font-weight: 400;
+}
+
 strong, b {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: avenir-medium;
+    font-weight: 800;
+}
+
+div {
+    font-size: 11pt;
+    line-height: 150%;
+    font-family: avenir-roman;
+    font-weight: 400;
+}
+
+.mpdf_toc span {
+    font-family: avenir-medium;
+    font-weight: 800;
 }
 
 .page {
     position: relative;
     width: 100%;
     height: 100%;
-    /* background-image: url("/wp-content/plugins/wp-assessment/assets/images/and-bg-gray-shape.png"); */
     background-size: contain;
     background-position: top;
     background-position-x: 270px;
     background-position-y: 300px;
     background-repeat: no-repeat;
-    letter-spacing: 0.4px!important;
+    letter-spacing: 0.3px!important;
 }
 
 .page img {
@@ -98,10 +153,6 @@ strong, b {
     color: #333;
 }
 
-.mpdf_toc {
-    padding: 40px 0;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
@@ -110,11 +161,16 @@ table {
 caption {
     margin-top: 16px;
     text-align: left;
+    font-size: 11pt;
     font-style: italic;
 }
 
 table.recom-table {
     border: 1px solid #333;
+}
+
+table.recom-table tr:nth-child(even) td {
+    background-color: white!important;
 }
 
 table.recom-table th {
@@ -155,10 +211,10 @@ table.table-3 th {
 }
 
 table.table-3 td {
-    padding: 4px 10px 30px;
+    padding: 10px 10px 30px;
     border: 1px solid #98c2ff;
     border-left: none;
-    background-color: azure;
+    text-align: right;
 }
 
 table.table-3 td:first-child {
@@ -178,7 +234,10 @@ table.table-5 td {
     text-align: right;
     border: 1px solid #98c2ff;
     border-left: none;
-    background-color: azure;
+}
+
+table tr:nth-child(even) td {
+    background-color: aliceblue!important;
 }
 
 img.chart {

@@ -6,33 +6,40 @@
  * 
  */
 
-$part_b_intro =
-'<div class="page">
-    <h2>Part B - Evaluation Findings</h2>
-    <p>The Access and Inclusion Index comprises of nine key areas determined to drive 
-        the greatest benefits for access and inclusion of people with disability. 
-        The listing of the ten areas below is hyperlinked for your convenience.
-    </p>
-    <ul style="list-style:decimal;">';
-foreach ($position_by_framework as $index => $key_area) {
-    $part_b_intro .=
-        '<li>
-            <a href="#'. $key_area['title'] .'">'. $key_area['title'] .'</a>
-        </li>';
+if (!empty($questions)) {
+    $part_b_intro =
+    '<div class="page">
+        <h2>Part B - Evaluation Findings</h2>
+        <p>The Access and Inclusion Index comprises of nine key areas determined to drive 
+            the greatest benefits for access and inclusion of people with disability. 
+            The listing of the ten areas below is hyperlinked for your convenience.
+        </p>
+        <ul style="list-style:decimal;">';
+    foreach ($questions as $index => $key_area) {
+        if (isset($key_area['title']) && !empty($key_area['title']) ) {
+            $part_b_intro .=
+            '<li>
+                <a href="#'. $key_area['title'] .'">'. $key_area['title'] .'</a>
+            </li>';
+        }
+    }
+    $part_b_intro .=   
+        '</ul>
+        <p>What follows is an evaluation of your assessment, with particular emphasis given 
+            to provide suggestions that support your organisation to build disability 
+            confidence in identified areas.
+        </p>
+    </div>';
+
+    // Add to table of contents
+    $mpdf->TOC_Entry('Part B - Evaluation Findings' ,0);
+
+    // Render HTML
+    $mpdf->WriteHTML($part_b_intro);
+
+    // Insert page break
+    $mpdf->AddPage();
 }
-$part_b_intro .=   
-    '</ul>
-    <p>What follows is an evaluation of your assessment, with particular emphasis given 
-        to provide suggestions that support your organisation to build disability 
-        confidence in identified areas.
-    </p>
-</div>';
-
-// Add to table of contents
-$mpdf->TOC_Entry('Part B - Evaluation Findings' ,0);
-
-// Render HTML
-$mpdf->WriteHTML($part_b_intro);
 
 $key_description = array(
     'Commitment'                    => 'This section of the Index seeks to understand the ways your organisation expresses its commitment to including people with disability across all aspects of your business.',
@@ -48,11 +55,13 @@ $key_description = array(
 
 // Part B Items
 foreach ($position_by_framework as $index => $key_area) {
+
     // Add to table of contents
     $mpdf->TOC_Entry($key_area['title'] ,1);
-
+    
     $max_score = array();
     $org_self_percent = 0;
+    $part_b_item = '';
 
     foreach ($questions[$index]['list'] as $quiz) {
         $max_score[] = $quiz['point'] * 4;
@@ -68,7 +77,7 @@ foreach ($position_by_framework as $index => $key_area) {
         <p>'. $key_description[$key_area['title']] .'</p>
         <p>'. $org_data['Name'] .' scored '. $org_self_percent .'% and achieved an overall '
             .$key_area['parent_questions'][$org_data['Id']]['org_rank'].
-            ' (Level '. get_maturity_level_org_step_2($key_area['parent_questions'][$org_data['Id']]['level']) .
+            ' (Level '. get_maturity_level_org($key_area['parent_questions'][$org_data['Id']]['level']) .
             ') maturity level in the '
             . $key_area['title'] .' key area. 
         </p>
@@ -85,11 +94,8 @@ foreach ($position_by_framework as $index => $key_area) {
     }
     $part_b_item .=
     '</div>';
+
+    // Render HTML
+    $mpdf->WriteHTML($part_b_item);
 }
-
-// Render HTML
-$mpdf->WriteHTML($part_b_item);
 ?>
-
-
-

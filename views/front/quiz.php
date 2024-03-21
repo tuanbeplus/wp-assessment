@@ -62,7 +62,6 @@ $all_quiz_pre_cmts = $main->get_dcr_quiz_answers_all_submissions($post_id, $orga
 $is_disabled = $status === 'pending';
 $is_publish = $status === 'publish';
 $is_accepted = $status === 'accepted';
-
 ?>
 
 <?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
