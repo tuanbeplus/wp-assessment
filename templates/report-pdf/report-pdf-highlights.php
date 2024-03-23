@@ -1,16 +1,17 @@
 <?php
 /**
- * The template for displaying Key Recommendations page Report PDF - Saturn
+ * The template for displaying Highlights page Report PDF - Saturn
  *
  * @author Tuan
  * 
  */
 
 if (!empty($recommentdation)) {
+    $org_name = $org_data['Name'] ?? '';
     $highlights_table = 
     '<div class="page">
         <h2>Highlights</h2>
-        <p>The below table highlights existing strengths at [Organisation] 
+        <p>The below table highlights existing strengths at '.$org_name.' 
             identified through the evaluation process for each key area. 
         </p>
         <table class="recom-table" width="100%">

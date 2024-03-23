@@ -22,7 +22,7 @@ if (isset($report_template['generic_page_after'])) {
         $content = str_replace('[year]', $year, $content);
     
         $page_content  = '';
-        $page_content .= '<div class="page">';
+        $page_content .= '<div class="page generic-page">';
         $page_content .=    '<h2>'. $generic_page['title'] .'</h2>';
         $page_content .=    $content;
         $page_content .= '</div>';

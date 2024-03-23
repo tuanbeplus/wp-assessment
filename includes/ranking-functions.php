@@ -291,129 +291,136 @@ class AndAssessmentRanking {
       if ($column_key == 'assessment') {
         $assessment_id = get_field('assessment', $post_id);
         if (isset($assessment_id)) {
-            if (isset($assessment_id)) {
-                echo '<a href="/wp-admin/post.php?post='.$assessment_id.'&action=edit" target="_blank">'
-                        .get_the_title($assessment_id).
-                    '</a>';
-            }
+          if (isset($assessment_id)) {
+            echo '<a href="/wp-admin/post.php?post='.$assessment_id.'&action=edit" target="_blank">'
+                    .get_the_title($assessment_id).
+                '</a>';
+          }
         }
       }
     }
 
+    /**
+     * Ranking orgs by group questions with key area
+     * 
+     * @param $assessment_id    Assessment ID
+     * 
+     * @return Array Ranking with key area
+     */
     function ranking_orgs_group_question($assessment_id) {
-        $wp_assessment = new WP_Assessment();
-        $key_areas = get_assessment_key_areas($assessment_id);
-        $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
-        $questions = $wp_assessment->wpa_unserialize_metadata($questions);
-        $index_submissions = $this->get_all_index_submission_finalised($assessment_id);
-        $ranking_by_key_areas = array();
-        $ranking_orgs_data = array();
+      $wp_assessment = new WP_Assessment();
+      $key_areas = get_assessment_key_areas($assessment_id);
+      $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+      $questions = $wp_assessment->wpa_unserialize_metadata($questions);
+      $index_submissions = $this->get_all_index_submission_finalised($assessment_id);
+      $ranking_by_key_areas = array();
+      $ranking_orgs_data = array();
 
-        foreach ($key_areas as $key) {
-            // Loop group question
-            foreach ($questions as $group_id => $gr_field) {
-                $sub_list = $gr_field['list'] ?? array();
-                $gr_title = $gr_field['title'] ?? '';
+      foreach ($key_areas as $key) {
+          // Loop group question
+          foreach ($questions as $group_id => $gr_field) {
+            $sub_list = $gr_field['list'] ?? array();
+            $gr_title = $gr_field['title'] ?? '';
 
-                // Add group title
-                $ranking_by_key_areas[$key][$group_id]['title'] = $gr_title;
+            // Add group title
+            $ranking_by_key_areas[$key][$group_id]['title'] = $gr_title;
 
-                if (!empty($sub_list)) {
-                    // Loop Sub question
-                    foreach ($sub_list as $sub_id => $sub_field) {
-                        // Weighting
-                        $weighting = $sub_field['point'] ?? '';
+            if (!empty($sub_list)) {
+                // Loop Sub question
+                foreach ($sub_list as $sub_id => $sub_field) {
+                  // Weighting
+                  $weighting = $sub_field['point'] ?? '';
 
-                        if (!empty($sub_field['key_area']) && $sub_field['key_area'] == $key) {
-                            
-                            if (!empty($index_submissions)) {
+                  if (!empty($sub_field['key_area']) && $sub_field['key_area'] == $key) {
+                    if (!empty($index_submissions)) {
+                      $agreed_score = array();
+                      // Loop all Index submissions
+                      foreach ($index_submissions as $submission) {
+                        $agreed_score = get_post_meta($submission->ID, 'agreed_score', true);
 
-                              $agreed_score = array();
-
-                              // Loop all Index submissions
-                              foreach ($index_submissions as $submission) {
-                                $agreed_score = get_post_meta($submission->ID, 'agreed_score', true);
-
-                                if (!empty($weighting)) {
-                                    $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
-                                }
-                                else {
-                                    $sub_score = (float)$agreed_score[$group_id][$sub_id];
-                                }
-
-                                // Add average group scores
-                                $ranking_by_key_areas[$key][$group_id]['gr_ranking'][$submission->ID]['score_average'] = $this->cal_group_scores_key_area($key, $group_id, $questions, $submission->ID);
-
-                                // Add empty froup rank
-                                $ranking_by_key_areas[$key][$group_id]['gr_ranking'][$submission->ID]['rank'] = '';
-
-                                // Add submission title
-                                $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['submission_title'] = $submission->post_title;
-
-                                // Add submission Id
-                                $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['submission_id'] = $submission->ID;
-
-                                // Add sub score
-                                if (isset($agreed_score[$group_id][$sub_id])) {
-                                    $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['sub_score'] = number_format($sub_score, 1);
-                                }   
-
-                                // Add empty rank Id
-                                $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['rank'] = '';
-                              }
-                            }
-                            // Add sub question title
-                            $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_title'] = $sub_field['sub_title'] ?? '';
+                        if (!empty($weighting)) {
+                          $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
                         }
-                    }
-
-                    // Sort the Sub score in DESC order
-                    if(isset($ranking_by_key_areas[$key][$group_id]['sub_data'])) {
-                        $sub_data = $ranking_by_key_areas[$key][$group_id]['sub_data'];
-
-                        foreach ($sub_data as $sub_id => $sub_field) {
-                            $sub_ranking = $sub_field['sub_ranking'] ?? array();
-
-                            if (!empty($sub_ranking)) {
-                                uasort($sub_ranking, function ($a, $b) {
-                                    if (!isset($b['sub_score']) && !isset($a['sub_score'])) return;
-                                    return $b['sub_score'] <=> $a['sub_score'];
-                                });
-                                // Add index numbers to 'rank'
-                                $rankIndex = 1;
-                                foreach ($sub_ranking as &$item) {
-                                    $item['rank'] = $rankIndex++;
-                                }
-                                $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'] = $sub_ranking;
-                            }
+                        else {
+                          $sub_score = (float)$agreed_score[$group_id][$sub_id];
                         }
+                        // Add average group scores
+                        $ranking_by_key_areas[$key][$group_id]['gr_ranking'][$submission->ID]['score_average'] = $this->cal_group_scores_key_area($key, $group_id, $questions, $submission->ID);
+                        // Add empty froup rank
+                        $ranking_by_key_areas[$key][$group_id]['gr_ranking'][$submission->ID]['rank'] = '';
+                        // Add submission title
+                        $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['submission_title'] = $submission->post_title;
+                        // Add submission Id
+                        $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['submission_id'] = $submission->ID;
+                        // Add sub score
+                        if (isset($agreed_score[$group_id][$sub_id])) {
+                          $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['sub_score'] = number_format($sub_score, 1);
+                        }   
+                        // Add empty rank Id
+                        $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'][$submission->ID]['rank'] = '';
+                      }
                     }
-                }                
-
-                // Sort the Group score array by 'score_average' key in DESC order
-                if (isset($ranking_by_key_areas[$key][$group_id]['gr_ranking'])) {
-                  $gr_score_sort = $ranking_by_key_areas[$key][$group_id]['gr_ranking'];
-
-                  uasort($gr_score_sort, function ($a, $b) {
-                    if (!isset($b['score_average']) && !isset($a['score_average'])) return;
-                    return $b['score_average'] <=> $a['score_average'];
-                  });
-                  // Add index numbers to 'rank'
-                  $rankIndex = 1;
-                  foreach ($gr_score_sort as &$item) {
-                    $item['rank'] = $rankIndex++;
+                    // Add sub question title
+                    $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_title'] = $sub_field['sub_title'] ?? '';
                   }
-                  $ranking_by_key_areas[$key][$group_id]['gr_ranking'] = $gr_score_sort;
                 }
-                else {
-                  $ranking_by_key_areas[$key][$group_id]['gr_ranking'] = array();
+
+                // Sort the Sub score in DESC order
+                if(isset($ranking_by_key_areas[$key][$group_id]['sub_data'])) {
+                  $sub_data = $ranking_by_key_areas[$key][$group_id]['sub_data'];
+
+                  foreach ($sub_data as $sub_id => $sub_field) {
+                    $sub_ranking = $sub_field['sub_ranking'] ?? array();
+
+                    if (!empty($sub_ranking)) {
+                      uasort($sub_ranking, function ($a, $b) {
+                        if (!isset($b['sub_score']) && !isset($a['sub_score'])) return;
+                        return $b['sub_score'] <=> $a['sub_score'];
+                      });
+                      // Add index numbers to 'rank'
+                      $rankIndex = 1;
+                      foreach ($sub_ranking as &$item) {
+                        $item['rank'] = $rankIndex++;
+                      }
+                      $ranking_by_key_areas[$key][$group_id]['sub_data'][$sub_id]['sub_ranking'] = $sub_ranking;
+                    }
+                  }
                 }
+            }                
+
+          // Sort the Group score array by 'score_average' key in DESC order
+          if (isset($ranking_by_key_areas[$key][$group_id]['gr_ranking'])) {
+            $gr_score_sort = $ranking_by_key_areas[$key][$group_id]['gr_ranking'];
+
+            uasort($gr_score_sort, function ($a, $b) {
+              if (!isset($b['score_average']) && !isset($a['score_average'])) return;
+              return $b['score_average'] <=> $a['score_average'];
+            });
+            // Add index numbers to 'rank'
+            $rankIndex = 1;
+            foreach ($gr_score_sort as &$item) {
+              $item['rank'] = $rankIndex++;
             }
+            $ranking_by_key_areas[$key][$group_id]['gr_ranking'] = $gr_score_sort;
+          }
+          else {
+            $ranking_by_key_areas[$key][$group_id]['gr_ranking'] = array();
+          }
         }
-        
-        return $ranking_by_key_areas;
+      }
+      return $ranking_by_key_areas;
     }
 
+    /**
+     * Ranking orgs by group questions with key area
+     * 
+     * @param $assessment_id    Assessment ID
+     * @param $group_id         Group ID
+     * @param $questions        Assessment Quiz data
+     * @param $submission_id    Submission ID
+     * 
+     * @return Array Group scores average with key area
+     */
     function cal_group_scores_key_area($key_area, $group_id, $questions, $submission_id) {
       $gr_ranking = array();
       $gr_scores_arr = array();
@@ -451,25 +458,30 @@ class AndAssessmentRanking {
       return $gr_scores_average;
     }
 
+    /**
+     * Get all Index submission finalised (published)
+     * 
+     * @param $assessment_id    Assessment ID
+     * 
+     * @return Array All Index Submissions finalised
+     */
     function get_all_index_submission_finalised($assessment_id) {
-
-        $args = array(
-            'post_type' => 'submissions',
-            'posts_per_page' => -1,
-            'post_status' => 'publish',
-            'order_by' => 'date',
-            'order' => 'ASC',
-            'meta_query' => array(
-            array(
-                'key' => 'assessment_id',
-                'value' => $assessment_id,
-            )
-            ),
-        );
-        $index_submissions = get_posts($args);
-        wp_reset_postdata();
-
-        return $index_submissions;
+      $args = array(
+        'post_type' => 'submissions',
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'order_by' => 'date',
+        'order' => 'ASC',
+        'meta_query' => array(
+        array(
+            'key' => 'assessment_id',
+            'value' => $assessment_id,
+        )
+        ),
+      );
+      $index_submissions = get_posts($args);
+      wp_reset_postdata();
+      return $index_submissions;
     }
 
 }

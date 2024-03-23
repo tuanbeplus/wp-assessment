@@ -257,3 +257,22 @@ img.chart {
     border-top: 1px solid #333;
 }
 
+.generic-page table {
+    margin: 16px 0;
+    border-left: 1px solid #333;
+}
+
+.generic-page table th {
+    padding: 16px;
+    line-height: 140%;
+    border: none;
+    background: none;
+}
+
+.generic-page table td {
+    padding: 14px 16px;
+    border: 1px solid #333;
+    border-left: none;
+    text-align: left;
+    line-height: 140%;
+}

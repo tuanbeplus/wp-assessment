@@ -25,6 +25,9 @@ $users = get_users(array(
   .select2-container .select2-search--inline .select2-search__field {
     padding: 0 6px;
   }
+  .select2-container--default .select2-selection--multiple .select2-selection__rendered li {
+    margin-bottom: 0;
+  }
 </style>
 <div id="report-dashboard-share">
    <p>
