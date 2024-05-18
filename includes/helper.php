@@ -8,17 +8,17 @@
 function getOpportunitiesPerchased()
 {
 	$opportunities = getOpportunity();
-
     $opps_purchased_arr = array();
 
     foreach ($opportunities->records as $opportunity) {
         if (isset($opportunity->DCR_Purchase__c) && $opportunity->DCR_Purchase__c == true) {
-            $opps_purchased_arr['drc_purchase'] = $opportunity;
+            $opps_purchased_arr['drc_purchase'][] = $opportunity;
         }
         if (isset($opportunity->Index_Purchase__c) && $opportunity->Index_Purchase__c == true) {
-            $opps_purchased_arr['index_purchase'] = $opportunity;
+            $opps_purchased_arr['index_purchase'][] = $opportunity;
         }
     }
+
     return $opps_purchased_arr;
 }
 
@@ -30,27 +30,42 @@ function getOpportunitiesPerchased()
  */
 function getProductIdByOpportunity() 
 {
-	$sf_products_id = array();
+	$sf_products_id = array(
+		'dcr_product_id' => array(),
+		'index_product_id' => array(),
+	);
 	$opps_purchased_arr = getOpportunitiesPerchased();
+	$drc_purchase = $opps_purchased_arr['drc_purchase'];
+	$index_purchase = $opps_purchased_arr['index_purchase'];
 
-	if (isset($opps_purchased_arr['drc_purchase'])) {
-		$opp_has_drc_purchase_id = $opps_purchased_arr['drc_purchase']->Id;
-		$opp_line_items = getOpportunityLineItem($opp_has_drc_purchase_id);
+	// Add DCR Product2 ID to array
+	if (isset($drc_purchase) && !empty($drc_purchase)) {
+		foreach ($drc_purchase as $item) {
+			$opp_has_drc_purchase_id = $item->Id ?? '';
+			$opp_line_items = getOpportunityLineItem($opp_has_drc_purchase_id);
 
-		foreach ($opp_line_items->records as $opp_line_item) {
-			if ($opp_line_item->Inclusion_Product_Type__c == 'DCR') {
-				$sf_products_id['dcr_product_id'] = $opp_line_item->Product2Id;
+			if (isset($opp_line_items->records) && !empty($opp_line_items->records)) {
+				foreach ($opp_line_items->records as $opp_line_item) {
+					if ($opp_line_item->Inclusion_Product_Type__c == 'DCR') {
+						$sf_products_id['dcr_product_id'][] = $opp_line_item->Product2Id ?? '';
+					}
+				}
 			}
 		}
 	}
 
-	if (isset($opps_purchased_arr['index_purchase'])) {
-		$opp_has_index_purchase_id = $opps_purchased_arr['index_purchase']->Id;
-		$opp_line_items = getOpportunityLineItem($opp_has_index_purchase_id);
+	// Add Index Product2 ID to array
+	if (isset($index_purchase) && !empty($index_purchase)) {
+		foreach ($index_purchase as $item) {
+			$opp_has_index_purchase_id = $item->Id ?? '';
+			$opp_line_items = getOpportunityLineItem($opp_has_index_purchase_id);
 
-		foreach ($opp_line_items->records as $opp_line_item) {
-			if ($opp_line_item->Inclusion_Product_Type__c == 'Index') {
-				$sf_products_id['index_product_id'] = $opp_line_item->Product2Id;
+			if (isset($opp_line_items->records) && !empty($opp_line_items->records)) {
+				foreach ($opp_line_items->records as $opp_line_item) {
+					if ($opp_line_item->Inclusion_Product_Type__c == 'Index') {
+						$sf_products_id['index_product_id'][] = $opp_line_item->Product2Id ?? '';
+					}
+				}
 			}
 		}
 	}
@@ -67,7 +82,7 @@ function getProductIdByOpportunity()
  * @return array Assessments 
  * 
  */
-function get_assessments_related_sf_products($product_id, $term)
+function get_assessments_related_sf_products($product_id_arr, $term)
 {
     $args = array(
 		'post_type' => 'assessments',
@@ -90,8 +105,9 @@ function get_assessments_related_sf_products($product_id, $term)
     foreach ($assessments->posts as $assessment) {
         $related_sf_products = get_post_meta($assessment->ID, 'related_sf_products', true);
 
-        if (! empty($related_sf_products)) {
-			if (in_array($product_id, $related_sf_products)) {
+        if (!empty($product_id_arr) && !empty($related_sf_products)) {
+			$products_related_arr = array_intersect($product_id_arr, $related_sf_products);
+			if (!empty($products_related_arr)) {
 				$assessments_arr[] = $assessment->ID;
 			}
         }
@@ -230,6 +246,54 @@ function get_assessment_terms($assessment_id)
 }
 
 /**
+ * Get current WP user's ID by Salesforce user's ID
+ *
+ * @param int $sf_user_id   Salesforce user's ID
+ *
+ * @return int WP User's ID
+ * 
+ */
+function get_current_user_by_salesforce_id($sf_user_id) 
+{
+    $user = get_users(array(
+        'meta_key' => '__salesforce_user_id',
+        'meta_value' => $sf_user_id,
+    ));
+
+    if (!empty($user)) {
+        return $user[0]->ID;
+    }
+}
+
+/**
+ * Get current WP user's Email by Salesforce user's ID
+ *
+ * @param int $sf_user_id   Salesforce user's ID
+ *
+ * @return string WP User's Email
+ * 
+ */
+function get_current_user_email_by_salesforce_id($sf_user_id)
+{
+	$user = get_users(array(
+        'meta_key' => '__salesforce_user_id',
+        'meta_value' => $sf_user_id,
+    ));
+
+    if (isset($user[0]) && !empty($user[0])) {
+        $user_email = $user[0]->user_email;
+		return $user_email;
+    }
+	else {
+		$sf_user_data = getUser($sf_user_id)->records[0];
+		if (isset($sf_user_data) && !empty($sf_user_data)) {
+			$user_email = getUser($sf_user_id)->records[0]->Email;
+			return $user_email;
+		}
+	}
+}
+
+/**
  * Check accessible for Salesforce Members(User)
  *
  * @param string $user_id   		Salesforce User ID
@@ -242,29 +306,34 @@ function check_access_salesforce_members($user_id, $assessment_id)
 {
 	$is_user_can_access = false;
 	$main = new WP_Assessment();
+	$user_email = get_current_user_email_by_salesforce_id($user_id) ?? '';
 	$terms_arr = get_assessment_terms($assessment_id);
 	$is_all_users_can_access = get_post_meta($assessment_id, 'is_all_users_can_access', true);
 	$related_sf_products = get_post_meta($assessment_id, 'related_sf_products', true);
-	
-	$assigned_members = get_post_meta( $assessment_id, 'assigned_members', true);
-	$invited_members = get_post_meta( $assessment_id, 'invited_members', true);
+	$assigned_members = get_post_meta($assessment_id, 'assigned_members', true);
+	$invited_members = get_post_meta($assessment_id, 'invited_members', true);
+	$blacklist_emails = get_post_meta($assessment_id, 'blacklist_emails', true);
+
 	$assigned_member_ids = array();
 	foreach ($assigned_members as $member) {
 		$assigned_member_ids[] = $member['id'];
 	}
 
 	$sf_product_id_opp = getProductIdByOpportunity();
-	$drc_product_id = isset($sf_product_id_opp['dcr_product_id']) ? $sf_product_id_opp['dcr_product_id'] : null;
-	$index_product_id = isset($sf_product_id_opp['index_product_id']) ? $sf_product_id_opp['index_product_id'] : null;
+	$drc_product_id = $sf_product_id_opp['dcr_product_id'] ?? array();
+	$index_product_id = $sf_product_id_opp['index_product_id'] ?? array();
 	
-	// check user access to asessment
-	if ($drc_product_id && !empty($related_sf_products)) {
-	    if (in_array('dcr', $terms_arr) && in_array($drc_product_id, $related_sf_products)) {
+	// check user access to DCR Asessment
+	if (!empty($drc_product_id) && !empty($related_sf_products)) {
+		$dcr_products_related_arr = array_intersect($drc_product_id, $related_sf_products);
+	    if (in_array('dcr', $terms_arr) && !empty($dcr_products_related_arr)) {
 	        $is_user_can_access = true;
 	    }
 	}
-	if ($index_product_id && !empty($related_sf_products)) {
-	    if (in_array('index', $terms_arr) && in_array($index_product_id, $related_sf_products)) {
+	// check user access to Index Asessment
+	if (!empty($index_product_id) && !empty($related_sf_products)) {
+		$index_products_related_arr = array_intersect($index_product_id, $related_sf_products);
+	    if (in_array('index', $terms_arr) && !empty($index_products_related_arr)) {
 	        $is_user_can_access = true;
 	    }
 	}
@@ -284,6 +353,13 @@ function check_access_salesforce_members($user_id, $assessment_id)
 	// Assessment is accessible for all loged in users
 	if ($is_all_users_can_access == true) {
 		$is_user_can_access = true;
+	}
+
+	// Stop user access if user's email in Blacklist
+	if (!empty($user_email) && !empty($blacklist_emails)) {
+		if (in_array($user_email, $blacklist_emails)) {
+			$is_user_can_access = false;
+		}
 	}
 
 	return $is_user_can_access;
@@ -320,9 +396,8 @@ function get_assessments_accessible_members($user_id, $organisation_id, $arr_ter
 
 	foreach ($assessments as $assessment) {
 		$is_accessible = check_access_salesforce_members($user_id, $assessment->ID);
-		$submission_completed = get_submissions_completed($organisation_id, $assessment->ID);
 
-		if ($is_accessible == true && empty($submission_completed)) {
+		if ($is_accessible == true) {
 			$accessible_assessments[] = $assessment->ID;
 		}
 	}
@@ -332,23 +407,29 @@ function get_assessments_accessible_members($user_id, $organisation_id, $arr_ter
 }
 
 /**
- * Get current WP user's ID by Salesforce user's ID
+ * Get Assessments accessible on Dashboard
  *
- * @param int $sf_user_id   Salesforce user's ID
+ * @param string $sf_user_id   		Salesforce User ID
+ * @param string $organisation_id   Salesforce Account ID
+ * @param array  $assessments_list  Assessments ID array
  *
- * @return int WP User's ID
+ * @return array Assessments accessible final array
  * 
  */
-function get_current_user_by_salesforce_id($sf_user_id) 
-{
-    $user = get_users(array(
-        'meta_key' => '__salesforce_user_id',
-        'meta_value' => $sf_user_id,
-    ));
-
-    if (!empty($user)) {
-        return $user[0]->ID;
-    }
+function get_assessments_on_dashboard($sf_user_id, $organisation_id, $assessments_list) {
+	$assessment_final_list = array();
+	$is_user_can_access = false;
+	if (!empty($assessments_list)) {
+		foreach ($assessments_list as $assessment_id) {
+			$submission_completed = get_submissions_completed($organisation_id, $assessment_id);
+			$is_user_can_access = check_access_salesforce_members($sf_user_id, $assessment_id);
+		
+			if (empty($submission_completed) && $is_user_can_access == true){
+				$assessment_final_list[] = $assessment_id;
+			}
+		}
+	}
+	return $assessment_final_list;
 }
 
 /**
@@ -917,24 +998,44 @@ function get_assessment_key_areas($assessment_id) {
 	return $key_areas;
 }
 
-
-function get_maturity_level_key_area_submission($assessment_id, $submission_id) {
-	$wp_assessment = new WP_Assessment();
-	$key_areas = get_assessment_key_areas($assessment_id);
-	$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
-	$questions = $wp_assessment->wpa_unserialize_metadata($questions);
-
-	if (!empty($questions)) {
-		foreach ($questions as $gr_id => $gr_field) {
-			$sub_question_list = $gr_field['list'] ?? array();
-			if (!empty($sub_question_list)) {
-				foreach ($sub_question_list as $sub_id => $sub_field) {
-
-				}
+/**
+ * Remove attributes from HTML tags
+ * 
+ * @param string $html_string	HTML string
+ *
+ * @return string Clean HTML string
+ * 
+ */
+function clean_html_report_pdf($html_string) {
+	$clean_html = preg_replace_callback(
+		'/<(?!img|a\s)([a-zA-Z0-9]+)([^>]*)>/',
+		function ($matches) {
+			// If it's an anchor tag, preserve href and target attributes
+			if ($matches[1] === 'a') {
+				return "<{$matches[1]} href{$matches[2]}>";
+			} else {
+				return "<{$matches[1]}>";
 			}
-		}
-	}
+		},
+		$html_string
+	);
+	return $clean_html;
 }
 
+/**
+ * Get the Exception Organisations ID
+ *
+ * @return array Orgs ID
+ * 
+ */
+function get_exception_orgs_id() {
+	$exception_orgs_id = array();
+	$exception_repeater = get_field('exception_orgs_id', 'option');
 
-
+	if (!empty($exception_repeater)) {
+		foreach($exception_repeater as $row) {
+			$exception_orgs_id[] = $row['organisation_id'];
+		}
+	}
+	return $exception_orgs_id;
+}

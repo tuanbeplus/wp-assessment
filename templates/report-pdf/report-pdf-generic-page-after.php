@@ -6,10 +6,11 @@
  * 
  */
 
-$count = 0;
-if (isset($report_template['generic_page_after'])) {
-    foreach ($report_template['generic_page_after'] as $index => $generic_page) {
-        $count++;
+$generic_page_after_list = $report_template['generic_page_after'] ?? array();
+if (isset($generic_page_after_list) && !empty($generic_page_after_list)) {
+    $count = count($generic_page_after_list) ?? 0;
+    foreach ($generic_page_after_list as $index => $generic_page) {
+
         $year = date('Y',strtotime($org_data['CreatedDate']));
         $content = $generic_page['content'];
         $content = str_replace('[Organisation]', $org_data['Name'], $content);
@@ -20,6 +21,8 @@ if (isset($report_template['generic_page_after'])) {
         $content = str_replace('[Membership level]', $org_data['Membership_Level__c'], $content);
         $content = str_replace('[Year]', $year, $content);
         $content = str_replace('[year]', $year, $content);
+        // Remove HTML attributes
+        $content = clean_html_report_pdf($content);
     
         $page_content  = '';
         $page_content .= '<div class="page generic-page">';

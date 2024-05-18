@@ -252,7 +252,7 @@ $submission_score_arr = array();
                                                     ?>
                                                     <?php if ($file_url): ?>
                                                     <li class="file-item">
-                                                        <span class="datetime"><?php echo $file_datetime; ?></span>
+                                                        <!-- <span class="datetime">// echo $file_datetime; </span> -->
                                                         <span class="name">
                                                             <a class="sas-blob-cta" data-blob="<?php echo $file_url; ?>">
                                                                 <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>

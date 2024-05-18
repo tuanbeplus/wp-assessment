@@ -1584,6 +1584,109 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // Click to Add emails to Blacklist
+    $(document).on('click', '#btn-add-emails-to-blacklist', function(e){
+        e.preventDefault();
+        let blacklist_wrapper = $('#assessment-blacklist')
+        let emails = blacklist_wrapper.find('textarea#blacklist-emails-area').val() 
+        let bl_message_error = blacklist_wrapper.find('.bl-message-error')
+        let bl_message_success = blacklist_wrapper.find('.bl-message-success')
+        let current_blacklist = blacklist_wrapper.find('ul#blacklist')
+        let current_bl_items = blacklist_wrapper.find('ul#blacklist .blacklist-item .text')
+        let current_bl_items_arr = []
+
+        if (emails === '') {
+            bl_message_error.html('<span>The emails is required.</span>')
+            .show()
+            return
+        } 
+        // Push current blacklist items to an array
+        current_bl_items.each(function(e) {
+            current_bl_items_arr.push($(this).text().replace(/\s/g, "").trim())
+        })
+        // Push emails to an array
+        let emails_arr = emails.replace(/\s/g, "").split(',');
+        let email_regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        // Check valid email
+        for (let i = 0; i < emails_arr.length; i++) {
+            let email = emails_arr[i];
+            let position_at = email.indexOf("@"); // Using indexOf to find the first occurrence of "@"
+            let position_last_at = email.lastIndexOf("@"); // Using lastIndexOf to find the last occurrence of "@"
+
+            // Check if "@" appears more than once
+            if (position_at !== position_last_at) {
+                // If "@" appears more than once, it's invalid
+                bl_message_error.html('<span>Please seperate each email by a comma.</span>').show();
+                return; // Return to stop further processing
+            }
+            else {
+                // If email are valid, hide the error message
+                bl_message_error.hide();
+            }
+            // Check valid email
+            if (email_regex.test(email)) {
+                // If email are valid, hide the error message
+                bl_message_error.hide();
+            }
+            else {
+                bl_message_error.html('<span><strong>'+ email +'</strong> is an invalid email address.</span>').show();
+                return; // Return to stop further processing
+            }
+            // Trim whitespace from the email address
+            emails_arr[i] = email.trim();
+        }
+        
+        let bl_item = '';
+        bl_message_error.html('')
+        bl_message_success.html('')
+        // Add emails to list
+        for (let i = 0; i < emails_arr.length; i++) {
+            bl_item  = '<li class="blacklist-item" tabindex="0">' 
+            bl_item +=      '<span class="text">'+ emails_arr[i] +'</span>'
+            bl_item +=      '<span class="btn-remove-blacklist-item" tabindex="0" role="button">'
+            bl_item +=          '<i class="fa-solid fa-xmark"></i>'
+            bl_item +=      '</span>'
+            bl_item +=      '<input type="hidden" name="blacklist_emails[]" value="'+ emails_arr[i] +'">'
+            bl_item +=      '<div class="confirm-remove">'
+            bl_item +=          'Do you want to remove this email?'
+            bl_item +=          '<a class="btn-confirmed-remove" tabindex="0" role="button">Remove</a>'
+            bl_item +=          '<a class="btn-not-remove" tabindex="0" role="button">No</a>'
+            bl_item +=      '</div>'
+            bl_item +=  '</li>'
+
+            // Email existing message
+            if (current_bl_items_arr.length > 0 && current_bl_items_arr.indexOf(emails_arr[i]) !== -1) {
+                bl_message_error.append('<span><strong>'+ emails_arr[i] +'</strong> is existing in Blacklist.</span><br>')
+                .show()
+            }
+            // Add email success message
+            else {
+                current_blacklist.prepend(bl_item)
+                bl_message_success.append('<span>Add email <strong>'+ emails_arr[i] +'</strong> successfully.</span><br>')
+                .show()
+            }
+        }
+    });
+
+    // Click to show confirm remove blacklist item
+    $(document).on('click', '.btn-remove-blacklist-item', function(e){
+        e.preventDefault();
+        let bl_item = $(this).closest('.blacklist-item')
+        bl_item.find('.confirm-remove').show()
+    });
+    // Click to remove blacklist item
+    $(document).on('click', '.blacklist-item .btn-confirmed-remove', function(e){
+        e.preventDefault();
+        let bl_item = $(this).closest('.blacklist-item')
+        bl_item.remove()
+    });
+    // Click to hide confirm remove message
+    $(document).on('click', '.blacklist-item .btn-not-remove', function(e){
+        e.preventDefault();
+        let bl_item = $(this).closest('.blacklist-item')
+        bl_item.find('.confirm-remove').hide()
+    });
+
     // require assessment admin fields
     $('input.group-question-admin-title').prop('required',true);
     $('input.question-admin-title').prop('required',true);

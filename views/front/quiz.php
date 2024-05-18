@@ -2,7 +2,6 @@
 /**
  * Assessments template front Saturn
  * 
- * @since 2.0.0
  * @author Tuan
  */
 
@@ -62,6 +61,9 @@ $all_quiz_pre_cmts = $main->get_dcr_quiz_answers_all_submissions($post_id, $orga
 $is_disabled = $status === 'pending';
 $is_publish = $status === 'publish';
 $is_accepted = $status === 'accepted';
+
+// Get the Exception Organisations ID
+$exception_orgs_id = get_exception_orgs_id();
 ?>
 
 <?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
@@ -85,7 +87,7 @@ $is_accepted = $status === 'accepted';
             <div class="container">
                 <div class="topBar">
                     <h1><?php echo $quiz_title; ?></h1>
-                    <?php if(!$is_disabled && !$is_accepted): ?>
+                    <?php if( (!$is_disabled && !$is_accepted) || in_array($organisation_id, $exception_orgs_id) ): ?>
                     <div class="topbar-action">
                         <?php if ($is_invite_colleagues == true): ?>
                             <button id="toggle-invite-colleagues"><span class="material-icons">arrow_forward</span>Invite Colleagues</button>
@@ -152,7 +154,7 @@ $is_accepted = $status === 'accepted';
                     </div>
                 <?php endif; ?>
 
-                <?php if($is_accepted): ?>
+                <?php if($is_accepted && !in_array($organisation_id, $exception_orgs_id)): ?>
                     <div class="notificationBar accepted">
                         <h3 style="text-align:center;">Your assessment is accepted!</h3>
                     </div>
@@ -325,7 +327,8 @@ $is_accepted = $status === 'accepted';
                     <!-- End Simple Assessment -->
                 <?php endif; ?>
 
-                <?php if ($question_templates == 'Comprehensive Assessment' && $questions && !$is_accepted) : ?>
+                <?php if ( ($question_templates == 'Comprehensive Assessment' && $questions && !$is_accepted) 
+                            || ($terms[0] == 'dcr' && in_array($organisation_id, $exception_orgs_id)) ): ?>
                     <!-- Begin Comprehensive Assessment -->
                     <div class="stepperFormWrap" id="main-quiz-form">
                         <!-- form message -->

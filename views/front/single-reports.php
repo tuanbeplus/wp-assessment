@@ -5,7 +5,14 @@
  * @author Tuan
  * 
  */
- 
+
+// Check user permission
+if (! current_user_can('administrator')) {
+    get_header();
+    get_template_part( '404' ); 
+    get_footer();
+    exit();
+}
 global $post;
 $post_id = $post->ID;
 $main = new WP_Assessment();
@@ -98,9 +105,6 @@ require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-generic-page-before.
 // Render Key Recommendations
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-key-recommendations.php';
 
-// Render Highlights table
-require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-highlights.php';
-
 //============== Begin Part A - Organisation Dashboard =============//
 // Render Organisation Total Score
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-org-total-score.php';
@@ -120,10 +124,6 @@ require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-overall-maturity-das
 // Render All Year on Year history dashboard
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-history.php';
 //============== End Part A - Organisation Dashboard =============//
-
-//============== Begin Part B - Evaluation Findings =============//
-require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-part-b-evaluation-findings.php';
-//============== End Part B - Evaluation Findings =============//
 
 // Render All after generic pages
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-generic-page-after.php';

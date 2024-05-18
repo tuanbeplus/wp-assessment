@@ -23,7 +23,8 @@ class Custom_Fields
         // Assessments
         add_meta_box('questions-repeater-field', 'Questions', array($this, 'question_repeatable_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
-        // add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'side', 'default');
+        // add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'normal', 'default');
+        add_meta_box('assessment-blacklist', 'Assessment Blacklist', array($this, 'assessment_blacklist_meta_box_callback'), 'assessments', 'normal', 'default');
         if (current_user_can('administrator')) {
             add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
         }
@@ -118,13 +119,21 @@ class Custom_Fields
         return include_once REPORT_DASHBOARD_CHART_VIEW;
     }
 
+    function assessment_blacklist_meta_box_callback()
+    {
+        return include_once ASSESSMENT_BLACKLIST_VIEW;
+    }
+
     function question_repeatable_meta_box_save($post_id): void
     {
 
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
 
-        if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'assessments')
+        if (!current_user_can('edit_post', $post_id))
+            return;
+
+        if (get_post_type($post_id) != 'assessments') 
             return;
 
         $assessment_template = $_POST['assessment_template'] ?? null;
@@ -137,6 +146,8 @@ class Custom_Fields
         $is_assessment_completed = $_POST['is_assessment_completed'] ?? 0;
         $assigned_members = $_POST['assigned_members'] ?? null;
         $invited_members = $_POST['invited_members'] ?? null;
+        $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
+        $blacklist_emails = isset($_POST['blacklist_emails']) ? $_POST['blacklist_emails'] : '';
 
         // Renew Index of Questions array
         $new_group_questions = array();
@@ -164,6 +175,8 @@ class Custom_Fields
         update_post_meta($post_id, 'is_assessment_completed', $is_assessment_completed);
         update_post_meta($post_id, 'assigned_members', $new_assigned_members);
         update_post_meta($post_id, 'invited_members', $invited_members);
+        update_post_meta($post_id, 'report_key_areas', $report_key_areas);
+        update_post_meta($post_id, 'blacklist_emails', $blacklist_emails);
     }
 
     function report_template_meta_box_save($post_id): void
@@ -175,55 +188,56 @@ class Custom_Fields
         if (!current_user_can('edit_post', $post_id))
             return;
 
-        $report_template = isset($_POST['report_template']) ? $_POST['report_template'] : '';
-        $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
-        $dashboard_chart_imgs = get_post_meta($post_id, 'dashboard_chart_imgs', true);
-        $framework_dashboard      = get_field('framework_dashboard',$post_id);
-        $implementation_dashboard = get_field('implementation_dashboard',$post_id);
-        $review_dashboard         = get_field('review_dashboard',$post_id);
-        $overall_dashboard        = get_field('overall_dashboard',$post_id);
+        if (get_post_type($post_id) == 'reports' || get_post_type($post_id) == 'assessments') {
+            
+            $report_template = isset($_POST['report_template']) ? $_POST['report_template'] : '';
+            $dashboard_chart_imgs = get_post_meta($post_id, 'dashboard_chart_imgs', true);
+            $framework_dashboard      = get_field('framework_dashboard',$post_id);
+            $implementation_dashboard = get_field('implementation_dashboard',$post_id);
+            $review_dashboard         = get_field('review_dashboard',$post_id);
+            $overall_dashboard        = get_field('overall_dashboard',$post_id);
 
-        // Renew chart images meta
-        if (!empty($dashboard_chart_imgs)) {
-            if (isset($dashboard_chart_imgs['Framework']) && empty($framework_dashboard)) {
-                wp_delete_attachment( $dashboard_chart_imgs['Framework'], true );
-                $dashboard_chart_imgs['Framework'] = null;
+            // Renew chart images meta
+            if (!empty($dashboard_chart_imgs)) {
+                if (isset($dashboard_chart_imgs['Framework']) && empty($framework_dashboard)) {
+                    wp_delete_attachment( $dashboard_chart_imgs['Framework'], true );
+                    $dashboard_chart_imgs['Framework'] = null;
+                }
+                if (isset($dashboard_chart_imgs['Implementation']) && empty($implementation_dashboard)) {
+                    wp_delete_attachment( $dashboard_chart_imgs['Implementation'], true );
+                    $dashboard_chart_imgs['Implementation'] = null;
+                }
+                if (isset($dashboard_chart_imgs['Review']) && empty($review_dashboard)) {
+                    wp_delete_attachment( $dashboard_chart_imgs['Review'], true );
+                    $dashboard_chart_imgs['Review'] = null;
+                }
+                if (isset($dashboard_chart_imgs['Overall']) && empty($overall_dashboard)) {
+                    wp_delete_attachment( $dashboard_chart_imgs['Overall'], true );
+                    $dashboard_chart_imgs['Overall'] = null;
+                }
             }
-            if (isset($dashboard_chart_imgs['Implementation']) && empty($implementation_dashboard)) {
-                wp_delete_attachment( $dashboard_chart_imgs['Implementation'], true );
-                $dashboard_chart_imgs['Implementation'] = null;
+
+            // Renew Index of generic page Report template array
+            if (!empty($report_template)) {
+                $new_page_before = array();
+                $i = 1;
+                foreach ($report_template['generic_page_before'] as $page_before) {
+                    $new_page_before[$i] = $page_before;
+                    $i++;
+                }
+                $new_page_after = array();
+                $j = 1;
+                foreach ($report_template['generic_page_after'] as $page_after) {
+                    $new_page_after[$j] = $page_after;
+                    $j++;
+                }
+                $report_template['generic_page_before'] = $new_page_before ?? null;
+                $report_template['generic_page_after'] = $new_page_after ?? null;
             }
-            if (isset($dashboard_chart_imgs['Review']) && empty($review_dashboard)) {
-                wp_delete_attachment( $dashboard_chart_imgs['Review'], true );
-                $dashboard_chart_imgs['Review'] = null;
-            }
-            if (isset($dashboard_chart_imgs['Overall']) && empty($overall_dashboard)) {
-                wp_delete_attachment( $dashboard_chart_imgs['Overall'], true );
-                $dashboard_chart_imgs['Overall'] = null;
-            }
+
+            update_post_meta($post_id, 'report_template', $report_template);
+            update_post_meta($post_id, 'dashboard_chart_imgs', $dashboard_chart_imgs);
         }
-
-        // Renew Index of generic page Report template array
-        if (!empty($report_template)) {
-            $new_page_before = array();
-            $i = 1;
-            foreach ($report_template['generic_page_before'] as $page_before) {
-                $new_page_before[$i] = $page_before;
-                $i++;
-            }
-            $new_page_after = array();
-            $j = 1;
-            foreach ($report_template['generic_page_after'] as $page_after) {
-                $new_page_after[$j] = $page_after;
-                $j++;
-            }
-            $report_template['generic_page_before'] = $new_page_before ?? null;
-            $report_template['generic_page_after'] = $new_page_after ?? null;
-        }
-
-        update_post_meta($post_id, 'report_template', $report_template);
-        update_post_meta($post_id, 'report_key_areas', $report_key_areas);
-        update_post_meta($post_id, 'dashboard_chart_imgs', $dashboard_chart_imgs);
     }
 
     function on_save_submission_custom_fields($post_id): void

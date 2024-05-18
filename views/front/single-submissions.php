@@ -84,11 +84,11 @@ $invalid_answers = array();
 							<?php endforeach; ?>
 						</ul>
 					<?php endif; ?>
-					<?php if($report_id): ?>
-						<p>
+					<?php if($report_id == 0): ?>
+						<!-- <p>
 							Preliminary Report: 
-							<a href="<?php echo get_the_permalink($report_id); ?>"><?php echo get_the_title($report_id); ?></a>
-						</p>
+							<a href="<?php// echo get_the_permalink($report_id); ?>"><?php// echo get_the_title($report_id); ?></a>
+						</p> -->
 					<?php endif; ?>
 
 					<p>The Australian Network on Disability team will be in contact with you once evidence/this submission has been reviewed (for Index and Disability Confident Recruiter).*</p>
