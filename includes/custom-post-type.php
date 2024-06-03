@@ -401,11 +401,17 @@ class CustomPostType
         $org_name = $org_data['Name'] ?? '';
 
         if ($post->post_date == $post->post_modified) {
-            if ($post->post_type = 'submissions' || $post->post_type = 'dcr_submissions') {
+            if ($post->post_type == 'submissions' || $post->post_type == 'dcr_submissions') {
 
-                $to = $this->get_all_users_email($assessment_id);
+                // if ($post->post_type == 'dcr_submissions') {
+                //     $to = 'tuan.beplus@gmail.com';
+                // }
+                // else {
+                //     $to = $this->get_all_users_email($assessment_id);
+                // }
                 $subject = 'Saturn - New Submission Added #' .$post_id. ' - ' .$org_name;
-                $message  = '<p>You have a new submission of <strong>'. get_the_title($assessment_id). '</strong>.</p>';
+                $message  = '<div style="font-size:15px;">';
+                $message .= '<p style="font-size:16px;">You have a new submission of <strong>'. get_the_title($assessment_id). '</strong>.</p>';
                 $message .= '<p>From:</p>';
                 $message .= '<ul style="padding:0;">';
                 if (isset($sf_user_name)) {
@@ -419,6 +425,7 @@ class CustomPostType
                 }
                 $message .= '</ul>';
                 $message .= 'View <a href='. home_url() .'/wp-admin/post.php?post='. $post_id .'&action=edit>'.get_the_title($post_id).'</a>';
+                $message .= '</div>';
 
                 $sent = wp_mail($to, $subject, $message);
                 return $sent;

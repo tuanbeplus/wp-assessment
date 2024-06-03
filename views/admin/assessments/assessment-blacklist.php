@@ -15,7 +15,7 @@ $blacklist_emails = get_post_meta($post->ID, 'blacklist_emails', true);
         <form class="form-blacklist" action="false">
             <label for="blacklist-emails-area">Add emails to Blacklist to stop users access the assessment</label>
             <textarea id="blacklist-emails-area"  
-                    rows="3" placeholder="Seperate each email by a comma."></textarea>
+                    rows="2" placeholder="Seperate each email by a comma."></textarea>
             <a id="btn-add-emails-to-blacklist" role="button" 
                 tabindex="0"
                 class="button button-primary button-large">
