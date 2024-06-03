@@ -47,7 +47,7 @@ class Custom_Fields
     }
 
     function report_dashboard_share_meta_box_callback(){
-      return include_once REPORT_DASHBOARD_SHARE_REPORTS;
+        return include_once REPORT_DASHBOARD_SHARE_REPORTS;
     }
 
     function assessment_options_meta_box_callback()

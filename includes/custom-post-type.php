@@ -9,6 +9,9 @@ class CustomPostType
         add_action('init', array($this, 'register_dcr_submissions_post_type'));
         add_action('init', array($this, 'register_reports_custom_post_type'));
         add_action('init', array($this, 'register_assessment_categories'));
+        // Hook into the 'acf/init' action to add the ACF options page
+        add_action('acf/init', array($this, 'add_assessments_options_page'));
+        add_action('acf/init', array($this, 'add_assessments_options_fields'));
 
         add_filter('manage_assessments_posts_columns', array($this, 'customize_assessments_admin_column'));
         add_action('manage_assessments_posts_custom_column', array($this, 'customize_assessments_admin_column_value'), 10, 2);
@@ -95,6 +98,10 @@ class CustomPostType
         register_post_type('assessments', $args);
     }
 
+    /**
+     * Register Assessment categories
+     * 
+     */
     function register_assessment_categories() {
         register_taxonomy(
             'category', 
@@ -107,6 +114,66 @@ class CustomPostType
                 'query_var' => true,
             )
         );
+    }
+
+    /**
+     * Add Assessments Settings ACF sub page
+     * 
+     */
+    function add_assessments_options_page() {
+        if( function_exists('acf_add_options_sub_page') ) {
+            acf_add_options_sub_page(array(
+                'page_title'    => 'Assessments Settings',
+                'menu_title'    => 'Settings',
+                'parent_slug'   => 'edit.php?post_type=assessments',
+                'capability'    => 'manage_options',
+                'redirect'      => false
+            ));
+        }
+    }
+
+    /**
+     * Add Assessments options ACF fields
+     * 
+     */
+    function add_assessments_options_fields() {
+        if( function_exists('acf_add_local_field_group') ) {
+            acf_add_local_field_group(array(
+                'key' => 'group_assessments_settings',
+                'title' => 'Settings',
+                'fields' => array(
+                    array(
+                        'key' => 'field_quick_10_register_url',
+                        'label' => 'Quick 10 Register URL',
+                        'name' => 'quick_10_register_url',
+                        'type' => 'text',
+                        'instructions' => 'Enter the URL to users register for the Quick 10.',
+                    ),
+                    array(
+                        'key' => 'field_dcr_submission_notification_email',
+                        'label' => 'DCR Submission Notification Email',
+                        'name' => 'dcr_submission_notification_email',
+                        'type' => 'email',
+                        'instructions' => 'Enter the email address to receive notifications for the new submissions.',
+                    ),
+                ),
+                'location' => array(
+                    array(
+                        array(
+                            'param' => 'options_page',
+                            'operator' => '==',
+                            'value' => 'acf-options-settings',
+                        ),
+                    ),
+                ),
+                'menu_order' => 0,
+                'position' => 'normal',
+                'style' => 'default',
+                'label_placement' => 'top',
+                'instruction_placement' => 'label',
+                'hide_on_screen' => '',
+            ));
+        }
     }
 
     /**
@@ -399,16 +466,23 @@ class CustomPostType
         $sf_user_email = get_post_meta($post_id, 'sf_user_email', true);
         $org_data = get_post_meta($post_id, 'org_data', true);
         $org_name = $org_data['Name'] ?? '';
+        $dcr_sub_notifi_email = get_field('dcr_submission_notification_email', 'option');
 
         if ($post->post_date == $post->post_modified) {
             if ($post->post_type == 'submissions' || $post->post_type == 'dcr_submissions') {
 
-                // if ($post->post_type == 'dcr_submissions') {
-                //     $to = 'tuan.beplus@gmail.com';
-                // }
-                // else {
-                //     $to = $this->get_all_users_email($assessment_id);
-                // }
+                if ($post->post_type == 'dcr_submissions') {
+                    if (!empty($dcr_sub_notifi_email)) {
+                        $to = $dcr_sub_notifi_email;
+                    }
+                    else {
+                        $to = $this->get_all_users_email($assessment_id);
+                    }
+                }
+                else {
+                    $to = $this->get_all_users_email($assessment_id);
+                }
+                
                 $subject = 'Saturn - New Submission Added #' .$post_id. ' - ' .$org_name;
                 $message  = '<div style="font-size:15px;">';
                 $message .= '<p style="font-size:16px;">You have a new submission of <strong>'. get_the_title($assessment_id). '</strong>.</p>';
