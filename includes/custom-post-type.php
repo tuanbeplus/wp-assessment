@@ -156,6 +156,35 @@ class CustomPostType
                         'type' => 'email',
                         'instructions' => 'Enter the email address to receive notifications for the new submissions.',
                     ),
+                    array(
+                        'key' => 'field_repeater_exception_orgs_id',
+                        'label' => 'Exception Orgs ID',
+                        'name' => 'exception_orgs_id',
+                        'type' => 'repeater',
+                        'instructions' => 'Add Organisation ID here.',
+                        'layout' => 'table',
+                        'button_label' => 'Add Org ID',
+                        'sub_fields' => array(
+                            array(
+                                'key' => 'field_organisation_name',
+                                'label' => 'Organisation Name',
+                                'name' => 'organisation_name',
+                                'type' => 'text',
+                                'wrapper' => array(
+                                    'width' => '50%',
+                                ),
+                            ),
+                            array(
+                                'key' => 'field_organisation_id',
+                                'label' => 'Organisation ID',
+                                'name' => 'organisation_id',
+                                'type' => 'text',
+                                'wrapper' => array(
+                                    'width' => '50%',
+                                ),
+                            ),
+                        ),
+                    ),
                 ),
                 'location' => array(
                     array(
