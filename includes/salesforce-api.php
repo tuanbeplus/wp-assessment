@@ -114,40 +114,51 @@ function getUserById($user_id)
 	return $response;
 }
 
-function updateSobjectRecord($obj_name, $record_id, $content = []) 
-{
-	$sf_access_token = get_field('salesforce_api_access_token', 'option');
+
+/**
+ * Update the Record SObject Salesforce
+ * 
+ * @param $sobject_name		SObject Name
+ * @param $record_id		Record ID
+ * @param $data				Array data
+ * 
+ * @return Boolean True/False
+ * 
+ */
+function update_record_sobject_salesforce($sobject_name, $record_id, $data = array()) {
+
+    if (empty($sobject_name) || empty($record_id)) return;
+    if (!is_array($data) || empty($data)) return;
+
+    $update_data = json_encode($data);
+    $sf_access_token = get_field('salesforce_api_access_token', 'option');
 	$sf_endpoint_url = get_field('salesforce_endpoint_url', 'option');
-	$sf_api_ver = get_field('salesforce_api_version', 'option');
+    $curl = curl_init();
 
-	$url = "$sf_endpoint_url/services/data/$sf_api_ver/sobjects/$obj_name/$record_id";
-
-   	$content_json = json_encode($content);
-
-	$curl = curl_init($url);
-	curl_setopt($curl, CURLOPT_HEADER, false);
-	curl_setopt($curl, CURLOPT_HTTPHEADER,
-		array("Authorization: OAuth $sf_access_token",
-			"Content-type: application/json"));
-	curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PATCH");
-	curl_setopt($curl, CURLOPT_POSTFIELDS, $content_json);
-
-	$response = curl_exec($curl);
+    curl_setopt_array($curl, array(
+    CURLOPT_URL => $sf_endpoint_url .'/services/data/v56.0/sobjects/'. $sobject_name .'/'. $record_id,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_ENCODING => '',
+    CURLOPT_MAXREDIRS => 10,
+    CURLOPT_TIMEOUT => 0,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    CURLOPT_CUSTOMREQUEST => 'PATCH',
+    CURLOPT_POSTFIELDS => $update_data,
+    CURLOPT_HTTPHEADER => array(
+        'Authorization: Bearer ' . $sf_access_token,
+        'Content-Type: application/json',
+    ),
+    ));
+    $response = curl_exec($curl);
 	$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
 
-	if ($status != 204) {
-		echo "Error: call to URL $url failed with status $status, curl_error " . curl_error($curl) . ", curl_errno " . curl_errno($curl);
-	}
 	if ($status == 204) {
-		echo "Update record successful.";
+		return true;
 	}
-
-	curl_close($curl);
+	else {
+		return false;
+	}
 }
-
-
-
-
-
-
 
