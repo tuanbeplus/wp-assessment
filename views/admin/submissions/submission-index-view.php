@@ -34,6 +34,19 @@ $question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id,
 
 $i = 0;
 $submission_score_arr = array();
+
+if (($_GET['update_sf_contact'] == '1')) {
+   
+    echo "<pre>";
+    // print_r($post_meta);
+
+    $the_update = sf_update_contact_quick_10_field($post_id);
+
+    print_r($the_update);
+
+
+    echo "</pre>";
+}
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>

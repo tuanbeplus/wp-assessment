@@ -145,7 +145,7 @@ class CustomPostType
                     array(
                         'key' => 'field_assessment_quick_10',
                         'label' => 'Assessment Quick 10',
-                        'name' => 'is_assessment_quick_10',
+                        'name' => 'assessment_quick_10',
                         'type' => 'post_object',
                         'instructions' => 'Select assessment is the Quick 10.',
                         'post_type' => array(
