@@ -1039,3 +1039,4 @@ function get_exception_orgs_id() {
 	}
 	return $exception_orgs_id;
 }
+

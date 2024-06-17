@@ -26,7 +26,6 @@ function sf_update_contact_quick_10_field($post_id) {
     // Define the data to update
     $data = array(
         'Quick_10__c' => true,
-        'Phone' => '12332423',
     );
 
     // Call the function to update Salesforce record
@@ -40,4 +39,4 @@ function sf_update_contact_quick_10_field($post_id) {
         wp_mail($email, $subject, $message);
     }
 }
-add_action('publish_submissions', 'sf_update_contact_quick_10_field');
+// add_action('publish_submissions', 'sf_update_contact_quick_10_field');

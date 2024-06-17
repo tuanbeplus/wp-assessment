@@ -143,6 +143,20 @@ class CustomPostType
                 'title' => 'Settings',
                 'fields' => array(
                     array(
+                        'key' => 'field_assessment_quick_10',
+                        'label' => 'Assessment Quick 10',
+                        'name' => 'is_assessment_quick_10',
+                        'type' => 'post_object',
+                        'instructions' => 'Select assessment is the Quick 10.',
+                        'post_type' => array(
+                            0 => 'assessments',
+                        ),
+                        'post_status' => 'publish',
+                        'taxonomy' => '',
+                        'return_format' => 'id',
+                        'multiple' => 0,
+                    ),
+                    array(
                         'key' => 'field_quick_10_register_url',
                         'label' => 'Quick 10 Register URL',
                         'name' => 'quick_10_register_url',
