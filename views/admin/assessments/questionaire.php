@@ -464,13 +464,13 @@ $i = 0; $j = 0;
     <!-- Button add more Group questions -->
     <?php if($question_templates == 'Simple Assessment'): ?>
         <p id="add-simple-row-block">
-            <span id="add-simple-row" class="button button-primary">Add Simple Question</span>
+            <span id="add-simple-row" class="button button-primary button-large">Add Simple Question</span>
         </p>
     <?php endif; ?>
 
     <?php if($question_templates == 'Comprehensive Assessment'): ?>
         <p id="add-group-row-block">
-            <span id="add-group-row" class="button button-primary">Add Group Question</span>
+            <span id="add-group-row" class="button button-primary button-large">Add Group Question</span>
         </p>
     <?php endif; ?>
 </div>

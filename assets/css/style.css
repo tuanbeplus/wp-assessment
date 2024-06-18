@@ -433,6 +433,10 @@
   font-size: 15px;
 }
 
+.multi-choice-btn-container {
+  margin-top: 16px;
+}
+
 .question-other-info-container {
   margin: 20px 0;
 }
@@ -442,7 +446,7 @@
 }
 
 .multi-choice-btn-table-container {
-  margin-top: 24px;
+  margin-top: 20px;
 }
 
 .multi-choice-table {
@@ -757,13 +761,21 @@
   font-size: 13px;
 }
 
-.dcr .submission-view-item-row .card .files-list .file-item {
+/* .dcr .submission-view-item-row .card .files-list .file-item {
   display: block;
   margin-top: 8px;
   width: fit-content;
-  padding: 2px;
   border-radius: 6px;
+} */
+
+.files-list .file-item > .name a {
   min-width: 146px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .files-list .file-item .datetime {
@@ -789,12 +801,14 @@
 .filesList {
   margin-top: 16px;
   margin-left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .filesList .file-item {
   display: flex;
   width: fit-content;
-  margin-top: 10px;
   border-radius: 10px;
   border: 1px solid #ccc;
   background-color: #f6f7f7;
@@ -1132,12 +1146,12 @@
 
 .field-select2 .list-items-selected-area {
   border: 1px solid #aaa;
-  padding: 6px;
+  padding: 8px;
   min-height: 34px;
   border-radius: 2px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
 }
 

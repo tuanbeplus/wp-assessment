@@ -136,19 +136,19 @@ function update_record_sobject_salesforce($sobject_name, $record_id, $data = arr
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
-    CURLOPT_URL => $sf_endpoint_url .'/services/data/v56.0/sobjects/'. $sobject_name .'/'. $record_id,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING => '',
-    CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST => 'PATCH',
-    CURLOPT_POSTFIELDS => $update_data,
-    CURLOPT_HTTPHEADER => array(
-        'Authorization: Bearer ' . $sf_access_token,
-        'Content-Type: application/json',
-    ),
+		CURLOPT_URL => $sf_endpoint_url .'/services/data/v56.0/sobjects/'. $sobject_name .'/'. $record_id,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_ENCODING => '',
+		CURLOPT_MAXREDIRS => 10,
+		CURLOPT_TIMEOUT => 0,
+		CURLOPT_FOLLOWLOCATION => true,
+		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		CURLOPT_CUSTOMREQUEST => 'PATCH',
+		CURLOPT_POSTFIELDS => $update_data,
+		CURLOPT_HTTPHEADER => array(
+			'Authorization: Bearer ' . $sf_access_token,
+			'Content-Type: application/json',
+		),
     ));
     $response = curl_exec($curl);
 	$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);

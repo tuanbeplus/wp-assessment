@@ -1135,6 +1135,9 @@ jQuery(document).ready(function ($) {
         var new_file_id = '';
         var new_file_url = '';
 
+        // Hide the message
+        message.hide();
+
         for (var i = 0; i < this.files.length; i++){
             file_item = $('<span/>', {class: 'file-item'})
             file_item.hide()
@@ -1194,7 +1197,8 @@ jQuery(document).ready(function ($) {
                     'file_id' : file_ID,
                 },
                 beforeSend : function ( xhr ) {
-        
+                    // Hide the message
+                    message.hide();
                 },
                 success:function(response){
                     btn.parent().remove()

@@ -21,6 +21,12 @@ function sf_user_mail_from_name( $name ) {
     return $_COOKIE['sf_name'];
 }
 
+/**
+ * Update Salesforce Contact Quick 10 field after users completed The Quick 10
+ * 
+ * @param $post_id   Submission ID
+ * 
+ */
 function sf_update_contact_quick_10_field($post_id) {
     // Get the Assessment Quick 10 ID
     $assessment_quick_10 = get_field('assessment_quick_10', 'option');
