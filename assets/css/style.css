@@ -775,42 +775,53 @@
   color: #888;
 }
 
-.files-list .file-item > .name {
-  padding: 3px 6px;
-  width: max-content;
-  display: inline-flex;
+.btn-add-files-wrapper .__message {
+  display: none;
+  margin: 6px 16px;
+  color: darkgreen;
 }
 
-.files-list .file-item > .name a {
+.btn-add-files-wrapper .fa-solid {
+  margin-right: 2px;
+  font-size: 16px;
+}
+
+.filesList {
+  margin-top: 16px;
+  margin-left: 12px;
+}
+
+.filesList .file-item {
+  display: flex;
+  width: fit-content;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #f6f7f7;
+}
+
+.filesList .file-item > a.name {
+  width: max-content;
+  display: inline-flex;
+  padding: 3px 8px;
   text-decoration: none;
   cursor: pointer;
 }
 
-.file-delete {
+.filesList .file-delete {
+  padding: 4px 8px 4px 2px;
   display: flex;
-  width: 24px;
-  color: initial;
-  background-color: #6eb4ff00;
-  font-size: large;
-  justify-content: center;
+  align-items: center;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s;
 }
-.file-delete:hover {
-  background-color: #dd6162;
-  border-radius: 50%;
-  color: #fff;
-}
-.file-delete > span {
-  transform: rotate(45deg);
+.filesList .file-delete:hover {
+  color: red;
 }
 
 .question-add-files-container {
   margin-bottom: 16px;
-}
-
-.filesList {
-  margin-top: 8px;
 }
 
 .filesList_submission > p {

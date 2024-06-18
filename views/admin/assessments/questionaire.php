@@ -194,7 +194,7 @@ $i = 0; $j = 0;
                                         </div>
                                         <div class="col-10 multi-choice-btn-container">
                                             <button class="button add-multi-choice-btn" type="button" data-group-id="<?php echo $parent_question_id; ?>" data-id="<?php echo $question_id; ?>">
-                                                Add multi choice button
+                                                <i class="fa-solid fa-plus"></i> Add Multiple Choice
                                             </button>
                                             <div class="multi-choice-btn-table-container">
                                                 <table class="multi-choice-table" id="multi-check-table-<?php echo $parent_question_id.'_'.$question_id; ?>">
@@ -241,16 +241,19 @@ $i = 0; $j = 0;
                                         <div class="col-12">
                                             <div class="btn-add-files-wrapper">
                                                 <label for="additional-files-<?php echo $parent_question_id.'-'.$question_id; ?>">
-                                                    <span class="button" role="button" aria-disabled="false">+ Add Additional Files</span>
+                                                    <span class="button" role="button" aria-disabled="false">
+                                                        <i class="fa-solid fa-file-arrow-up"></i> Add Additional Files
+                                                    </span>
                                                 </label>
                                                 <input id="additional-files-<?php echo $parent_question_id.'-'.$question_id; ?>"
                                                         class="additional-files"
                                                         type="file"
                                                         name="file[]"
-                                                        style="visibility: hidden; position: absolute;"/>
+                                                        style="visibility:hidden; position:absolute;"/>
                                                 <div class="uploading-wrapper">
                                                     <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="uploading">
                                                 </div>
+                                                <div class="__message">File Uploaded</div>
                                             </div>
                                             <div class="filesList">
                                                 <?php if ($additional_files): ?>
@@ -261,10 +264,8 @@ $i = 0; $j = 0;
                                                         ?>
                                                         <?php if ($file_url): ?>
                                                         <span class="file-item">
-                                                            <span class="file-delete"><span>+</span></span>
-                                                            <span class="name">
-                                                                <a href="<?php echo $file_url; ?>" target="_blank"><?php echo $file_name; ?></a>
-                                                            </span>
+                                                            <a class="name" href="<?php echo $file_url; ?>" target="_blank"><?php echo $file_name; ?></a>
+                                                            <span class="file-delete"><i class="fa-solid fa-xmark"></i></span>
                                                             <input name="group_questions[<?php echo $parent_question_id; ?>][list][<?php echo $question_id; ?>][additional_files][<?php echo $key; ?>]"
                                                                     type="hidden"
                                                                     class="input-file-hiden additional-file-id-<?php echo $key; ?>"

@@ -127,7 +127,9 @@ jQuery(document).ready(function ($) {
             question_row_html += '            </div>';
             question_row_html += '        </div>';
             question_row_html += '        <div class="col-10 multi-choice-btn-container">';
-            question_row_html += '            <button class="button add-multi-choice-btn" type="button" data-group-id=' + group_id + ' data-id="' + rowCount + '">Add multi choice button</button>';
+            question_row_html += '            <button class="button add-multi-choice-btn" type="button" data-group-id=' + group_id + ' data-id="' + rowCount + '">';
+            question_row_html += '              <i class="fa-solid fa-plus"></i> Add Multiple Choice';
+            question_row_html += '            </button>';
             question_row_html += '            <div class="multi-choice-btn-table-container">';
             question_row_html += '                <table class="multi-choice-table" id="multi-check-table-' + group_id + '_' + rowCount + '">';
             question_row_html += '                    <tbody>';
@@ -140,7 +142,7 @@ jQuery(document).ready(function ($) {
             question_row_html += '        <div class="col-12">'
             question_row_html += '            <div class="btn-add-files-wrapper">'
             question_row_html += '                <label for="additional-files-' + group_id + '-' + rowCount + '">'
-            question_row_html += '                    <span class="button" role="button" aria-disabled="false">+ Add Additional Files</span>'
+            question_row_html += '                    <span class="button" role="button" aria-disabled="false"><i class="fa-solid fa-file-arrow-up"></i> Add Additional Files</span>'
             question_row_html += '                </label>'
             question_row_html += '                <input id="additional-files-' + group_id + '-' + rowCount + '"'
             question_row_html += '                        class="additional-files"'
@@ -1123,9 +1125,8 @@ jQuery(document).ready(function ($) {
         let group_questions_id =  $(this).closest('.group-question-wrapper').data('id')
         let sub_question_id = $(this).closest('.question-row-container').data('id')
         let add_files_container = $(this).closest('.question-add-files-container')
-
-        let count_file_item = (add_files_container.find('.filesList').children().length) + 1;
-        // console.log(count_file_item);
+        let message = add_files_container.find('.__message')
+        let count_file_item = Date.now();
 
         var file_id_input = '';
         var file_item = '';
@@ -1135,57 +1136,79 @@ jQuery(document).ready(function ($) {
         var new_file_url = '';
 
         for (var i = 0; i < this.files.length; i++){
-        file_item = $('<span/>', {class: 'file-item'})
-        file_item.hide()
-        fileName = $('<a/>', {class: 'name', text: this.files.item(i).name})
+            file_item = $('<span/>', {class: 'file-item'})
+            file_item.hide()
+            fileName = $('<a/>', {
+                class: 'name',
+                text: this.files.item(i).name,
+                target: '_blank'
+            });
 
-        file_id_input  = '<input name="group_questions['+group_questions_id+'][list]['+sub_question_id+'][additional_files]['+ count_file_item +']" ';
-        file_id_input += 'type="hidden" class="input-file-hiden additional-file-id-'+ count_file_item +'" value="" />';
+            file_id_input  = '<input name="group_questions['+group_questions_id+'][list]['+sub_question_id+'][additional_files]['+ count_file_item +']" ';
+            file_id_input += 'type="hidden" class="input-file-hiden additional-file-id-'+ count_file_item +'" value="" />';
 
-        file_item.append('<span class="file-delete"><span>+</span></span>')
-            .append(fileName)
-            .append(file_id_input)
+            file_item.append(fileName)
+                .append('<span class="file-delete"><i class="fa-solid fa-xmark"></i></span>')
+                .append(file_id_input)
 
-        filesList.append(file_item);
+            filesList.append(file_item);
 
-        await admin_upload_additional_files(file, that, count_file_item);
+            await admin_upload_additional_files(file, that, count_file_item);
 
-        new_file_id = filesList.find('.additional-file-id-'+ count_file_item).val()
+            new_file_id = filesList.find('.additional-file-id-'+ count_file_item).val()
 
-        wp.media.attachment(new_file_id).fetch().then(function (data) {
-            // preloading finished
-            // after this you can use your attachment normally
-            new_file_url = wp.media.attachment(new_file_id).get('url');
-            fileName.attr('href', new_file_url)
-        });
+            wp.media.attachment(new_file_id).fetch().then(function (data) {
+                // preloading finished
+                // after this you can use your attachment normally
+                new_file_url = wp.media.attachment(new_file_id).get('url');
+                fileName.attr('href', new_file_url)
+            });
 
-        file_item.show()
+            file_item.show()
 
+            // Show the message
+            message.text('File Uploaded');
+            message.show();
+            // Hide the message after 10 seconds
+            setTimeout(function() {
+                message.hide();
+            }, 10000);
         };
     });
 
     // EventListener for delete file item
     $(document).on('click', '.file-delete', function(){
-
-        let input_file_hiden = $(this).parent().find('.input-file-hiden')
+        let btn = $(this)
+        let add_files_container = btn.closest('.question-add-files-container')
+        let message = add_files_container.find('.__message')
+        let input_file_hiden = btn.parent().find('.input-file-hiden')
         let file_ID = input_file_hiden.val()
-        // console.log(file_ID);
-        $.ajax({
-        type: 'POST',
-        url: ajaxUrl,
-        data:{
-            'action' : 'delete_additional_file_assessment',
-            'file_id' : file_ID,
-        },
-        beforeSend : function ( xhr ) {
 
-        },
-        success:function(response){
-            // alert('Delete file Successfully')
+        let confirm_result = confirm("Do you want to remove this file?");
+        if (confirm_result) {
+            $.ajax({
+                type: 'POST',
+                url: ajaxUrl,
+                data:{
+                    'action' : 'delete_additional_file_assessment',
+                    'file_id' : file_ID,
+                },
+                beforeSend : function ( xhr ) {
+        
+                },
+                success:function(response){
+                    btn.parent().remove()
+
+                    // Show the message
+                    message.text('File Deleted');
+                    message.show();
+                    // Hide the message after 10 seconds
+                    setTimeout(function() {
+                        message.hide();
+                    }, 10000);
+                }
+            });
         }
-        });
-
-        $(this).parent().remove()
     });
 
     async function admin_upload_additional_files(file, inputInstance, index) {
