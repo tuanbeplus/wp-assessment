@@ -2,7 +2,6 @@
 
 class Custom_Fields
 {
-
     public function __construct()
     {
         add_action('admin_init', array($this, 'init_meta_boxes_admin'));
@@ -24,7 +23,7 @@ class Custom_Fields
         add_meta_box('questions-repeater-field', 'Questions', array($this, 'question_repeatable_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
         // add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'normal', 'default');
-        add_meta_box('assessment-blacklist', 'Assessment Blacklist', array($this, 'assessment_blacklist_meta_box_callback'), 'assessments', 'normal', 'default');
+        // add_meta_box('assessment-blacklist', 'Assessment Blacklist', array($this, 'assessment_blacklist_meta_box_callback'), 'assessments', 'normal', 'default');
         if (current_user_can('administrator')) {
             add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
         }
@@ -35,6 +34,7 @@ class Custom_Fields
         add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'dcr_submission_list_card_section_admin'), array('dcr_submissions'), 'normal', 'default');
         add_meta_box('submitted_info_view', 'Submission by ', array($this, 'submission_info_section_admin'), array('submissions', 'dcr_submissions'), 'side', 'default');
         add_meta_box('submission-scoring-field', 'Submission Scoring ', array($this, 'submission_scoring_section_admin'), 'submissions', 'normal', 'default');
+        add_meta_box('saturn-invite', 'Salesforce Saturn Invite', array($this, 'saturn_invite_meta_box_callback'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
 
         // Reports
         add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), array('assessments', 'reports'), 'normal', 'default');
@@ -124,6 +124,11 @@ class Custom_Fields
         return include_once ASSESSMENT_BLACKLIST_VIEW;
     }
 
+    function saturn_invite_meta_box_callback()
+    {
+        return include_once ADMIN_SATURN_INVITE_VIEW;
+    }
+
     function question_repeatable_meta_box_save($post_id): void
     {
 
@@ -142,7 +147,7 @@ class Custom_Fields
         $is_required_document_all = $_POST['is_required_document_all'] ?? 0;
         $is_invite_colleagues = $_POST['is_invite_colleagues'] ?? 0;
         $is_all_users_can_access = $_POST['is_all_users_can_access'] ?? 0;
-        $related_sf_products = $_POST['related_sf_products'] ?? null;
+        $related_sf_products = $_POST['related_sf_products'] ?? array();
         $is_assessment_completed = $_POST['is_assessment_completed'] ?? 0;
         $assigned_members = $_POST['assigned_members'] ?? null;
         $invited_members = $_POST['invited_members'] ?? null;
@@ -177,6 +182,9 @@ class Custom_Fields
         update_post_meta($post_id, 'invited_members', $invited_members);
         update_post_meta($post_id, 'report_key_areas', $report_key_areas);
         update_post_meta($post_id, 'blacklist_emails', $blacklist_emails);
+
+        // Save Salesforce Saturn Invite metadata
+        save_saturn_invite_meta_assessment($post_id, $related_sf_products);
     }
 
     function report_template_meta_box_save($post_id): void

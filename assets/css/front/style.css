@@ -77,7 +77,7 @@ body {
 
 .formWrapper .notificationBar.rejected {
     max-height: 500px;
-    overflow-y: scroll;
+    overflow-y: auto;
     border-bottom: 1px solid #ddd;
 }
 
@@ -1528,6 +1528,12 @@ body.single-reports {
     width: fit-content;
     color: #0d6efd!important;
     text-decoration: underline!important;
+}
+
+.access-exprired {
+    text-align: center;
+    margin-top: 24px;
+    color: red;
 }
 
 @keyframes slide-down {

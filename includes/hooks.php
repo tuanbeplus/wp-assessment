@@ -68,20 +68,20 @@ function sf_update_contact_quick_10_field($post_id) {
         else {
             $subject .= 'Update Salesforce Contact Quick 10 Failed - '.date('d F Y');
             $message .= 'Status: Failed';
-        }
-        $message .= '<br>';
-        $message .= 'User Name: '.$sf_user_name;
-        $message .= '<br>';
-        $message .= 'User ID: '.$sf_user_id;
-        $message .= '<br>';
-        $message .= 'Contact ID: '.$contact_id;
-        $message .= '<br>';
-        $message .= 'Email: '.$sf_user_email;
-        $message .= '<br>';
-        $message .= 'Org Name: '.$org_metadata['Name'];
-        $message .= '<br>';
+            $message .= '<br>';
+            $message .= 'User Name: '.$sf_user_name;
+            $message .= '<br>';
+            $message .= 'User ID: '.$sf_user_id;
+            $message .= '<br>';
+            $message .= 'Contact ID: '.$contact_id;
+            $message .= '<br>';
+            $message .= 'Email: '.$sf_user_email;
+            $message .= '<br>';
+            $message .= 'Org Name: '.$org_metadata['Name'];
+            $message .= '<br>';
 
-        wp_mail($email, $subject, $message);
+            wp_mail($email, $subject, $message);
+        }
     }
 }
 add_action('publish_submissions', 'sf_update_contact_quick_10_field');

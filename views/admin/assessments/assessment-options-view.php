@@ -26,14 +26,14 @@ $related_sf_products = get_post_meta($post_id, 'related_sf_products', true);
             Required to provide document on all questions.
         </label>
     </div>
-    <div class="invite-colleagues field-checkbox">
+    <!-- <div class="invite-colleagues field-checkbox">
         <label for="invite-colleagues">
-            <input <?php if ($is_invite_colleagues == true) echo 'checked'; ?>
+            <input  if ($is_invite_colleagues == true) echo 'checked'; 
                     type="checkbox" name="is_invite_colleagues" 
                     id="invite-colleagues" value="1">
             Show invite colleagues area.
         </label>
-    </div>
+    </div> -->
     <div class="accessible-option field-checkbox">
         <label for="accessible">
             <input <?php if ($is_all_users_can_access == true) echo 'checked'; ?>
@@ -43,6 +43,7 @@ $related_sf_products = get_post_meta($post_id, 'related_sf_products', true);
         </label>
     </div>
     
+    <!-- Related Salesforce Products -->
     <div class="related-sf-products field-select2">
         <label for="products-selected-area">Related to Salesforce products</label>
         <!-- List items selected -->
@@ -60,7 +61,6 @@ $related_sf_products = get_post_meta($post_id, 'related_sf_products', true);
             <?php endif; ?>
         </ul>
         <!-- /List items selected -->
-        
         <?php if (isset($sf_products_assessment->records)): ?>
             <!-- List items dropdown -->
             <ul class="list-items-dropdown sf-products-list">
@@ -85,5 +85,5 @@ $related_sf_products = get_post_meta($post_id, 'related_sf_products', true);
             </ul>
         <?php endif; ?>
     </div>
-    
+    <!-- /Related Salesforce Products -->
 </div>

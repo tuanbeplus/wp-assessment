@@ -16,7 +16,6 @@ if (! current_user_can('administrator')) {
 global $post;
 $post_id = $post->ID;
 $main = new WP_Assessment();
-$report = new WP_Report_PDF();
 $post_meta = get_post_meta($post_id);
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
 $submission_id = get_post_meta($post_id, 'submission_id', true);

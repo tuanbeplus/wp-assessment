@@ -1755,5 +1755,40 @@ jQuery(document).ready(function ($) {
           }
       //}
     };
+    
+    // Initialize sorting order to descending
+    var ascending = false;
+    // Attach click event to the "Org Name" header
+    $(document).on("click", "#sort-org-name", function () {
+        $(this).toggleClass('active')
+        // Get all table rows
+        let rows = $(".saturn-invites-table tbody tr").get();
+        // Sort the rows based on the text content of the "Org Name" column
+        rows.sort(function (a, b) {
+            var A = $(a).find('.org-name').text().toUpperCase();
+            var B = $(b).find('.org-name').text().toUpperCase();
+
+            if (A < B) {
+                return ascending ? -1 : 1;
+            }
+            if (A > B) {
+                return ascending ? 1 : -1;
+            }
+            return 0;
+        });
+        // Clear current rows in the table body
+        $(".saturn-invites-table tbody").empty();
+
+        // Append sorted rows with left to right animation
+        $.each(rows, function (index, row) {
+            let row_number = $(row).find('td.index')
+            row_number.text(index + 1)
+            $(row).css("opacity", "0.3")
+                .appendTo(".saturn-invites-table tbody")
+                .animate({ opacity: 1 }, 300);
+        });
+        // Toggle the sorting order for the next click
+        ascending = !ascending;
+    });
 
 });

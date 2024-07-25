@@ -19,6 +19,7 @@ const ADMIN_SUBMISSION_INDEX_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions
 const ADMIN_SUBMISSION_DCR_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-dcr-view.php';
 const ADMIN_SUBMISSION_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-info-view.php';
 const ADMIN_SUBMISSION_SCORING_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/submission-scoring.php';
+const ADMIN_SATURN_INVITE_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/submissions/saturn-invite.php';
 
 // define admin views Reports
 const LINK_REPORT_TO_ASSESSMENT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/link-report-to-assessment.php';

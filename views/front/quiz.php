@@ -28,7 +28,7 @@ $questions = get_post_meta($post_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $question_templates = get_post_meta($post_id, 'question_templates', true);
 $quiz_title = get_the_title($post_id);
-$terms = get_assessment_terms($assessment_id);
+$terms = get_assessment_terms($post_id);
 
 $i = 0;
 $j = 0;
@@ -52,8 +52,11 @@ $is_required_document_all = get_post_meta($post_id, 'is_required_document_all', 
 $is_invite_colleagues = get_post_meta($post_id, 'is_invite_colleagues', true);
 $dcr_feedbacks = $feedback_cl->format_feedbacks_by_question($post_id, $organisation_id);
 
-// check user access to asessment
-$is_user_can_access = check_access_salesforce_members($user_id, $post_id);
+// Check user access to asessment
+$is_all_users_can_access = get_post_meta($post_id, 'is_all_users_can_access', true);
+
+// Get Status of the Saturn Invite
+$saturn_invite_status = get_saturn_invite_status($user_id, $post_id);
 
 // Get all answers desciption of all submissions
 $all_quiz_pre_cmts = $main->get_dcr_quiz_answers_all_submissions($post_id, $organisation_id);
@@ -68,7 +71,7 @@ $exception_orgs_id = get_exception_orgs_id();
 
 <?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
 
-    <?php if (current_user_can('administrator') || $is_user_can_access == true): ?>
+    <?php if (current_user_can('administrator') || $is_all_users_can_access == true || $saturn_invite_status == 'Active'): ?>
 
         <?php if (isset($_COOKIE['userId'])): ?>
             <input type="hidden" id="sf_user_id" value="<?php echo $_COOKIE['userId']; ?>" />
@@ -101,7 +104,7 @@ $exception_orgs_id = get_exception_orgs_id();
                     <?php endif; ?>
                 </div>
 
-                <?php if ($is_invite_colleagues == true): ?>
+                <?php if ($is_invite_colleagues == 999): ?>
                     <?php echo $question_form->get_invite_colleagues_form(); ?>
                 <?php endif; ?>
 
@@ -785,6 +788,11 @@ $exception_orgs_id = get_exception_orgs_id();
         <section class="formWrapper">
             <div class="container">
                 <h3 style="text-align:center;">Oops! You can't access this assessment.</h3>
+                <?php 
+                    if ($saturn_invite_status == 'Expired') {
+                        echo '<p class="access-exprired">The access has expired.</p>';
+                    }
+                ?>
             </div>
         </section>
     <?php endif; ?>

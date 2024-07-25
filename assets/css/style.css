@@ -1172,7 +1172,7 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   animation: append-animate 0.1s linear;
   z-index: 10;
 }
@@ -1994,4 +1994,79 @@ li .confirm-remove .btn-confirmed-remove {
 li .confirm-remove .btn-not-remove {
   margin-left: 4px;
   color: #eee;
+}
+
+/* ------- Salesforce Saturn Invite Area -------- */
+#salesforce-saturn-invite {
+  padding: 6px 0;
+}
+#salesforce-saturn-invite * {
+  font-size: 14px;
+}
+#salesforce-saturn-invite .field-select2 {
+  margin-top: 0;
+}
+#salesforce-saturn-invite .field-select2 .list-items-selected-area::after {
+  content: "Select Saturn Products";
+  margin-top: -2px;
+}
+#salesforce-saturn-invite .field-select2 h3{
+  margin-top: 0;
+}
+#salesforce-saturn-invite .list-items-dropdown {
+  max-width: 100%;
+}
+#salesforce-saturn-invite p {
+  margin-bottom: 10px;
+}
+#salesforce-saturn-invite h3 {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+#salesforce-saturn-invite table.saturn-invites-table {
+  width: 100%;
+  border-right: 1px solid #ddd;
+}
+table.saturn-invites-table tr {
+  transition: all 0.3s ease 0s;
+}
+table.saturn-invites-table th {
+  font-weight: 600;
+}
+table.saturn-invites-table th, 
+table.saturn-invites-table td {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-right: none;
+}
+table.saturn-invites-table tbody tr:nth-child(odd) td {
+  background-color: #f6f7f7;
+}
+table.saturn-invites-table .Active {
+  color: green;
+}
+table.saturn-invites-table .Expired {
+  color: #cb2f30;
+}
+table.saturn-invites-table #sort-org-name {
+  position: relative;
+  padding-right: 20px;
+  cursor: pointer;
+}
+table.saturn-invites-table #sort-org-name::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border: 0 solid transparent;
+  border-left-width: 4px;
+  border-right-width: 4px;
+  border-top: 6px solid #777;
+  transition: all 0.2s;
+}
+table.saturn-invites-table #sort-org-name.active::after {
+  transform: rotate(-180deg);
 }

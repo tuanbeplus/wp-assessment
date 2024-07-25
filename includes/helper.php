@@ -35,8 +35,8 @@ function getProductIdByOpportunity()
 		'index_product_id' => array(),
 	);
 	$opps_purchased_arr = getOpportunitiesPerchased();
-	$drc_purchase = $opps_purchased_arr['drc_purchase'];
-	$index_purchase = $opps_purchased_arr['index_purchase'];
+	$drc_purchase = $opps_purchased_arr['drc_purchase'] ?? array();
+	$index_purchase = $opps_purchased_arr['index_purchase'] ?? array();
 
 	// Add DCR Product2 ID to array
 	if (isset($drc_purchase) && !empty($drc_purchase)) {
@@ -53,7 +53,6 @@ function getProductIdByOpportunity()
 			}
 		}
 	}
-
 	// Add Index Product2 ID to array
 	if (isset($index_purchase) && !empty($index_purchase)) {
 		foreach ($index_purchase as $item) {
@@ -74,44 +73,35 @@ function getProductIdByOpportunity()
 }
 
 /**
- * Get Assessments that related to Salesforce products
+ * Get all assessments from a specified category that have the 'related_sf_products' meta field
  *
- * @param string $product_id    Salesforce porducts ID
- * @param string $term          assessment Term's slug
+ * @param array $term_slug    Category slug
  *
- * @return array Assessments 
- * 
+ * @return array Assessments ID List
  */
-function get_assessments_related_sf_products($product_id_arr, $term)
+function get_assessments_related_saturn_products()
 {
     $args = array(
 		'post_type' => 'assessments',
 		'posts_per_page' => -1,
 		'post_status' => 'publish',
+		'meta_query' => array(
+            array(
+                'key' => 'related_sf_products',
+                'value' => '',
+                'compare' => '!='
+            )
+		),
 	);
-	if (isset($term)) {
-		$args['tax_query'] = array(
-			array(
-				'taxonomy' => 'category',
-				'field'    => 'slug',
-				'terms'    => $term,
-			)
-		);
-	}
 
-	$assessments = new WP_Query($args);
+	$assessments = get_posts($args);
 	$assessments_arr = array();
 
-    foreach ($assessments->posts as $assessment) {
-        $related_sf_products = get_post_meta($assessment->ID, 'related_sf_products', true);
-
-        if (!empty($product_id_arr) && !empty($related_sf_products)) {
-			$products_related_arr = array_intersect($product_id_arr, $related_sf_products);
-			if (!empty($products_related_arr)) {
-				$assessments_arr[] = $assessment->ID;
-			}
-        }
-    }
+	if (!empty($assessments)) {
+		foreach ($assessments as $assessment) {
+			$assessments_arr[] = $assessment->ID;
+		}
+	}
 	wp_reset_postdata();
     
     return $assessments_arr;
@@ -176,57 +166,12 @@ function get_submissions_completed($organisation_id, $assessment_id)
 		}
 	}
 	return $submissions_arr;
-} 
-
-/**
- * Get Assessments accessible for all logged in users
- *
- * @param array $arr_terms   Terms array include in Assessment
- *
- * @return array Assessments array
- * 
- */
-function get_assessments_accessible_all_users($organisation_id, $arr_terms)
-{
-    $args = array(
-		'post_type' => 'assessments',
-		'posts_per_page' => -1,
-		'post_status' => 'publish',
-		'meta_query' => array(
-            array(
-                'key' => 'is_all_users_can_access',
-                'value' => true,
-                'compare' => '=',
-            ),
-        ),
-		'tax_query' => array(  
-			array(
-				'taxonomy' => 'category',
-				'field' => 'slug',
-				'terms' => $arr_terms,
-				'include_children' => true,
-				'operator' => 'IN'
-			)
-		),
-	);
-	$assessments = new WP_Query($args);
-	$assessments_arr = array();
-
-	foreach ($assessments->posts as $assessment) {
-		$submission_completed = get_submissions_completed($organisation_id, $assessment->ID);
-		if (empty($submission_completed)) {
-			$assessments_arr[] = $assessment->ID;
-		}
-	}
-	wp_reset_postdata();
-    
-    return $assessments_arr;
 }
 
 /**
  * Get all terms of an Assessment
  *
- * @param int 	 $assessment_id   	Assessment ID
+ * @param int $assessment_id   	Assessment ID
  *
  * @return array Terms Array
  * 
@@ -294,7 +239,7 @@ function get_current_user_email_by_salesforce_id($sf_user_id)
 }
 
 /**
- * Check accessible for Salesforce Members(User)
+ * Check accessible for Salesforce Members (User)
  *
  * @param string $user_id   		Salesforce User ID
  * @param int 	 $assessment_id   	Assessment ID
@@ -305,105 +250,77 @@ function get_current_user_email_by_salesforce_id($sf_user_id)
 function check_access_salesforce_members($user_id, $assessment_id)
 {
 	$is_user_can_access = false;
-	$main = new WP_Assessment();
-	$user_email = get_current_user_email_by_salesforce_id($user_id) ?? '';
-	$terms_arr = get_assessment_terms($assessment_id);
 	$is_all_users_can_access = get_post_meta($assessment_id, 'is_all_users_can_access', true);
-	$related_sf_products = get_post_meta($assessment_id, 'related_sf_products', true);
-	$assigned_members = get_post_meta($assessment_id, 'assigned_members', true);
-	$invited_members = get_post_meta($assessment_id, 'invited_members', true);
-	$blacklist_emails = get_post_meta($assessment_id, 'blacklist_emails', true);
 
-	$assigned_member_ids = array();
-	foreach ($assigned_members as $member) {
-		$assigned_member_ids[] = $member['id'];
-	}
-
-	$sf_product_id_opp = getProductIdByOpportunity();
-	$drc_product_id = $sf_product_id_opp['dcr_product_id'] ?? array();
-	$index_product_id = $sf_product_id_opp['index_product_id'] ?? array();
-	
-	// check user access to DCR Asessment
-	if (!empty($drc_product_id) && !empty($related_sf_products)) {
-		$dcr_products_related_arr = array_intersect($drc_product_id, $related_sf_products);
-	    if (in_array('dcr', $terms_arr) && !empty($dcr_products_related_arr)) {
-	        $is_user_can_access = true;
-	    }
-	}
-	// check user access to Index Asessment
-	if (!empty($index_product_id) && !empty($related_sf_products)) {
-		$index_products_related_arr = array_intersect($index_product_id, $related_sf_products);
-	    if (in_array('index', $terms_arr) && !empty($index_products_related_arr)) {
-	        $is_user_can_access = true;
-	    }
-	}
-
-	// Accessible for all assigned members
-	if (is_array($assigned_member_ids)) {
-		if (in_array($user_id, $assigned_member_ids)) {
-			$is_user_can_access = true;
-		}
-	}
-	// Accessible for all invited members
-	if (is_array($invited_members)) {
-		if (in_array($user_id, $invited_members)) {
-			$is_user_can_access = true;
-		}
-	}
 	// Assessment is accessible for all loged in users
 	if ($is_all_users_can_access == true) {
 		$is_user_can_access = true;
-	}
-
-	// Stop user access if user's email in Blacklist
-	if (!empty($user_email) && !empty($blacklist_emails)) {
-		if (in_array($user_email, $blacklist_emails)) {
-			$is_user_can_access = false;
-		}
 	}
 
 	return $is_user_can_access;
 }
 
 /**
- * Get all Assessments accessible for Member
+ * Get Assessments accessible for all logged in users
  *
- * @param string $user_id   		Salesforce User ID
- * @param string $organisation_id   Salesforce Account ID
- * @param array  $arr_terms   		Terms array of Assessment
- *
- * @return array Assessments accessible array
+ * @return array Array of Assessments ID
  * 
  */
-function get_assessments_accessible_members($user_id, $organisation_id, $arr_terms)
+function get_assessments_accessible_all_users()
 {
-	$args = array(
+    $args = array(
 		'post_type' => 'assessments',
 		'posts_per_page' => -1,
 		'post_status' => 'publish',
-		'tax_query' => array(  
-			array(
-				'taxonomy' => 'category',
-				'field' => 'slug',
-				'terms' => $arr_terms,
-				'include_children' => true,
-				'operator' => 'IN'
-			)
-		),
+		'meta_query' => array(
+            array(
+                'key' => 'is_all_users_can_access',
+                'value' => true,
+                'compare' => '=',
+            ),
+        ),
 	);
 	$assessments = get_posts($args);
-	$accessible_assessments = array();
+	$assessments_arr = array();
 
 	foreach ($assessments as $assessment) {
-		$is_accessible = check_access_salesforce_members($user_id, $assessment->ID);
-
-		if ($is_accessible == true) {
-			$accessible_assessments[] = $assessment->ID;
-		}
+		$assessments_arr[] = $assessment->ID;
 	}
 	wp_reset_postdata();
-	
-	return $accessible_assessments;
+    
+    return $assessments_arr;
+}
+
+/**
+ * Get the Status of Saturn Invites by Contact ID
+ *
+ * @param string $sf_user_id   		Salesforce User ID
+ * @param int 	 $assessment_id   	Assessment ID
+ *
+ * @return Status Active/Expired/Null
+ * 
+ */
+function get_saturn_invite_status($sf_user_id, $assessment_id) {
+	// Get WordPress User ID
+	$wp_user_id = get_current_user_by_salesforce_id($sf_user_id);
+
+	// Salesforce Contact ID
+	$contact_id = get_user_meta($wp_user_id, 'salesforce_contact_id', true);
+	if (empty($contact_id)) {
+		$contact_id = getUser($sf_user_id)->records[0]->ContactId;
+	}
+	// Get the Saturn Invites data
+	$saturn_invites = get_post_meta($assessment_id, 'sf_saturn_invites', true);
+
+	$filtered = '';
+	if (is_array($saturn_invites) && !empty($saturn_invites)) {
+		$filtered = array_filter($saturn_invites, function($item) use ($contact_id) {
+			return isset($item['Contact__c']) && $item['Contact__c'] === $contact_id;
+		});
+	}
+
+	// Return the Status__c of the first matching item, or null if no matches found
+    return !empty($filtered) ? reset($filtered)['Status__c'] : null;
 }
 
 /**
@@ -418,14 +335,19 @@ function get_assessments_accessible_members($user_id, $organisation_id, $arr_ter
  */
 function get_assessments_on_dashboard($sf_user_id, $organisation_id, $assessments_list) {
 	$assessment_final_list = array();
-	$is_user_can_access = false;
 	if (!empty($assessments_list)) {
 		foreach ($assessments_list as $assessment_id) {
+			// Get Submission completed of the Assessment
 			$submission_completed = get_submissions_completed($organisation_id, $assessment_id);
-			$is_user_can_access = check_access_salesforce_members($sf_user_id, $assessment_id);
+			// Check user access to asessment
+			$is_all_users_can_access = get_post_meta($assessment_id, 'is_all_users_can_access', true);
+			// Get Status of the Saturn Invite
+			$saturn_invite_status = get_saturn_invite_status($sf_user_id, $assessment_id);
 		
-			if (empty($submission_completed) && $is_user_can_access == true){
-				$assessment_final_list[] = $assessment_id;
+			if (empty($submission_completed)){
+				if ($is_all_users_can_access == true || $saturn_invite_status == 'Active') {
+					$assessment_final_list[] = $assessment_id;
+				}
 			}
 		}
 	}
