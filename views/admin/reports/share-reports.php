@@ -16,11 +16,11 @@ $users = get_users(array(
   }
   .report-message .success{
     color: green;
-    font-weight: 600;
+    font-weight: 500;
   }
   .report-message .error{
     color: red;
-    font-weight: 600;
+    font-weight: 500;
   }
   .select2-container .select2-search--inline .select2-search__field {
     padding: 0 6px;
@@ -37,9 +37,7 @@ $users = get_users(array(
         } ?>
      </select>
    </p>
-   <p>
-    <div class="report-message"></div>
-     <input type="hidden" name="post_share" value="<?php echo $report_id; ?>">
-     <a href="javascript:;" class="button button-primary button-large btn-share-report">Send</a>
-   </p>
+  <div class="report-message"></div>
+  <input type="hidden" name="post_share" value="<?php echo $report_id; ?>">
+  <a href="javascript:;" class="button button-primary button-large btn-share-report">Send</a>
 </div>

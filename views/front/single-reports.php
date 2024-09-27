@@ -30,6 +30,9 @@ $recommentdation = get_post_meta($submission_id, 'recommentdation', true);
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $count_index = count_all_index_submissions_finalised($assessment_id);
+$report_title = get_the_title($post_id);
+$report_title = html_entity_decode($report_title, ENT_QUOTES, 'UTF-8');
+$report_file_name = !empty($report_title) ? $report_title : 'Access and Inclusion Index Comprehensive Report';
 $report_template = get_post_meta($post_id, 'report_template', true);
 if (empty($report_template)) {
     $report_template = get_post_meta($assessment_id, 'report_template', true);
@@ -50,9 +53,7 @@ $defaultFontConfig = (new Mpdf\Config\FontVariables())->getDefaults();
 $fontData = $defaultFontConfig['fontdata'];
 
 // mPDF Configuration
-$mpdf = new \Mpdf\Mpdf([
-    'margin_top' => 34, 
-    'margin_bottom' => 24, 
+$mpdf = new \Mpdf\Mpdf([  
     'fontDir' => array_merge($fontDirs, [
         ABSPATH .'wp-content/plugins/wp-assessment/assets/font/',
     ]),
@@ -80,12 +81,22 @@ $mpdf = new \Mpdf\Mpdf([
 $pdf_stylesheet = file_get_contents(WP_ASSESSMENT_ASSETS . '/css/report-pdf-style.css');
 $mpdf->WriteHTML($pdf_stylesheet,\Mpdf\HTMLParserMode::HEADER_CSS);
 
+// Render Front page
+require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-front-page.php';
+
 // Define the Header/Footer before writing anything so they appear on the first page
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-header.php';
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-footer.php';
 
-// Render Front page
-require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-front-page.php';
+// add margin for all pages below
+$mpdf->AddPageByArray(
+    array(
+        'margin-top' => 34, 
+        'margin-bottom' => 24, 
+        'margin-left' => 14,
+        'margin-right' => 14,
+    ),
+);
 
 // Render Table of content
 if (isset($report_template['is_include_toc'])) {
@@ -93,6 +104,7 @@ if (isset($report_template['is_include_toc'])) {
         $mpdf->TOCpagebreakByArray(
             array(
                 'links' => true,
+                'toc-preHTML' => '<h2>Table of Contents</h2>', 
             ),
         );
     }
@@ -127,6 +139,5 @@ require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-history.php';
 // Render All after generic pages
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-generic-page-after.php';
 
-// Output a PDF file directly to the browser
-// $mpdf->Output('Access_and_Inclusion_Index_Comprehensive_Roadmap_Report_2023_'.$org_data['Name'].'.pdf', 'D');
-$mpdf->Output();
+// Output the PDF to the browser with the File name
+$mpdf->Output($report_file_name.'.pdf', \Mpdf\Output\Destination::INLINE);

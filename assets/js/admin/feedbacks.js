@@ -13,6 +13,9 @@
 
     $("body").on("click", ".ic-delete-feedback", function (e) {
       e.preventDefault();
+      if ( ! confirm('Do you want to remove?') ) {
+        return;
+      }
       and_remove_submission_feedback($(this));
     });
 
@@ -75,11 +78,14 @@
 
         let added_fb_html = '<div class="fd-row">';
         added_fb_html += ' <div class="fb-content">';
-        added_fb_html +=
-          '  <span class="ic-delete-feedback" data-fb-id="' + feedback_id + '" title="Remove this feedback">';
+        added_fb_html += '  <span class="ic-delete-feedback" data-fb-id="' + feedback_id + '" title="Remove this feedback">';
         added_fb_html += '    <i class="fa fa-trash-o"></i>';
         added_fb_html += "  </span>";
-        added_fb_html += '  <div class="author"><strong>' + user_name + "</strong> - " + time + "</div>";
+        added_fb_html += '  <div class="author">';
+        added_fb_html += '    <strong>' + user_name + "</strong>";
+        added_fb_html += '    <span> - </span>';
+        added_fb_html += '    <span class="datetime">'+ time +'</span>';
+        added_fb_html += '  </div>';
         added_fb_html += '  <div class="fb">' + feedback_vl + "</div>";
         added_fb_html += " </div>";
         added_fb_html += "</div>";

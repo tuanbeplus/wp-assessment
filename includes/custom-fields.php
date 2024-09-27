@@ -28,6 +28,7 @@ class Custom_Fields
             add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
         }
         add_meta_box('report-key-areas-field', 'Add Key Areas', array($this, 'report_key_areas_meta_box_callback'), 'assessments', 'normal', 'default');
+        add_meta_box('scoring-formula-options', 'Scoring formula options', array($this, 'scoring_formula_options_meta_box_callback'), 'assessments', 'side', 'default');
 
         // Submisions
         add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'index_submission_list_card_section_admin'), array('submissions'), 'normal', 'default');
@@ -129,6 +130,11 @@ class Custom_Fields
         return include_once ADMIN_SATURN_INVITE_VIEW;
     }
 
+    function scoring_formula_options_meta_box_callback()
+    {
+        return include_once ASSESSMENT_FORMULA_OPTIONS_VIEW;
+    }
+
     function question_repeatable_meta_box_save($post_id): void
     {
 
@@ -153,6 +159,7 @@ class Custom_Fields
         $invited_members = $_POST['invited_members'] ?? null;
         $report_key_areas = isset($_POST['report_key_areas']) ? $_POST['report_key_areas'] : '';
         $blacklist_emails = isset($_POST['blacklist_emails']) ? $_POST['blacklist_emails'] : '';
+        $scoring_formula = isset($_POST['scoring_formula']) ? $_POST['scoring_formula'] : '';
 
         // Renew Index of Questions array
         $new_group_questions = array();
@@ -182,6 +189,7 @@ class Custom_Fields
         update_post_meta($post_id, 'invited_members', $invited_members);
         update_post_meta($post_id, 'report_key_areas', $report_key_areas);
         update_post_meta($post_id, 'blacklist_emails', $blacklist_emails);
+        update_post_meta($post_id, 'scoring_formula', sanitize_text_field($scoring_formula));
 
         // Save Salesforce Saturn Invite metadata
         save_saturn_invite_meta_assessment($post_id, $related_sf_products);
@@ -260,7 +268,6 @@ class Custom_Fields
         $assessment_id = get_post_meta($post_id, 'assessment_id', true);
         $group_quiz_points = $_POST['group_quiz_point'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
-        $total_submission_score = $_POST['total_submission_score'] ?? null;
         $org_score = $_POST['org_score'] ?? array();
         $and_score = $_POST['and_score'] ?? array();
         $agreed_score = $_POST['agreed_score'] ?? array();
@@ -315,24 +322,35 @@ class Custom_Fields
         }
         $new_group_quiz_points = serialize($new_group_quiz_points);
 
+        // Get max score of the assessmnet
+        $assessment_max_score = get_assessment_max_score($assessment_id);
+
+        // Save total Org Self-Assessed Score
+        $total_org_score = array();
+        $total_org_score['sum'] = array_sum_submission_score($assessment_id, $org_score);
+        $total_org_score['sum_with_weighting'] = array_sum_submission_score_with_weighting($assessment_id, $org_score);
+        $total_org_score['percent'] = round((array_sum_submission_score_with_weighting($assessment_id, $org_score))/$assessment_max_score * 100);
+
         // Save total AND Score
         $total_and_score = array();
         $total_and_score['sum'] = array_sum_submission_score($assessment_id, $and_score);
-        $total_and_score['percent'] = round((array_sum_submission_score($assessment_id, $and_score))/272*100);
+        $total_and_score['sum_with_weighting'] = array_sum_submission_score_with_weighting($assessment_id, $and_score);
+        $total_and_score['percent'] = round((array_sum_submission_score_with_weighting($assessment_id, $and_score))/$assessment_max_score * 100);
 
         // Save total Agreed Score
         $total_agreed_score = array();
         $total_agreed_score['sum'] = array_sum_submission_score($assessment_id, $agreed_score);
-        $total_agreed_score['percent'] = round((array_sum_submission_score($assessment_id, $agreed_score))/272*100);
+        $total_agreed_score['sum_with_weighting'] = array_sum_submission_score_with_weighting($assessment_id, $agreed_score);
+        $total_agreed_score['percent'] = round((array_sum_submission_score_with_weighting($assessment_id, $agreed_score))/$assessment_max_score * 100);
 
         update_post_meta($post_id, 'group_quiz_point', $new_group_quiz_points);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);
-        update_post_meta($post_id, 'total_submission_score', $total_submission_score);
         update_post_meta($post_id, 'org_score', $org_score);
         update_post_meta($post_id, 'and_score', $and_score);
         update_post_meta($post_id, 'agreed_score', $agreed_score);
         update_post_meta($post_id, 'org_section_score', $org_section_score);
         update_post_meta($post_id, 'recommentdation', $recommentdation);
+        update_post_meta($post_id, 'total_submission_score', $total_org_score);
         update_post_meta($post_id, 'total_and_score', $total_and_score);
         update_post_meta($post_id, 'total_agreed_score', $total_agreed_score);
         update_post_meta($post_id, 'key_area', $key_area);

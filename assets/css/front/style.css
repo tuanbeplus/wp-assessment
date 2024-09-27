@@ -660,7 +660,7 @@ body {
 }
 
 .fieldsWrapper .checkBox label.required {
-    border: 1px solid #c50000;
+    border: 1px solid #ff0000;
 }
 
 .fieldsWrapper .checkBox label::before {
@@ -714,7 +714,7 @@ body {
 }
 
 .textAreaWrap textarea.required {
-    border: 1px solid #c50000;
+    border: 2px solid #ff0000;
 }
 
 .textAreaWrap textarea::placeholder {

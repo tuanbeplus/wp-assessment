@@ -107,6 +107,8 @@ class AndAssessmentRanking {
             return;
 
         $assessment_id = get_field('assessment', $post_id);
+        // Get Scoring formula type
+		    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
         $submissions_info = array();
         $org_list = array();
 
@@ -123,8 +125,6 @@ class AndAssessmentRanking {
           $user_id = get_post_meta($sub->ID, 'user_id', true);
           $org_id = get_post_meta($sub->ID, 'organisation_id', true);
           $org_metadata = get_post_meta($sub->ID, 'org_data', true);
-          // $sub_all_scores = get_post_meta($sub->ID, 'org_score', true);
-          // $group_all_scores = get_post_meta($sub->ID, 'org_section_score', true);
 
           // Calculator Agreed Scores
           $agreed_score = get_post_meta($sub->ID, 'agreed_score', true);
@@ -140,7 +140,13 @@ class AndAssessmentRanking {
           $industry_name = (isset($org_metadata['Industry'])) ? $org_metadata['Industry'] : '';
 
           if ( ! in_array($org_name, $org_list) && $org_name ) {
-            $total_score_sum = ( isset($total_score['sum']) ) ? $total_score['sum'] : 0;
+            if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+              $total_score_sum = ( isset($total_score['sum']) ) ? $total_score['sum'] : 0;
+            }
+            else {
+              $total_score_sum = ( isset($total_score['sum_with_weighting']) ) ? $total_score['sum_with_weighting'] : 0;
+            }
+            
             $total_percent = ( isset($total_score['percent']) ) ? $total_score['percent'] : 0;
             $submissions_info[] = array(
               'sub_id' => $sub->ID,
@@ -315,6 +321,8 @@ class AndAssessmentRanking {
       $index_submissions = $this->get_all_index_submission_finalised($assessment_id);
       $ranking_by_key_areas = array();
       $ranking_orgs_data = array();
+      // Get Scoring formula type
+      $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
 
       foreach ($key_areas as $key) {
           // Loop group question
@@ -339,13 +347,19 @@ class AndAssessmentRanking {
                         $agreed_score = get_post_meta($submission->ID, 'agreed_score', true);
 
                         if (!empty($weighting)) {
-                          $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
+                          if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+                            $sub_score = (float)$agreed_score[$group_id][$sub_id];
+                          }
+                          else {
+                            $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
+                          }
+                          
                         }
                         else {
                           $sub_score = (float)$agreed_score[$group_id][$sub_id];
                         }
                         // Add average group scores
-                        $ranking_by_key_areas[$key][$group_id]['gr_ranking'][$submission->ID]['score_average'] = $this->cal_group_scores_key_area($key, $group_id, $questions, $submission->ID);
+                        $ranking_by_key_areas[$key][$group_id]['gr_ranking'][$submission->ID]['score_average'] = $this->cal_group_scores_key_area($assessment_id, $key, $group_id, $questions, $submission->ID);
                         // Add empty froup rank
                         $ranking_by_key_areas[$key][$group_id]['gr_ranking'][$submission->ID]['rank'] = '';
                         // Add submission title
@@ -421,11 +435,13 @@ class AndAssessmentRanking {
      * 
      * @return Array Group scores average with key area
      */
-    function cal_group_scores_key_area($key_area, $group_id, $questions, $submission_id) {
+    function cal_group_scores_key_area($assessment_id, $key_area, $group_id, $questions, $submission_id) {
       $gr_ranking = array();
       $gr_scores_arr = array();
       $agreed_score = get_post_meta($submission_id, 'agreed_score', true);
       $gr_field = $questions[$group_id] ?? array();
+      // Get Scoring formula type
+		  $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
 
       if (isset($gr_field) && !empty($gr_field)) {
         $sub_questions_list = $gr_field['list'] ?? array();
@@ -437,7 +453,12 @@ class AndAssessmentRanking {
               $weighting = $sub_field['point'] ?? '';
           
               if (!empty($weighting)) {
-                $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
+                if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+                  $sub_score = (float)$agreed_score[$group_id][$sub_id];
+                }
+                else {
+                  $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
+                }
               }
               else {
                 $sub_score = (float)$agreed_score[$group_id][$sub_id];

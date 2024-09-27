@@ -37,10 +37,6 @@ $all_answers_desc = $main->get_dcr_quiz_answers_all_submissions($assessment_id, 
 
 $i = 0;
 $submission_score_arr = array();
-
-// echo "<pre>";
-// print_r($all_answer_desc);
-// echo "</pre>";
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -450,10 +446,6 @@ $submission_score_arr = array();
                 <?php endif;?>
             </div>
         <?php endforeach;?>
-        
-        <!-- Save Total Submission Score -->
-        <input type="hidden" name="total_submission_score[sum]" value="<?php echo array_sum($submission_score_arr); ?>">
-        <input type="hidden" name="total_submission_score[percent]" value="<?php echo round(array_sum($submission_score_arr)/272*100); ?>">
 
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">

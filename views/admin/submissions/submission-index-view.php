@@ -34,19 +34,6 @@ $question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id,
 
 $i = 0;
 $submission_score_arr = array();
-
-if (($_GET['update_sf_contact'] == '1')) {
-   
-    echo "<pre>";
-    // print_r($post_meta);
-
-    $the_update = sf_update_contact_quick_10_field($post_id);
-
-    print_r($the_update);
-
-
-    echo "</pre>";
-}
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -277,7 +264,14 @@ if (($_GET['update_sf_contact'] == '1')) {
                                                                 echo $sub_question_score;
                                                             }
                                                             elseif ($weighting != null && $quiz_point != null) {
-                                                                $sub_question_score = $weighting * $quiz_point;
+                                                                // Get Scoring formula type
+		                                                        $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+                                                                if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+                                                                    $sub_question_score = $quiz_point;
+                                                                }
+                                                                else {
+                                                                    $sub_question_score = $weighting * $quiz_point;
+                                                                }
                                                                 $section_score_arr[] = $sub_question_score;
                                                                 echo $sub_question_score;
                                                             } 
@@ -380,12 +374,16 @@ if (($_GET['update_sf_contact'] == '1')) {
                                                     ?>
                                                         <div class="fd-row">
                                                             <div class="fb-content">
-                                                                <?php if ( $current_user->ID == $q_fb['user_id'] ) { ?>
-                                                                <span class="ic-delete-feedback" data-fb-id="<?php echo $q_fb['fb_id']; ?>" title="Remove this feedback">
-                                                                    <i class="fa fa-trash-o"></i>
-                                                                </span>
-                                                                <?php } ?>
-                                                                <div class="author"><strong><?php echo $q_fb['user_name']; ?></strong> - <?php echo date("M d Y H:i a", strtotime($q_fb['time'])); ?></div>
+                                                                <?php if ( $current_user->ID == $q_fb['user_id'] ): ?>
+                                                                    <span class="ic-delete-feedback" data-fb-id="<?php echo $q_fb['fb_id']; ?>" title="Remove this feedback">
+                                                                        <i class="fa fa-trash-o"></i>
+                                                                    </span>
+                                                                <?php endif; ?>
+                                                                <div class="author">
+                                                                    <strong><?php echo $q_fb['user_name']; ?></strong>
+                                                                    <span> - </span>
+                                                                    <span class="datetime"><?php echo date("M d Y H:i a", strtotime($q_fb['time'])); ?></span>
+                                                                </div>
                                                                 <div class="fb"><?php 
                                                                 $feedback_str = strip_tags($q_fb['feedback']);
                                                                 if ( strlen($feedback_str) > 200 ) {
@@ -441,7 +439,7 @@ if (($_GET['update_sf_contact'] == '1')) {
                         $submission_score_arr[] = $total_section_score;
                 ?>
                     <div class="total-section-score">
-                        <span>Key Area Score: 
+                        <span>Key Area Score (<?php echo $group_title; ?>): 
                             <span class="total-section-score-val">
                                 <?php echo $section_score; ?>
                             </span>
@@ -452,10 +450,6 @@ if (($_GET['update_sf_contact'] == '1')) {
                 <?php endif;?>
             </div>
         <?php endforeach;?>
-        
-        <!-- Save Total Submission Score -->
-        <input type="hidden" name="total_submission_score[sum]" value="<?php echo array_sum($submission_score_arr); ?>">
-        <input type="hidden" name="total_submission_score[percent]" value="<?php echo round(array_sum($submission_score_arr)/272*100); ?>">
 
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">

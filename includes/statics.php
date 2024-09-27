@@ -9,6 +9,7 @@ const ADMIN_ASSESSMENT_OPTION_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessment
 const MODERATOR_LIST_ADMIN_SELECT = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/moderator-list.php';
 const ADMIN_ACCESS_CONTROL_PANEL = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/access-control-panel.php';
 const ASSESSMENT_BLACKLIST_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/assessment-blacklist.php';
+const ASSESSMENT_FORMULA_OPTIONS_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/assessments/scoring-formula-options.php';
 
 const ADMIN_REPORT_CONTENT_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-content.php';
 const ADMIN_REPORT_SECTION_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/reports/report-section.php';

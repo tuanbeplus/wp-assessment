@@ -47,11 +47,24 @@ if (empty($org_metadata)) {
     <p class="post-status-display">Status: <strong><?php echo $submission_status; ?></strong></p>
 
     <?php if (in_array('index', $terms)): ?>
+        <?php
+            $sum_key = 'sum';
+            // Get Scoring formula type
+		    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+            // Using Index formula 2024
+            if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+                $sum_key = 'sum';
+            }
+            // Using Index formula 2023
+            else {
+                $sum_key = 'sum_with_weighting';
+            }
+        ?>
         <?php if (isset($total_submission_score)): ?>
             <p class="post-status-display">
                 Total Org Score: 
                 <strong class="total-submission-score">
-                    <?php echo $total_submission_score['sum'] ?? 0; ?>
+                    <?php echo $total_submission_score[$sum_key] ?? 0; ?>
                     (<?php echo $total_submission_score['percent'] ?? 0; ?>%)
                 </strong>
             </p>
@@ -61,7 +74,7 @@ if (empty($org_metadata)) {
             <p class="post-status-display">
                 Total AND Score: 
                 <strong class="total-submission-score">
-                    <?php echo $total_and_score['sum'] ?? 0; ?>
+                    <?php echo $total_and_score[$sum_key] ?? 0; ?>
                     (<?php echo $total_and_score['percent'] ?? 0; ?>%)
                 </strong>
             </p>
@@ -71,7 +84,7 @@ if (empty($org_metadata)) {
             <p class="post-status-display">
                 Total Agreed Score: 
                 <strong class="total-submission-score">
-                    <?php echo $total_agreed_score['sum'] ?? 0; ?>
+                    <?php echo $total_agreed_score[$sum_key] ?? 0; ?>
                     (<?php echo $total_agreed_score['percent'] ?? 0; ?>%)
                 </strong>
             </p>

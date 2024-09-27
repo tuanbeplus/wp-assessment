@@ -164,6 +164,20 @@ class CustomPostType
                         'instructions' => 'Enter the URL to users register for the Quick 10.',
                     ),
                     array(
+                        'key' => 'field_assessment_index_2023',
+                        'label' => 'Assessment Index 2023',
+                        'name' => 'assessment_index_2023',
+                        'type' => 'post_object',
+                        'instructions' => 'Select assessment is the Index 2023.',
+                        'post_type' => array(
+                            0 => 'assessments',
+                        ),
+                        'post_status' => 'publish',
+                        'taxonomy' => '',
+                        'return_format' => 'id',
+                        'multiple' => 0,
+                    ),
+                    array(
                         'key' => 'field_dcr_submission_notification_email',
                         'label' => 'DCR Submission Notification Email',
                         'name' => 'dcr_submission_notification_email',
@@ -212,7 +226,7 @@ class CustomPostType
                 'menu_order' => 0,
                 'position' => 'normal',
                 'style' => 'default',
-                'label_placement' => 'top',
+                'label_placement' => 'left',
                 'instruction_placement' => 'label',
                 'hide_on_screen' => '',
             ));

@@ -1,7 +1,7 @@
 
 <?php
 /**
- * The template for displaying Footer Report PDF - Saturn
+ * The template for displaying Header Report PDF - Saturn
  *
  * @author Tuan
  * 

@@ -8,6 +8,7 @@
 
 $generic_page_before_list = $report_template['generic_page_before'] ?? array();
 if (isset($generic_page_before_list) && !empty($generic_page_before_list)) {
+
     foreach ($generic_page_before_list as $index => $generic_page) {
 
         $year = date('Y',strtotime($org_data['CreatedDate']));

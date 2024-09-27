@@ -1,6 +1,6 @@
 <?php
 /**
- * The template for displaying All Generic page Report PDF - Saturn
+ * The template for displaying Scorecard for nine key areas Report PDF - Saturn
  *
  * @author Tuan
  * 
@@ -53,7 +53,8 @@ $mpdf->WriteHTML($self_assessed_score);
 // Insert page break
 $mpdf->AddPage();
 
-$cal_agreed_score = cal_scores_with_weighting($assessment_id, $agreed_score, 'sub') ?? array();
+$cal_org_score = cal_scores_with_weighting_for_percentages($assessment_id, $org_score, 'sub') ?? array();
+$cal_agreed_score = cal_scores_with_weighting_for_percentages($assessment_id, $agreed_score, 'sub') ?? array();
 $self_assessed_percent_table =
 '<div class="page">
     <table class="table-3 table-5">
@@ -73,8 +74,8 @@ foreach ($questions as $index => $key_area) {
     }
 
     // Average Org score in a Key area
-    if (is_array($org_score[$index])) {
-        $org_self_percent = round(array_sum($org_score[$index]) / array_sum($max_score) * 100);
+    if (is_array($cal_org_score[$index])) {
+        $org_self_percent = round(array_sum($cal_org_score[$index]) / array_sum($max_score) * 100);
     }
     
     // Average Agreed score in a Key area
@@ -107,5 +108,3 @@ $mpdf->WriteHTML($self_assessed_percent_table);
 
 // Insert page break
 $mpdf->AddPage();
-
-

@@ -12,7 +12,7 @@ $all_agreed_score = cal_overall_total_score($assessment_id, 'total_agreed_score'
 $overall_and_score = cal_overall_total_score($assessment_id, 'total_and_score');
 $org_score_rank = $position_by_total_score[$org_data['Id']]['org_rank'] ?? '';
 $org_industry_rank = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'] ?? '';
-$average_industry = cal_average_industry_score($position_by_industry['by_indus_data'][$org_data['Industry']]) ?? '';
+$average_industry = cal_average_industry_score($assessment_id, $position_by_industry['by_indus_data'][$org_data['Industry']]) ?? '';
 
 $total_org_score_percent   = isset($total_org_score['percent']) ? $total_org_score['percent'] : '';
 $total_agreed_score_percent = isset($total_agreed_score['percent']) ? $total_agreed_score['percent'] : '';

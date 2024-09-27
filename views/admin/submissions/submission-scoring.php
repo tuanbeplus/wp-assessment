@@ -22,9 +22,6 @@ $agreed_score = get_post_meta($post_id, 'agreed_score', true);
 $total_submission_score = get_post_meta($post_id, 'total_submission_score', true);
 $total_and_score = get_post_meta($post_id, 'total_and_score', true);
 $total_agreed_score = get_post_meta($post_id, 'total_agreed_score', true);
-$overall_org_score = cal_overall_total_score($assessment_id, 'total_submission_score');
-$overall_and_score =  cal_overall_total_score($assessment_id, 'total_and_score');
-$overall_agreed_score =  cal_overall_total_score($assessment_id, 'total_agreed_score');
 $report_id = is_report_of_submission_exist($post_id);
 $report_url = home_url() . '/wp-admin/post.php?post='. $report_id .'&action=edit';
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
@@ -54,17 +51,30 @@ $agreed_gr_score_with_weighting = cal_scores_with_weighting($assessment_id, $agr
     </div>
     <div class="overall _field">
         <p><strong>Overall total score</strong></p>
+        <?php
+            $sum_key = 'sum';
+            // Get Scoring formula type
+		    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+            // Using Index formula 2024
+            if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+                $sum_key = 'sum';
+            }
+            // Using Index formula 2023
+            else {
+                $sum_key = 'sum_with_weighting';
+            }
+        ?>
         <ul class="overall-list">
             <li>Overall Organisation Total Score: 
-                <strong><?php echo $total_submission_score['sum'] ?? 0; ?></strong> 
+                <strong><?php echo $total_submission_score[$sum_key] ?? 0; ?></strong> 
                 <strong>(<?php echo $total_submission_score['percent'] ?? 0; ?>%)</strong>
             </li>
             <li>Overall AND Total Score: 
-                <strong><?php echo $total_and_score['sum'] ?? 0; ?></strong> 
+                <strong><?php echo $total_and_score[$sum_key] ?? 0; ?></strong> 
                 <strong>(<?php echo $total_and_score['percent'] ?? 0; ?>%)</strong>
             </li>
             <li>Overall Agreed Total Score: 
-                <strong><?php echo $total_agreed_score['sum'] ?? 0; ?></strong> 
+                <strong><?php echo $total_agreed_score[$sum_key] ?? 0; ?></strong> 
                 <strong>(<?php echo $total_agreed_score['percent'] ?? 0; ?>%)</strong>
             </li>
         </ul>

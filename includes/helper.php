@@ -475,6 +475,36 @@ function array_sum_submission_score($assessment_id, $score_array=[])
 	$total_score = array();
 
 	if (is_array($score_array) && !empty($score_array)) {
+
+		foreach ($score_array as $i => $group) {
+			foreach ($group as $j => $quiz) {
+				$weighting = $questions[$i]['list'][$j]['point'];
+				if (!empty($quiz)) {
+					$total_score[] = $quiz;
+				}
+			}
+		}
+		if (!empty($total_score)) {
+			return array_sum($total_score) ?? 0;
+		}
+		else {
+			return 0;
+		}
+	}
+	else {
+		return 0;
+	}
+}
+
+function array_sum_submission_score_with_weighting($assessment_id, $score_array=[]) 
+{
+	$main = new WP_Assessment();
+	$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+	$questions = $main->wpa_unserialize_metadata($questions);
+	$total_score = array();
+
+	if (is_array($score_array) && !empty($score_array)) {
+
 		foreach ($score_array as $i => $group) {
 			foreach ($group as $j => $quiz) {
 				$weighting = $questions[$i]['list'][$j]['point'];
@@ -510,6 +540,51 @@ function cal_scores_with_weighting($assessment_id, $scores_arr, $arr_type = 'sub
 	$cal_scores_array = array();
 
 	if (is_array($scores_arr) && !empty($scores_arr)) {
+		// Get Scoring formula type
+		$scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+
+		foreach ($scores_arr as $i => $group) {
+			foreach ($group as $j => $quiz) {
+				$weighting = $questions[$i]['list'][$j]['point'];
+				if (!empty($quiz)) {
+					// Using Index formula 2024
+					if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+						$cal_scores_array[$i][$j] = (float)$quiz;
+					}
+					// Using Index formula 2023
+					else {
+						$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
+					}
+				}
+				else {
+					$cal_scores_array[$i][$j] = 0;
+				}
+			}
+		}
+
+		if ($arr_type != 'group') return $cal_scores_array;
+
+		$average_group_scores = array();
+		if (!empty($cal_scores_array)) {
+			foreach ($cal_scores_array as $i => $group) {
+				if (is_array($group) && !empty($group)) {
+					$average_group_scores[$i] = number_format(round(array_sum($group) / count($group), 1), 1);
+				}
+			}
+
+			return $average_group_scores;
+		}
+	}
+}
+
+function cal_scores_with_weighting_for_percentages($assessment_id, $scores_arr, $arr_type = 'sub'){
+	$main = new WP_Assessment();
+	$questions = get_post_meta($assessment_id, 'question_group_repeater', true);
+	$questions = $main->wpa_unserialize_metadata($questions);
+	$cal_scores_array = array();
+
+	if (is_array($scores_arr) && !empty($scores_arr)) {
+
 		foreach ($scores_arr as $i => $group) {
 			foreach ($group as $j => $quiz) {
 				$weighting = $questions[$i]['list'][$j]['point'];
@@ -761,6 +836,7 @@ function cal_overall_total_score($assessment_id, $post_meta)
 	$overall_scores = array();
 	$result = array();
 	$submissions = get_all_submissions_of_assessment($assessment_id);
+	$assessment_max_score = get_assessment_max_score($assessment_id);
 
 	if (!empty($submissions)) {
 		foreach ($submissions as $submission){
@@ -771,7 +847,7 @@ function cal_overall_total_score($assessment_id, $post_meta)
 		}
 		if (!empty($overall_scores) && is_array($overall_scores)) {
 			$result['sum_average'] = number_format(array_sum($overall_scores)/count($overall_scores), 1);
-			$result['percent_average'] = round(array_sum($overall_scores)/count($overall_scores) / 272 * 100);
+			$result['percent_average'] = round(array_sum($overall_scores)/count($overall_scores) / $assessment_max_score * 100);
 			return $result;
 		}
 		else {
@@ -791,9 +867,11 @@ function cal_overall_total_score($assessment_id, $post_meta)
  * @return int Average Percent 
  * 
  */
-function cal_average_industry_score($industry_score_data=[])
+function cal_average_industry_score($assessment_id, $industry_score_data=[])
 {
 	$total_industry_score = array();
+	$assessment_max_score = get_assessment_max_score($assessment_id);
+
 	if (!empty($industry_score_data)) {
 		foreach ($industry_score_data as $record) {
 			$total_industry_score[] = $record['total_score'];
@@ -801,7 +879,7 @@ function cal_average_industry_score($industry_score_data=[])
 
 		if (is_array($total_industry_score)) {
 			$average = array_sum($total_industry_score) / count($total_industry_score);
-			$average_percent = round($average/272*100);
+			$average_percent = round($average / $assessment_max_score * 100);
 			return $average_percent;
 		}
 		else {
@@ -961,4 +1039,93 @@ function get_exception_orgs_id() {
 	}
 	return $exception_orgs_id;
 }
+
+/**
+ * Get the Max Score of the Assessment.
+ *
+ * @param int|string $assessment_id The ID of the assessment post.
+ * @return float Max score of the assessment.
+ */
+function get_assessment_max_score($assessment_id = '') {
+    // Define an associative array of max scores by year.
+    $max_scores = array(
+		'index_formula_2023' => 272.0,
+        'index_formula_2024' => 271.2,
+	);
+    // Default to 2023 if no assessment ID is provided or if the formula is missing/invalid.
+    $default_formula = 'index_formula_2023';
+
+    // Get the selected scoring formula in the assessment.
+    if (!empty($assessment_id)) {
+        $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+        if (!empty($scoring_formula) && array_key_exists($scoring_formula, $max_scores)) {
+            return (float) $max_scores[$scoring_formula];
+        }
+    }
+    // Return the max score for the default year.
+    return (float) $max_scores[$default_formula];
+}
+
+/**
+ * Find a matching quiz record based on group ID and sub-question ID.
+ *
+ * @param array  $user_quizzes List of user quizzes.
+ * @param string $group_id     The group ID to match.
+ * @param string $sub_id       The sub-question ID to match.
+ *
+ * @return object|null The matching quiz record, or null if none found.
+ */
+function wpa_find_matching_quiz($user_quizzes, $group_id, $sub_id) {
+    foreach ($user_quizzes as $quiz) {
+        if ($quiz->parent_id == $group_id && $quiz->quiz_id == $sub_id) {
+            return $quiz;
+        }
+    }
+    return null;
+}
+
+/**
+ * Get all index answer scores for a given assessment, submission, and organisation.
+ *
+ * @param string $assessment_id    The ID of the assessment.
+ * @param string $submission_id    The ID of the submission.
+ * @param string $organisation_id  The ID of the organisation.
+ *
+ * @return array|null An associative array of answer scores, or null if invalid parameters are provided.
+ */
+function get_all_index_answer_scores($assessment_id = '', $submission_id = '', $organisation_id = '') {
+    // Validate input parameters
+    if (empty($assessment_id) || empty($submission_id) || empty($organisation_id)) {
+        return null; // Return null if any parameter is missing
+    }
+    // Initialize an empty array to store the scores
+    $answer_scores = array();
+    // Instantiate WP_Assessment class
+    $assessment = new WP_Assessment();
+    // Retrieve and unserialize the questions associated with the assessment
+    $question_groups = $assessment->wpa_unserialize_metadata(
+        get_post_meta($assessment_id, 'question_group_repeater', true)
+    );
+    // Retrieve user quiz data based on assessment, submission, and organisation IDs
+    $user_quizzes = $assessment->get_user_quiz_by_assessment_id_and_submissions(
+        $assessment_id, 
+        $submission_id, 
+        $organisation_id
+    );
+    // Process each group of questions
+    foreach ($question_groups as $group_id => $group_questions) {
+        if (isset($group_questions['list']) && !empty($group_questions['list'])) {
+            foreach ($group_questions['list'] as $sub_id => $sub_question) {
+                // Find matching quiz record and store the quiz point
+                $matching_quiz = wpa_find_matching_quiz($user_quizzes, $group_id, $sub_id);
+                if ($matching_quiz) {
+                    $answer_scores[$group_id][$sub_id] = $matching_quiz->quiz_point ?? 0;
+                }
+            }
+        }
+    }
+    // Return the answer scores array
+    return $answer_scores;
+}
+
 

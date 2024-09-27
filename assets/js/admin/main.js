@@ -1444,7 +1444,7 @@ jQuery(document).ready(function ($) {
     $(document).on('click', '#report-add-logo', function(e){
         e.preventDefault();
         let logo_uploader = wp.media({
-            title: 'Logo image',
+            title: 'Logo Image',
             button: {
                 text: 'Use this image'
             },
@@ -1461,12 +1461,44 @@ jQuery(document).ready(function ($) {
     // Remove current Logo
     $(document).on('click', '#btn-remove-logo', function(e){
         e.preventDefault();
+        if (! confirm("Do you want to remove this image?")) {
+            return;
+        }
         $('#front-page-logo-url').val(null);
         $('img#report-front-logo-preview').attr('src', null).hide()
     });
 
+    // Report Front page add Background Image
+    $(document).on('click', '#report-add-bg-img', function(e){
+        e.preventDefault();
+        let logo_uploader = wp.media({
+            title: 'Background Image',
+            button: {
+                text: 'Use this image'
+            },
+            multiple: false
+        }).on('select', function() {
+            let attachment = logo_uploader.state().get('selection').first().toJSON();
+            $('#front-page-bg-img-url').val(attachment.url);
+            $('img#report-front-bg-img-preview').attr('src', attachment.url).show()
+        })
+        .open();
+        $('#report-front-page #btn-remove-bg-img').addClass('active')
+    });
+
+    // Remove current Background Image
+    $(document).on('click', '#btn-remove-bg-img', function(e){
+        e.preventDefault();
+        if (! confirm("Do you want to remove this image?")) {
+            return;
+        }
+        $('#front-page-bg-img-url').val(null);
+        $('img#report-front-bg-img-preview').attr('src', null).hide()
+    });
+
     // Add Generic page to List
     $(document).on('click', '.btn-add-generic-page', function(e){
+        let btn_add_page = $(this);
         let generic_page_wrapper = $(this).closest('.generic-page-wrapper')
         let data_position = $(this).data('position')
         let data_insert = $(this).data('insert')
@@ -1474,7 +1506,7 @@ jQuery(document).ready(function ($) {
         let page_count = Date.now();
 
         let generic_page_item  = '<li id="generic-page-'+ data_position +'-'+ page_count +'" class="_section generic-page">'
-            generic_page_item +=     '<h3 class="_heading">Generic page</h3>'
+            generic_page_item +=     '<h3 class="_heading">Generic page '+ data_position +' #<span class="page-index"></span></h3>'
             generic_page_item +=     '<input type="text" name="report_template[generic_page_'+ data_position +']['+ page_count +'][title]" placeholder="Add title">'
             generic_page_item +=     '<textarea id="'+ textarea_id +'" class="generic-page-wpeditor" name="report_template[generic_page_'+ data_position +']['+ page_count +'][content]" rows="10"></textarea>'
             generic_page_item +=     '<div class="add-row-block">'
@@ -1490,19 +1522,38 @@ jQuery(document).ready(function ($) {
             $(this).closest('.generic-pages-list .generic-page').after(generic_page_item)
         }
         // Append WP editor
-        append_wpeditor('#'+ textarea_id, true)
+        append_wpeditor('#'+ textarea_id, true);
+
+        // Renew pages index
+        setTimeout(function() {
+            Renew_Index_Generic_Page_Report(btn_add_page);
+        }, 300)
     });
 
     // Remove a Generic page row
     $(document).on('click', '.btn-remove-generic-page', function(e){
         e.preventDefault();
+        let btn_remove_page = $(this);
+        if (! confirm("Do you want to remove this page?")) {
+            return;
+        }
         let currnet_row = $(this).closest('.generic-pages-list .generic-page')
-
         currnet_row.addClass('removing')
         setTimeout(function() {
             currnet_row.remove();
-        }, 300)
+        }, 300);
     });
+
+    // Renew the Index of the Generic pages
+    function Renew_Index_Generic_Page_Report(button) {
+        let pages_wrapper = button.closest('.generic-page-wrapper')
+        let all_pages_index = pages_wrapper.find('.page-index')
+        let count_index = 1;
+        all_pages_index.each(function(e) {
+            $(this).text(count_index);            
+            count_index++;
+        })
+    }
 
     // Show up Recommentdation WP editor
     $(document).on('click', '.btn-add-recommentdation', function(e){

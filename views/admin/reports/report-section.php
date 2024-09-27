@@ -10,12 +10,15 @@ if ($post->post_type == 'reports') {
     }
 } 
 else {
+    $assessment_id = $post->ID;
     $report_template = get_post_meta($post->ID, 'report_template', true);
 }
 
 $report_logo_url = $report_template['front_page']['logo_url'] ?? null;
+$report_bg_img_url = $report_template['front_page']['bg_img'] ?? null;
 $report_front_title = $report_template['front_page']['title'] ?? null;
 $report_front_content = $report_template['front_page']['content'] ?? null;
+$report_front_heading_2 = $report_template['front_page']['heading_2'] ?? null;
 $is_include_toc = $report_template['is_include_toc'] ?? null;
 $terms = get_assessment_terms($post->ID);
 ?>
@@ -26,7 +29,7 @@ $terms = get_assessment_terms($post->ID);
             <input id="report-include-toc" type="checkbox" 
                     name="report_template[is_include_toc]" placeholder="Add title" value="1"
                     <?php if ($is_include_toc == true) echo 'checked'; ?>>
-            Include table of content
+            Include Table of Contents
         </label>
     </div>
     <!-- begin Report section -->
@@ -34,29 +37,44 @@ $terms = get_assessment_terms($post->ID);
         <!-- Front page -->
         <div id="report-front-page" class="_section">
             <h3 class="_heading">Report front page (cover)</h3>
+            <div class="field-content">
+                <label for="heading-1">
+                    Heading 1
+                </label>
+                <input id="heading-1" type="text" name="report_template[front_page][title]" 
+                        placeholder="Add heading 1"
+                        value="<?php echo $report_front_title; ?>">
+                
+                <?php if ($assessment_id == '31523'): ?>
+                <label for="wp-report-front-page-wpeditor-wrap">Content</label>
+                <?php
+                    $editor_id = 'report-front-page-wpeditor';
+                    $editor_settings = array(
+                        'textarea_name' => "report_template[front_page][content]",
+                        'textarea_rows' => 12,
+                        'quicktags' => true, // Remove view as HTML button.
+                        'default_editor' => 'tinymce',
+                        'tinymce' => true,
+                    );
+                    wp_editor( $report_front_content, $editor_id, $editor_settings );
+                ?>
+                <?php else: ?>
+                    <label for="heading-2">
+                        Heading 2
+                    </label>
+                    <input id="heading-2" type="text" name="report_template[front_page][heading_2]" 
+                            placeholder="Add heading 2"
+                            value="<?php echo $report_front_heading_2; ?>">
+                <?php endif; ?>
+            </div>
             <div class="_container">
-                <div class="field-content">
-                    <input type="text" name="report_template[front_page][title]" 
-                            placeholder="Add title"
-                            value="<?php echo $report_front_title; ?>">
-                    <?php
-                        $editor_id = 'report-front-page-wpeditor';
-                        $editor_settings = array(
-                            'textarea_name' => "report_template[front_page][content]",
-                            'textarea_rows' => 12,
-                            'quicktags' => true, // Remove view as HTML button.
-                            'default_editor' => 'tinymce',
-                            'tinymce' => true,
-                        );
-                        wp_editor( $report_front_content, $editor_id, $editor_settings );
-                    ?>
-                </div>
                 <div class="field-upload-logo">
-                    <a id="report-add-logo" class="button button-medium">+ Add Logo</a>
+                    <h4>ADN Logo</h4>
+                    <a id="report-add-logo" class="button button-medium">+ Add Image</a>
                     <input id="front-page-logo-url" type="hidden" 
                             name="report_template[front_page][logo_url]" 
                             value="<?php echo $report_logo_url; ?>">
-                    <div class="logo-preview-block">
+                    <div class="img-preview-block">
                         <img id="report-front-logo-preview" src="<?php echo $report_logo_url; ?>" 
                             class="<?php if(!empty($report_logo_url)) echo 'active'; ?>"
                             alt="Image Preview">
@@ -65,6 +83,23 @@ $terms = get_assessment_terms($post->ID);
                         Remove this image
                     </a> 
                 </div>
+                <?php if ($assessment_id != '31523'): ?>
+                    <div class="field-upload-logo">
+                        <h4>Background Image</h4>
+                        <a id="report-add-bg-img" class="button button-medium">+ Add Image</a>
+                        <input id="front-page-bg-img-url" type="hidden" 
+                                name="report_template[front_page][bg_img]" 
+                                value="<?php echo $report_bg_img_url; ?>">
+                        <div class="img-preview-block">
+                            <img id="report-front-bg-img-preview" src="<?php echo $report_bg_img_url; ?>" 
+                                class="<?php if(!empty($report_bg_img_url)) echo 'active'; ?>"
+                                alt="Image Preview">
+                        </div>               
+                        <a id="btn-remove-bg-img" class="button_remove <?php if(!empty($report_bg_img_url)) echo 'active'; ?>">
+                            Remove this image
+                        </a> 
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <!-- /Front page -->
@@ -97,9 +132,11 @@ $terms = get_assessment_terms($post->ID);
                     <?php foreach ($report_template['generic_page_'.$page_type['type']] as $index => $generic_page): ?>
                         <li id="generic-page-<?php echo $page_type['type']; ?>-<?php echo $index; ?>" 
                             class="_section generic-page">
-                            <h3 class="_heading">Generic page</h3>
+                            <h3 class="_heading">Generic page <?php echo $page_type['type']; ?> 
+                                #<span class="page-index"><?php echo $index; ?></span>
+                            </h3>
                             <input type="text" name="report_template[generic_page_<?php echo $page_type['type']; ?>][<?php echo $index; ?>][title]" 
-                                    placeholder="Add title"
+                                    placeholder="Add title" 
                                     value="<?php echo $generic_page['title'] ?? null; ?>">
                             <?php
                                 $content   = $generic_page['content'] ?? null;

@@ -24,6 +24,11 @@ $question_form = new Question_Form();
 $azure = new WP_Azure_Storage();
 $feedback_cl = new AndSubmissionFeedbacks();
 $organisation_id = getUser($_COOKIE['userId'])->records[0]->AccountId;
+$org_name = '';
+$org_data = sf_get_object_metadata('Account', $organisation_id);
+if (!empty($org_data)) {
+    $org_name = $org_data->Name ?? '';
+}
 $questions = get_post_meta($post_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $question_templates = get_post_meta($post_id, 'question_templates', true);
@@ -83,6 +88,7 @@ $exception_orgs_id = get_exception_orgs_id();
         
         <input type="hidden" id="assessment_id" value="<?php echo $post_id; ?>" />
         <input type="hidden" id="organisation_id" value="<?php echo $organisation_id; ?>"/>
+        <input type="hidden" id="org_name" value="<?php echo $org_name; ?>"/>
 
         <section id="assessment-main-wrapper" class="formWrapper" 
                 data-required_answer_all="<?php echo $is_required_answer_all ?>"

@@ -7,6 +7,7 @@ jQuery(document).ready(function ($) {
     const assessmentIdInstance = $('#assessment_id');
     const submissionId = $('#submission_id');
     const organisationIdInstance = $('#organisation_id');
+    const orgNameInstance = $('#org_name');
     const messageWrap = $('.progress-message');
 
     const current = 1;
@@ -589,6 +590,12 @@ jQuery(document).ready(function ($) {
 
     // EventListener for delete file item
     $(document).on('click', '.file-delete', function(){
+
+        // Delete confirm
+        if ( ! confirm('Do you want to delete this file?')) {
+            return;
+        }
+
         let file_item = $(this).closest('.file-item')
         let input_file_hiden = file_item.find('.input-file-hiden')
         let attachmentId = input_file_hiden.val()
@@ -974,11 +981,13 @@ jQuery(document).ready(function ($) {
     async function submitAssessmentProgressByContinue() {
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();
+        let orgName = orgNameInstance.val();
 
         const data = {
             'action': 'submit_assessment_progress',
-            'assessment_id': assessmentId,
+            'assessment_id'   : assessmentId,
             'organisation_id' : organisationId,
+            'org_name'        : orgName,
         };
 
         let response = await $.ajax({
@@ -986,6 +995,7 @@ jQuery(document).ready(function ($) {
             url: ajax_object.ajax_url,
             data: data
         });
+
         const {status, message, submission_id} = response;
 
         console.log(response);

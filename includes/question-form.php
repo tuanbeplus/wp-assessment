@@ -52,6 +52,14 @@ class Question_Form
      */
     function save_question()
     {
+        // $log_status = true;
+
+        // if($log_status == true) {
+        //     require( __DIR__ . '/log-helper.php' );
+        //     $__log = new DebugLogHelper();
+        //     $__log->log(wp_json_encode($_POST));
+        // }
+
         try {
             $assessment_id = intval($_POST['assessment_id']);
             if (empty($assessment_id))
@@ -428,6 +436,7 @@ class Question_Form
                 $user_id = get_current_user_id();
             }
 
+            $org_name = $_POST['org_name'];
             $organisation_id = $_POST['organisation_id'];
             if (empty($organisation_id))
                 throw new Exception('Organisation not found.');
@@ -448,18 +457,17 @@ class Question_Form
                     $submission_type = 'submissions';
                 }
             }
-            
-            if ($is_submission_exist) {
-                $org_name = ' - '.get_post_meta($is_submission_exist, 'org_data', true)['Name'] ?? '';
-            }
-            else if ($is_submission_progress_exist) {
-                $org_name = ' - '.get_post_meta($is_submission_progress_exist, 'org_data', true)['Name'] ?? '';
+
+            // Salesforce Org Name
+            if (isset($org_name) && !empty($org_name)) {
+                $org_name_extend = ' - '. $org_name;
             }
             else {
-                $org_name = '';
+                $org_name_extend = '';
             }
             
-            $submission_title = 'Progress on ' .$assessment->post_title . $org_name;
+            // Prepare submission title
+            $submission_title = 'Progress on ' .$assessment->post_title . $org_name_extend;
 
             // Not exist any submissions
             if (!$is_submission_exist && !$is_submission_progress_exist) {
@@ -1056,7 +1064,7 @@ class Question_Form
             $post_id = intval($_POST['post_id']);
 
             if(empty($users)){
-              return wp_send_json(array('message' => 'You don\'t not to choose any users yet!', 'status' => false));
+              return wp_send_json(array('message' => 'Please select an user.', 'status' => false));
             }
 
             $link_post = get_permalink($post_id);
@@ -1145,26 +1153,7 @@ class Question_Form
                 $sent = wp_mail($email , 'Invitation to work on the '.$assessment_title, $content);
                 $emails_sent[] = $email;
                 if (!$sent) throw new Exception($sent, 1);
-
-                // Add users ID to Array
-                // $user = getUserFromEmail($email);
-                // if (!empty($user)) {
-                //     $invite_members_arr[] = $user[0]->Id;
-                // }
             }
-
-            // if (!empty($invite_members_arr)) {
-            //     $invited_members = get_post_meta($assessment_id, 'invited_members', true);
-            //     if (!empty($invited_members)) {
-            //         // Merge old & new invite members array and update to post meta
-            //         $new_invited_members = array_unique(array_merge($invited_members, $invite_members_arr));
-            //         $updated_meta = update_post_meta($assessment_id, 'invited_members', $new_invited_members);
-            //     }
-            //     else {
-            //         // Update new invite members to post meta
-            //         $updated_meta = update_post_meta($assessment_id, 'invited_members', $invite_members_arr);
-            //     }
-            // }
 
             // Remove filter mail from
             remove_filter( 'wp_mail_from', 'sf_user_mail_from' );
