@@ -21,6 +21,8 @@ $report_front_content = $report_template['front_page']['content'] ?? null;
 $report_front_heading_2 = $report_template['front_page']['heading_2'] ?? null;
 $is_include_toc = $report_template['is_include_toc'] ?? null;
 $terms = get_assessment_terms($post->ID);
+$index_2023 = get_field('assessment_index_2023', 'option');
+$index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
 ?>
 
 <div id="report-template-wrapper" class="report-template-wrapper">
@@ -45,7 +47,7 @@ $terms = get_assessment_terms($post->ID);
                         placeholder="Add heading 1"
                         value="<?php echo $report_front_title; ?>">
                 
-                <?php if ($assessment_id == '31523'): ?>
+                <?php if ($assessment_id == $index_2023_id): ?>
                 <label for="wp-report-front-page-wpeditor-wrap">Content</label>
                 <?php
                     $editor_id = 'report-front-page-wpeditor';
