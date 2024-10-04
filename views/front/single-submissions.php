@@ -84,12 +84,6 @@ $invalid_answers = array();
 							<?php endforeach; ?>
 						</ul>
 					<?php endif; ?>
-					<?php if($report_id == 0): ?>
-						<!-- <p>
-							Preliminary Report: 
-							<a href="<?php// echo get_the_permalink($report_id); ?>"><?php// echo get_the_title($report_id); ?></a>
-						</p> -->
-					<?php endif; ?>
 
 					<p>The Australian Network on Disability team will be in contact with you once evidence/this submission has been reviewed (for Index and Disability Confident Recruiter).*</p>
 					<p>If you have any questions at all, please reach out to your key contact person.</p>
@@ -97,10 +91,6 @@ $invalid_answers = array();
 					<p><strong>Contact us</strong></p>
 					<a href="mailto:info@and.org.au">info@and.org.au</a>
 					<a href="tel:(02) 8270 9200">(02) 8270 9200</a>
-
-					<?php //if (!in_array('index', $assessment_terms)): ?>
-						<!-- <a id="printSubmissionEntry" href="#Print">Print Preliminary Report (.PDF)</a> -->
-					<?php //endif; ?>
 				</div>
 				<div class="wrapperTablePrint">
 					<img id="logoPrintPage" style="margin: 0 auto 20px;display:block" src="<?php echo get_template_directory_uri().'/assets/imgs/logo.svg'; ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
