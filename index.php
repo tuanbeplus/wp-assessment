@@ -27,7 +27,6 @@ require_once(WP_ASSESSMENT_DIR . '/includes/hooks.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/custom-post-type.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/custom-fields.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/question-form.php');
-require_once(WP_ASSESSMENT_DIR . '/includes/local-storage.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/salesforce-api.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/salesforce-webhook.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/azure-storage.php');

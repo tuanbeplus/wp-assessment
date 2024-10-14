@@ -974,20 +974,6 @@ class WP_Assessment
         }        
     }
 
-    function save_data_local_storage($key, $value)
-    {
-        LocalStorage::getInstance()->setValue($key, $value);
-        LocalStorage::getInstance()->commit();
-    }
-
-    function get_data_value_local_storage($key)
-    {
-        $data_local_storage = json_decode((string)LocalStorage::getInstance(), true);
-        $data_value = $data_local_storage[$key];
-
-        return $data_value;
-    }
-
     function get_self_assessed_score($assessment_id, $submission_data_arr)
     {
         $assessment_term_arr = get_assessment_terms($assessment_id);
