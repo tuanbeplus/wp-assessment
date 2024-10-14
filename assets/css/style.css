@@ -1188,7 +1188,7 @@
 .list-items-dropdown {
   display: none;
   position: absolute;
-  max-height: 300px;
+  max-height: 400px;
   overflow-y: scroll;
   width: 100%;
   max-width: 400px;
@@ -1200,6 +1200,11 @@
   border: 1px solid #999;
   border-radius: 2px;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 3px 0px;
+}
+
+.list-items-dropdown input#search-dropdown-items {
+  width: 100%;
+  height: 34px;
 }
 
 .list-items-dropdown > *:last-child {

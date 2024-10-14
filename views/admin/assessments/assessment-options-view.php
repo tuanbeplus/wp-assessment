@@ -64,6 +64,9 @@ $related_sf_products = get_post_meta($post_id, 'related_sf_products', true);
         <?php if (isset($sf_products_assessment->records)): ?>
             <!-- List items dropdown -->
             <ul class="list-items-dropdown sf-products-list">
+                <li>
+                    <input type="text" id="search-dropdown-items" placeholder="Enter product name">
+                </li>
                 <?php foreach ($sf_products_assessment->records as $product): ?>
                     <?php 
                         if (is_array($related_sf_products)) {

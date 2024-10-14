@@ -954,6 +954,17 @@ jQuery(document).ready(function ($) {
         list_dropdown.show()
     });
 
+    $(document).on('keyup', '#search-dropdown-items', function() {
+        let field_select2_wrapper = $(this).closest('.field-select2')
+        let list_dropdown = field_select2_wrapper.find('.list-items-dropdown')
+        let value = $(this).val().toLowerCase();
+        
+        // Filter the list items based on input
+        list_dropdown.find('li.item').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+
     async function markFeedbackSubmissionAnswers(instance, type = "rejected") {
 
         let quizId = instance.data("id");
