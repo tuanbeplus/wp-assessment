@@ -98,7 +98,7 @@ $exception_orgs_id = get_exception_orgs_id();
                     <h1><?php echo $quiz_title; ?></h1>
                     <?php if( (!$is_disabled && !$is_accepted) || in_array($organisation_id, $exception_orgs_id) ): ?>
                     <div class="topbar-action">
-                        <?php if ($is_invite_colleagues == true): ?>
+                        <?php if ($is_invite_colleagues == 999): ?>
                             <button id="toggle-invite-colleagues"><span class="material-icons">arrow_forward</span>Invite Colleagues</button>
                         <?php endif; ?>
                         <button <?php echo $is_disabled ? 'disabled' : '' ?> class="progressBtn">
@@ -111,7 +111,7 @@ $exception_orgs_id = get_exception_orgs_id();
                 </div>
 
                 <?php if ($is_invite_colleagues == 999): ?>
-                    <?php echo $question_form->get_invite_colleagues_form(); ?>
+                    <?php// echo $question_form->get_invite_colleagues_form(); ?>
                 <?php endif; ?>
 
                 <!-- Notification Box -->
