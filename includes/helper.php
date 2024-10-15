@@ -122,7 +122,7 @@ function get_submissions_completed($organisation_id, $assessment_id)
 
 	if (is_array($assessment_terms) && isset($assessment_terms[0])) {
 		if ($assessment_terms[0] == 'dcr') {
-			$post_type = 'dcr_submissions';
+			return null;
 		}
 		else {
 			$post_type = 'submissions';
