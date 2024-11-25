@@ -192,8 +192,15 @@ class WP_Assessment
     {
         global $post;
 
-        if ($post->post_type == 'assessments')
-            return QUIZ_TEMPLATE_VIEW;
+        if ($post->post_type == 'assessments') {
+            $question_templates = get_post_meta($post->ID, 'question_templates', true);
+            if ($question_templates == 'Simple Assessment') {
+                return SIMPLE_ASSESSMENT_VIEW;
+            }
+            if ($question_templates == 'Comprehensive Assessment') {
+                return COMP_ASSESSMENT_VIEW;
+            }
+        }
 
         if ($post->post_type == 'reports')
             return SINGLE_REPORTS_TEMPLATE;
@@ -414,67 +421,129 @@ class WP_Assessment
         }
     }
 
-    function get_user_quiz_by_assessment_id($assessment_id, $organisation_id)
+    function get_quizzes_by_assessment($assessment_id, $organisation_id)
     {
         try {
             global $wpdb;
 
             $table = $this->get_quiz_submission_table_name($assessment_id);
 
-            $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND organisation_id = '$organisation_id'";
-            $result = $wpdb->get_results($sql);
-
-            return !empty($result) ? $result : null;
-
-            if ($wpdb->last_error) {
-                throw new Exception($wpdb->last_error);
-            }
-        } catch (Exception $exception) {
-            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
-        }
-    }
-
-    function get_user_quiz_by_assessment_id_and_submissions($assessment_id, $submission_id, $organisation_id)
-    {
-        try {
-            global $wpdb;
-
-            $table = $this->get_quiz_submission_table_name($assessment_id);
-
-            $sql = "SELECT * FROM $table WHERE assessment_id = $assessment_id AND submission_id = $submission_id AND organisation_id = '$organisation_id'";
-            
-            $result = $wpdb->get_results($sql);
-
-            return !empty($result) ? $result : null;
-
-            if ($wpdb->last_error) {
-                throw new Exception($wpdb->last_error);
-            }
-        } catch (Exception $exception) {
-            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
-        }
-    }
-
-    function get_dcr_quiz_answers_all_submissions($assessment_id, $organisation_id)
-    {
-        try {
-            global $wpdb;
-
-            $table = $this->get_quiz_submission_table_name($assessment_id);
-
-            $sql = "SELECT time, user_id, organisation_id, description, submission_id, parent_id, quiz_id
+            $sql = "SELECT * 
                     FROM $table 
                     WHERE assessment_id = $assessment_id 
-                    AND organisation_id = '$organisation_id' 
-                    ORDER BY time DESC";
-            
-            $result = $wpdb->get_results($sql);
+                    AND organisation_id = '$organisation_id'";
 
-            return !empty($result) ? $result : null;
+            $result = $wpdb->get_results($sql);
 
             if ($wpdb->last_error) {
                 throw new Exception($wpdb->last_error);
             }
+
+            return !empty($result) ? $result : null;
+            
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+
+    function get_previous_submission_vers_list($assessment_id, $submission_id, $organisation_id) 
+    {
+        if (empty($assessment_id) || empty($submission_id) || empty($organisation_id)) {
+            return;
+        }
+        $submission_ids_list = '';
+        $terms = get_assessment_terms($assessment_id);
+
+        if ($terms[0] == 'dcr') {
+            $all_submission_vers = $this->get_all_dcr_submission_vers($assessment_id, $organisation_id);
+            $submission_ids_arr = array();
+
+            if (!empty($all_submission_vers)) {
+                $main_submission_date = new DateTime(get_the_date('Y-m-d H:i:s', $submission_id));
+                foreach ($all_submission_vers as $submission_ver) {
+                    $submission_ver_date = new DateTime($submission_ver->post_date);
+                    if ($submission_ver_date <= $main_submission_date) {
+                        $submission_ids_arr[] = $submission_ver->ID;
+                    }
+                }
+            }
+            $submission_ids_list = !empty($submission_ids_arr) 
+                                ? implode(', ', array_map('intval', $submission_ids_arr)) 
+                                : implode(', ', array_map('intval', array($submission_id)));
+        } 
+        else {
+            $submission_ids_list = implode(', ', array_map('intval', array($submission_id)));
+        }
+
+        return $submission_ids_list;
+    }
+
+    function get_quizzes_by_assessment_and_submissions($assessment_id, $submission_id, $organisation_id)
+    {
+        try {
+            if (empty($assessment_id) || empty($submission_id) || empty($organisation_id)) {
+                return;
+            }
+            global $wpdb;
+            $table = $this->get_quiz_submission_table_name($assessment_id);
+
+            $submission_ids_list = $this->get_previous_submission_vers_list($assessment_id, $submission_id, $organisation_id);
+
+            if (empty($submission_ids_list)) {
+                return null;
+            }
+
+            $result = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * 
+                    FROM $table 
+                    WHERE assessment_id = %d 
+                    AND submission_id IN ($submission_ids_list) 
+                    AND organisation_id = %s",
+                    $assessment_id,
+                    $organisation_id
+                )
+            );
+
+            if ($wpdb->last_error) {
+                throw new Exception($wpdb->last_error);
+            }
+
+            return !empty($result) ? $result : null;
+
+        } catch (Exception $exception) {
+            return array('message' => $exception->getMessage(), 'status' => false);
+        }
+    }
+
+    function get_dcr_quiz_answers_pre_submissions($assessment_id, $submission_id, $organisation_id)
+    {
+        try {
+            global $wpdb;
+
+            $table = $this->get_quiz_submission_table_name($assessment_id);
+
+            $submission_ids_list = $this->get_previous_submission_vers_list($assessment_id, $submission_id, $organisation_id);
+
+            if (empty($submission_ids_list)) {
+                return null;
+            }
+            
+            $result = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT time, user_id, organisation_id, description, submission_id, parent_id, quiz_id 
+                    FROM $table 
+                    WHERE assessment_id = %d 
+                    AND submission_id IN ($submission_ids_list) 
+                    AND organisation_id = %s
+                    ORDER BY time DESC",
+                    $assessment_id,
+                    $organisation_id
+                )
+            );
+
+            return !empty($result) ? $result : null;
+
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }
@@ -519,44 +588,66 @@ class WP_Assessment
         }
     }
 
-    function is_group_quiz_exist_in_object($group_id, $obj, $organisation_id, $args)
+    function is_group_quiz_completed($questions_list, $group_id, $quizzes)
     {
-        if (isset($_COOKIE['userId'])) {
-            $user_id = $_COOKIE['userId'];
-        } else {
-            $user_id = get_current_user_id();
+        // Return false if there are no questions or quizzes to check
+        if (empty($questions_list) || empty($quizzes)) {
+            return false;
         }
-        $data = null;
+        // Initialize counters for required fields in questions and provided answers in quizzes
+        $count_questions = 0;
+        $count_answers = 0;
 
-        if ($obj && is_array($obj)) {
-            foreach ($obj as $item) {
-                if ($item->organisation_id == $organisation_id && $item->parent_id == $group_id) {
+        // Count the number of required descriptions and choices across all questions
+        foreach ($questions_list as $question) {
+            $requires_description = $question['is_description'] ?? false;
+            $requires_choices = !empty($question['choice']);
 
-                    if ($args['is_required_answer_all'] == true) {
-
-                        if ($args['choice'] && empty($item->answers)) {
-                            return false;
-                        }
-                        elseif ($args['is_description'] && empty($item->description)) {
-                            return false;
-                        }
-                        elseif ($args['supporting_doc'] && empty($item->attachment_ids)) {
-                            return false;
-                        }
-                        else {
-                            $data = true;
-                        }
-                    }
-                    else {
-                        $data['answers'] = json_decode($item->answers);
-                        $data['description'] = $item->description;
-                        $data['attachment_ids'] = $item->attachment_ids;
-                    }
+            if ($requires_description) {
+                $count_questions++; // Increment for required description
+            }
+            if ($requires_choices) {
+                $count_questions++; // Increment for required choices
+            }
+        }
+        // Count the actual provided descriptions and answers in quizzes belonging to the specified group
+        foreach ($quizzes as $item) {
+            if ($item->parent_id == $group_id) {
+                if (!empty($item->description)) {
+                    $count_answers++; // Increment for provided description
+                }
+                if (!empty($item->answers)) {
+                    $count_answers++; // Increment for provided answer
                 }
             }
         }
+        
+        // Return true if the number of required questions matches the provided answers; otherwise, false
+        return $count_answers >= $count_questions;
+    }
 
-        return $data;
+    function get_all_dcr_submission_vers($assessment_id, $organisation_id) 
+    {
+        $args = array(
+            'post_type' => 'dcr_submissions',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'post_status' => 'any',
+            'meta_query' => array(
+                array(
+                    'key' => 'assessment_id',
+                    'value' => $assessment_id,
+                ),
+                array(
+                    'key' => 'organisation_id',
+                    'value' => $organisation_id,
+                ),
+            ),
+        );
+        $submission = get_posts($args);
+
+        return $submission;
     }
 
     function is_quiz_exist_in_object($quiz_id, $obj, $organisation_id)
@@ -571,11 +662,11 @@ class WP_Assessment
         if ($obj && is_array($obj)) {
             foreach ($obj as $item) {
                 if ($item->organisation_id == $organisation_id && $item->quiz_id == $quiz_id) {
-                    $data['answers'] = json_decode($item->answers);
-                    $data['description'] = $item->description;
-                    $data['attachment_id'] = $item->attachment_id;
-                    $data['feedback'] = $item->feedback;
-                    $data['status'] = $item->status;
+                    $data['answers'] = json_decode($item->answers) ?? '';
+                    $data['description'] = $item->description ?? '';
+                    $data['attachment_id'] = $item->attachment_id ?? '';
+                    $data['feedback'] = $item->feedback ?? '';
+                    $data['status'] = $item->status ?? '';
 
                     break;
                 }
@@ -585,7 +676,7 @@ class WP_Assessment
         return $data;
     }
 
-    function is_quiz_exist_in_object_sub($parent_id ,$sub, $obj, $organisation_id)
+    function get_quiz_object_sub_question($group_id ,$sub_id, $quizzes, $organisation_id)
     {
         if (isset($_COOKIE['userId'])) {
             $user_id = $_COOKIE['userId'];
@@ -594,17 +685,15 @@ class WP_Assessment
         }
         $data = null;
 
-        if ($obj && is_array($obj)) {
-            foreach ($obj as $item) {
-                if ($item->organisation_id == $organisation_id && $item->parent_id == $parent_id && $sub == $item->quiz_id) {
-                    $data['answers'] = json_decode($item->answers);
-                    $data['description'] = $item->description;
-                    $data['attachment_id'] = $item->attachment_id;
-                    $data['attachment_ids'] = $item->attachment_ids;
-                    $data['feedback'] = $item->feedback;
-                    $data['status'] = $item->status;
-
-                    break;
+        if ($quizzes && is_array($quizzes)) {
+            foreach ($quizzes as $item) {
+                if ($item->organisation_id == $organisation_id && $item->parent_id == $group_id && $sub_id == $item->quiz_id) {
+                    $data['answers'] = json_decode($item->answers) ?? '';
+                    $data['description'] = $item->description ?? '';
+                    $data['attachment_id'] = $item->attachment_id ?? '';
+                    $data['attachment_ids'] = $item->attachment_ids ?? '';
+                    $data['feedback'] = $item->feedback ?? '';
+                    $data['status'][] = $item->status ?? '';
                 }
             }
         }
@@ -723,19 +812,17 @@ class WP_Assessment
         return $attach_id;
     }
 
-    function get_field($array, $index, $key)
-    {
-        if (!key_exists($index, $array) || !key_exists($key, $array[$index])) return;
-        return $array[$index][$key];
-    }
-
     function get_latest_submission_id($assessment_id, $organisation_id)
     {
-        $submission_id = null;
-        $assessment_terms = get_assessment_terms($assessment_id);
+        if (isset($_GET['submission_id']) && !empty($_GET['submission_id'])) {
+            return $_GET['submission_id'];
+        }
 
-        if (is_array($assessment_terms) && isset($assessment_terms[0])) {
-            if ($assessment_terms[0] == 'dcr') {
+        $submission_id = null;
+        $terms = get_assessment_terms($assessment_id);
+
+        if (is_array($terms) && isset($terms[0])) {
+            if ($terms[0] == 'dcr') {
                 $post_type = 'dcr_submissions';
             }
             else {
@@ -993,6 +1080,17 @@ class WP_Assessment
 
             return $self_assessed_score;
         }
+    }
+
+    /**
+     * remove Slashes of Quotes character(\", \')
+     * 
+     * @param string The string need to stripslashes
+     * @return string The string after stripslashes
+     */
+    function wpa_stripslashes_string($string) {
+        if (!isset($string) || empty($string)) return;
+        return htmlentities(stripslashes(mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8')));
     }
 
     // echo $wpdb->last_query;

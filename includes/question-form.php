@@ -52,14 +52,6 @@ class Question_Form
      */
     function save_question()
     {
-        // $log_status = true;
-
-        // if($log_status == true) {
-        //     require( __DIR__ . '/log-helper.php' );
-        //     $__log = new DebugLogHelper();
-        //     $__log->log(wp_json_encode($_POST));
-        // }
-
         try {
             $assessment_id = intval($_POST['assessment_id']);
             if (empty($assessment_id))

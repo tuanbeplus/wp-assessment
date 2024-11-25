@@ -306,8 +306,14 @@ function get_saturn_invite_status($sf_user_id, $assessment_id) {
 
 	// Salesforce Contact ID
 	$contact_id = get_user_meta($wp_user_id, 'salesforce_contact_id', true);
-	if (empty($contact_id)) {
-		$contact_id = getUser($sf_user_id)->records[0]->ContactId;
+	if (!empty($contact_id)) {
+		$sf_user_data = getUser($sf_user_id);
+		if (!empty($sf_user_data) && !empty($sf_user_data->records)) {
+			$contact_id = $sf_user_data->records[0]->ContactId ?? '';
+		}
+		else {
+			return null;
+		}
 	}
 	// Get the Saturn Invites data
 	$saturn_invites = get_post_meta($assessment_id, 'sf_saturn_invites', true);
@@ -1107,7 +1113,7 @@ function get_all_index_answer_scores($assessment_id = '', $submission_id = '', $
         get_post_meta($assessment_id, 'question_group_repeater', true)
     );
     // Retrieve user quiz data based on assessment, submission, and organisation IDs
-    $user_quizzes = $assessment->get_user_quiz_by_assessment_id_and_submissions(
+    $user_quizzes = $assessment->get_quizzes_by_assessment_and_submissions(
         $assessment_id, 
         $submission_id, 
         $organisation_id

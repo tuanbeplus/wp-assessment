@@ -1,6 +1,6 @@
 <?php
 /**
- * Assessments template front Saturn
+ * Template Comprehensive Assessments Front - Saturn
  * 
  * @author Tuan
  */
@@ -8,10 +8,9 @@
 get_header(); 
 
 global $post;
-global $wpdb;
 $post_id = $post->ID;
 
-if (isset($_COOKIE['userId'])) {
+if (isset($_COOKIE['userId']) && !empty($_COOKIE['userId'])) {
     $user_id = $_COOKIE['userId'];
 } else if (is_user_logged_in()) {
     $user_id = get_user_meta(get_current_user_id(), '__salesforce_user_id', true);
@@ -23,7 +22,7 @@ $main = new WP_Assessment();
 $question_form = new Question_Form();
 $azure = new WP_Azure_Storage();
 $feedback_cl = new AndSubmissionFeedbacks();
-$organisation_id = getUser($_COOKIE['userId'])->records[0]->AccountId;
+$organisation_id = getUser($user_id)->records[0]->AccountId ?? '';
 $org_name = '';
 $org_data = sf_get_object_metadata('Account', $organisation_id);
 if (!empty($org_data)) {
@@ -34,24 +33,15 @@ $questions = $main->wpa_unserialize_metadata($questions);
 $question_templates = get_post_meta($post_id, 'question_templates', true);
 $quiz_title = get_the_title($post_id);
 $terms = get_assessment_terms($post_id);
-
-$i = 0;
-$j = 0;
-
 $submission_id = $main->get_latest_submission_id($post_id, $organisation_id);
-
-if (isset($submission_id)) {
-    $quiz = $main->get_user_quiz_by_assessment_id_and_submissions($post_id, $submission_id, $organisation_id);
-}
-else {
-    $quiz = $main->get_user_quiz_by_assessment_id($post_id, $organisation_id);
-}
+$all_submission_vers = $main->get_all_dcr_submission_vers($post_id, $organisation_id);
+$quizzes = $main->get_quizzes_by_assessment_and_submissions($post_id, $submission_id, $organisation_id);
 
 $show_first_active_view = false;
 $total_quiz = is_array($questions) ? count($questions) : 0;
 
 $is_submission_exist = $question_form->is_submission_exist($user_id, $post_id);
-$status = get_post_meta($submission_id, 'assessment_status', true);
+$assessment_status = get_post_meta($submission_id, 'assessment_status', true);
 $is_required_answer_all = get_post_meta($post_id, 'is_required_answer_all', true);
 $is_required_document_all = get_post_meta($post_id, 'is_required_document_all', true);
 $is_invite_colleagues = get_post_meta($post_id, 'is_invite_colleagues', true);
@@ -64,11 +54,11 @@ $is_all_users_can_access = get_post_meta($post_id, 'is_all_users_can_access', tr
 $saturn_invite_status = get_saturn_invite_status($user_id, $post_id);
 
 // Get all answers desciption of all submissions
-$all_quiz_pre_cmts = $main->get_dcr_quiz_answers_all_submissions($post_id, $organisation_id);
+$all_quiz_pre_cmts = $main->get_dcr_quiz_answers_pre_submissions($post_id, $submission_id, $organisation_id);
 
-$is_disabled = $status === 'pending';
-$is_publish = $status === 'publish';
-$is_accepted = $status === 'accepted';
+$is_disabled = $assessment_status === 'pending' && !in_array('dcr', $terms);
+$is_publish = $assessment_status === 'publish';
+$is_accepted = $assessment_status === 'accepted';
 
 // Get the Exception Organisations ID
 $exception_orgs_id = get_exception_orgs_id();
@@ -93,247 +83,107 @@ $exception_orgs_id = get_exception_orgs_id();
         <section id="assessment-main-wrapper" class="formWrapper" 
                 data-required_answer_all="<?php echo $is_required_answer_all ?>"
                 data-required_document_all="<?php echo $is_required_document_all ?>">
+
+                <?php if ($assessment_status == 'rejected' && $questions && !$is_disabled) : ?>
+                    <!-- Notification Box -->
+                    <div class="notificationBar rejected">
+                        <div class="bgRed"><h2>ATTENTION</h2></div>
+                        <div class="messageBox">
+                            <p class="result">Your submission has been rejected by the moderator, please see the results below.</p>
+                            <div class="notifiDetails">
+                            <?php foreach ($questions as $group_id => $gr_field) :
+                                $submission_data = $main->is_quiz_exist_in_object($group_id, $quizzes, $organisation_id);
+                                $section_title = $main->wpa_stripslashes_string($gr_field['title']) ?? '';
+                                $sub_questions = $gr_field['list'] ?? array();
+                                ?>
+                                <h3><?php echo $group_id .'. '. $section_title; ?></h3>
+                                <ul>
+                                <?php
+                                foreach ($sub_questions as $sub_id => $field) :
+                                    $submission_data_sub = $main->get_quiz_object_sub_question($group_id, $sub_id, $quizzes, $organisation_id);
+                                    $sub_title = $main->wpa_stripslashes_string($field['sub_title']) ?? '';
+                                    $all_status = $submission_data_sub['status'] ?? array();
+                                    if (!empty($all_status)):
+                                        $latest_status = '';
+                                        foreach ($all_status as $status):
+                                            if ($status == 'accepted'):
+                                                $latest_status = 'accepted';
+                                                break;
+                                            endif;
+                                            $latest_status = $status;
+                                        endforeach;
+                                        echo '<li>'.$group_id.'.'.$sub_id.' - <strong class="remarks '.$latest_status.'">'.$latest_status.'</strong></li>';
+                                    endif;
+                                    ?>
+                                <?php endforeach; ?>
+                                </ul>
+                            <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
+                    </div><!-- .Notification Box -->
+                    
+                <?php endif; ?>
+
             <div class="container">
-                <div class="topBar">
+                <div class="topBar <?php if (!in_array('dcr', $terms) || empty($all_submission_vers)) echo 'flex'; ?>">
                     <h1><?php echo $quiz_title; ?></h1>
                     <?php if( (!$is_disabled && !$is_accepted) || in_array($organisation_id, $exception_orgs_id) ): ?>
                     <div class="topbar-action">
-                        <?php if ($is_invite_colleagues == 999): ?>
-                            <button id="toggle-invite-colleagues"><span class="material-icons">arrow_forward</span>Invite Colleagues</button>
+                        <?php if ($terms[0] == 'dcr' && !empty($all_submission_vers) && is_array($all_submission_vers)): 
+                            $all_submissions_sort_asc = array_reverse($all_submission_vers);
+                            $all_submissions = array_combine(range(1, count($all_submissions_sort_asc)), $all_submissions_sort_asc);
+                            $subm_current_name = '';
+                            foreach ($all_submissions as $index => $submission): 
+                                if ($submission->ID == $submission_id):
+                                    $subm_current_name = 'Submission No. '.$index.' at '.get_the_date('j M Y h:i a', $submission_id);
+                                    continue;
+                                endif;
+                            endforeach;
+                            ?>
+                            <div class="submission-vers">
+                                <p>Choose Submission Version</p>
+                                <button id="btn-show-submission-vers" class="submission-ver-current" aria-label="Choose Submission Version">
+                                    <span><?php echo $subm_current_name; ?></span>
+                                    <span class="icon"><i class="fa-solid fa-chevron-down"></i></span>
+                                </button>
+                                <ul class="submission-vers-list">
+                                <?php foreach ($all_submissions as $index => $submission): 
+                                    $submission_ver_name = 'Submission No. '.$index.' at '.get_the_date('j M Y h:i a', $submission->ID);
+                                    ?>
+                                    <li class="submission-ver">
+                                        <?php if ($submission_id != $submission->ID): ?>
+                                            <a href="<?php echo get_the_permalink() .'?submission_id='. $submission->ID ?>">
+                                                <?php echo $submission_ver_name; ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span><?php echo $submission_ver_name; ?></span>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                                </ul>
+                            </div>
                         <?php endif; ?>
-                        <button <?php echo $is_disabled ? 'disabled' : '' ?> class="progressBtn">
-                            Save Progress
-                            <img class="progress-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="uploading">
+                        <button id="save-progress-btn" class="progressBtn" <?php echo $is_disabled ? 'disabled' : '' ?>>
+                            <span class="text">Save Progress</span>
+                            <div class="spinner-wrapper"><div class="wpa-spinner"></div></div>
                         </button>
-                        <span class="notify">Your progress has been saved</span>
                     </div>
                     <?php endif; ?>
                 </div>
 
-                <?php if ($is_invite_colleagues == 999): ?>
-                    <?php// echo $question_form->get_invite_colleagues_form(); ?>
-                <?php endif; ?>
-
-                <!-- Notification Box -->
-                <?php if ($status == 'rejected' && $questions && !$is_disabled) : ?>
-                    <div class="notificationBar rejected">
-                        <div class="bgRed"><h3>ATTENTION</h3></div>
-                        <div class="messageBox">
-                            <p class="result">Your submission has been rejected by the moderator for the following reason.</p>
-                            <ul class="testDetails">
-                                <?php foreach ($questions as $quiz_id => $field) :
-
-                                    $submission_data = $main->is_quiz_exist_in_object($quiz_id, $quiz, $organisation_id);
-                                    $question_title = $field['question_title'] ?? '';
-                                    $__status = $submission_data['status'] ?? '';
-                                ?>
-
-                                <?php if ($question_templates == 'Comprehensive Assessment') : ?>
-                                    <?php
-                                    $sub_question = $field['list'];
-                                    foreach ($sub_question as $sub => $field) :
-                                        $submission_data_sub = $main->is_quiz_exist_in_object_sub($quiz_id,$sub, $quiz, $organisation_id);
-                                        $sub_title = $field['sub_title'] ?? '';
-                                        $sub_title = htmlentities(stripslashes(utf8_decode($sub_title)));
-                                        $__status_sub = $submission_data_sub['status'];
-                                        ?>
-                                        <?php if ($__status_sub) : ?>
-                                            <li>
-                                                <span><?php echo $quiz_id.'.'.$sub.' - '; ?></span>
-                                                <span class="stepNumber"><?php echo $sub_title; ?></span>:
-                                                <span class="remarks <?php echo $__status_sub; ?>">
-                                                    <strong><?php echo $__status_sub; ?></strong>
-                                                </span>
-                                            </li>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-
-                                <?php endif; ?>
-
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                        <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
-                    </div>
-                <?php endif; ?>
-
-                <?php if($is_disabled): ?>
+                <?php if($assessment_status == 'pending'): ?>
+                    <!-- Notification Box -->
                     <div class="notificationBar pending">
                         <h3 style="text-align:center;">Your assessment is under pending review!</h3>
-                    </div>
+                    </div><!-- .Notification Box -->
                 <?php endif; ?>
 
                 <?php if($is_accepted && !in_array($organisation_id, $exception_orgs_id)): ?>
+                    <!-- Notification Box -->
                     <div class="notificationBar accepted">
                         <h3 style="text-align:center;">Your assessment is accepted!</h3>
-                    </div>
-                <?php endif; ?>
-                <!-- Notification Box -->
-
-                <?php if ($question_templates == 'Simple Assessment' && $questions && !$is_accepted) : ?>
-                    <!-- Begin Simple Assessment -->
-                    <div class="stepperFormWrap" id="main-quiz-form">
-                        <form onsubmit="return false" id="form_submit_quiz">
-                            <div class="loading-overlay">
-                                <img class="form-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="Spinner"> 
-                            </div>
-                            
-                            <div class="stepsWrap">
-                                <?php foreach ($questions as $quiz_id => $field) :
-
-                                    $is_step_completed = $main->is_quiz_exist_in_object($quiz_id, $quiz, $organisation_id);
-                                    $step_completed_class = $is_step_completed ? 'completed' : '';
-                                    $question_title = $field['title'] ?? '';
-                                ?>
-                                    <button class="step step-item-container <?php echo $step_completed_class; ?> step-<?php echo $quiz_id; ?>" data-id="<?php echo $quiz_id; ?>">
-                                        <span class="editImg">
-                                            <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/edit.svg" alt="edit">
-                                        </span>
-                                        <span class="completedImg">
-                                            <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/completed.svg" alt="completed">
-                                        </span>
-                                        <span class="pendingImg">
-                                            <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/pending-png.png" alt="pending">
-                                        </span>
-                                        <p class="count">
-                                            <span class="title">Question <?php echo $quiz_id; ?></span>
-                                        </p>
-                                    </button>
-                                <?php endforeach; ?>
-                            </div>
-
-                            <div class="quizDetails">
-                                <?php foreach ($questions as $field) : $j++; ?>
-                                    <?php
-                                    $multiple_choice = $field['choice'] ?? array();
-                                    $question_description = $field['description'] ?? '';
-                                    $question_advice = $field['advice'] ?? '';
-                                    $choices_index = 0;
-
-                                    $is_attachment = isset($field['is_question_supporting']) ? 1 : '';
-                                    $is_question_description = isset($field['is_description']) ? 1 : '';
-                                    $question_title = $field['title'] ?? '';
-
-                                    $item_class = $j === 1 ? 'quiz-item-show' : 'quiz-item-hide';
-                                    $answers = null;
-                                    $description = null;
-                                    $attachment_id = null;
-                                    $feedback = null;
-
-                                    $current_quiz = $main->is_quiz_exist_in_object($j, $quiz, $organisation_id);
-
-                                    // remove all attr of html tags before print
-                                    $question_description = stripslashes($question_description);
-                                    $question_description = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $question_description);
-                                    $question_advice = stripslashes($question_advice);
-                                    $question_advice = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $question_advice);
-
-                                    if ($current_quiz) {
-                                        $item_class = $total_quiz === $j ? 'quiz-item-show active' : 'quiz-item-hide';
-
-                                        if (array_key_exists('answers', $current_quiz)) {
-                                            $answers = $current_quiz['answers'];
-                                        }
-
-                                        if (array_key_exists('description', $current_quiz)) {
-                                            $description = $current_quiz['description'];
-                                        }
-
-                                        if (array_key_exists('attachment_id', $current_quiz)) {
-                                            $attachment_id = $current_quiz['attachment_id'];
-                                        }
-
-                                        if (array_key_exists('feedback', $current_quiz)) {
-                                            $feedback = $current_quiz['feedback'];
-                                        }
-                                    } else {
-                                        if (!$show_first_active_view) {
-                                            $show_first_active_view = true;
-                                            $item_class = 'quiz-item-show active';
-                                        }
-                                    }
-                                    ?>
-                                    <div class="quiz <?php echo $item_class; ?> quiz-<?php echo $j; ?>" id="quiz-item-<?php echo $j ?>" data-group="<?php echo $j ?>" data-quiz="<?php echo $j ?>">
-                                        <div class="quizTitle"><?php echo $question_title; ?></div>
-                                        <div class="fieldsWrapper">
-                                            <div class="fieldDetails">
-                                                <div class="question-description"><?php echo $question_description; ?></div>
-                                            </div>
-                                            <?php if (is_array($multiple_choice) && count($multiple_choice) > 0) : ?>
-                                                <div class="multiple-choice-area <?php if (!empty($answers)) echo 'checked'; ?>">
-                                                    <?php foreach ($multiple_choice as $item) :
-                                                        $choices_index++;
-                                                        $is_checked = $main->is_answer_exist($choices_index, $answers) ? 'checked' : null;
-                                                        $answer = isset($item['answer']) ? $item['answer'] : null;
-                                                        $point = isset($item['point']) ? $item['point'] : null;
-                                                    ?>
-                                                        <div class="checkBox">
-                                                            <input class="form-check-input <?php echo $is_checked; ?>" type="radio"
-                                                                    value="" <?php echo $is_disabled ? 'disabled' : '' ?>
-                                                                    id="checkbox-<?php echo $j ?>-<?php echo $choices_index; ?>"
-                                                                    name="quiz_<?php echo $j; ?>_choice"
-                                                                    data-title="<?php echo $answer; ?>" 
-                                                                    data-point="<?php echo $point; ?>" 
-                                                                    data-id="<?php echo $choices_index; ?>" <?php echo $is_checked; ?>>
-                                                            <label class="form-check-label" for="checkbox-<?php echo $j ?>-<?php echo $choices_index; ?>">
-                                                                <?php echo $item['answer']; ?>
-                                                                <?php if ($is_checked): ?>
-                                                                    <span class="answer-tooltip">This answer has been selected</span>
-                                                                <?php endif; ?>
-                                                            </label>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <?php if ($is_question_description) : ?>
-                                                <div class="textAreaWrap">
-                                                    <label for="quiz-description-<?php echo $j; ?>">
-                                                        Your comments 
-                                                        <?php if ($is_required_answer_all == true) echo '(Required)'; ?>
-                                                    </label>
-                                                    <textarea name="description" <?php echo $is_disabled ? 'disabled' : '' ?> 
-                                                            id="quiz-description-<?php echo $j; ?>"
-                                                            class="quiz-description textarea medium" 
-                                                            placeholder="Enter comments" 
-                                                            rows="10"><?php if (isset($current_quiz['description'])) echo $description; ?></textarea>
-                                                </div>
-                                            <?php endif; ?>
-                                            <?php if ($is_attachment) : ?>
-                                                <div class="fileUploaderWrap">
-                                                    <input type="file" class="assessment-file" <?php echo $is_disabled ? 'disabled' : '' ?> />
-                                                    <div class="uploading-wrapper">
-                                                        <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="uploading">
-                                                    </div>
-                                                    <input name="attachment_id" type="hidden" class="assessment-attachment-id" <?php echo $is_disabled ? 'disabled' : '' ?> value="<?php echo $attachment_id; ?>" />
-                                                    <p class=" fileInstruct">Maximum file size: <?php echo size_format(wp_max_upload_size()); ?> <br> File types
-                                                        allowed:
-                                                        .ppt, .pdf, .docx</p>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                        <?php if ($question_advice): ?>
-                                            <div class="quizAdvice">
-                                                <div class="advice-area">
-                                                    <?php echo $question_advice; ?>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
-                                        <div class="answer-notification">
-                                            <p>Please make sure you have answered all questions and provided evidence.</p>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                                <div class="formController" <?php if($is_disabled) echo 'disabled'; ?>>
-                                    <button <?php echo $is_disabled ? 'disabled' : '' ?> id="continue-quiz-btn" class="nextPrevBtn next">Save and continue</button>
-                                    <div id="saving-spinner" style="display:none;"> 
-                                        <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="uploading">
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <!-- End Simple Assessment -->
+                    </div><!-- .Notification Box -->
                 <?php endif; ?>
 
                 <?php if ( ($question_templates == 'Comprehensive Assessment' && $questions && !$is_accepted) 
@@ -352,24 +202,11 @@ $exception_orgs_id = get_exception_orgs_id();
                             </div>
                             <div class="stepsWrap">
                                 <?php foreach ($questions as $group_id => $field):
-                                    $args = '';
-                                    foreach ($field['list'] as $sub):
-                                        $args_choice = $sub['choice'] ?? null;
-                                        $args_is_description = $sub['is_description'] ?? null;
-                                        $args_supporting_doc = $sub['supporting_doc'] ?? null;
-                                        
-                                        $args = array(
-                                            'is_required_answer_all' => $is_required_answer_all,
-                                            'choice' => $args_choice,
-                                            'is_description' => $args_is_description,
-                                            'supporting_doc' => $args_supporting_doc,
-                                        );
-                                        $is_step_completed = $main->is_group_quiz_exist_in_object($group_id, $quiz, $organisation_id, $args);
-                                    endforeach;
-
+                                    $questions_list = $field['list'] ?? array();
+                                    $is_step_completed = $main->is_group_quiz_completed($questions_list, $group_id, $quizzes);
                                     $step_completed_class = $is_step_completed ? 'completed' : '';
                                 ?>
-                                    <button class="step step-item-container <?php echo $step_completed_class; ?> step-<?php echo $group_id; ?>" data-id="<?php echo $group_id; ?>">
+                                    <button id="step-<?php echo $group_id; ?>" class="step step-item-container <?php echo $step_completed_class; ?> step-<?php echo $group_id; ?>" data-id="<?php echo $group_id; ?>">
                                         <span class="editImg">
                                             <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/edit.svg" alt="edit"> 
                                         </span>
@@ -387,64 +224,27 @@ $exception_orgs_id = get_exception_orgs_id();
                             </div>
 
                             <div class="quizDetails">
-                                <?php foreach ($questions as  $field): 
-                                    $j++; 
+                                <?php foreach ($questions as $group_id => $field): 
+
                                     $group_question_title = $field['title'] ?? '';
-                                    $group_question_title = htmlentities(stripslashes(utf8_decode($group_question_title)));
-                                    $sub_question = $field['list'];
-                                    $current_quiz = $main->is_quiz_exist_in_object($j, $quiz, $organisation_id);
-                                    $item_class = $j === 1 ? 'quiz-item-show' : 'quiz-item-hide';
-                                    $answers = null;
-                                    $description = null;
-                                    $attachment_id = null;
-                                    $feedback = null;
-
-                                    if ($current_quiz) {
-                                        $item_class = $total_quiz === $j ? 'quiz-item-show active' : 'quiz-item-hide';
-
-                                        if (array_key_exists('answers', $current_quiz)) {
-                                            $answers = $current_quiz['answers'];
-                                        }
-
-                                        if (array_key_exists('description', $current_quiz)) {
-                                            $description = $current_quiz['description'];
-                                        }
-
-                                        if (array_key_exists('attachment_id', $current_quiz)) {
-                                            $attachment_id = $current_quiz['attachment_id'];
-                                        }
-
-                                        if (array_key_exists('feedback', $current_quiz)) {
-                                            $feedback = $current_quiz['feedback'];
-                                        }
-
-                                        if (array_key_exists('submission_id', $current_quiz)) {
-                                            $submission_id = $current_quiz['submission_id'];
-                                        }
-                                    } 
-                                    else {
-                                        if (!$show_first_active_view) {
-                                            $show_first_active_view = true;
-                                            $item_class = 'quiz-item-show active';
-                                        }
-                                    }
+                                    $group_question_title = htmlentities(stripslashes(mb_convert_encoding($group_question_title, 'ISO-8859-1', 'UTF-8')));
+                                    $sub_questions = $field['list'] ?? array();
+                                    $item_class = $group_id === 1 ? 'active' : '';
                                     ?>
-                                    <div class="group-question quiz <?php echo $item_class; ?>" id="quiz-item-<?php echo $j; ?>" data-group="<?php echo $j; ?>">
+                                    <div class="group-question quiz <?php echo $item_class; ?>" id="quiz-item-<?php echo $group_id; ?>" data-group="<?php echo $group_id; ?>">
                                         <div class="quizTitle"><?php echo $group_question_title; ?></div>
-                                        <?php foreach ($sub_question as $sub_id => $field): ?>
+                                        <?php foreach ($sub_questions as $sub_id => $field): ?>
                                             <?php
                                                 $multiple_choice = $field['choice'] ?? null;
-                                                $sub_title = $field['sub_title'] ?? '';
-                                                $question_description = $field['description'];
+                                                $sub_title = $main->wpa_stripslashes_string($field['sub_title']) ?? '';
+                                                $question_description = $field['description'] ?? '';
                                                 $question_advice = $field['advice'] ?? '';
                                                 $choices_index = 0;
                                                 $additional_files = $field['additional_files'] ?? null;
                                                 $is_attachment = $field['supporting_doc'] ?? null;
                                                 $is_question_description = $field['is_description'] ?? null;
                                                 $arr_attachmentID = '';
-
-                                                // remove Slashes of Quotes character(\", \')
-                                                $sub_title = htmlentities(stripslashes(utf8_decode($sub_title)));
+                                                $answers = '';
 
                                                 // remove all attr of html tags before print
                                                 $question_description = stripslashes($question_description);
@@ -452,40 +252,29 @@ $exception_orgs_id = get_exception_orgs_id();
                                                 $question_advice = stripslashes($question_advice);
                                                 $question_advice = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $question_advice);
 
-                                                $current_quiz_sub = $main->is_quiz_exist_in_object_sub($j, $sub_id, $quiz, $organisation_id);
+                                                $current_quiz_sub = $main->get_quiz_object_sub_question($group_id, $sub_id, $quizzes, $organisation_id);
 
                                                 if ($current_quiz_sub) {
-                                                    //$item_class = $total_quiz === $j ? 'quiz-item-show' : 'quiz-item-hide';
                                                     if (array_key_exists('answers', $current_quiz_sub)) {
                                                         $answers = $current_quiz_sub['answers'];
                                                     }
-                                                    if (array_key_exists('answers', $current_quiz_sub)) {
-                                                        $answers = $current_quiz_sub['answers'];
-                                                    }
-
                                                     if (array_key_exists('description', $current_quiz_sub)) {
                                                         $description = $current_quiz_sub['description'];
-                                                        $description = htmlentities(stripslashes(utf8_decode($description)));
+                                                        $description = $main->wpa_stripslashes_string($description);
                                                     }
-
-                                                    if (array_key_exists('attachment_id', $current_quiz_sub)) {
-                                                        $attachment_id = $current_quiz_sub['attachment_id'];
-                                                    }
-
                                                     if (array_key_exists('attachment_ids', $current_quiz_sub)) {
                                                         $arr_attachmentID = $current_quiz_sub['attachment_ids'];
                                                         $arr_attachmentID = json_decode($arr_attachmentID, true);
                                                     }
-
                                                     if (array_key_exists('feedback', $current_quiz_sub)) {
                                                         $feedback = $current_quiz_sub['feedback'];
-                                                        $feedback = htmlentities(stripslashes(utf8_decode($feedback)));
+                                                        $feedback = $main->wpa_stripslashes_string($feedback);
                                                     }
                                                 }
                                             ?>
                                             <div class="fieldsWrapper sub-quiz-<?php echo $sub_id; ?>" data-sub="<?php echo $sub_id; ?>">
                                                 <div class="fieldDetails">
-                                                    <h3 class="sub-quiz-title"><?php echo $j.'.'.$sub_id.' '.$sub_title; ?></h3>
+                                                    <h3 class="sub-quiz-title"><?php echo $group_id.'.'.$sub_id.' '.$sub_title; ?></h3>
                                                     <div class="question-description"><?php echo $question_description; ?></div>
                                                 </div>
                                                 <?php if (is_array($multiple_choice) && count($multiple_choice) > 0) : ?>
@@ -497,12 +286,12 @@ $exception_orgs_id = get_exception_orgs_id();
                                                             <div class="checkBox">
                                                                 <input class="form-check-input <?php echo $is_checked; ?>" 
                                                                         type="radio" value="<?php echo $item['answer']; ?>" <?php echo $is_disabled ? 'disabled' : '' ?>
-                                                                        id="checkbox-<?php echo $j ?>-<?php echo $sub_id; ?>-<?php echo $choices_index; ?>"
+                                                                        id="checkbox-<?php echo $group_id ?>-<?php echo $sub_id; ?>-<?php echo $choices_index; ?>"
                                                                         data-title="<?php echo $item['answer']; ?>"
                                                                         data-point="<?php echo $item['point']; ?>"
-                                                                        name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_choice"
+                                                                        name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_choice"
                                                                         data-id="<?php echo $choices_index; ?>" <?php echo $is_checked; ?>>
-                                                                <label class="form-check-label" for="checkbox-<?php echo $j ?>-<?php echo $sub_id; ?>-<?php echo $choices_index; ?>">
+                                                                <label class="form-check-label" for="checkbox-<?php echo $group_id ?>-<?php echo $sub_id; ?>-<?php echo $choices_index; ?>">
                                                                     <?php echo $item['answer']; ?>
                                                                     <?php if ($is_checked): ?>
                                                                         <span class="answer-tooltip">This answer has been selected</span>
@@ -515,28 +304,16 @@ $exception_orgs_id = get_exception_orgs_id();
 
                                                 <?php if ($is_question_description) : ?>
                                                     <div class="textAreaWrap">
-                                                        <label for="quiz-description-<?php echo $j; ?>-<?php echo $sub_id; ?>">
+                                                        <label for="quiz-description-<?php echo $group_id; ?>-<?php echo $sub_id; ?>">
                                                             Your comments 
                                                             <?php if ($is_required_answer_all == true) echo '(Required)'; ?>
                                                         </label>
-                                                        <textarea name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_description" 
-                                                                id="quiz-description-<?php echo $j; ?>-<?php echo $sub_id; ?>"
+                                                        <textarea name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_description" 
+                                                                id="quiz-description-<?php echo $group_id; ?>-<?php echo $sub_id; ?>"
                                                                 <?php echo $is_disabled ? 'disabled' : '' ?> 
                                                                 class="quiz-description textarea medium" 
                                                                 placeholder="Enter comments"
-                                                                rows="10"><?php 
-                                                                    if (isset($current_quiz_sub['description'])) {
-                                                                        if ($terms[0] == 'dcr') { 
-                                                                            $submission_status = get_post_meta($submission_id, 'assessment_status', true);
-                                                                            if ($submission_status == 'draft') {
-                                                                                echo $description; 
-                                                                            }
-                                                                        }
-                                                                        else {
-                                                                            echo $description; 
-                                                                        }
-                                                                    }
-                                                                ?></textarea>
+                                                                rows="10"><?php if (isset($current_quiz_sub['description'])) echo $description; ?></textarea>
                                                     </div>
                                                     <?php if (!empty($all_quiz_pre_cmts) && $terms[0] == 'dcr'): ?>
                                                         <div class="pre-comments">
@@ -545,9 +322,9 @@ $exception_orgs_id = get_exception_orgs_id();
                                                             <?php foreach ($all_quiz_pre_cmts as $row): 
                                                                 $submission_status = get_post_meta($row->submission_id, 'assessment_status', true);
                                                                 if (isset($row->parent_id) && isset($row->quiz_id)):
-                                                                    if ($row->parent_id == $j && $row->quiz_id == $sub_id && $submission_status != 'draft'):
+                                                                    if ($row->parent_id == $group_id && $row->quiz_id == $sub_id && $submission_status != 'draft'):
                                                                         $cmt_time = date("M d Y H:i a", strtotime($row->time));
-                                                                        $cmt_desc = htmlentities(stripslashes($row->description));
+                                                                        $cmt_desc = !empty($row->description) ? htmlentities(stripslashes($row->description)) : '';
                                                                         $cmt_class = (strlen($cmt_desc) > 400) ? 'show_less' : '';
                                                                         ?>
                                                                         <?php if ($cmt_desc != null): ?>
@@ -620,12 +397,12 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 </div>
                                                                 <p class="helper-text" style="display:inline;">Drop files to attach, or </p>
                                                                 <div class="btn-add-files-wrapper">
-                                                                    <label for="additional-files-<?php echo $j.'-'.$sub_id; ?>"
+                                                                    <label for="additional-files-<?php echo $group_id.'-'.$sub_id; ?>"
                                                                         <?php if($is_disabled) echo 'style="opacity: 0.5; cursor:default;"'; ?>>
                                                                         <span aria-disabled="false">Browse.</span>
                                                                     </label>
                                                                     <input  <?php if($is_disabled) echo 'disabled'; ?>
-                                                                            id="additional-files-<?php echo $j.'-'.$sub_id; ?>"
+                                                                            id="additional-files-<?php echo $group_id.'-'.$sub_id; ?>"
                                                                             class="additional-files"
                                                                             type="file"
                                                                             name="file[]"
@@ -638,7 +415,7 @@ $exception_orgs_id = get_exception_orgs_id();
 
                                                         <div class="filesList">
                                                         <?php 
-                                                            $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($j, $sub_id, $post_id, $organisation_id);
+                                                            $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($group_id, $sub_id, $post_id, $organisation_id);
                                                         ?>
                                                         <!-- WP media attachment file -->
                                                         <?php if ($arr_attachmentID): ?>
@@ -655,7 +432,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                             <i class="fa-solid fa-paperclip"></i>
                                                                             <?php echo $file_name; ?>
                                                                     </a>
-                                                                    <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
+                                                                    <input name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
                                                                             class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"
                                                                             value="<?php echo $file_id; ?>">
@@ -686,7 +463,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                             <i class="fa-solid fa-paperclip"></i>
                                                                             <?php echo $file_name; ?>
                                                                     </button>
-                                                                    <input name="questions_<?php echo $j; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
+                                                                    <input name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
                                                                             class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"
                                                                             value="<?php echo $file_id; ?>">
@@ -736,11 +513,11 @@ $exception_orgs_id = get_exception_orgs_id();
                                                     </div>
                                                 <?php endif; ?>
                                                 <?php if ($terms[0] == 'dcr'): ?>
-                                                    <?php if (!empty($dcr_feedbacks[$j][$sub_id])): ?>
+                                                    <?php if (!empty($dcr_feedbacks[$group_id][$sub_id])): ?>
                                                         <div class="quizAdvice feedback-area">
                                                             <p>Feedbacks</p>
                                                             <ul class="feedback-list">
-                                                                <?php $quiz_feedbacks = array_reverse($dcr_feedbacks[$j][$sub_id]); ?>
+                                                                <?php $quiz_feedbacks = array_reverse($dcr_feedbacks[$group_id][$sub_id]); ?>
                                                                 <?php foreach ($quiz_feedbacks as $feedback): ?>
                                                                     <?php if (!empty($feedback['feedback'])): ?>
                                                                         <li class="feedback-item">
@@ -770,15 +547,26 @@ $exception_orgs_id = get_exception_orgs_id();
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
-                                <div class="formController">
-                                    <!-- <p class="helper-text">Click continue to save this Section</p> -->
+                                <div class="formController <?php echo $is_disabled ? 'disabled' : ''; ?>">
                                     <input type="hidden" name="type_quiz" value="<?php echo $question_templates ?>">
-                                    <button <?php echo $is_disabled ? 'disabled' : '' ?> id="continue-quiz-btn" class="nextPrevBtn next">
-                                        Save and continue
+                                    <button id="go-back-quiz-btn" class="nextPrevBtn prev show">
+                                        <span class="icon"><i class="fa-solid fa-arrow-left"></i></span>
+                                        <span>Go back</span>
                                     </button>
-                                    <div id="saving-spinner" style="display:none;"> 
-                                        <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="uploading">
+                                    <div class="__center">
+                                        <button <?php echo $is_disabled ? 'disabled' : '' ?> id="continue-quiz-btn" class="primaryBtn">
+                                            <span class="text">Save and continue</span>
+                                            <div class="spinner-wrapper"><div class="wpa-spinner"></div></div>
+                                        </button>
+                                        <button <?php echo $is_disabled ? 'disabled' : '' ?> id="submit-quiz-btn" class="primaryBtn">
+                                            <span class="text">Submit</span>
+                                            <div class="spinner-wrapper"><div class="wpa-spinner"></div></div>
+                                        </button>
                                     </div>
+                                    <button id="go-next-quiz-btn" class="nextPrevBtn next show">
+                                        <span>Go next</span>
+                                        <span class="icon"><i class="fa-solid fa-arrow-right"></i></span>
+                                    </button>
                                 </div>
                                 
                             </div>

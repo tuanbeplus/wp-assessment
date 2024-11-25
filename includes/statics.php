@@ -34,7 +34,8 @@ const USER_ASSESSMENTS_PERCHASED_FIELDS = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/users
 const ADMIN_ATTACHMENT_UPLOADER_INFO_VIEW = WP_ASSESSMENT_ADMIN_VIEW_DIR . '/attachments/attachment-uploader-info-view.php';
 
 // define front views
-const QUIZ_TEMPLATE_VIEW = WP_ASSESSMENT_FRONT_VIEW_DIR . '/quiz.php';
+const COMP_ASSESSMENT_VIEW = WP_ASSESSMENT_FRONT_VIEW_DIR . '/comprehensive-assessment.php';
+const SIMPLE_ASSESSMENT_VIEW = WP_ASSESSMENT_FRONT_VIEW_DIR . '/simple-assessment.php';
 const SINGLE_REPORTS_TEMPLATE = WP_ASSESSMENT_FRONT_VIEW_DIR . '/single-reports.php';
 const SINGLE_SUBMISSIONS_TEMPLATE = WP_ASSESSMENT_FRONT_VIEW_DIR . '/single-submissions.php';
 
@@ -49,7 +50,7 @@ function admin_enqueue_scripts()
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
         wp_enqueue_script('chart-lib', 'https://cdn.jsdelivr.net/npm/chart.js');
-        wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/main.js', true, WP_ASSESSMENT_VER);
+        wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/admin-main.js', WP_ASSESSMENT_VER, true);
 
         wp_localize_script(
             'admin-js',
@@ -65,7 +66,7 @@ function admin_enqueue_scripts()
         wp_localize_script('admin-js', 'report_chart_imgs_meta', $dashboard_chart_imgs);
 
     }
-    wp_enqueue_style('admin-css', WP_ASSESSMENT_ASSETS . '/css/style.css', false, WP_ASSESSMENT_VER);
+    wp_enqueue_style('admin-css', WP_ASSESSMENT_ASSETS . '/css/admin/admin-main.css', false, WP_ASSESSMENT_VER);
 }
 
 add_action('wp_enqueue_scripts', 'enqueue_scripts');
@@ -74,15 +75,12 @@ function enqueue_scripts()
     global $post_type;
     if( $post_type == 'assessments' || $post_type == 'submissions' || $post_type == 'dcr_submissions' || $post_type == 'reports') {
         wp_enqueue_media();
-        wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
-        wp_enqueue_style('front-style', WP_ASSESSMENT_ASSETS . '/css/front/style.css', true, WP_ASSESSMENT_VER);
-        wp_enqueue_style('front-responsive', WP_ASSESSMENT_ASSETS . '/css/front/responsive.css', true, WP_ASSESSMENT_VER);
         wp_enqueue_script('jquery', WP_ASSESSMENT_ASSETS . '/js/jquery.min.js');
-        wp_enqueue_script('bootstrap-min-js', WP_ASSESSMENT_ASSETS . '/js/bootstrap.min.js');
-        wp_enqueue_script('main-js', WP_ASSESSMENT_ASSETS . '/js/front/main.js', true, WP_ASSESSMENT_VER);
+        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
+        wp_enqueue_style('front-style', WP_ASSESSMENT_ASSETS . '/css/front/main.css', WP_ASSESSMENT_VER);
+        wp_enqueue_script('main-script', WP_ASSESSMENT_ASSETS . '/js/front/main.js', array('jquery'), WP_ASSESSMENT_VER, true);
         wp_localize_script(
-            'main-js',
+            'main-script',
             'ajax_object',
             array(
                 'ajax_url' => admin_url('admin-ajax.php'),

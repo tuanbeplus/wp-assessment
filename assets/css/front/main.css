@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 
 h1,
 h2,
@@ -30,8 +29,6 @@ a:focus {
 }
 
 body {
-    overflow-x: hidden;
-    font-family: "Poppins";
     position: relative;
     scroll-behavior: smooth;
 }
@@ -41,20 +38,17 @@ body {
 }
 
 /* Form Wrapper CSS Starts Here */
-
 .formWrapper {
     padding-bottom: 100px;
     font-size: 1.25rem;
     background-color: #faf9f9;
 }
-
 .formWrapper button:focus {
     outline: none!important;
     box-shadow: none!important;
     background-color: #ccc;
     border: 2px solid #333!important;
 }
-
 .formWrapper a.btn {
     font-size: 1.125rem;
     color: #fff;
@@ -63,95 +57,177 @@ body {
     font-family: "Avenir-Medium";
     cursor: pointer;
 }
-
 .formWrapper .notificationBar {
     margin-bottom: 40px;
-    max-width: 1000px;
+    max-width: 800px;
     margin-left: auto;
     margin-right: auto;
     background: #fff;
     padding: 20px 30px;
-    border-radius: 2px;
     box-shadow: rgb(0 0 0 / 4%) 0px 3px 5px;
 }
-
 .formWrapper .notificationBar.rejected {
-    max-height: 500px;
-    overflow-y: auto;
+    border-top: 3px solid #666;
     border-bottom: 1px solid #ddd;
 }
-
 .formWrapper .notificationBar.pending {
-    border-left: 6px solid orange;
+    border-left: 5px solid orange;
 }
-
 .formWrapper .notificationBar.accepted {
-    border-left: 6px solid green;
+    border-left: 5px solid green;
 }
-
+.formWrapper .notificationBar h2 {
+    font-size: 1.75rem;
+}
+.notificationBar .remarks {
+    text-transform: capitalize;
+    font-size: 1rem;
+}
 .notificationBar .remarks.accepted {
     color: green;
 }
-
 .notificationBar .remarks.rejected {
-    color: darkred;
+    color: #b32d2e;
 }
-
 .formWrapper .require-login {
     text-align: center;
 }
-
 .formWrapper .require-login > h3 {
     margin-bottom: 10px;
 }
-
 .formWrapper .require-login > a.btn {
     margin: 10px;
     padding: 6px 30px;
     min-width: 130px;
     transition: all 0.2s;
 }
-
 .formWrapper .require-login > a.btn:hover {
     opacity: 0.8;
 }
 
 .notificationBar .result {
-    margin-bottom: 20px;
+    margin: 4px 0 14px;
 }
-
-.notificationBar ul.testDetails li {
-    font-size: 1.125rem;
+.notificationBar .notifiDetails {
     margin-bottom: 16px;
+    max-height: 460px;
+    overflow-y: auto;
+    border-bottom: 1px solid #eaeaea;
+}
+.notificationBar .notifiDetails h3 {
+    font-size: 1.3rem;
+}
+.notificationBar .notifiDetails ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 10px 0;
+    padding: 0 0 0 20px;
+    border-bottom: 1px solid #ececec;
+}
+.notificationBar .notifiDetails ul:last-child {
+    margin-bottom: 0;
+}
+@media only screen and (max-width: 768px) {
+    .notificationBar .notifiDetails ul {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+.notificationBar .notifiDetails li {
+    font-size: 1.125rem;
+    margin-bottom: 10px;
     line-height: 130%;
 }
-
-.notificationBar ul.testDetails li span.crossIcon {
+.notificationBar .notifiDetails li span.crossIcon {
     color: red;
 }
-
-.notificationBar ul.testDetails li span.checkedIcon {
+.notificationBar .notifiDetails li span.checkedIcon {
     color: green;
 }
 
 .topBar {
+    margin-bottom: 40px;
+}
+.topBar.flex {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 60px;
-    gap: 30px;
+}
+.topBar.flex .topbar-action {
+    margin-top: 0;
 }
 
 .topBar h1 {
-    font-size: 3rem;
-    line-height: 110%;
+    font-size: 2.8rem;
+    line-height: 120%;
     color: #3d3d3d;
 }
 
 .topbar-action {
+    margin-top: 24px;
     display: flex;
-    align-items: center;
+    align-items: end;
     gap: 40px;
+}
+
+.submission-vers {
+    position: relative;
+    min-width: 370px;
+}
+.submission-vers > * {
+    font-size: 1rem;
+    font-family: "Avenir-Medium";
+}
+.submission-vers #btn-show-submission-vers {
+    width: 100%;
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    white-space: nowrap;
+    font-size: 1rem;
+    gap: 8px;
+    padding: 12px 16px 10px;
+    background-color: #fff;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.submission-vers #btn-show-submission-vers:focus {
+    background: #fff;
+    border: 1px solid #333 !important;
+}
+.submission-vers .submission-ver-current .icon {
+    position: relative;
+    right: -4px;
+    color: #555;
+    font-size: 15px;
+}
+.submission-vers .submission-vers-list{
+    display: none;
+    position: absolute;
+    bottom: 2px;
+    transform: translateY(100%);
+    padding: 16px;
+    width: 100%;
+    max-height: 400px;
+    overflow: auto;
+    background-color: #fff;
+    border: 1px solid #aaa;
+    border-top: 1px solid #ccc;
+    border-radius: 0 0 4px 4px;
+    z-index: 10;
+}
+.submission-vers .submission-vers-list .submission-ver {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+.submission-vers .submission-vers-list .submission-ver:last-child {
+    margin-bottom: 0;
+}
+.submission-vers .submission-vers-list .submission-ver a {
+    color: #6e297b;
+    font-family: "Avenir-Medium";
+    text-decoration: none!important;
 }
 
 #toggle-invite-colleagues {
@@ -192,7 +268,7 @@ body {
     line-height: 100%;
     color: #212529;
     border-radius: 8px;
-    padding: 16px 58px;
+    padding: 14px 40px;
     display: block;
     margin-left: auto;
     font-family: "Avenir-Medium";
@@ -201,39 +277,15 @@ body {
     border-color: #ccc;
     background-color: #dfdfdf;
 }
-
-.topBar .progressBtn.loading {
-    background-color: #eee!important;
-    color: #eee!important;
-}
-
-.progressBtn .progress-spinner {
-    display: none;
-    position: absolute;
-    width: 64px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-}
-
-.progressBtn.loading .progress-spinner {
-    display: block;
-}
-
 .topBar .progressBtn:hover {
     background-color: #5f5f5f;
     color: #f1f1f1;
 }
-
-.notify {
-    font-size: 1.125rem;
-    line-height: 100%;
-    color: #212529;
-    display: none;
-    position: absolute;
-    right: 0;
-    bottom: -16px;
+.progressBtn.loading .text{
+    opacity: 0;
+}
+.progressBtn.loading .wpa-spinner {
+    display: block;
 }
 
 .invite-colleagues-wrapper {
@@ -376,9 +428,10 @@ body {
 .stepsWrap {
     display: flex;
     flex-wrap: wrap;
+    border-left: 1px solid #C9C9C9;
 }
-
 .stepsWrap .step {
+    margin-top: -1px;
     width: 10%;
     background-color: #ffffff;
     padding: 20px 24px;
@@ -389,16 +442,12 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    border-right: 1px solid #C9C9C9;
-    border-top: 1px solid #C9C9C9;
-    border-bottom: 1px solid #C9C9C9;
+    border: 1px solid #C9C9C9;
     border-left: 0;
 }
-
 .stepsWrap .step .title {
     white-space: nowrap;
 }
-
 .stepsWrap .step .editImg {
     width: 48px;
     height: 48px;
@@ -410,7 +459,6 @@ body {
     align-items: center;
     margin: 0 0 8px 0;
 }
-
 .stepsWrap .step .completedImg {
     width: 48px;
     height: 48px;
@@ -422,69 +470,47 @@ body {
     align-items: center;
     margin: 0 0 8px 0;
 }
-
 .stepsWrap .step .pendingImg {
     display: none;
     max-width: 60px;
 }
-
 .stepsWrap .step.pending {
     background-color: #ccc;
 }
-
 .stepsWrap .step.pending .editImg {
     display: none;
 }
-
 .stepsWrap .step.pending .pendingImg {
     display: block;
 }
-
 .stepsWrap .step.completed {
     background: #b1b1b1;
     border: none;
 }
-
 .stepsWrap .step.active {
-    background-color: #ccc;
-    border: 2px solid #333!important;
-} 
-
+    background-color: #ccc!important;
+    border: 1px solid #444!important;
+    box-shadow: inset 0px 0px 0px 1px #444!important;
+}
 .stepsWrap .step .completedImg {
     display: none;
 }
-
 .stepsWrap .step.completed .editImg {
     display: none;
 }
-
 .stepsWrap .step.completed .completedImg {
     display: flex;
 }
-
 .stepsWrap .step:not(:last-child) {
     border-right: 1px solid #c9c9c9;
 }
 
-.stepsWrap .step:first-child {
-    border-left: 1px solid #c9c9c9;
-}
-
-/* Quiz Form Fields Css Starts*/
-/*.quizDetails .quiz:not(:first-of-type) {*/
-/*  display: none;*/
-/*}*/
-
 .quiz {
+    display: none;
     position: relative;
     background-color: #fff;
 }
-
-.quiz-item-hide {
-    display: none;
-}
-
-.quiz-item-show {
+.quiz.active {
     display: block;
 }
 
@@ -496,10 +522,6 @@ body {
     padding: 25px 16px;
     font-family: "Avenir-Heavy";
 }
-
-/* #form_submit_quiz {
-    position: relative;
-} */
 
 #form_submit_quiz.loading {
     opacity: 0.5;
@@ -537,33 +559,32 @@ body {
     line-height: 130%;
     font-family: "Avenir-Medium";
 }
-
 .fieldDetails .question-description {
     margin: 20px 0;
     font-size: 1.2rem;
     line-height: 130%;
     font-family: "Avenir-Medium";
 }
-
 .fieldDetails .question-description ul {
     margin: 14px 0 24px 32px;
     list-style: disc;
 }
-
 .fieldDetails .question-description ul li {
     font-size: 1.125rem;
     margin-bottom: 14px;
     list-style-type: disc;
 }
-
 .fieldDetails .question-description ol {
     margin: 0 0 32px 32px;
     list-style: decimal;
 }
-
 .fieldDetails .question-description ol li {
     margin-bottom: 10px;
     list-style-type: decimal;
+}
+.fieldDetails .question-description strong * {
+    font-weight: 700;
+    font-family: "Avenir-Heavy";
 }
 
 .fieldsWrapper {
@@ -760,7 +781,7 @@ body {
 .quizAdvice .advice-area ul li{
     list-style-type: disc;
     line-height: 130%;
-    margin: 14px 0;
+    margin: 12px 0;
 }
 
 .quizAdvice .advice-area ol{
@@ -858,39 +879,77 @@ body {
 }
 
 .formController {
-    margin: 46px auto 0;
-    width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 46px 24px 0;
     position: relative;
     text-align: center;
 }
 
-.formController .nextPrevBtn {
-    margin: 0 20px;
+.formController button {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
     border-color: #ccc;
     background-color: #dfdfdf;
     border-radius: 8px;
     font-size: 1.125rem;
     color: #212529;
-    padding: 16px 60px;
+    padding: 14px 40px;
     transition: all 0.3s;
     font-family: "Avenir-Medium";
 }
+.formController button:hover {
+    background-color: #5f5f5f;
+    color: #f1f1f1;
+}
+.formController button .icon {
+    font-size: 16px;
+}
 
-.formController.not-allowed .nextPrevBtn {
+.formController .__center{
+    display: flex;
+    gap: 24px;
+}
+.formController button.primaryBtn {
+    min-width: 240px;
+}
+.formController.disabled .primaryBtn{
+    visibility: hidden;
+}
+
+.primaryBtn.loading .text {
+    opacity: 0;
+}
+.primaryBtn.loading .wpa-spinner {
+    display: block;
+}
+
+.formController button.nextPrevBtn {
+    padding: 14px 32px;
+    transition: all 0s;
+}
+
+.nextPrevBtn {
+    visibility: hidden;
+}
+.nextPrevBtn.show {
+    visibility: visible;
+}
+
+.formController.not-allowed button {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.formController.not-allowed .nextPrevBtn:hover {
+.formController.not-allowed button:hover {
     opacity: 0.5;
     cursor: not-allowed;
     background-color: #dfdfdf;
     color: #212529;
-}
-
-.formController .nextPrevBtn:hover {
-    background-color: #5f5f5f;
-    color: #f1f1f1;
 }
 
 .formController #saving-spinner {
@@ -968,7 +1027,9 @@ body {
     opacity: 1;
     cursor: pointer;
 }
-
+.btn-add-files-wrapper label * {
+    font-family: "Avenir-Heavy";
+}
 .btn-add-files-wrapper label:hover {
     color: #004887;
 }
@@ -1058,19 +1119,32 @@ body {
     display: inline-block;
     width: fit-content;
     margin-right: 8px;
-    padding: 8px 14px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 1rem;
-    border: 1px solid #222;
+    border: 1px solid #888;
     border-radius: 4px;
     text-transform: none;
     opacity: 1;
-    cursor: pointer;
     background-color: #fafafa;
-    box-shadow: rgba(0, 0, 0, 0.15) 2px 3px 3px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0 3px 3px;
     font-family: 'Avenir-Medium';
 }
 .btn-open-upload-area:hover {
     background-color: #ececec;
+}
+.btn-open-upload-area::after {
+    content: "";
+    border-color: #767676 transparent transparent transparent;
+    border-style: solid;
+    border-width: 6px 4px 0 4px;
+    position: relative;
+    right: -4px;
+}
+.btn-open-upload-area:focus {
+    background-color: #fafafa!important;
 }
 
 .upload-message {
@@ -1208,7 +1282,7 @@ body {
     display: none;
     width: 100%;
     position: absolute;
-    margin-top: 6px;
+    margin-top: 10px;
     color: #C00000;
 }
 
@@ -1536,6 +1610,30 @@ body.single-reports {
     color: red;
 }
 
+/* Spinner Circle Rotation */
+.spinner-wrapper {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.wpa-spinner {
+    display: none;
+    width: 30px;
+    height: 30px;
+    clear: both;
+    border: 3px #fff solid;
+    border-top: 3px #999 solid;
+    border-radius: 50%;
+    -webkit-animation: spinnerCircleRotate .6s infinite linear;
+    animation: spinnerCircleRotate .6s infinite linear;
+}
+
+@keyframes spinnerCircleRotate {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(359deg); }
+}
+
 @keyframes slide-down {
 	from {
 		transform: translateY(-100%);
@@ -1546,3 +1644,180 @@ body.single-reports {
 		opacity: 1;	
 	}
 }
+
+/* ----------------- Responsive ----------------- */
+
+@media only screen and (max-width:1920px) {}
+
+@media only screen and (max-width:1600px) {}
+
+@media only screen and (max-width:1440px) {}
+
+@media only screen and (max-width:1366px) {}
+
+@media only screen and (max-width:1280px) {}
+
+@media only screen and (max-width:1200px) {
+    .single-assessments .breadcrumbs-top {
+        margin-bottom: 42px;
+    }
+    .formWrapper .topBar {
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 1024px) {
+    .single-assessments .breadcrumbs-top {
+        margin-bottom: 32px;
+    }
+    .topBar h1 {
+        font-size: 40px;
+    }
+    .stepsWrap {
+        overflow-x: auto;
+    }
+    .stepsWrap .step {
+        min-width: 122px;
+        width: 122px;
+    }
+    .fieldsWrapper {
+        padding: 0 80px 50px;
+    }
+}
+
+@media only screen and (max-width:991px) {
+    .fieldsWrapper .checkBox label {
+        font-size: 1rem;
+    }
+    .form-spinner {
+        width: 100px;
+    }
+    .invite-colleagues-wrapper {
+        padding: 70px 40px;
+    }
+    #form-invite-colleagues {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    #emails-area {
+        font-size: 1rem;
+    }
+}
+
+@media only screen and (max-width:767px) {
+    .topBar h1 {
+        font-size: 32px;
+    }
+    .topBar .topbar-action {
+        gap: 24px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    .topBar .progressBtn {
+        margin-left: 0;
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+    .form-spinner {
+        width: 80px;
+    }
+    .formWrapper {
+        padding-bottom: 40px;
+    }
+    .stepsWrap .step {
+        min-width: auto;
+        width: auto;
+        padding: 8px 12px;
+    }
+    .stepsWrap .step .completedImg,
+    .stepsWrap .step .editImg {
+        width: 34px;
+        height: 34px;
+    }
+    .stepsWrap .step .editImg img,
+    .stepsWrap .step .completedImg img {
+        width: 20px;
+    }
+    .fieldsWrapper {
+        padding: 0 24px 24px;
+    }
+    .fieldDetails {
+        margin-top: 16px;
+    }
+    .fieldDetails .question-description>* {
+        font-size: 1rem;
+    }
+    .quizAdvice p {
+        font-size: 16px;
+    }
+    .quizTitle {
+        font-size: 20px;
+        padding: 16px;
+    }
+    .fieldsWrapper .checkBox {
+        margin-bottom: 16px;
+    }
+    .textAreaWrap {
+        margin-top: 24px;
+    }
+    .question-add-files-container ._label {
+        font-size: 1.125rem;
+    }
+    .progressBtn,
+    button {
+        font-size: 1rem;
+        padding: 16px 24px;
+        text-align: center;
+    }
+    .quizAdvice {
+        padding: 24px 24px 24px 50px;
+    }
+    .quizAdvice::before {
+        left: 10px
+    }
+    .quizAdvice .advice-area ul li,
+    .quizAdvice .advice-area ol li {
+        font-size: 1rem;
+        margin: 12px 0;
+    }
+    .formController {
+        margin: 30px 0 0 0;
+        flex-wrap: wrap;
+        gap: 0;
+    }
+    .formController button {
+        margin: 0 10px;
+        padding: 12px 40px;
+        font-size: 1rem;
+    }
+    .formController button.primaryBtn {
+        min-width: auto;
+    }
+    .formController button.nextPrevBtn {
+        padding: 12px 24px;
+    }
+    .btn-open-upload-area {
+        font-size: 0.925rem;
+    }
+}
+
+@media only screen and (max-width:575px) {
+    .formController {
+        margin-top: 28px;
+    }
+    .formController button {
+        margin: 10px;
+    }
+    .fieldDetails {
+        margin: 24px 0 16px;
+    }
+    .textAreaWrap textarea {
+        height: 140px;
+        font-size: 16px;
+    }
+}
+
+@media only screen and (max-width:480px) {}
+
+@media only screen and (max-width:385px) {}

@@ -23,7 +23,6 @@ $terms = get_assessment_terms($assessment_id);
 $main = new WP_Assessment();
 $azure = new WP_Azure_Storage();
 $feedback_cl = new AndSubmissionFeedbacks();
-$quiz = $main->get_user_quiz_by_assessment_id_and_submissions($assessment_id, $post_id, $organisation_id);
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $group_quiz_points = unserialize(get_post_meta($post_id, 'group_quiz_point', true));
@@ -31,6 +30,8 @@ $get_quiz_accepted = $main->get_quiz_accepted($assessment_id, $post_id, $organis
 
 // Get all feedbacks for assessment
 $question_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id, $organisation_id);
+
+$quizzes = $main->get_quizzes_by_assessment_and_submissions($assessment_id, $post_id, $organisation_id);
 
 $i = 0;
 $submission_score_arr = array();
@@ -44,8 +45,8 @@ $submission_score_arr = array();
 <div class="container">
     <?php if ($assessment_meta == 'Simple Assessment'): ?>
         <!-- Begin Simple Submission -->
-        <?php if ($quiz && is_array($quiz)) : ?>
-            <?php foreach ($quiz as $field) :
+        <?php if ($quizzes && is_array($quizzes)) : ?>
+            <?php foreach ($quizzes as $field) :
                 $i++;
                 $answers = [];
                 $attachment_id = null;
@@ -122,8 +123,8 @@ $submission_score_arr = array();
                 <p class="group-title"><?php echo $group_id.' - '.$group_title; ?></p>
                 <input type="hidden" name="recommentdation[<?php echo $group_id; ?>][key_area]" value="<?php echo $group_title; ?>">
                 <!--  -->
-                <?php if ($quiz && is_array($quiz)) : ?>
-                    <?php foreach ($quiz as $field) :
+                <?php if ($quizzes && is_array($quizzes)) : ?>
+                    <?php foreach ($quizzes as $field) :
                         if ($field->parent_id == $group_id):
                         // $i++;
                         $answers = [];
@@ -510,7 +511,7 @@ $submission_score_arr = array();
 <?php endif; ?>
 
 <!-- Hide meta box if quizs don't exist -->
-<?php if (!empty($quiz)): ?>
+<?php if (!empty($quizzes)): ?>
     <style>
         /* #submitted_info_view,
         #questions-repeater-field {

@@ -183,8 +183,8 @@ $i = 0; $j = 0;
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row question-other-info-container">
-                                        <div class="col-12">
+                                    <div class="question-other-info-container">
+                                        <div>
                                             <strong class="checkbox-label-heading">Rules:</strong>
                                             <div class="question-rule-checkbox-inner-container">
                                                 <label>Supporting documentation required..</label>
@@ -192,7 +192,7 @@ $i = 0; $j = 0;
                                                     value="1" <?php checked( $supporting_doc, 1 ); ?>/>
                                             </div>
                                         </div>
-                                        <div class="col-10 multi-choice-btn-container">
+                                        <div class="multi-choice-btn-container">
                                             <button class="button add-multi-choice-btn" type="button" data-group-id="<?php echo $parent_question_id; ?>" data-id="<?php echo $question_id; ?>">
                                                 <i class="fa-solid fa-plus"></i> Add Multiple Choice
                                             </button>
@@ -238,7 +238,7 @@ $i = 0; $j = 0;
                                     </div>
 
                                     <div class="row question-add-files-container">
-                                        <div class="col-12">
+                                        <div>
                                             <div class="btn-add-files-wrapper">
                                                 <label for="additional-files-<?php echo $parent_question_id.'-'.$question_id; ?>">
                                                     <span class="button" role="button" aria-disabled="false">
@@ -411,7 +411,7 @@ $i = 0; $j = 0;
                         <div class="col-12">
                             <strong class="checkbox-label-heading">Rules:</strong>
                             <div class="question-rule-checkbox-inner-container" style="display:none;">
-                                <label>Supporting documentation required.. </label>
+                                <label>Supporting documentation required. </label>
                                 <input type="checkbox" class="question-rule-checkbox-input" name="group_questions[<?php echo $i; ?>][is_question_supporting]" <?php checked( $is_question_supporting, 1 ); ?>/>
                             </div>
                         </div>

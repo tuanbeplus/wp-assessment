@@ -221,7 +221,9 @@
   border-color: #acaeb2;
   box-shadow: inset 3px 3px 3px 0px #eee;
 }
-
+.question input.form-control:focus {
+  box-shadow: 0 0 0 1px rgb(13 110 253 / 60%);
+}
 .question .form-control:disabled {
   color: inherit;
   background-color: #fff;
@@ -266,7 +268,7 @@
   position: relative;
   margin: 16px 0;
   border: 1px solid #ccc;
-  padding: 16px;
+  padding: 20px;
   border-radius: 6px;
   box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;
   transform-origin: 50% 0;
@@ -370,7 +372,7 @@
 }
 
 .question-row-container .form-control:focus {
-  box-shadow: 0 0 0 0.1rem rgb(13 110 253 / 25%);
+  box-shadow: 0 0 0 1px rgb(13 110 253 / 60%);
 }
 
 .question-row-container .block-remove {
@@ -446,7 +448,7 @@
 }
 
 .multi-choice-btn-table-container {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .multi-choice-table {
@@ -646,12 +648,15 @@
 }
 
 .container .submission-admin-view-footer {
-  margin: 16px 0;
+  text-align: center;
+  border-top: 1px solid #ccc;
+  padding-top: 12px;
+  margin: 24px 0 12px;
 }
 
 .submission-admin-view-footer .label {
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .submission-admin-view-footer .button {
@@ -769,12 +774,12 @@
 } */
 
 .files-list .file-item > .name a {
-  min-width: 146px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   text-decoration: none;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -864,10 +869,6 @@
   align-items: center;
   gap: 6px;
   font-weight: 500;
-}
-
-.question-row-container .key-areas {
-  padding: 0 12px 12px;
 }
 
 .key-areas .select-key-area {
@@ -965,7 +966,6 @@
 
 .question-add-files-container .btn-add-files-wrapper {
   display: flex;
-  padding: 0 12px;
 }
 
 .question-add-files-container .uploading-wrapper {

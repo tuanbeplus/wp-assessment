@@ -1,132 +1,62 @@
-jQuery(document).ready(function ($) {
-    let opacity;
-    let activeQuiz;
-    let isQuizComplete = false;
-    let isStepComplete = false;
-    let bodySelector = $('body');
+!(function ($) {
+	"use strict";
+
     const assessmentIdInstance = $('#assessment_id');
     const submissionId = $('#submission_id');
     const organisationIdInstance = $('#organisation_id');
     const orgNameInstance = $('#org_name');
     const messageWrap = $('.progress-message');
-
-    const current = 1;
-    const steps = $("quiz").length;
-
     const ajaxUrl = ajax_object.ajax_url;
+    const assessmentWrapper = $('#assessment-main-wrapper');
+    const btn_Continue = assessmentWrapper.find('#continue-quiz-btn');
+    const btn_Submit = assessmentWrapper.find('#submit-quiz-btn');
+    const btn_Prev = assessmentWrapper.find('#go-back-quiz-btn');
+    const btn_Next = assessmentWrapper.find('#go-next-quiz-btn');
+    const isRequiredAnswerAll = assessmentWrapper.data('required_answer_all');
+    const isRequiredDocumentAll = assessmentWrapper.data('required_document_all');
+    
+    /**
+     * Validate required quiz answers and documents before saving.
+     * 
+     * @returns {boolean} True if validation passes, false otherwise.
+     */
+    function validateQuizAnswersRequired(quizId) {
+        let currentQuiz = $('#quiz-item-' + quizId);
+        if (!currentQuiz.length) return false;
 
-    const continueBtnElement = $("<button>", {id: "continue-quiz-btn", class: "nextPrevBtn next", text: 'Save and continue'});
-    const backBtnElement = $("<button>", {id: "go-back-quiz-btn", class: "nextPrevBtn next", text: 'Go back'});
-    const submitBtnElement = $("<button>", { id: "submit-quiz-btn", class: "nextPrevBtn next", text: 'Submit' });
-
-    initQuizDetail();
-    updateCallToActions();
-    styleActiveStep();
-    markAsCompletedSection();
-    activeFirstPendingSection();
-
-    bodySelector.on('click', '#continue-quiz-btn', async function (e) {
-        e.preventDefault();
-
-        let quizCount = getQuizCount();
-        let currentQuiz = $(`.quiz.active`);
-        let current_quiz_id = currentQuiz.data('group')
-        activeQuiz = current_quiz_id
-        let nextQuiz = currentQuiz.next()
-        let formController = $('.formController');
-        let is_required_answer_all = $('#assessment-main-wrapper').data('required_answer_all')
-        let is_required_document_all = $('#assessment-main-wrapper').data('required_document_all')
-
-        if (is_required_answer_all == true) {
-            let check_answered_quiz = getDataQuizAnswered(currentQuiz)
-            if (check_answered_quiz == false) return
+        if (isRequiredAnswerAll) {
+            let hasAnsweredAll = getDataQuizAnswered(currentQuiz);
+            if (!hasAnsweredAll) return false;
         }
-
-        if (is_required_document_all == true) {
-            let is_uploaded_doc_required = getUploadedDocumentRequired(currentQuiz)
-            if (is_uploaded_doc_required == false) return;
+        if (isRequiredDocumentAll) {
+            let hasUploadedRequiredDocs = getUploadedDocumentRequired(currentQuiz);
+            if (!hasUploadedRequiredDocs) return false;
         }
-        
-        if (activeQuiz >= quizCount) {
+        return true;
+    }
 
-            $('#form_submit_quiz').addClass('loading')
+    /**
+     * Show/Hide loading Spinner in the button
+     */
+    function buttonLoadingStatus(btn, status) {
+        if (!status) return false;
 
-			let checkAnswers = getCheckAnswers(currentQuiz);
-
-            let isQuestionSaved = await saveQuestion(checkAnswers);
-            if (!isQuestionSaved) return;
-            
-            await submitAssessment()
-
-            $('#form_submit_quiz').removeClass('loading')
-            
-        } else {
-
-            $('.formController button').css('opacity', '0.4')
-            $('#saving-spinner').show()
-
-            let checkAnswers = getCheckAnswers(currentQuiz);
-            var active_question_wrapper = $('#main-quiz-form .quiz.active')
-            var count_checked_choices = getCheckedChoices(active_question_wrapper)
-            var all_sub_question_wrapper = $('#main-quiz-form .quiz.active .fieldsWrapper').length
-            var incomplete_sub_question = (all_sub_question_wrapper - count_checked_choices)
-
-            await submitAssessmentProgressByContinue();
-
-            let isQuestionSaved = await saveQuestion(checkAnswers);
-
-            if (isQuestionSaved) {
-                let section_id = active_question_wrapper.data('group')
-                let form_message = $('#main-quiz-form .form-message')
-
-                form_message.addClass('_success')
-                form_message.find('.message').text('Section '+ section_id +' has been saved.')
-                form_message.show()
-                setTimeout(function() {
-                    form_message.hide()
-                    form_message.removeClass('_success')
-                }, 15000)
-            }
-            else {
-                return
-            }
-
-            let current_step = $(`.step-${current_quiz_id}`);
-
-            $('.formController button').css('opacity', '1')
-            $('#saving-spinner').hide()
-            moveToNextQuizStep(currentQuiz);
-            current_step.removeClass('pending');
-            current_step.addClass('completed');
-
-            let current_step_id = current_step.attr('data-id');
-
-            currentQuiz.removeClass('active')
-            nextQuiz.addClass('active')
-
-            $('.quizDetails .quiz-' + current_step_id).addClass('quiz-item-hide').removeClass('quiz-item-show');
-
-            activeQuiz++;
-
-            $('#saving-spinner').hide()
-
-            styleActiveStep()
-
-            $('html, body').animate({
-                scrollTop: $('#form_submit_quiz').offset().top - 150
-            }, 500);
+        if (status == 'show') {
+            btn.addClass('loading');
+            btn.attr('disabled', true); 
         }
-
-        if (activeQuiz == quizCount) {
-            formController.prepend(backBtnElement)
-            $(this).text('Submit')
+        else if (status == 'hide') {
+            btn.removeClass('loading');
+            btn.removeAttr('disabled'); 
         }
         else {
-            formController.prepend(backBtnElement)
-            formController.remove(submitBtnElement)
+            return false;
         }
-    });
+    }
 
+    /**
+     * Validate Quiz choices answered
+     */
     function getDataQuizAnswered(currentSection) 
     {
         let count_empty_des = 0;
@@ -158,6 +88,9 @@ jQuery(document).ready(function ($) {
 
         if (choice_answer_area > count_checked_answers || count_empty_des > 0) {
             currentSection.find('.answer-notification').show()
+            setTimeout(() => {
+                currentSection.find('.answer-notification').hide()
+            }, 10000); 
             return false
         }
         else if (choice_answer_area = count_checked_answers) {
@@ -165,31 +98,34 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    function markAsCompletedSection() 
-    {
-        let is_required_all_document = $('#assessment-main-wrapper').data('required_document_all')
-        let all_sections = $('#form_submit_quiz .quizDetails .quiz')
-        let section_id = null;
+    /**
+     * Check the section and mark it as completed if criteria are met
+     */
+    function markAsCompletedSection() {
+        const isRequiredAllDocuments = $('#assessment-main-wrapper').data('required_document_all');
+        const allSections = $('#form_submit_quiz .quizDetails .quiz');
 
-        all_sections.each(function (e) {
-            section_id = $(this).data('group')
-            // get all answers choice
-            if (is_required_all_document == true) {
-                if (isAnswerChoicesChecked($(this)) == true 
-                && isAnswerCmtsFilled($(this)) == true
-                && getUploadedDocumentRequired($(this)) == true) {
-                    $('.stepsWrap .step-'+ section_id).addClass('completed')
-                }
+        allSections.each(function () {
+            const sectionId = $(this).data('group');
+            const section = $(`.stepsWrap .step-${sectionId}`);
+
+            // Check conditions
+            const hasCheckedAnswers = isAnswerChoicesChecked($(this));
+            const hasFilledComments = isAnswerCmtsFilled($(this));
+            const hasUploadedDocuments = isRequiredAllDocuments ? getUploadedDocumentRequired($(this)) : true;
+
+            // Mark section as completed if all conditions are met
+            if (hasCheckedAnswers && hasFilledComments && hasUploadedDocuments) {
+                section.addClass('completed');
+            } else {
+                section.removeClass('completed');
             }
-            else{
-                if (isAnswerChoicesChecked($(this)) == true 
-                && isAnswerCmtsFilled($(this)) == true) {
-                    $('.stepsWrap .step-'+ section_id).addClass('completed')
-                }
-            }
-        })
+        });
     }
 
+    /**
+     * Validate the Choies checked
+     */
     function isAnswerChoicesChecked(section_wrapper)
     {
         let answer_choices = section_wrapper.find('.multiple-choice-area').length;
@@ -203,6 +139,9 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    /**
+     * Validate the Cmt fields content
+     */
     function isAnswerCmtsFilled(section_wrapper)
     {
         let answer_cmts = section_wrapper.find('textarea.quiz-description')
@@ -222,6 +161,9 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    /**
+     * Validate the Documents required fields
+     */
     function getUploadedDocumentRequired(currentQuiz)
     {
         var upload_file_arr = [];
@@ -255,6 +197,9 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    /**
+     * Get all Choices have checked
+     */
     function getCheckedChoices(question_main_wrapper) {
         let checkboxes = question_main_wrapper.find('.checkBox');
 
@@ -273,8 +218,10 @@ jQuery(document).ready(function ($) {
         return count_checked_choices;
     }
 
-    function activeFirstPendingSection()
-    {
+    /**
+     * Active & Focus to first pending section after load page
+     */
+    function activeFirstPendingSection() {
         let all_steps = $('#main-quiz-form .step')
         let all_section_wrapper = $('#main-quiz-form .quizDetails .quiz')
         let step_ids = [];
@@ -307,243 +254,102 @@ jQuery(document).ready(function ($) {
             first_step_id = step_ids[0] ?? 1;
         
             if (section_wrapper_id == first_step_id) {
-                $(this).removeClass('quiz-item-hide').addClass('quiz-item-show active')
+                $(this).addClass('active')
             }
             else {
                 $(this).removeClass('active')
-                $(this).removeClass('quiz-item-show')
-                if (!$(this).hasClass('quiz-item-hide')) {
-                    $(this).addClass('quiz-item-hide')
-                }
             }
         })
     }
 
-    bodySelector.on('click', '.progressBtn', async function (e) {
-        e.preventDefault();
-        $(this).addClass('loading')
-        activeQuiz = activeQuiz? activeQuiz : 1;
-        let currentQuiz = $(`#quiz-item-${activeQuiz}`);
-		let checkAnswers = getCheckAnswers(currentQuiz);
-
-        await submitAssessmentProgress();
-
-        let isQuestionSaved = await saveQuestion(checkAnswers);
-        $(this).removeClass('loading')
-
-        if (!isQuestionSaved) return;
-    });
-
-    bodySelector.on('click', '#go-back-quiz-btn', function (e) {
-        e.preventDefault();
-
-        let currentQuiz = $(`#quiz-item-${activeQuiz}`);
-
-        let prevQuiz = $(`#quiz-item-${activeQuiz - 1}`);
-        $('#continue-quiz-btn').text('Save and continue')
-
-        if (activeQuiz <= 1) return;
-        moveToNextQuizStep(currentQuiz, true);
-
-        currentQuiz.removeClass('active')
-        prevQuiz.addClass('active')
-
-        activeQuiz--;
-
-        $('html, body').animate({
-            scrollTop: $('#form_submit_quiz').offset().top - 150
-        }, 500);
-
-        updateCallToActions();
-        styleActiveStep()
-    });
-
-    bodySelector.on('change', '.assessment-file', async function (e) {
-        e.preventDefault();
-        // let attachmentPath = $(this).val()
-        let that = $(this);
-        let file = e.target.files[0];
-        await uploadAssessmentAttachment(file, that)
-    });
-    bodySelector.on('click', '#submit-quiz-btn', async function (e) {
-        e.preventDefault();
-        await submitAssessment()
-    });
-
-    $(document).on('click focus','.step-item-container', async function (e) {
-        e.preventDefault();
-        $('.formWrapper .step-item-container').removeClass('active')
-        $(this).addClass('active')
-        // if ($(this).hasClass('completed') || $(this).hasClass('pending')) {
-        if (true) {
-            step_item_id = $(this).attr('data-id')
-            $('.quizDetails .quiz').addClass('quiz-item-hide').removeClass('quiz-item-show').css('display', 'none').css('opacity', '0')
-            $('.quizDetails #quiz-item-' + step_item_id).removeClass('quiz-item-hide').addClass('quiz-item-show').css('display', 'block').css('opacity', '1')
-            // console.log(quiz_container);
-        }
-        let quizCount = getQuizCount();
-        let thisQuiz = $(this).data('id');
-        $('.formWrapper .quiz').removeClass('active')
-        $(`#quiz-item-${thisQuiz}`).addClass('active')
-
-        if (thisQuiz == quizCount) {
-            $('#continue-quiz-btn').text('Submit')
-        }
-        else if (thisQuiz < quizCount) {
-            $('#continue-quiz-btn').text('Save and continue')
-        }
-        else {
-            $('#continue-quiz-btn').text('Save and continue')
-        }
-        let that = $(this);
-        let targetQuizId = that.data('id');
-        if (targetQuizId === activeQuiz) return;
-
-        let currentQuiz = $(`#quiz-item-${activeQuiz}`);
-        let targetQuiz = $(`#quiz-item-${targetQuizId}`);
-
-        updateCallToActions();
-
-    })
-
-    $(document).on('click','.fieldsWrapper .form-check-input', function (e) {
-
-        let check_input = $(this)
-        let answer_point = check_input.data('point')
-        let checkBox = check_input.closest('.checkBox')
-        let check_input_wrapper = check_input.closest('.fieldsWrapper')
-        let all_check_input = check_input_wrapper.find('.form-check-input')
-        let all_input_point = check_input_wrapper.find('.quiz-input-point')
-        let group_id = check_input.closest('.group-question').data('group')
-        let quiz_id = check_input.closest('.fieldsWrapper').data('sub')
-        let multiple_choice_area = $(this).closest('.multiple-choice-area')
-
-        let input_quiz_point =  '<input class="quiz-input-point" type="hidden"';
-            input_quiz_point += 'name="questions_'+ group_id +'_quiz_'+ quiz_id +'_point"';
-            input_quiz_point += 'value="'+ answer_point +'">';
-        
-        multiple_choice_area.removeClass('required')
-        multiple_choice_area.find('.form-check-label').removeClass('required')
-        
-        if (check_input.hasClass('checked')) {
-            check_input.removeClass('checked')
-            multiple_choice_area.removeClass('checked')
-            all_input_point.remove()
-            check_input.prop('checked', false)
-        }
-        else {
-            all_check_input.removeClass('checked')
-            all_input_point.remove()
-            check_input.addClass('checked')
-            multiple_choice_area.addClass('checked')
-            check_input.prop('checked', true)
-            checkBox.append(input_quiz_point)
-        }
-    })
-
-    $(document).on('ready', function () {
-        if ($('.quiz.active').data('id') == 1) {
-            $('.formController').remove('#go-back-quiz-btn')
-        }
-    })
-
-    $(document).on('click', 'report-toc a', function () {
-        $('html, body').animate({
-            scrollTop: $(body).offset(200).top
-        }, 500);
-        console.log('click');
-    })
-
-    function initQuizDetail() {
-        let allQuizElement = $('.quiz');
-        allQuizElement.each(function () {
-            let element = $(this);
-            if (element.hasClass('quiz-item-show')) {
-                activeQuiz = element.data('quiz');
-                return false;
-            }
-        })
+    /**
+     * Get total number of quizzes
+     * @returns {number} Total number of quizzes
+     */
+    function getQuizzesCount() {
+        let quizzesElement = $('#main-quiz-form .quizDetails').children('.quiz');
+        return quizzesElement.length || 0;
     }
 
-    // upload additional files on front fields
-    $(document).on('change', ".additional-files", async function(e){
+    /**
+     * Show/Hide form controller buttons
+     */
+    function updateFormController() {
+        let countQuizzes = getQuizzesCount();
+        let activeQuizId = getActiveQuizId();
 
-        uploadMutilpleAttachments(this.files, $(this))
-
-    });
-
-    $(".dropFiles").on('dragenter', function(ev) {
-        // Entering drop area. Highlight area
-        $(this).addClass("highlightDropArea");
-    });
-    
-    $(".dropFiles").on('dragleave',async function(ev) {
-        // Going out of drop area. Remove Highlight
-        $(this).removeClass("highlightDropArea");
-    });
-    
-    $(".dropFiles").on('drop', async function(e) {
-        // Dropping files
-        e.preventDefault();
-        e.stopPropagation();
-        $(this).addClass("uploading");
-       
-        let add_files_container = $(this).closest('.question-add-files-container')
-        var main_files_input = add_files_container.find('input.additional-files')
-
-        if(e.originalEvent.dataTransfer){
-            if(e.originalEvent.dataTransfer.files.length) {
-
-                var droppedFiles = e.originalEvent.dataTransfer.files;
-                var data_transfer = new DataTransfer();
-
-                for(let i=0; i<droppedFiles.length; i++) {
-                    let file = droppedFiles[i];
-                    data_transfer.items.add(
-                    new File(
-                        [file.slice(0, file.size, file.type)],
-                        file.name
-                    ));
-                }
-                main_files_input.files = data_transfer.files;
-
-                uploadMutilpleAttachments(main_files_input.files, $(this))
-            }
+        if (activeQuizId == 1) {
+            btn_Prev.removeClass('show');
         }
-    
-        $(this).removeClass("highlightDropArea");
-        return false;
-    });
-    
-    $(".dropFiles").on('dragover', function(e) {
-        e.preventDefault();
-    });
+        else if (activeQuizId >= countQuizzes) {
+            btn_Next.removeClass('show');
+        }
+        else {
+            btn_Prev.addClass('show');
+            btn_Next.addClass('show');
+        }
+    }
 
-    function uploadMutilpleAttachments(filesInput, inputElement) {
+    /**
+     * Get current active quiz ID
+     */
+    function getActiveQuizId() {
+        let mainWrapper = $('#assessment-main-wrapper #main-quiz-form');
+        let activeQuizId = mainWrapper.find('.quiz.active').data('group');
+        let activeStepId = mainWrapper.find('.step.active').data('id');
 
-        // const file_type_arr = [ 
-        //         'ppt', 'pptx', 'pdf', 'doc', 
-        //         'docx', 'xlsx', 'peg', 'png', 
-        //         'jpg', 'jpeg', 'mp4', 'mpg', 
-        //         'wmv', 'mov', 'msg', 'svg',
-        //     ];
+        return ( activeQuizId || activeStepId ||  1 );
+    }
+
+    /**
+     * Move to the Quiz by ID
+     * @param {number} quizId - The ID of the quiz to move to
+     * @returns {boolean} True if the quiz was successfully activated, otherwise false
+     */
+    function moveToTheQuiz(quizId) {
+        const mainWrapper = $('#main-quiz-form');
+        if (!mainWrapper.length) return false; // Ensure the main wrapper exists
+    
+        const countQuizzes = getQuizzesCount();
+        if (quizId < 1 || quizId > countQuizzes) return false; // Validate quizId range
+    
+        const stepTarget = mainWrapper.find(`#step-${quizId}`);
+        const quizTarget = mainWrapper.find(`#quiz-item-${quizId}`);
+    
+        if (stepTarget.length && quizTarget.length) {
+            // Activate the step
+            mainWrapper.find('.step').removeClass('active');
+            stepTarget.addClass('active');
+    
+            // Activate the quiz
+            mainWrapper.find('.quiz').removeClass('active');
+            quizTarget.addClass('active');
+    
+            return true; // Successfully activated
+        }
+        return false; // Targets not found
+    }
+
+    /**
+     * Upload multiple attachment files
+     */
+    function uploadMultipleAttachments(filesInput, inputElement) {
 
         let group_questions_id =  inputElement.closest('.group-question').data('group')
         let sub_question_id = inputElement.closest('.fieldsWrapper').data('sub')
         let add_files_container = inputElement.closest('.question-add-files-container')
         let upload_message_error = add_files_container.find('.upload-message._error')
 
-        var file_error_list = [];
         var file_id_input = '';
         var file_item = '';
         var item_index = '';
         var fileName = '';
         var filesList = add_files_container.find(".filesList");
+        var file_ext = '';
 
         upload_message_error.hide()
 
-        for(var i = 0; i < filesInput.length; i++)
-        {
+        for (var i = 0; i < filesInput.length; i++) {
             // Upload droppedFiles[i] to Media
             file_item = $('<span/>', {class: 'file-item', style: 'display:none;',})
             // fileName = $('<a/>', { class: 'name', href: '', text: filesInput.item(i).name,})
@@ -557,279 +363,29 @@ jQuery(document).ready(function ($) {
                 .append('<button class="file-delete" aria-label="Remove this uploaded file"><i class="fa-regular fa-trash-can"></i></button>')
 
             file_ext = filesInput.item(i).name.split('.').pop().toLowerCase();
-
-            // if (jQuery.inArray(file_ext, file_type_arr) !== -1) {
                 
-                filesList.append(file_item);
+            filesList.append(file_item);
 
-                item_index = filesList.children().length
+            item_index = filesList.children().length
 
-                file_item.addClass('file-item-' + item_index)
-                file_item.find('input.input-file-hiden').attr('name', 'questions_'+group_questions_id+'_quiz_'+sub_question_id+'_attachmentIDs_'+ item_index )
-                file_item.find('input.input-file-hiden').addClass('additional-file-id-'+ item_index)
-                file_item.find('span.name').addClass('file-name-'+ item_index)
+            file_item.addClass('file-item-' + item_index)
+            file_item.find('input.input-file-hiden').attr('name', 'questions_'+group_questions_id+'_quiz_'+sub_question_id+'_attachmentIDs_'+ item_index )
+            file_item.find('input.input-file-hiden').addClass('additional-file-id-'+ item_index)
+            file_item.find('span.name').addClass('file-name-'+ item_index)
 
-                frontUploadAdditionalFiles(filesInput[i], inputElement, item_index);
-
-            // }
-            // else {
-            //     file_error_list.push({ name: filesInput.item(i).name })
-            //     // console.log(file_ext);
-            //     if (file_error_list.length > 0) {
-            //         let error_text = 'The following file could not be uploaded.<br>'
-            //         for (let i = 0; i < file_error_list.length; i++) {
-            //             error_text += '<span class="file-name">'+ file_error_list[i].name + '</span><br>'
-            //         }
-            //             error_text += 'Please make sure your files are in one of the folowing formats: .ppt, .pdf, .docx, .xlsx, .png, .jpg, .mp4.'
-            //         upload_message_error.css('display', 'flex')
-            //         upload_message_error.find('.message').html(error_text)
-            //     }
-            // }
+            frontUploadAdditionalFiles(filesInput[i], inputElement, item_index);
         }
-    }
-
-    // EventListener for delete file item
-    $(document).on('click', '.file-delete', function(){
-
-        // Delete confirm
-        if ( ! confirm('Do you want to delete this file?')) {
-            return;
-        }
-
-        let file_item = $(this).closest('.file-item')
-        let input_file_hiden = file_item.find('.input-file-hiden')
-        let attachmentId = input_file_hiden.val()
-        let assessmentId = assessmentIdInstance.val();
-        let organisationId = organisationIdInstance.val();
-        let upload_file_container = $(this).closest('.question-add-files-container')
-        let upload_message = upload_file_container.find('.upload-message._success')
-
-        $.ajax({
-            type: 'POST',
-            url: ajaxUrl,
-            data:{
-                'action' : 'delete_azure_attachments_ajax',
-                'attachment_id' : attachmentId,
-                'assessment_id' : assessmentId,
-                'organisation_id' : organisationId,
-            },
-            beforeSend : function ( xhr ) {
-                file_item.css('opacity', '0.5').attr('disable')
-            },
-            success:function(response){
-
-                console.log(response);
-
-                file_item.remove()
-
-                upload_message.text('Delete file successfully.')
-                
-                setTimeout(function() {
-                    upload_message.show()
-                }, 100)
-                
-                setTimeout(function() {
-                    upload_message.hide()
-                }, 10000)
-            }
-        });
-    });
-
-    $(document).on('click', '.btn-open-upload-area', function (e) {
-        let add_files_container = $(this).closest('.question-add-files-container')
-        let upload_area = add_files_container.find('.drop-files-area')
-        upload_area.slideToggle()
-    })
-
-    $(document).on('click', '.remove-message', function() {
-        $(this).closest('.upload-message').hide()
-    })
-
-    $(document).on('click focus','.quiz-description', async function (e) {
-        $(this).removeClass('required')
-    })
-
-    $(document).on('click','#toggle-invite-colleagues', async function (e) {
-        $(this).toggleClass('active')
-        let invite_colleagues_wrapper = $('.invite-colleagues-wrapper')
-        invite_colleagues_wrapper.slideToggle()
-    })
-
-    $(document).on('click','#btn-close-invite', async function (e) {
-        $(this).closest('.invite-colleagues-wrapper').slideUp()
-        $('#toggle-invite-colleagues').removeClass('active')
-    })
-
-    $(document).on('click','#btn-send-invite-colleagues', async function (e) {
-
-        let send_message = $('#form-invite-colleagues').find('.send-message')
-        let input_emails = $('#emails-area').val()
-        let emails_arr = input_emails.split(',') // remove comma and push to array
-        let assessmentId = $('#assessment_id').val()
-        
-        for (let i = 0; i < emails_arr.length; i++) {
-            let position_at = emails_arr[i].search("@")
-
-            if (position_at == -1) {
-                send_message.text('Please ensure that a valid email address has been entered.').show()
-                return
-            }
-            else {
-                send_message.hide()
-            }
-        }
-
-        $.ajax({
-            type: 'POST',
-            url: ajax_object.ajax_url,
-            data:{
-                'action' : 'send_invite_to_colleagues',
-                'emails' : emails_arr,
-                'assessment_id' : assessmentId,
-            },
-            beforeSend : function ( xhr ) {
-                $('#btn-send-invite-colleagues').addClass('sending')
-            },
-            success:function(response){
-                $('#btn-send-invite-colleagues').removeClass('sending')
-                console.log(response);
-                if (response.status == true) {
-                    send_message.text('Your invitation has been sent.').show()
-                }
-                else {
-                    send_message.html('Unable to send invitation, ensure that emails are seperated by a comma.').show()
-                }        
-                
-                if (response.updated_meta == false) {
-                    console.log("Post meta invited_members has not been updated.");
-                }
-                else {
-                    console.log("Updated post meta invited_members Successful.");
-                }
-            }
-        });
-    })
-
-    $(document).on('click', '.sas-blob-cta', function (e){
-
-        let blobUrl = $(this).data('blob')
-
-        $.ajax({
-            type: 'POST',
-            url: ajaxUrl,
-            data:{
-                'action' : 'create_sas_blob_url_azure_ajax',
-                'blob_url' : blobUrl,
-            },
-            beforeSend : function ( xhr ) {
-            },
-            success:function(response){
-                if (response.status) {
-                    window.open(
-                        response.sas_blob_url,
-                        '_blank',
-                      );
-                } else {
-                    alert(response.message)
-                }
-            }
-        });
-    });
-
-    $(document).on('click', '.btn-showmore-cmt', function (e){
-        let cmt = $(this).closest('.comment')
-        let show_less = cmt.find('.show_less');
-        let show_full = cmt.find('.show_full');
-
-        if ($(this).hasClass('active')) {
-            $(this).removeClass('active')
-            $(this).text('Show more')
-            show_less.show()
-            show_full.hide()
-        }
-        else {
-            $(this).addClass('active')
-            $(this).text('Show less')
-            show_full.show()
-            show_less.hide()
-        }
-    });
-
-    function moveToNextQuizStep(instance, prev = false) {
-        let prevQuiz = instance;
-        let nextQuiz = prev ? instance.prev() : instance.next();
-
-        nextQuiz.show();
-        // prevQuiz.addClass('quiz-item-hide')
-        prevQuiz.animate({opacity: 0}, {
-            step: function (now) {
-                opacity = 1 - now;
-                prevQuiz.css({
-                    'display': 'none', 'position': 'relative'
-                });
-                nextQuiz.css({'opacity': opacity});
-            }, duration: 500
-        });
-    }
-
-    function getQuizCount() {
-        let quizElement = $('.quizDetails').children('.quiz');
-        return quizElement.length;
-    }
-
-    function updateCallToActions() {
-        let count = getQuizCount();
-        let formController = $('.formController');
-        let backBtnInstance = $('#go-back-quiz-btn');
-        let submitBtnInstance = $('#submit-quiz-btn');
-
-        activeQuiz = $('#main-quiz-form .quiz.active').data('group')
-
-        if (activeQuiz <= 1 || activeQuiz >= count) {
-            if (backBtnInstance.length !== 0) backBtnInstance.remove();
-        } else {
-            if (backBtnInstance.length === 0) {
-                formController.prepend(backBtnElement)
-            }
-        }
-        if (activeQuiz > 1) {
-            formController.prepend(backBtnElement)
-        }
-        if (isQuizComplete) {
-            formController.prepend(submitBtnElement)
-        } else {
-            submitBtnInstance.remove();
-        }
-        if (activeQuiz == 1) {
-            formController.find(backBtnInstance).remove()
-        }
-    }
-
-    function styleActiveStep() {
-        let active_quiz_id = $('#main-quiz-form .quiz.active').data('group')
-        let step_item = $('#main-quiz-form .step')
-        let step_item_id = '';
-
-        step_item.each(function( index, value ) {
-            step_item_id = $(this).data('id')
-
-            $(this).removeClass('active')
-
-            if (active_quiz_id == step_item_id) {
-                $(this).addClass('active')
-            }
-        });
     }
 
     function getDescriptionValue() {
-        let currentQuiz = $(`#quiz-item-${activeQuiz}`);
+        let currentQuiz = $('#quiz-item-' + getActiveQuizId());
         let input = currentQuiz.find('.quiz-description');
 
         return input.val();
     }
 
     function getAttachmentIdInput() {
-        let currentQuiz = $(`#quiz-item-${activeQuiz}`);
+        let currentQuiz = $('#quiz-item-' + getActiveQuizId());
         let input = currentQuiz.find('.fileUploaderWrap .assessment-attachment-id');
         return input;
     }
@@ -880,8 +436,9 @@ jQuery(document).ready(function ($) {
         return choices;
     }
 
-    async function saveQuestion(answers) {
-        let currentQuiz = $(`#quiz-item-${activeQuiz}`);
+    async function saveQuizAssessment(answers) {
+        let activeQuizId = getActiveQuizId();
+        let currentQuiz = $('#quiz-item-' + activeQuizId);
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();
         let submission_id = submissionId.val();
@@ -894,7 +451,7 @@ jQuery(document).ready(function ($) {
         const data = {
             'action': 'save_question',
             'answers': answers,
-            'quiz_id': activeQuiz,
+            'quiz_id': activeQuizId,
             'organisation_id' : organisationId,
             'assessment_id': assessmentId,
             'submission_id': submission_id,
@@ -921,13 +478,9 @@ jQuery(document).ready(function ($) {
         return status;
     }
 
-    async function submitAssessment() {
+    async function submitPublishSubmission() {
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();
-        let quizCount = getQuizCount();
-        let currentQuiz = $(`#quiz-item-${activeQuiz}`);
-        let checkAnswers = getCheckAnswers(currentQuiz);
-        let isQuestionSaved = await saveQuestion(checkAnswers);
 
         const data = {
             'action': 'create_assessment_submission',
@@ -940,28 +493,22 @@ jQuery(document).ready(function ($) {
             url: ajax_object.ajax_url,
             data: data
         });
-        const {status, message, submission_url} = response;
 
-        alert(message);
+        console.log(response);
 
-        if (status) {
-            // redirect to single submission
-            $(location).attr('href', submission_url);
-
-            return true;
-        }
-
-        return status;
+        return response;
     }
 
-    async function submitAssessmentProgress() {
+    async function saveDraftSubmission() {
         let assessmentId = assessmentIdInstance.val();
         let organisationId = organisationIdInstance.val();
+        let orgName = orgNameInstance.val();
 
         const data = {
-            'action': 'submit_assessment_progress',
-            'assessment_id': assessmentId,
+            'action'          : 'submit_assessment_progress',
+            'assessment_id'   : assessmentId,
             'organisation_id' : organisationId,
+            'org_name'        : orgName,
         };
 
         let response = await $.ajax({
@@ -973,34 +520,9 @@ jQuery(document).ready(function ($) {
 
         $('#submission_id').attr('value', submission_id);
 
-        alert(message);
-
-        return status;
-    }
-
-    async function submitAssessmentProgressByContinue() {
-        let assessmentId = assessmentIdInstance.val();
-        let organisationId = organisationIdInstance.val();
-        let orgName = orgNameInstance.val();
-
-        const data = {
-            'action': 'submit_assessment_progress',
-            'assessment_id'   : assessmentId,
-            'organisation_id' : organisationId,
-            'org_name'        : orgName,
-        };
-
-        let response = await $.ajax({
-            type: 'POST',
-            url: ajax_object.ajax_url,
-            data: data
-        });
-
-        const {status, message, submission_id} = response;
-
         console.log(response);
 
-        return status;
+        return submission_id;
     }
 
     async function uploadAssessmentAttachment(file, inputInstance) {
@@ -1115,28 +637,452 @@ jQuery(document).ready(function ($) {
         }, 8000)
     }
 
-    /**
-     * Auto save quiz after an action from user
-     * 
-     */
-    function autoSaveQuiz() {
-        // Auto save after click choice answer
-        $(document).on('click', '.checkBox .form-check-input', function (e){
-            let currentQuiz = $('.quiz.active');
-            let checkAnswers = getCheckAnswers(currentQuiz);
-            setTimeout(() => {
-                saveQuestion(checkAnswers);
-            }, 1000)
-        });
+    jQuery(document).ready(function ($) {
+        activeFirstPendingSection();
+        updateFormController();
+    });
 
-        // Auto save after focus out of user comment
-        $(document).on('blur', '.quiz-description', function (e){
-            let currentQuiz = $('.quiz.active');
-            let checkAnswers = getCheckAnswers(currentQuiz);
+    // Click to Save a Quiz Assessment
+    $(document).on('click', '#continue-quiz-btn', async function (e) {
+        e.preventDefault();
+
+        const $button = $(this); // Cache the button for reuse
+        const $activeQuizId = getActiveQuizId(); // Get the currently active quiz ID
+        const $currentQuiz = $(`#quiz-item-${$activeQuizId}`); // Select the current quiz element
+        const $formMessage = $('#main-quiz-form .form-message'); // Cache form message element
+        // Validate quiz answers
+        if (!validateQuizAnswersRequired($activeQuizId)) {
+            return; // Exit if validation fails
+        }
+        buttonLoadingStatus($button, 'show'); // Show loading indicator
+        try {
+            // Fetch and save answers
+            const answers = getCheckAnswers($currentQuiz);
+            await saveDraftSubmission(); // Save the draft submission
+            const isQuizSaved = await saveQuizAssessment(answers);
+
+            if (isQuizSaved) {
+                // Show success message
+                const sectionId = $currentQuiz.data('group');
+                $formMessage
+                    .addClass('_success')
+                    .find('.message')
+                    .text(`Section ${sectionId} has been saved.`);
+                $formMessage.show();
+
+                // Hide the message after 10 seconds
+                setTimeout(() => {
+                    $formMessage.hide().removeClass('_success');
+                }, 10000);
+            } else {
+                throw new Error('Failed to save the quiz assessment.');
+            }
+            // Mark section as completed
+            markAsCompletedSection();
+            // Scroll to top of the assessment wrapper
+            $('html, body').animate({ scrollTop: assessmentWrapper.offset().top - 32 }, 500);
+            // Move to the next quiz
+            moveToTheQuiz($activeQuizId + 1);
+
+        } catch (error) {
+            console.error(error); // Log error for debugging
+            alert('An error occurred while saving the quiz. Please try again.');
+        } finally {
+            buttonLoadingStatus($button, 'hide'); // Hide loading indicator
+        }
+    });
+
+    // Click to Save Quiz progress
+    $(document).on('click', '#save-progress-btn', async function (e) {
+        e.preventDefault();
+        let this_Btn = $(this);
+        let currentQuiz = $('#quiz-item-' + getActiveQuizId());
+		let checkAnswers = getCheckAnswers(currentQuiz);
+
+        buttonLoadingStatus(this_Btn, 'show'); // Begin loading
+
+        let isDraftSaved = await saveDraftSubmission();
+
+        let isQuizSaved = await saveQuizAssessment(checkAnswers);
+        
+        buttonLoadingStatus(this_Btn, 'hide'); // Stop loading
+
+        // Delay the alert
+        if (isDraftSaved && isQuizSaved) {
             setTimeout(() => {
-                saveQuestion(checkAnswers);
-            }, 1000)
+                alert('Submission progress has been saved');
+            }, 100); // Add a small delay
+        }
+    });
+
+    // Click to Submit Submission
+    $(document).on('click', '#submit-quiz-btn', async function (e) {
+        e.preventDefault();
+        let thisBtn = $(this);
+
+        // Show loading status
+        buttonLoadingStatus(thisBtn, 'show');
+
+        // Validate All Quizzes
+        let allValid = true; // Flag to track validation status
+        $('#main-quiz-form .quiz').each(function () {
+            let quizId = $(this).data('group');
+            let isValid = validateQuizAnswersRequired(quizId);
+            if (!isValid) {
+                allValid = false; // Mark as invalid
+                return false; // Break out of the `.each()` loop
+            }
         });
-    }
-    // autoSaveQuiz();
-});
+        // Stop if validation fails
+        if (!allValid) {
+            buttonLoadingStatus(thisBtn, 'hide'); // Hide loading
+            setTimeout(() => {
+                alert('Please make sure you have completed all sections.');
+            }, 100);
+            return; // Exit click handler
+        }
+        // Proceed to submission if validation passes
+        try {
+            let response = await submitPublishSubmission();
+
+            // Hide loading after submission
+            buttonLoadingStatus(thisBtn, 'hide');
+
+            const { status, message, submission_url } = response;
+
+            if (message) {
+                setTimeout(() => {
+                    alert(message);
+                }, 100); // Small delay for better UX
+            }
+            if (status) {
+                // Redirect to single submission
+                window.location.href = submission_url;
+            }
+        } catch (error) {
+            // Handle submission error
+            buttonLoadingStatus(thisBtn, 'hide');
+            alert('An error occurred during submission. Please try again.');
+            console.error(error); // Log error for debugging
+        }
+    });
+
+    // Move to the Section by Step
+    $(document).on('click focus','.stepsWrap .step', function (e) {
+        e.preventDefault();
+        let currentStepId = $(this).data('id');
+
+        let movedQuiz = moveToTheQuiz(currentStepId);
+        if (movedQuiz) {
+            updateFormController();
+        }
+    })
+
+    // Click to go to Prev Quiz
+    $(document).on('click', '#go-back-quiz-btn', function (e) {
+        e.preventDefault();
+        let currentQuizId = getActiveQuizId();
+        let prevQuizId = currentQuizId - 1;
+
+        if (currentQuizId <= 1) return;
+
+        let movedPrev = moveToTheQuiz(prevQuizId);
+        if (movedPrev) {
+            $('html, body').animate({ scrollTop: assessmentWrapper.offset().top - 32 }, 500);
+            updateFormController();
+        }
+    });
+
+    // Click to go to Next Quiz
+    $(document).on('click', '#go-next-quiz-btn', function (e) {
+        e.preventDefault();
+        let countQuizzes = getQuizzesCount();
+        let currentQuizId = getActiveQuizId();
+        let nextQuizId = currentQuizId + 1;
+        
+        if (currentQuizId >= countQuizzes) return;
+
+        let movedNext = moveToTheQuiz(nextQuizId);
+        if (movedNext) {
+            $('html, body').animate({ scrollTop: assessmentWrapper.offset().top - 32 }, 500);
+            updateFormController();
+        }
+    });
+
+    $(document).on('change', '.assessment-file', async function (e) {
+        e.preventDefault();
+        let that = $(this);
+        let file = e.target.files[0];
+        await uploadAssessmentAttachment(file, that)
+    });
+
+    $(document).on('click','.fieldsWrapper .form-check-input', function (e) {
+        let check_input = $(this)
+        let answer_point = check_input.data('point')
+        let checkBox = check_input.closest('.checkBox')
+        let check_input_wrapper = check_input.closest('.fieldsWrapper')
+        let all_check_input = check_input_wrapper.find('.form-check-input')
+        let all_input_point = check_input_wrapper.find('.quiz-input-point')
+        let group_id = check_input.closest('.group-question').data('group')
+        let quiz_id = check_input.closest('.fieldsWrapper').data('sub')
+        let multiple_choice_area = $(this).closest('.multiple-choice-area')
+
+        let input_quiz_point =  '<input class="quiz-input-point" type="hidden"';
+            input_quiz_point += 'name="questions_'+ group_id +'_quiz_'+ quiz_id +'_point"';
+            input_quiz_point += 'value="'+ answer_point +'">';
+        
+        multiple_choice_area.removeClass('required')
+        multiple_choice_area.find('.form-check-label').removeClass('required')
+        
+        if (check_input.hasClass('checked')) {
+            check_input.removeClass('checked')
+            multiple_choice_area.removeClass('checked')
+            all_input_point.remove()
+            check_input.prop('checked', false)
+        }
+        else {
+            all_check_input.removeClass('checked')
+            all_input_point.remove()
+            check_input.addClass('checked')
+            multiple_choice_area.addClass('checked')
+            check_input.prop('checked', true)
+            checkBox.append(input_quiz_point)
+        }
+    })
+
+    $(document).on('click', 'report-toc a', function () {
+        $('html, body').animate({
+            scrollTop: $(body).offset(200).top
+        }, 500);
+        console.log('click');
+    })
+
+    // upload additional files on front fields
+    $(document).on('change', ".additional-files", async function(e){
+        uploadMultipleAttachments(this.files, $(this));
+    });
+
+    $(".dropFiles").on('dragenter', function(ev) {
+        // Entering drop area. Highlight area
+        $(this).addClass("highlightDropArea");
+    });
+    
+    $(".dropFiles").on('dragleave',async function(ev) {
+        // Going out of drop area. Remove Highlight
+        $(this).removeClass("highlightDropArea");
+    });
+    
+    $(".dropFiles").on('drop', async function(e) {
+        // Dropping files
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass("uploading");
+       
+        let add_files_container = $(this).closest('.question-add-files-container')
+        var main_files_input = add_files_container.find('input.additional-files')
+
+        if(e.originalEvent.dataTransfer){
+            if(e.originalEvent.dataTransfer.files.length) {
+
+                var droppedFiles = e.originalEvent.dataTransfer.files;
+                var data_transfer = new DataTransfer();
+
+                for(let i=0; i<droppedFiles.length; i++) {
+                    let file = droppedFiles[i];
+                    data_transfer.items.add(
+                    new File(
+                        [file.slice(0, file.size, file.type)],
+                        file.name
+                    ));
+                }
+                main_files_input.files = data_transfer.files;
+
+                uploadMultipleAttachments(main_files_input.files, $(this))
+            }
+        }
+    
+        $(this).removeClass("highlightDropArea");
+        return false;
+    });
+    
+    $(".dropFiles").on('dragover', function(e) {
+        e.preventDefault();
+    });
+
+    // EventListener for delete file item
+    $(document).on('click', '.file-delete', function(){
+        // Delete confirm
+        if ( ! confirm('Do you want to delete this file?')) {
+            return;
+        }
+        let file_item = $(this).closest('.file-item')
+        let input_file_hiden = file_item.find('.input-file-hiden')
+        let attachmentId = input_file_hiden.val()
+        let assessmentId = assessmentIdInstance.val();
+        let organisationId = organisationIdInstance.val();
+        let upload_file_container = $(this).closest('.question-add-files-container')
+        let upload_message = upload_file_container.find('.upload-message._success')
+
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'delete_azure_attachments_ajax',
+                'attachment_id' : attachmentId,
+                'assessment_id' : assessmentId,
+                'organisation_id' : organisationId,
+            },
+            beforeSend : function ( xhr ) {
+                file_item.css('opacity', '0.5').attr('disable')
+            },
+            success:function(response){
+                console.log(response);
+                file_item.remove();
+                upload_message.text('Delete file successfully.');
+                setTimeout(function() {
+                    upload_message.show()
+                }, 100)
+                setTimeout(function() {
+                    upload_message.hide()
+                }, 10000)
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-open-upload-area', function (e) {
+        let add_files_container = $(this).closest('.question-add-files-container')
+        let upload_area = add_files_container.find('.drop-files-area')
+        upload_area.slideToggle(300);
+    })
+
+    $(document).on('click', '.remove-message', function() {
+        $(this).closest('.upload-message').hide()
+    })
+
+    $(document).on('click focus','.quiz-description', async function (e) {
+        $(this).removeClass('required')
+    })
+
+    $(document).on('click','#toggle-invite-colleagues', async function (e) {
+        $(this).toggleClass('active')
+        let invite_colleagues_wrapper = $('.invite-colleagues-wrapper')
+        invite_colleagues_wrapper.slideToggle()
+    })
+
+    $(document).on('click','#btn-close-invite', async function (e) {
+        $(this).closest('.invite-colleagues-wrapper').slideUp()
+        $('#toggle-invite-colleagues').removeClass('active')
+    })
+
+    $(document).on('click','#btn-send-invite-colleagues', async function (e) {
+
+        let send_message = $('#form-invite-colleagues').find('.send-message')
+        let input_emails = $('#emails-area').val()
+        let emails_arr = input_emails.split(',') // remove comma and push to array
+        let assessmentId = $('#assessment_id').val()
+        
+        for (let i = 0; i < emails_arr.length; i++) {
+            let position_at = emails_arr[i].search("@")
+
+            if (position_at == -1) {
+                send_message.text('Please ensure that a valid email address has been entered.').show()
+                return
+            }
+            else {
+                send_message.hide()
+            }
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: ajax_object.ajax_url,
+            data:{
+                'action' : 'send_invite_to_colleagues',
+                'emails' : emails_arr,
+                'assessment_id' : assessmentId,
+            },
+            beforeSend : function ( xhr ) {
+                $('#btn-send-invite-colleagues').addClass('sending')
+            },
+            success:function(response){
+                $('#btn-send-invite-colleagues').removeClass('sending')
+                console.log(response);
+                if (response.status == true) {
+                    send_message.text('Your invitation has been sent.').show()
+                }
+                else {
+                    send_message.html('Unable to send invitation, ensure that emails are seperated by a comma.').show()
+                }        
+                
+                if (response.updated_meta == false) {
+                    console.log("Post meta invited_members has not been updated.");
+                }
+                else {
+                    console.log("Updated post meta invited_members Successful.");
+                }
+            }
+        });
+    })
+
+    $(document).on('click', '.sas-blob-cta', function (e){
+        let blobUrl = $(this).data('blob');
+        $.ajax({
+            type: 'POST',
+            url: ajaxUrl,
+            data:{
+                'action' : 'create_sas_blob_url_azure_ajax',
+                'blob_url' : blobUrl,
+            },
+            beforeSend : function ( xhr ) {
+            },
+            success:function(response){
+                if (response.status) {
+                    window.open(
+                        response.sas_blob_url,
+                        '_blank',
+                    );
+                } else {
+                    alert(response.message)
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-showmore-cmt', function (e){
+        let cmt = $(this).closest('.comment')
+        let show_less = cmt.find('.show_less');
+        let show_full = cmt.find('.show_full');
+
+        if ($(this).hasClass('active')) {
+            $(this).removeClass('active')
+            $(this).text('Show more')
+            show_less.show()
+            show_full.hide()
+        }
+        else {
+            $(this).addClass('active')
+            $(this).text('Show less')
+            show_full.show()
+            show_less.hide()
+        }
+    });
+
+    $(document).on('click', function(event) {
+        // Check if the click is outside the dropdown and the button that opens it
+        if (!$(event.target).closest('.submission-vers').length) {
+            $('.submission-vers-list').slideUp(200); // Close the dropdown
+        }
+    });
+
+    $(document).on('click', '.submission-vers', function (e){
+        e.stopPropagation();
+    });
+
+    $(document).on('click', '#btn-show-submission-vers', function (e){
+        e.preventDefault();
+        let wrapper = $(this).closest('.submission-vers');
+        let sub_vers_list = wrapper.find('.submission-vers-list');
+        sub_vers_list.slideToggle(200);
+    });
+
+})(jQuery);

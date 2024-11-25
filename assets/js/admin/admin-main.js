@@ -117,8 +117,8 @@ jQuery(document).ready(function ($) {
             question_row_html += '            </div>';
             question_row_html += '        </div>';
             question_row_html += '    </div>';
-            question_row_html += '    <div class="row question-other-info-container">';
-            question_row_html += '        <div class="col-12">';
+            question_row_html += '    <div class="question-other-info-container">';
+            question_row_html += '        <div>';
             question_row_html += '            <strong class="checkbox-label-heading">Rules:</strong>';
             question_row_html += '            <div class="question-rule-checkbox-inner-container">';
             question_row_html += '                <label>Supporting documentation required.. </label>';
@@ -126,7 +126,7 @@ jQuery(document).ready(function ($) {
             question_row_html += '                <input type="hidden" class="question-rule-checkbox-input" name="group_questions[' + group_id + '][list][' + rowCount + '][supporting_doc]"/>';
             question_row_html += '            </div>';
             question_row_html += '        </div>';
-            question_row_html += '        <div class="col-10 multi-choice-btn-container">';
+            question_row_html += '        <div class="multi-choice-btn-container">';
             question_row_html += '            <button class="button add-multi-choice-btn" type="button" data-group-id=' + group_id + ' data-id="' + rowCount + '">';
             question_row_html += '              <i class="fa-solid fa-plus"></i> Add Multiple Choice';
             question_row_html += '            </button>';
@@ -138,8 +138,8 @@ jQuery(document).ready(function ($) {
             question_row_html += '            </div>';
             question_row_html += '        </div>';
             question_row_html += '    </div>';
-            question_row_html += '    <div class="row question-add-files-container">'
-            question_row_html += '        <div class="col-12">'
+            question_row_html += '    <div class="question-add-files-container">'
+            question_row_html += '        <div>'
             question_row_html += '            <div class="btn-add-files-wrapper">'
             question_row_html += '                <label for="additional-files-' + group_id + '-' + rowCount + '">'
             question_row_html += '                    <span class="button" role="button" aria-disabled="false"><i class="fa-solid fa-file-arrow-up"></i> Add Additional Files</span>'
@@ -252,7 +252,7 @@ jQuery(document).ready(function ($) {
             simple_question_html += '        <div class="col-12">';
             simple_question_html += '            <strong class="checkbox-label-heading">Rules:</strong>';
             simple_question_html += '            <div class="question-rule-checkbox-inner-container" style="display:none;">';
-            simple_question_html += '                <label>Supporting documentation required.. </label>';
+            simple_question_html += '                <label>Supporting documentation required. </label>';
             simple_question_html += '                <input type="checkbox" class="question-rule-checkbox"/>';
             simple_question_html += '                <input type="hidden" class="question-rule-checkbox-input" name="group_questions[' + groupCount_Simple + '][is_question_supporting]"/>';
             simple_question_html += '            </div>';
