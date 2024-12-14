@@ -219,7 +219,7 @@ $submission_score_arr = array();
                                             
                                             <?php if (!empty($azure_attachments_uploaded)): ?>
                                                 <!-- New Azure uploaded -->
-                                                <ul class="files-list">
+                                                <ul class="files-list azure">
                                                 <?php foreach($azure_attachments_uploaded as $field): ?>
                                                     <?php
                                                         $file_name = $field->attachment_name;
@@ -363,6 +363,7 @@ $submission_score_arr = array();
                                                 data-group-id="<?php echo $group_id ?>"
                                                 data-id="<?php echo $quiz_id ?>">
                                                 Add private note
+                                                <div class="fb-spinner"></div>
                                             </a>
                                         </div>
                                         <div class="feedback-lst">
@@ -373,17 +374,17 @@ $submission_score_arr = array();
                                                 foreach ($q_fb_lst as $key => $q_fb) {
                                                     if ($q_fb['feedback'] != null) {
                                                     ?>
-                                                        <div class="fd-row">
+                                                        <div id="fb-<?php echo $q_fb['fb_id']; ?>" class="fd-row">
                                                             <div class="fb-content">
-                                                                <?php if ( $current_user->ID == $q_fb['user_id'] ): ?>
-                                                                    <span class="ic-delete-feedback" data-fb-id="<?php echo $q_fb['fb_id']; ?>" title="Remove this feedback">
-                                                                        <i class="fa fa-trash-o"></i>
-                                                                    </span>
-                                                                <?php endif; ?>
-                                                                <div class="author">
-                                                                    <strong><?php echo $q_fb['user_name']; ?></strong>
-                                                                    <span> - </span>
-                                                                    <span class="datetime"><?php echo date("M d Y H:i a", strtotime($q_fb['time'])); ?></span>
+                                                                <div class="fb-top">
+                                                                    <div class="author">
+                                                                        <strong class="name"><?php echo $q_fb['user_name']; ?></strong>
+                                                                        <span> - </span>
+                                                                        <span class="datetime"><?php echo date("M d Y H:i a", strtotime($q_fb['time'])); ?></span>
+                                                                    </div>
+                                                                    <?php if ( $current_user->ID == $q_fb['user_id'] ): ?>
+                                                                        <span class="ic-delete-feedback" data-fb-id="<?php echo $q_fb['fb_id']; ?>">Remove</span>
+                                                                    <?php endif; ?>
                                                                 </div>
                                                                 <div class="fb"><?php 
                                                                 $feedback_str = strip_tags($q_fb['feedback']);

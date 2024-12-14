@@ -3,7 +3,7 @@
 Plugin Name: WP Assessment
 Plugin URI: #
 Description: Custom plugin for Project Saturn
-Version: 2.8
+Version: 2.9.1
 Author: tom@ysnstudios.com
 Author URI: tom@ysnstudios.com
 Text Domain: wp-assessment
@@ -15,7 +15,7 @@ if (!function_exists('add_action')) {
     exit;
 }
 
-define('WP_ASSESSMENT_VER', '2.8');
+define('WP_ASSESSMENT_VER', '2.9.1');
 define('WP_ASSESSMENT_DIR', plugin_dir_path(__FILE__));
 define('WP_ASSESSMENT_ASSETS', plugins_url('/assets', __FILE__));
 define('WP_ASSESSMENT_FRONT_IMAGES', plugins_url('/assets/images/front', __FILE__));
@@ -24,7 +24,7 @@ require_once(WP_ASSESSMENT_DIR . '/includes/function.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/statics.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/helper.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/hooks.php');
-require_once(WP_ASSESSMENT_DIR . '/includes/custom-post-type.php');
+require_once(WP_ASSESSMENT_DIR . '/includes/custom-post-types.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/custom-fields.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/question-form.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/salesforce-api.php');

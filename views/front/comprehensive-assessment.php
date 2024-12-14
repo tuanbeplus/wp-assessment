@@ -19,7 +19,7 @@ if (isset($_COOKIE['userId']) && !empty($_COOKIE['userId'])) {
 }
 
 $main = new WP_Assessment();
-$question_form = new Question_Form();
+$question_form = new WPA_Question_Form();
 $azure = new WP_Azure_Storage();
 $feedback_cl = new AndSubmissionFeedbacks();
 $organisation_id = getUser($user_id)->records[0]->AccountId ?? '';

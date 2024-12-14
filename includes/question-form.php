@@ -1,6 +1,6 @@
 <?php
 
-class Question_Form
+class WPA_Question_Form
 {
     public int $user_id;
 
@@ -1165,4 +1165,4 @@ class Question_Form
 
 }
 
-new Question_Form();
+new WPA_Question_Form();

@@ -23,6 +23,8 @@ class WP_Azure_Storage {
         add_action('wp_ajax_create_sas_blob_url_azure_ajax', array($this, 'create_sas_blob_url_azure_ajax'));
         add_action('wp_ajax_nopriv_create_sas_blob_url_azure_ajax', array($this, 'create_sas_blob_url_azure_ajax'));
 
+        add_action('init', array($this, 'report_create_azure_sas_blob_url'));
+    
         $this->set_azure_storage_table();
         $this->init_azure_storage_attachments();
     }
@@ -431,6 +433,35 @@ class WP_Azure_Storage {
 
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+
+    /**
+     * Create Shared Access Signature Blob URL at the URL
+     */
+    function report_create_azure_sas_blob_url() {
+        if (isset($_GET['action']) && $_GET['action'] === 'create_sas_blob_url') {
+            $blob_url = $_GET['blob_url'] ?? '';
+            
+            if (empty($blob_url)) {
+                echo 'Error: Create file URL failed. Blob URL not found.';
+                exit;
+            }
+            // Extract resource path from the blob URL
+            $resource_path = str_replace('blob.core.windows.net/', '', strstr($blob_url, 'blob.core.windows.net/'));
+            
+            // Generate the SAS token
+            $sas_blob_url = $this->generate_sas_token_azure($resource_path);
+    
+            if (!empty($sas_blob_url)) {
+                // Redirect the user to the generated SAS Blob URL
+                wp_redirect($sas_blob_url);
+                exit;
+            } 
+            else {
+                echo 'Error: Generate Azure Shared Access Signature failed.';
+                exit;
+            }
         }
     }
     

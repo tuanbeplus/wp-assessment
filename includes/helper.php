@@ -655,30 +655,33 @@ function get_sf_organisation_data($sf_user_id, $org_id)
 }
 
 /**
- * Check Report of Submission exist 
+ * Check if a report for a submission exists.
  * 
- * @param $submission_id
- *
- * @return int Report ID  
- * 
+ * @param int|string $submission_id The submission ID to check.
+ * @param string $report_type The post type to search within.
+ * @return int|null Report ID if found, null otherwise.
  */
-function is_report_of_submission_exist($submission_id) 
-{
-	$args = array(
-		'post_type' => 'reports',
-		'posts_per_page' => 1,
-		'post_status' => 'any',
-		'meta_query' => array(
-			array(
-				'key' => 'submission_id',
-				'value' => $submission_id,
-			)
-		),
-	);
-	$reports = get_posts($args);
-	if (!empty($reports)) {
-		return $reports[0]->ID;
-	}
+function is_report_of_submission_exist($submission_id = null, $report_type = '') {
+    // Validate input parameters
+    if (empty($submission_id) || empty($report_type)) {
+        return null;
+    }
+    // Query to find a matching post
+    $args = array(
+        'post_type'      => $report_type,
+        'posts_per_page' => 1,
+        'post_status'    => 'any',
+        'fields'         => 'ids', 
+        'meta_query'     => array(
+            array(
+                'key'   => 'submission_id',
+                'value' => $submission_id,
+            ),
+        ),
+    );
+    $query = new WP_Query($args);
+    // Return the first report ID or null
+    return !empty($query->posts) ? $query->posts[0] : null;
 }
 
 /**

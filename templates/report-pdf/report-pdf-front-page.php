@@ -23,8 +23,15 @@ if (!empty($report_template['front_page'])) {
     $org_name = $org_data['Name'] ?? '';
     $front_page_logo_url = $report_template['front_page']['logo_url'] ?? '';
     $front_page_title = $report_template['front_page']['title'] ?? '';
-    $front_page_heading_2 = $report_template['front_page']['heading_2'] ?? '';
+    if (empty($front_page_title)) {
+        $front_page_title = 'Report Title';
+    }
+    $front_sub_title = $report_template['front_page']['heading_2'] ?? '';
+    if (empty($front_sub_title)) {
+        $front_sub_title = 'Report Sub Title';
+    }
     $front_page_bg_img = $report_template['front_page']['bg_img'] ?? '';
+    $custom_class = get_post_type();
 
     $front_page = 
     '<div class="front-page page" style="text-align:center;">
@@ -38,11 +45,11 @@ if (!empty($report_template['front_page'])) {
     '</div>';
 
     $front_page_2024 = 
-    '<div class="front-page page front-page-2024" style="background-image:url('. esc_url($front_page_bg_img) .');">
+    '<div class="front-page page front-page-2024 '.$custom_class.'" style="background-image:url('. esc_url($front_page_bg_img) .');">
         <div class="content">
             <img width="300" src="'. esc_url($front_page_logo_url) .'" alt="ADN Logo">
             <h1>'. esc_html($front_page_title) .'</h1>
-            <h2>'. esc_html($front_page_heading_2) .'</h2>
+            <h2>'. esc_html($front_sub_title) .'</h2>
             <h2>'. esc_html($org_name) .'</h2>
         </div>
     </div>';

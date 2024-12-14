@@ -38,13 +38,11 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
     <div id="report-template" class="report-template">
         <!-- Front page -->
         <div id="report-front-page" class="_section">
-            <h3 class="_heading">Report front page (cover)</h3>
+            <h3 class="_heading">Report front page (Cover)</h3>
             <div class="field-content">
-                <label for="heading-1">
-                    Heading 1
-                </label>
+                <label for="heading-1">Report Title</label>
                 <input id="heading-1" type="text" name="report_template[front_page][title]" 
-                        placeholder="Add heading 1"
+                        placeholder="Enter report title"
                         value="<?php echo $report_front_title; ?>">
                 
                 <?php if ($assessment_id == $index_2023_id): ?>
@@ -61,11 +59,9 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                     wp_editor( $report_front_content, $editor_id, $editor_settings );
                 ?>
                 <?php else: ?>
-                    <label for="heading-2">
-                        Heading 2
-                    </label>
+                    <label for="heading-2">Sub Title</label>
                     <input id="heading-2" type="text" name="report_template[front_page][heading_2]" 
-                            placeholder="Add heading 2"
+                            placeholder="Enter report sub title"
                             value="<?php echo $report_front_heading_2; ?>">
                 <?php endif; ?>
             </div>
@@ -153,7 +149,10 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                                 wp_editor( $content, $editor_id, $editor_settings );
                             ?>
                             <div class="add-row-block">
-                                <a class="btn-remove-generic-page button_remove">Remove this row</a>
+                                <a class="btn-remove-generic-page button_remove">
+                                    <span><i class="fa-solid fa-xmark"></i></span>
+                                    <span>Remove this row</span>
+                                </a>
                                 <a class="btn-add-generic-page button button-primary" 
                                     data-position="<?php echo $page_type['type']; ?>"
                                     data-insert="bottom">

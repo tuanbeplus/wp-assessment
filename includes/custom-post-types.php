@@ -1,17 +1,15 @@
 <?php
 
-class CustomPostType
+class WPA_CustomPostType
 {
     function __construct()
     {
         add_action('init', array($this, 'register_assessment_custom_post_type'));
         add_action('init', array($this, 'register_index_submissions_post_type'));
         add_action('init', array($this, 'register_dcr_submissions_post_type'));
-        add_action('init', array($this, 'register_reports_custom_post_type'));
+        add_action('init', array($this, 'register_index_reports_custom_post_type'));
+        add_action('init', array($this, 'register_dcr_reports_custom_post_type'));
         add_action('init', array($this, 'register_assessment_categories'));
-        // Hook into the 'acf/init' action to add the ACF options page
-        add_action('acf/init', array($this, 'add_assessments_options_page'));
-        add_action('acf/init', array($this, 'add_assessments_options_fields'));
 
         add_filter('manage_assessments_posts_columns', array($this, 'customize_assessments_admin_column'));
         add_action('manage_assessments_posts_custom_column', array($this, 'customize_assessments_admin_column_value'), 10, 2);
@@ -25,12 +23,17 @@ class CustomPostType
         add_filter('manage_reports_posts_columns', array($this, 'customize_reports_admin_column'));
         add_action('manage_reports_posts_custom_column', array($this, 'customize_reports_admin_column_value'), 10, 2);
 
+        add_filter('manage_dcr_reports_posts_columns', array($this, 'customize_reports_admin_column'));
+        add_action('manage_dcr_reports_posts_custom_column', array($this, 'customize_reports_admin_column_value'), 10, 2);
+
         add_filter('manage_attachment_posts_columns', array($this, 'customize_attachment_admin_column'));
         add_action('manage_attachment_posts_custom_column', array($this, 'customize_attachment_admin_column_value'), 10, 2);
 
         add_action('comment_post', array($this, 'submission_comments_post_hook'), 10, 2);
         add_action('publish_submissions', array($this, 'on_submissions_created'), 10, 2);
         add_action('publish_dcr_submissions', array($this, 'on_submissions_created'), 10, 2);
+        add_action('template_redirect', array($this, 'redirect_post_type_archives_to_404'));
+        add_filter('single_template', array($this, 'redirect_single_front_template'));
     }
 
     function activate(): void
@@ -41,6 +44,51 @@ class CustomPostType
     function deactivate(): void
     {
         flush_rewrite_rules();
+    }
+
+    function redirect_post_type_archives_to_404() {
+        global $wp_query;
+        // List of post types to hide their archives
+        $post_types_hidden = array('assessments', 'submissions', 'dcr_submissions', 'reports', 'dcr_reports');
+        // Get the current queried post type
+        $post_type = get_query_var('post_type');
+
+        // Check if the current page is an archive of one of the hidden post types
+        if (is_post_type_archive() && in_array($post_type, $post_types_hidden)) {
+            // Set 404 status
+            $wp_query->set_404();
+            status_header(404);
+
+            // Redirect to 404 template
+            include(get_query_template('404'));
+            exit;
+        }
+    }
+
+    function redirect_single_front_template($template)
+    {
+        global $post;
+
+        if ($post->post_type == 'assessments') {
+            $question_templates = get_post_meta($post->ID, 'question_templates', true);
+            if ($question_templates == 'Simple Assessment') {
+                return wpa_get_template_front_view('simple-assessment');
+            }
+            if ($question_templates == 'Comprehensive Assessment') {
+                return wpa_get_template_front_view('comprehensive-assessment');
+            }
+        }
+        else if ($post->post_type == 'submissions' || $post->post_type == 'dcr_submissions') {
+            return wpa_get_template_front_view('single-submission');
+        }
+        else if ($post->post_type == 'reports') {
+            return wpa_get_template_front_view('single-report');
+        }
+        else if ($post->post_type == 'dcr_reports') {
+            return wpa_get_template_front_view('single-dcr-report');
+        }
+        
+        return $template;
     }
 
     /**
@@ -91,7 +139,6 @@ class CustomPostType
                 'delete_post' => 'delete_assessment',
                 'edit_published_post' => 'edit_published_assessment',
                 'edit_published_posts' => 'edit_published_assessments',
-
             ),
         );
 
@@ -117,123 +164,6 @@ class CustomPostType
     }
 
     /**
-     * Add Assessments Settings ACF sub page
-     * 
-     */
-    function add_assessments_options_page() {
-        if( function_exists('acf_add_options_sub_page') ) {
-            acf_add_options_sub_page(array(
-                'page_title'    => 'Assessments Settings',
-                'menu_title'    => 'Settings',
-                'parent_slug'   => 'edit.php?post_type=assessments',
-                'capability'    => 'manage_options',
-                'redirect'      => false
-            ));
-        }
-    }
-
-    /**
-     * Add Assessments options ACF fields
-     * 
-     */
-    function add_assessments_options_fields() {
-        if( function_exists('acf_add_local_field_group') ) {
-            acf_add_local_field_group(array(
-                'key' => 'group_assessments_settings',
-                'title' => 'Settings',
-                'fields' => array(
-                    array(
-                        'key' => 'field_assessment_quick_10',
-                        'label' => 'Assessment Quick 10',
-                        'name' => 'assessment_quick_10',
-                        'type' => 'post_object',
-                        'instructions' => 'Select assessment is the Quick 10.',
-                        'post_type' => array(
-                            0 => 'assessments',
-                        ),
-                        'post_status' => 'publish',
-                        'taxonomy' => '',
-                        'return_format' => 'id',
-                        'multiple' => 0,
-                    ),
-                    array(
-                        'key' => 'field_quick_10_register_url',
-                        'label' => 'Quick 10 Register URL',
-                        'name' => 'quick_10_register_url',
-                        'type' => 'text',
-                        'instructions' => 'Enter the URL to users register for the Quick 10.',
-                    ),
-                    array(
-                        'key' => 'field_assessment_index_2023',
-                        'label' => 'Assessment Index 2023',
-                        'name' => 'assessment_index_2023',
-                        'type' => 'post_object',
-                        'instructions' => 'Select assessment is the Index 2023.',
-                        'post_type' => array(
-                            0 => 'assessments',
-                        ),
-                        'post_status' => 'publish',
-                        'taxonomy' => '',
-                        'return_format' => 'id',
-                        'multiple' => 0,
-                    ),
-                    array(
-                        'key' => 'field_dcr_submission_notification_email',
-                        'label' => 'DCR Submission Notification Email',
-                        'name' => 'dcr_submission_notification_email',
-                        'type' => 'email',
-                        'instructions' => 'Enter the email address to receive notifications for the new submissions.',
-                    ),
-                    array(
-                        'key' => 'field_repeater_exception_orgs_id',
-                        'label' => 'Exception Orgs ID',
-                        'name' => 'exception_orgs_id',
-                        'type' => 'repeater',
-                        'instructions' => 'Add Organisation ID here.',
-                        'layout' => 'table',
-                        'button_label' => 'Add Org ID',
-                        'sub_fields' => array(
-                            array(
-                                'key' => 'field_organisation_name',
-                                'label' => 'Organisation Name',
-                                'name' => 'organisation_name',
-                                'type' => 'text',
-                                'wrapper' => array(
-                                    'width' => '50%',
-                                ),
-                            ),
-                            array(
-                                'key' => 'field_organisation_id',
-                                'label' => 'Organisation ID',
-                                'name' => 'organisation_id',
-                                'type' => 'text',
-                                'wrapper' => array(
-                                    'width' => '50%',
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-                'location' => array(
-                    array(
-                        array(
-                            'param' => 'options_page',
-                            'operator' => '==',
-                            'value' => 'acf-options-settings',
-                        ),
-                    ),
-                ),
-                'menu_order' => 0,
-                'position' => 'normal',
-                'style' => 'default',
-                'label_placement' => 'left',
-                'instruction_placement' => 'label',
-                'hide_on_screen' => '',
-            ));
-        }
-    }
-
-    /**
      * Register Index submissions post type
      * 
      * @param Index
@@ -242,18 +172,18 @@ class CustomPostType
     function register_index_submissions_post_type(): void
     {
         $labels = array(
-            'name' => _x('Index submissions', 'submission'),
-            'singular_name' => _x('Index submission', 'submission'),
-            'add_new' => _x('Add New', 'submission'),
-            'add_new_item' => _x('Add New Index submission', 'submission'),
-            'edit_item' => _x('Edit Index submission', 'submission'),
-            'new_item' => _x('New Index submission', 'submission'),
-            'view_item' => _x('View Index submission', 'submission'),
-            'search_items' => _x('Search Index submissions', 'submission'),
-            'not_found' => _x('No Index submissions found', 'submission'),
-            'not_found_in_trash' => _x('No Index submissions found in Trash', 'submission'),
-            'parent_item_colon' => _x('Parent Index submission:', 'submission'),
-            'menu_name' => _x('Index submissions', 'submission'),
+            'name'               => _x('Index submissions', 'wp-assessment'),
+            'singular_name'      => _x('Index submission', 'wp-assessment'),
+            'add_new'            => _x('Add New', 'wp-assessment'),
+            'add_new_item'       => _x('Add New Index submission', 'wp-assessment'),
+            'edit_item'          => _x('Edit Index submission', 'wp-assessment'),
+            'new_item'           => _x('New Index submission', 'wp-assessment'),
+            'view_item'          => _x('View Index submission', 'wp-assessment'),
+            'search_items'       => _x('Search Index submissions', 'wp-assessment'),
+            'not_found'          => _x('No Index submissions found', 'wp-assessment'),
+            'not_found_in_trash' => _x('No Index submissions found in Trash', 'wp-assessment'),
+            'parent_item_colon'  => _x('Parent Index submission:', 'wp-assessment'),
+            'menu_name'          => _x('Index submissions', 'wp-assessment'),
         );
 
         $args = array(
@@ -298,18 +228,18 @@ class CustomPostType
     function register_dcr_submissions_post_type(): void
     {
         $labels = array(
-            'name' => _x('DCR submissions', 'submission'),
-            'singular_name' => _x('DCR submission', 'submission'),
-            'add_new' => _x('Add New', 'submission'),
-            'add_new_item' => _x('Add New DCR submission', 'submission'),
-            'edit_item' => _x('Edit DCR submission', 'submission'),
-            'new_item' => _x('New DCR submission', 'submission'),
-            'view_item' => _x('View DCR submission', 'submission'),
-            'search_items' => _x('Search DCR submissions', 'submission'),
-            'not_found' => _x('No DCR submissions found', 'submission'),
-            'not_found_in_trash' => _x('No DCR submissions found in Trash', 'submission'),
-            'parent_item_colon' => _x('Parent DCR submission:', 'submission'),
-            'menu_name' => _x('DCR submissions', 'submission'),
+            'name'               => _x('DCR submissions', 'wp-assessment'),
+            'singular_name'      => _x('DCR submission', 'wp-assessment'),
+            'add_new'            => _x('Add New', 'wp-assessment'),
+            'add_new_item'       => _x('Add New DCR submission', 'wp-assessment'),
+            'edit_item'          => _x('Edit DCR submission', 'wp-assessment'),
+            'new_item'           => _x('New DCR submission', 'wp-assessment'),
+            'view_item'          => _x('View DCR submission', 'wp-assessment'),
+            'search_items'       => _x('Search DCR submissions', 'wp-assessment'),
+            'not_found'          => _x('No DCR submissions found', 'wp-assessment'),
+            'not_found_in_trash' => _x('No DCR submissions found in Trash', 'wp-assessment'),
+            'parent_item_colon'  => _x('Parent DCR submission:', 'wp-assessment'),
+            'menu_name'          => _x('DCR submissions', 'wp-assessment'),
         );
 
         $args = array(
@@ -346,27 +276,26 @@ class CustomPostType
     }
 
     /**
-     * Register Reports post type
+     * Register Index Reports post type
      * 
      * @param Reports
      * 
      */
-    function register_reports_custom_post_type(): void
+    function register_index_reports_custom_post_type(): void
     {
         $labels = array(
-            'name' => _x('Reports', 'report'),
-            'singular_name' => _x('Reports', 'report'),
-            'add_new' => _x('Add New', 'report'),
-            'add_new_item' => _x('Add New Report', 'report'),
-            'edit_item' => _x('Edit Report', 'report'),
-            'new_item' => _x('New Report', 'report'),
-            'view_item' => _x('View Report', 'report'),
-            'search_items' => _x('Search Reports', 'report'),
-            'not_found' => _x('No Reports found', 'report'),
-            'not_found_in_trash' => _x('No reports found in Trash', 'report'),
-            'parent_item_colon' => _x('Parent Report:', 'report'),
-            'menu_name' => _x('Reports', 'report'),
-            
+            'name'               => _x('Index Reports', 'wp-assessment'),
+            'singular_name'      => _x('Report', 'wp-assessment'),
+            'add_new'            => _x('Add New Report', 'wp-assessment'),
+            'add_new_item'       => _x('Add New Report', 'wp-assessment'),
+            'edit_item'          => _x('Edit Report', 'wp-assessment'),
+            'new_item'           => _x('New Report', 'wp-assessment'),
+            'view_item'          => _x('View Report', 'wp-assessment'),
+            'search_items'       => _x('Search Reports', 'wp-assessment'),
+            'not_found'          => _x('No Reports found', 'wp-assessment'),
+            'not_found_in_trash' => _x('No reports found in Trash', 'wp-assessment'),
+            'parent_item_colon'  => _x('Parent Report:', 'wp-assessment'),
+            'menu_name'          => _x('Index Reports', 'wp-assessment'),
         );
 
         $args = array(
@@ -384,11 +313,54 @@ class CustomPostType
             'rewrite' => true,
             'public' => true,
             'map_meta_cap' => true,
-            // 'show_in_rest' => true,
             'menu_icon' => 'dashicons-format-aside',
         );
 
         register_post_type('reports', $args);
+    }
+
+    /**
+     * Register DCR Reports post type
+     * 
+     * @param DCR_Reports
+     * 
+     */
+    function register_dcr_reports_custom_post_type(): void
+    {
+        $labels = array(
+            'name'               => _x('DCR Reports', 'wp-assessment'),
+            'singular_name'      => _x('Report', 'wp-assessment'),
+            'add_new'            => _x('Add New Report', 'wp-assessment'),
+            'add_new_item'       => _x('Add New Report', 'wp-assessment'),
+            'edit_item'          => _x('Edit Report', 'wp-assessment'),
+            'new_item'           => _x('New Report', 'wp-assessment'),
+            'view_item'          => _x('View Report', 'wp-assessment'),
+            'search_items'       => _x('Search Reports', 'wp-assessment'),
+            'not_found'          => _x('No Reports found', 'wp-assessment'),
+            'not_found_in_trash' => _x('No reports found in Trash', 'wp-assessment'),
+            'parent_item_colon'  => _x('Parent Report:', 'wp-assessment'),
+            'menu_name'          => _x('DCR Reports', 'wp-assessment'),
+        );
+
+        $args = array(
+            'labels' => $labels,
+            'hierarchical' => false,
+            'supports' => array('title', 'thumbnail', 'author'),
+            'show_ui' => true,
+            'show_in_menu' => true,
+            'show_in_nav_menus' => true,
+            'publicly_queryable' => true,
+            'exclude_from_search' => true,
+            'has_archive' => true,
+            'query_var' => true,
+            'can_export' => true,
+            'rewrite' => true,
+            'public' => true,
+            'map_meta_cap' => true,
+            'menu_icon' => 'dashicons-format-aside',
+        );
+
+        register_post_type('dcr_reports', $args);
     }
 
     function customize_reports_admin_column($columns)
@@ -405,25 +377,23 @@ class CustomPostType
         if ($column_key == 'user') {
             $sf_user_name = get_post_meta($post_id, 'sf_user_name', true);
             if ($sf_user_name) {
-                echo $sf_user_name;
+                echo $sf_user_name ?? '';
             }
         }
-
         // Column "Organisation"
         if ($column_key == 'organisation') {
             $org_metadata = get_post_meta($post_id, 'org_data', true);
             if (!empty($org_metadata)) {
-                echo $org_metadata['Name'];
+                echo $org_metadata['Name'] ?? '';
             }
         }
-
         // Column "Assessment"
         if ($column_key == 'assessment') {
             $assessment_id = get_post_meta($post_id, 'assessment_id', true);
             if (isset($assessment_id)) {
                 echo '<a href="/wp-admin/post.php?post='.$assessment_id.'&action=edit" target="_blank">'
                         .get_the_title($assessment_id).
-                    '</a>';
+                    '</a>' ?? '';
             }
         }
     }
@@ -585,8 +555,8 @@ class CustomPostType
     }
 }
 
-if (class_exists('CustomPostType')) {
-    $instance = new CustomPostType();
+if (class_exists('WPA_CustomPostType')) {
+    $instance = new WPA_CustomPostType();
 }
 
 register_activation_hook(__FILE__, array($instance, 'activate'));

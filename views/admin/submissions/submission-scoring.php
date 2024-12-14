@@ -22,7 +22,7 @@ $agreed_score = get_post_meta($post_id, 'agreed_score', true);
 $total_submission_score = get_post_meta($post_id, 'total_submission_score', true);
 $total_and_score = get_post_meta($post_id, 'total_and_score', true);
 $total_agreed_score = get_post_meta($post_id, 'total_agreed_score', true);
-$report_id = is_report_of_submission_exist($post_id);
+$report_id = is_report_of_submission_exist($post_id, 'reports');
 $report_url = home_url() . '/wp-admin/post.php?post='. $report_id .'&action=edit';
 $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
@@ -84,12 +84,12 @@ $agreed_gr_score_with_weighting = cal_scores_with_weighting($assessment_id, $agr
         <div class="report-action">
             <?php if ($is_ranking_exist): ?>
                 <a id="btn-create-report" class="button button-primary">
-                    Create Preliminary Report
+                    <span>Create Preliminary Report</span>
                     <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
                 </a>
                 <a id="btn-view-report" href="<?php echo $report_url; ?>" target="_blank"
                     class="button button-medium <?php if (!empty($report_id)) echo 'show'; ?>">
-                    Edit Report
+                    <span>Edit Report</span>
                 </a>
             <?php else: ?>
                 <div class="add-ranking-box">

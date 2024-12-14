@@ -13,7 +13,7 @@
 
     $("body").on("click", ".ic-delete-feedback", function (e) {
       e.preventDefault();
-      if ( ! confirm('Do you want to remove?') ) {
+      if (!confirm('Do you want to remove?')) {
         return;
       }
       and_remove_submission_feedback($(this));
@@ -60,14 +60,10 @@
           parent_quiz_id: parent_quiz_id,
         },
         beforeSend: function (xhr) {
-          instance.addClass("disabled").html('<div class="and-spinner-loading"></div>');
+          instance.addClass("loading");
         },
         success: function (response) {
-          if (instance.hasClass("private-note")) {
-            instance.removeClass("disabled").html("Add private note");
-          } else {
-            instance.removeClass("disabled").html("Add feedback");
-          }
+          instance.removeClass("loading");
         },
       });
       const { time, feedback_id, user_name, status, message } = response;
@@ -76,21 +72,22 @@
       if (status) {
         feedback_el.val("");
 
-        let added_fb_html = '<div class="fd-row">';
-        added_fb_html += ' <div class="fb-content">';
-        added_fb_html += '  <span class="ic-delete-feedback" data-fb-id="' + feedback_id + '" title="Remove this feedback">';
-        added_fb_html += '    <i class="fa fa-trash-o"></i>';
-        added_fb_html += "  </span>";
-        added_fb_html += '  <div class="author">';
-        added_fb_html += '    <strong>' + user_name + "</strong>";
-        added_fb_html += '    <span> - </span>';
-        added_fb_html += '    <span class="datetime">'+ time +'</span>';
-        added_fb_html += '  </div>';
-        added_fb_html += '  <div class="fb">' + feedback_vl + "</div>";
-        added_fb_html += " </div>";
-        added_fb_html += "</div>";
-        feedback_lst.prepend(added_fb_html);
-      } else {
+        let added_fb_html =  '<div id="fb-' + feedback_id + '" class="fd-row">';
+            added_fb_html += '  <div class="fb-content">';
+            added_fb_html += '    <div class="fb-top">';
+            added_fb_html += '      <div class="author">';
+            added_fb_html += '        <strong class="name">' + user_name + "</strong>";
+            added_fb_html += '        <span> - </span>';
+            added_fb_html += '        <span class="datetime">' + time + '</span>';
+            added_fb_html += '      </div>';
+            added_fb_html += '      <span class="ic-delete-feedback" data-fb-id="' + feedback_id + '">Remove</span>';
+            added_fb_html += '  </div>';
+            added_fb_html += '  <div class="fb">' + feedback_vl + "</div>";
+            added_fb_html += " </div>";
+            added_fb_html += "</div>";
+            feedback_lst.prepend(added_fb_html);
+      } 
+      else {
         feedback_el.next(".fb-error-msg").text(message);
       }
       return status;
@@ -115,7 +112,7 @@
           feedback_id: fb_id,
         },
         beforeSend: function (xhr) {
-          parent_el.addClass("loading").append('<div class="and-spinner-loading"></div>');
+          parent_el.addClass("loading");
         },
         success: function (response) {
           if (response.status) {

@@ -1521,7 +1521,10 @@ jQuery(document).ready(function ($) {
             generic_page_item +=     '<input type="text" name="report_template[generic_page_'+ data_position +']['+ page_count +'][title]" placeholder="Add title">'
             generic_page_item +=     '<textarea id="'+ textarea_id +'" class="generic-page-wpeditor" name="report_template[generic_page_'+ data_position +']['+ page_count +'][content]" rows="10"></textarea>'
             generic_page_item +=     '<div class="add-row-block">'
-            generic_page_item +=         '<a class="btn-remove-generic-page button_remove">Remove this row</a>'
+            generic_page_item +=         '<a class="btn-remove-generic-page button_remove">'
+            generic_page_item +=            '<span><i class="fa-solid fa-xmark"></i></span>'
+            generic_page_item +=            '<span>Remove this row</span>'
+            generic_page_item +=         '</a>'
             generic_page_item +=         '<a class="btn-add-generic-page button button-primary" data-position='+ data_position +' data-insert="bottom">+ Add row</a>'
             generic_page_item +=     '</div>'
             generic_page_item += '</li>'
@@ -1648,13 +1651,15 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         let btn = $(this)
         let submissionId = $("#submission_id").val();
-
+        let submissionType = $("#post_type").val();
+        
         $.ajax({
             type: 'POST',
             url: ajaxUrl,
             data:{
-                'action' : 'create_comprehensive_report',
-                'submission_id': submissionId,
+                'action'          : 'create_comprehensive_report',
+                'submission_id'   : submissionId,
+                'submission_type' : submissionType,
             },
             beforeSend : function ( xhr ) {
                 btn.addClass('loading')
@@ -1664,10 +1669,15 @@ jQuery(document).ready(function ($) {
                 if (response.report_id) {
                     $('#btn-view-report')
                         .addClass('show')
-                        .attr('href', '/wp-admin/post.php?post='+ response.report_id +'&action=edit')
+                        .attr('href', '/wp-admin/post.php?post='+ response.report_id +'&action=edit');
+                    setTimeout(function() {
+                        alert(response.message);
+                    }, 100)
                 }
                 if (response.status == false) {
-                    alert(response.message)
+                    setTimeout(function() {
+                        alert(response.message);
+                    }, 100)
                 }
             }
         });

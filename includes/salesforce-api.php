@@ -77,6 +77,7 @@ function getUsersFromOrgId($organisation_id)
 	$sql = "SELECT Id, Name, Email, ContactId, AccountId
 			FROM User
 			WHERE AccountId='{$organisation_id}'
+			AND IsActive = true 
 			ORDER BY Name ASC";
 
 	$response = sf_query_object_metadata($sql);
@@ -119,6 +120,7 @@ function getUserFromEmail($email)
 	$sql = "SELECT Id, Name, Email, ContactId, AccountId
 			FROM User
 			WHERE Email='{$email}'
+			AND IsActive = true 
 			ORDER BY Name ASC";
 
 	$response = sf_query_object_metadata($sql);

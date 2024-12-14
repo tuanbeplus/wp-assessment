@@ -1,3 +1,7 @@
+.postbox a {
+  color: #1872ef;
+}
+
 .post-type-submissions .inside .container {
   max-width: 100%;
 }
@@ -90,7 +94,7 @@
   background-color: #fff;
 }
 
-.btn-expland-wrapper {
+.question .btn-expland-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -754,6 +758,14 @@
 .submission-view-item-row .card .files-list {
   padding: 0;
   margin: 0;
+  overflow-y: auto;
+  max-height: 250px;
+}
+.submission-view-item-row .card .files-list.azure {
+  margin-top: 4px;
+  padding: 4px;
+  background-color: #fbfbfb;
+  border: 1px solid #ccc;
 }
 
 .submission-view-item-row .card .files-list .file-item {
@@ -765,21 +777,17 @@
   border: 1px solid #ddd;
   font-size: 13px;
 }
-
-/* .dcr .submission-view-item-row .card .files-list .file-item {
-  display: block;
-  margin-top: 8px;
-  width: fit-content;
-  border-radius: 6px;
-} */
+.submission-view-item-row .card .files-list .file-item:hover {
+  background-color: rgba(144, 163, 203, 0.16);
+}
 
 .files-list .file-item > .name a {
-  padding: 6px 10px;
+  padding: 5px 8px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   text-decoration: none;
-  line-height: 1;
+  line-height: 1.2;
   cursor: pointer;
 }
 
@@ -940,7 +948,7 @@
   font-size: 14px;
 }
 
-.scoring-wrapper .report-action {
+.postbox .report-action {
   position: relative;
   width: fit-content;
 }
@@ -962,6 +970,11 @@
 
 #btn-view-report.show {
   display: inline-block;
+}
+
+.dcr-report-wrapper p {
+  margin: 12px 0;
+  font-size: 14px;
 }
 
 .question-add-files-container .btn-add-files-wrapper {
@@ -1441,7 +1454,7 @@ ul.dashboard-charts-list li.chart:last-child {
 
 /* Lock question */
 
-.btn-lock-question {
+.question .btn-lock-question {
   display: flex;
   align-items: end;
   font-size: 15px;
@@ -1629,6 +1642,10 @@ ul.dashboard-charts-list li.chart:last-child {
   font-size: 16px;
 }
 
+.field-include-toc label {
+  cursor: pointer;
+}
+
 .generic-page-wrapper {
   margin: 16px 0;
   padding: 12px 16px;
@@ -1752,10 +1769,19 @@ ul.dashboard-charts-list li.chart:last-child {
   display: block;
 }
 
-.button_remove {
+.report-template .button_remove {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  line-height: 1.4;
+  width: fit-content;
   color: #b32d2e;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
+  border-bottom: 1px solid;
+}
+.report-template .button_remove :hover {
+  color: darkred;
 }
 
 #btn-remove-logo {
@@ -1804,41 +1830,52 @@ ul.dashboard-charts-list li.chart:last-child {
   }
 }
 .and-btn {
-  min-width: 106px;
+  position: relative;
 }
-.and-btn.disabled {
-  background-color: #dadfe3 !important;
-  border-color: #dadfe3 !important;
-  color: #a9afb2 !important;
+.and-btn.loading {
   pointer-events: none !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  background-color: #2271b1cc !important;
 }
-.and-btn .and-spinner-loading {
+.and-btn .fb-spinner {
+  display: none;
   margin: 0;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  right: -36px;
+  top: 1px;
   border-radius: 50%;
-  background: conic-gradient(#0000 10%, #2271b1);
-  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 4px), #000 0);
-  animation: sploading 1s infinite linear;
+  border: 3px #2271b130 solid;
+  border-top: 3px #2271b1 solid;
+  border-radius: 50%;
+  -webkit-animation: effectSpinnerRotate 0.5s infinite linear;
+  animation: effectSpinnerRotate 0.5s infinite linear;
+  background-color: unset;
+}
+.and-btn.loading .fb-spinner {
+  display: block;
+}
+@keyframes effectSpinnerRotate {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(359deg); }
 }
 .feedback-lst {
-  margin-top: 10px;
+  margin-top: 12px;
+  overflow-y: auto;
+  max-height: 400px;
+  padding-right: 6px;
 }
 .feedback-lst .fd-row {
-  border-radius: 5px;
-  background-color: rgba(144, 163, 203, 0.1);
-  margin: 8px 0;
-  padding: 5px 8px 5px 16px;
-  color: initial;
+  margin: 0 0 10px;
+  padding: 6px 10px;
   border: 1px solid #ddd;
   width: 100%;
   position: relative;
+  border-radius: 4px;
+  background-color: rgba(144, 163, 203, 0.08);
 }
-.feedback-lst .fd-row .datetime {
-  color: #555;
+.feedback-lst .fd-row:hover {
+  background-color: rgba(144, 163, 203, 0.12);
 }
 .feedback-lst .fd-row .fb {
   white-space: pre-wrap;
@@ -1859,51 +1896,54 @@ ul.dashboard-charts-list li.chart:last-child {
 .feedback-lst .fd-row .fb.show-full .less + .full {
   display: block;
 }
-.feedback-lst .fd-row .and-spinner-loading {
-  margin: 0;
-  position: absolute;
-  top: calc(50% - 20px);
-  left: calc(50% - 20px);
-  width: 32px;
-  height: 32px;
-  background: conic-gradient(#0000 10%, #2271b1);
-  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 4px), #000 0);
-  z-index: 2;
-}
-.feedback-lst .fd-row.loading:after {
-  content: "";
-  background: rgb(204 204 204 / 50%);
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  left: 0;
-  top: 0;
-  border-radius: 5px;
+.feedback-lst .fd-row.loading {
+  opacity: 0.5;
 }
 .submission-view-item-row .card .and-feedback-input.error {
-  border-color: red !important;
+  border-color: #b32d2e !important;
 }
 .fb-error-msg {
-  color: red;
+  color: #b32d2e;
   margin-bottom: 5px;
 }
-.ic-delete-feedback {
-  position: absolute;
-  left: -7px;
-  top: 12px;
-  font-size: 16px;
+.feedback-lst .fb-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 10px;
+}
+.fd-row .author {
+  width: fit-content;
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #e6e6e6;
+}
+@media only screen and (max-width:1440px) {
+  .fd-row .author {
+    max-width: 230px;
+  }
+}
+.fd-row .author .name {
+  font-size: 13px;
+  color: #111;
+}
+.fd-row .datetime {
+  color: #555;
+}
+.fd-row .ic-delete-feedback {
+  visibility: hidden;
+  position: relative;
+  right: -2px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #b32d2e;
+  text-decoration: underline;
+  text-underline-offset: 2px;
   cursor: pointer;
-  transition: ease 0.25s all;
+  z-index: 2;
 }
-.ic-delete-feedback:hover {
-  transform: scale(1.3);
-}
-.ic-delete-feedback i {
-  color: rgb(214 54 56 / 60%);
-  background: #fff;
-}
-.ic-delete-feedback:hover i {
-  color: red;
+.fd-row:hover .ic-delete-feedback {
+  visibility: visible;
 }
 .private-note {
   margin-top: 20px;

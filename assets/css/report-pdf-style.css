@@ -126,6 +126,10 @@ body .page.front-page-2024 {
     background-size: contain;
     background-position: bottom;
 }
+body .page.front-page-2024.dcr_reports {
+    background-size: 2000px auto;
+    background-position: bottom right;
+}
 
 .page.front-page .content {
     padding: 0px 80px 40px;
@@ -305,3 +309,28 @@ img.chart {
     text-align: left;
     line-height: 140%;
 }
+
+.page table.dcr-table th {
+    vertical-align: top;
+    white-space: nowrap;
+    background-color: aliceblue;
+}
+.page table.dcr-table td {
+    line-height: 1.5;
+}
+.page table.dcr-table,
+.page table.dcr-table th, 
+.page table.dcr-table td {
+    font-size: 12px;
+    border-color: #999;
+}
+.page table.dcr-table li {
+    font-size: 12px;
+}
+table.dcr-table .accepted {
+    color: green;
+}
+table.dcr-table .rejected {
+    color: darkred;
+}
+

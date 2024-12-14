@@ -1,20 +1,20 @@
 <?php
 
-class Custom_Fields
+class WPA_Custom_Fields
 {
     public function __construct()
     {
         add_action('admin_init', array($this, 'init_meta_boxes_admin'));
-        add_action('save_post', array($this, 'question_repeatable_meta_box_save'));
+        add_action('save_post', array($this, 'assessment_meta_boxs_save'));
         add_action('save_post', array($this, 'report_template_meta_box_save'));
         add_action('save_post', array($this, 'save_assigned_moderator'));
         add_action('save_post', array($this, 'save_assigned_collaborator'));
         add_action('save_post', array($this, 'on_save_submission_custom_fields'));
-
-        add_action( 'show_user_profile', array($this, 'assessments_additional_profile_fields'));
-        add_action( 'edit_user_profile', array($this, 'assessments_additional_profile_fields'));
-
-        // moderator user list
+        add_action('show_user_profile', array($this, 'assessments_additional_profile_fields'));
+        add_action('edit_user_profile', array($this, 'assessments_additional_profile_fields'));
+        // Hook into the 'acf/init' action to add the ACF options page
+        add_action('acf/init', array($this, 'add_assessments_options_page'));
+        add_action('acf/init', array($this, 'add_assessments_options_fields'));
     }
 
     function init_meta_boxes_admin(): void
@@ -22,8 +22,6 @@ class Custom_Fields
         // Assessments
         add_meta_box('questions-repeater-field', 'Questions', array($this, 'question_repeatable_meta_box_callback'), 'assessments', 'normal', 'default');
         add_meta_box('assessment-options-field', 'Assessment Options', array($this, 'assessment_options_meta_box_callback'), 'assessments', 'side', 'default');
-        // add_meta_box('access-control-panel', 'Access Control Panel', array($this, 'access_control_panel_meta_box_callback'), 'assessments', 'normal', 'default');
-        // add_meta_box('assessment-blacklist', 'Assessment Blacklist', array($this, 'assessment_blacklist_meta_box_callback'), 'assessments', 'normal', 'default');
         if (current_user_can('administrator')) {
             add_meta_box('moderator-list', 'Assessment Access', array($this, 'display_moderator_select_list'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
         }
@@ -31,113 +29,109 @@ class Custom_Fields
         add_meta_box('scoring-formula-options', 'Scoring formula options', array($this, 'scoring_formula_options_meta_box_callback'), 'assessments', 'side', 'default');
 
         // Submisions
-        add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'index_submission_list_card_section_admin'), array('submissions'), 'normal', 'default');
-        add_meta_box('questions-repeater-field', 'Submission detail', array($this, 'dcr_submission_list_card_section_admin'), array('dcr_submissions'), 'normal', 'default');
+        add_meta_box('questions-repeater-field', 'Submission Details', array($this, 'index_submission_details_admin'), array('submissions'), 'normal', 'default');
+        add_meta_box('questions-repeater-field', 'Submission Details', array($this, 'dcr_submission_details_admin'), array('dcr_submissions'), 'normal', 'default');
         add_meta_box('submitted_info_view', 'Submission by ', array($this, 'submission_info_section_admin'), array('submissions', 'dcr_submissions'), 'side', 'default');
         add_meta_box('submission-scoring-field', 'Submission Scoring ', array($this, 'submission_scoring_section_admin'), 'submissions', 'normal', 'default');
         add_meta_box('saturn-invite', 'Salesforce Saturn Invite', array($this, 'saturn_invite_meta_box_callback'), array('assessments', 'submissions', 'dcr_submissions'), 'normal', 'default');
+        add_meta_box('draft-preliminary-report', 'Draft Preliminary Report', array($this, 'submission_dcr_report_section_admin'), 'dcr_submissions', 'normal', 'default');
 
         // Reports
-        add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), array('assessments', 'reports'), 'normal', 'default');
+        add_meta_box('report-template', 'Report Template', array($this, 'report_template_meta_box_callback'), array('assessments', 'reports', 'dcr_reports'), 'normal', 'default');
         add_meta_box('report-dashboard-charts', 'Dashboard Charts', array($this, 'report_dashboard_chart_meta_box_callback'), 'reports', 'normal', 'default');
-        // add_meta_box('link-report-to-assessment', 'Link Report to Assessment', array($this, 'link_report_to_assessment_callback'), 'reports', 'side', 'default');
         add_meta_box('report-dashboard-share', 'Share this Report to Users', array($this, 'report_dashboard_share_meta_box_callback'), 'reports', 'side', 'default');
-
-        // Attachments
-        add_meta_box('attachment_uploader_info_view', 'Uploaded by member', array($this, 'attachment_uploader_info_section_admin'), 'attachment', 'side', 'default');
     }
 
-    function report_dashboard_share_meta_box_callback(){
-        return include_once REPORT_DASHBOARD_SHARE_REPORTS;
+    /* ---- Assessment Callbacks ---- */
+
+    function question_repeatable_meta_box_callback()
+    {
+        return wpa_get_template_admin_view('assessments', 'questionaire');
     }
 
     function assessment_options_meta_box_callback()
     {
-        return include_once ADMIN_ASSESSMENT_OPTION_VIEW;
-    }
-
-    function attachment_uploader_info_section_admin()
-    {
-        return include_once ADMIN_ATTACHMENT_UPLOADER_INFO_VIEW;
-    }
-
-    function report_template_meta_box_callback()
-    {
-        return include_once ADMIN_REPORT_SECTION_FIELDS;
-    }
-
-    function question_repeatable_meta_box_callback()
-    {
-        return include_once ADMIN_QUESTIONAIRE_FIELDS;
-    }
-
-    function report_key_areas_meta_box_callback()
-    {
-        return include_once ADMIN_REPORT_KEY_AREAS_FIELDS;
-    }
-
-    function display_moderator_select_list()
-    {
-        return include_once MODERATOR_LIST_ADMIN_SELECT;
-    }
-
-    function index_submission_list_card_section_admin()
-    {
-        return include_once ADMIN_SUBMISSION_INDEX_VIEW;
-    }
-
-    function dcr_submission_list_card_section_admin()
-    {
-        return include_once ADMIN_SUBMISSION_DCR_VIEW;
-    }
-
-    function submission_info_section_admin()
-    {
-        return include_once ADMIN_SUBMISSION_INFO_VIEW;
-    }
-
-    function submission_scoring_section_admin() {
-        return include_once ADMIN_SUBMISSION_SCORING_VIEW;
-    }
-
-    function assessments_additional_profile_fields()
-    {
-        return include_once USER_ASSESSMENTS_PERCHASED_FIELDS;
-    }
-
-    function access_control_panel_meta_box_callback()
-    {
-        return include_once ADMIN_ACCESS_CONTROL_PANEL;
-    }
-
-    function link_report_to_assessment_callback()
-    {
-        return include_once LINK_REPORT_TO_ASSESSMENT;
-    }
-
-    function report_dashboard_chart_meta_box_callback()
-    {
-        return include_once REPORT_DASHBOARD_CHART_VIEW;
-    }
-
-    function assessment_blacklist_meta_box_callback()
-    {
-        return include_once ASSESSMENT_BLACKLIST_VIEW;
-    }
-
-    function saturn_invite_meta_box_callback()
-    {
-        return include_once ADMIN_SATURN_INVITE_VIEW;
+        return wpa_get_template_admin_view('assessments', 'assessment-options-view');
     }
 
     function scoring_formula_options_meta_box_callback()
     {
-        return include_once ASSESSMENT_FORMULA_OPTIONS_VIEW;
+        return wpa_get_template_admin_view('assessments', 'scoring-formula-options');
     }
 
-    function question_repeatable_meta_box_save($post_id): void
+    function display_moderator_select_list()
     {
+        return wpa_get_template_admin_view('assessments', 'moderator-list');
+    }
 
+    function report_key_areas_meta_box_callback()
+    {
+        return wpa_get_template_admin_view('assessments', 'report-key-areas');
+    }
+    /* ------------------------------- */
+
+    /* ---- Submission Callbacks ---- */
+
+    function dcr_submission_details_admin()
+    {
+        return wpa_get_template_admin_view('submissions', 'submission-dcr-view');
+    }
+
+    function index_submission_details_admin()
+    {
+        return wpa_get_template_admin_view('submissions', 'submission-index-view');
+    }
+
+    function submission_info_section_admin()
+    {
+        return wpa_get_template_admin_view('submissions', 'submission-info-view');
+    }
+
+    function submission_scoring_section_admin() 
+    {
+        return wpa_get_template_admin_view('submissions', 'submission-scoring');
+    }
+
+    function submission_dcr_report_section_admin() 
+    {
+        return wpa_get_template_admin_view('submissions', 'submission-dcr-report');
+    }
+
+    function saturn_invite_meta_box_callback()
+    {
+        return wpa_get_template_admin_view('submissions', 'saturn-invite');
+    }
+    /* ------------------------------ */
+
+    /* ---- Report Callbacks ---- */
+
+    function report_template_meta_box_callback()
+    {
+        return wpa_get_template_admin_view('reports', 'report-section');
+    }
+
+    function report_dashboard_chart_meta_box_callback()
+    {
+        return wpa_get_template_admin_view('reports', 'report-dashboard-charts');
+    }
+
+    function report_dashboard_share_meta_box_callback()
+    {
+        return wpa_get_template_admin_view('reports', 'share-report');
+    }
+    /* ------------------------------ */
+
+    /* ---- User Callbacks ---- */
+
+    function assessments_additional_profile_fields()
+    {
+        return wpa_get_template_admin_view('users', 'assessments-purchased-view');
+    }
+    /* ------------------------------ */
+
+
+    function assessment_meta_boxs_save($post_id): void
+    {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
 
@@ -197,14 +191,15 @@ class Custom_Fields
 
     function report_template_meta_box_save($post_id): void
     {
-
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
             return;
 
         if (!current_user_can('edit_post', $post_id))
             return;
 
-        if (get_post_type($post_id) == 'reports' || get_post_type($post_id) == 'assessments') {
+        $post_types_allow = array('assessments', 'reports', 'dcr_reports');
+        
+        if ( in_array(get_post_type($post_id), $post_types_allow) ) {
             
             $report_template = isset($_POST['report_template']) ? $_POST['report_template'] : '';
             $dashboard_chart_imgs = get_post_meta($post_id, 'dashboard_chart_imgs', true);
@@ -264,7 +259,7 @@ class Custom_Fields
         if (!current_user_can('edit_post', $post_id)) return;
         if (is_single() || is_page()) return;
 
-        $question_form = new Question_Form();
+        $question_form = new WPA_Question_Form();
         $assessment_id = get_post_meta($post_id, 'assessment_id', true);
         $group_quiz_points = $_POST['group_quiz_point'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
@@ -390,6 +385,122 @@ class Custom_Fields
 
         update_post_meta($post_id, 'assigned_collaborator', $assigned_collaborator);
     }
+
+    /**
+     * Add Assessments Settings ACF sub page
+     */
+    function add_assessments_options_page() {
+        if( function_exists('acf_add_options_sub_page') ) {
+            acf_add_options_sub_page(array(
+                'page_title'    => 'Assessments Settings',
+                'menu_title'    => 'Settings',
+                'parent_slug'   => 'edit.php?post_type=assessments',
+                'capability'    => 'manage_options',
+                'redirect'      => false
+            ));
+        }
+    }
+
+    /**
+     * Add Assessments options ACF fields
+     */
+    function add_assessments_options_fields() {
+        if( function_exists('acf_add_local_field_group') ) {
+            acf_add_local_field_group(array(
+                'key' => 'group_assessments_settings',
+                'title' => 'Settings',
+                'fields' => array(
+                    array(
+                        'key' => 'field_assessment_quick_10',
+                        'label' => 'Assessment Quick 10',
+                        'name' => 'assessment_quick_10',
+                        'type' => 'post_object',
+                        'instructions' => 'Select assessment is the Quick 10.',
+                        'post_type' => array(
+                            0 => 'assessments',
+                        ),
+                        'post_status' => 'publish',
+                        'taxonomy' => '',
+                        'return_format' => 'id',
+                        'multiple' => 0,
+                    ),
+                    array(
+                        'key' => 'field_quick_10_register_url',
+                        'label' => 'Quick 10 Register URL',
+                        'name' => 'quick_10_register_url',
+                        'type' => 'text',
+                        'instructions' => 'Enter the URL to users register for the Quick 10.',
+                    ),
+                    array(
+                        'key' => 'field_assessment_index_2023',
+                        'label' => 'Assessment Index 2023',
+                        'name' => 'assessment_index_2023',
+                        'type' => 'post_object',
+                        'instructions' => 'Select assessment is the Index 2023.',
+                        'post_type' => array(
+                            0 => 'assessments',
+                        ),
+                        'post_status' => 'publish',
+                        'taxonomy' => '',
+                        'return_format' => 'id',
+                        'multiple' => 0,
+                    ),
+                    array(
+                        'key' => 'field_dcr_submission_notification_email',
+                        'label' => 'DCR Submission Notification Email',
+                        'name' => 'dcr_submission_notification_email',
+                        'type' => 'email',
+                        'instructions' => 'Enter the email address to receive notifications for the new submissions.',
+                    ),
+                    array(
+                        'key' => 'field_repeater_exception_orgs_id',
+                        'label' => 'Exception Orgs ID',
+                        'name' => 'exception_orgs_id',
+                        'type' => 'repeater',
+                        'instructions' => 'Add Organisation ID here.',
+                        'layout' => 'table',
+                        'button_label' => 'Add Org ID',
+                        'sub_fields' => array(
+                            array(
+                                'key' => 'field_organisation_name',
+                                'label' => 'Organisation Name',
+                                'name' => 'organisation_name',
+                                'type' => 'text',
+                                'wrapper' => array(
+                                    'width' => '50%',
+                                ),
+                            ),
+                            array(
+                                'key' => 'field_organisation_id',
+                                'label' => 'Organisation ID',
+                                'name' => 'organisation_id',
+                                'type' => 'text',
+                                'wrapper' => array(
+                                    'width' => '50%',
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+                'location' => array(
+                    array(
+                        array(
+                            'param' => 'options_page',
+                            'operator' => '==',
+                            'value' => 'acf-options-settings',
+                        ),
+                    ),
+                ),
+                'menu_order' => 0,
+                'position' => 'normal',
+                'style' => 'default',
+                'label_placement' => 'left',
+                'instruction_placement' => 'label',
+                'hide_on_screen' => '',
+            ));
+        }
+    }
+
 }
 
-new Custom_Fields();
+new WPA_Custom_Fields();
