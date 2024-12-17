@@ -1137,4 +1137,24 @@ function get_all_index_answer_scores($assessment_id = '', $submission_id = '', $
     return $answer_scores;
 }
 
+/**
+ * Get name of the submission version by Id.
+ *
+ * @param int|string $submission_id    Submission's ID
+ * @return string Submission Name
+ */
+function get_submission_version_name($submission_id) {
+	if (empty($submission_id)) {
+		return 'Susmission ID not found.';
+	}
+	$submission_name = '';
 
+	$this_sub_ver = get_post_meta($submission_id, 'submission_version', true);
+	$this_sub_ver = !empty($this_sub_ver) ? '#'.$this_sub_ver : 'N/A';
+
+	$created_date = get_post_meta($submission_id, 'created_date', true);
+	$created_date = !empty($created_date) ? $created_date : get_the_date('Y-m-d H:i:s', $submission_id);
+
+	$submission_name = 'Submission '.$this_sub_ver.' on '. date('M d, Y \a\t H:i a', strtotime($created_date));
+	return $submission_name;
+}

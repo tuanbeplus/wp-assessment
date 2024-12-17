@@ -234,6 +234,7 @@ $is_disabled = $status === 'pending';
                                         </div>
                                         <?php if ($question_advice): ?>
                                             <div class="quizAdvice">
+                                                <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
                                                 <div class="advice-area">
                                                     <?php echo $question_advice; ?>
                                                 </div>

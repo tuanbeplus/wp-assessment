@@ -1,336 +1,332 @@
 /* Saturn - Report PDF Stylesheet */
 * {
-    font-family: avenir-roman;
-    line-height: 150%;
-    letter-spacing: 0.3px!important;
+  font-family: avenir-roman;
+  line-height: 150%;
+  letter-spacing: 0.3px !important;
 }
 
 h1 {
-    font-size: 20pt;
-    font-family: avenir-heavy;
-    font-weight: 900;
-}
-h2 {
-    font-size: 16pt;
-    font-family: avenir-medium;
-    font-weight: 800;
-}
-h3 {
-    font-size: 15pt;
-    font-family: avenir-medium;
-    font-weight: 800;
-}
-h4 {
-    font-size: 14pt;
-    font-family: avenir-medium;
-    font-weight: 800;
-}
-h5 {
-    font-size: 13pt;
-    font-family: avenir-medium;
-    font-weight: 800;
-}
-h6 {
-    font-size: 12pt;
-    font-family: avenir-medium;
-    font-weight: 800;
+  font-size: 20pt;
+  font-family: avenir-heavy;
+  font-weight: 900;
 }
 
-p, li {
-    font-family: avenir-roman;
-    font-weight: 400;
-    font-size: 11pt;
-    line-height: 150%;
-    letter-spacing: 0.3px!important;
+h2 {
+  font-size: 16pt;
+  font-family: avenir-medium;
+  font-weight: 800;
+}
+
+h3 {
+  font-size: 15pt;
+  font-family: avenir-medium;
+  font-weight: 800;
+}
+
+h4 {
+  font-size: 14pt;
+  font-family: avenir-medium;
+  font-weight: 800;
+}
+
+h5 {
+  font-size: 13pt;
+  font-family: avenir-medium;
+  font-weight: 800;
+}
+
+h6 {
+  font-size: 12pt;
+  font-family: avenir-medium;
+  font-weight: 800;
+}
+
+p,
+li {
+  font-family: avenir-roman;
+  font-weight: 400;
+  font-size: 11pt;
+  line-height: 150%;
+  letter-spacing: 0.3px !important;
 }
 
 table th {
-    font-size: 11pt;
-    font-family: avenir-medium;
-    font-weight: 800;
+  font-size: 11pt;
+  font-family: avenir-medium;
+  font-weight: 800;
 }
-
 table td {
-    font-size: 11pt;
-    font-family: avenir-roman;
-    font-weight: 400;
+  font-size: 11pt;
+  font-family: avenir-roman;
+  font-weight: 400;
 }
 
-ul li, ol li {
-    margin-bottom: 10px;
+ul li,
+ol li {
+  margin-bottom: 10px;
 }
 
 a {
-    font-family: avenir-roman;
-    text-decoration: none!important;
+  font-family: avenir-roman;
+  text-decoration: none !important;
 }
 
 span {
-    font-family: avenir-roman;
-    font-weight: 400;
+  font-family: avenir-roman;
+  font-weight: 400;
 }
 
-strong, b {
-    font-family: avenir-medium;
-    font-weight: 800;
+strong,
+b {
+  font-family: avenir-medium;
+  font-weight: 800;
 }
 
 div {
-    font-size: 11pt;
-    line-height: 150%;
-    font-family: avenir-roman;
-    font-weight: 400;
+  font-size: 11pt;
+  line-height: 150%;
+  font-family: avenir-roman;
+  font-weight: 400;
 }
 
 .mpdf_toc span {
-    font-family: avenir-medium;
-    font-weight: 800;
+  font-family: avenir-medium;
+  font-weight: 800;
 }
 
 .page {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-size: contain;
-    background-position: top;
-    background-position-x: 270px;
-    background-position-y: 300px;
-    background-repeat: no-repeat;
-    letter-spacing: 0.3px!important;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-position: top;
+  background-position-x: 270px;
+  background-position-y: 300px;
+  background-repeat: no-repeat;
+  letter-spacing: 0.3px !important;
 }
-
 .page img {
-    margin: auto;
+  margin: auto;
 }
 
 .shape {
-    position: absolute;
-    margin-top: -400px;
-    margin-right: -400px;
-    top: 0;
-    z-index: -10;
+  position: absolute;
+  margin-top: -400px;
+  margin-right: -400px;
+  top: 0;
+  z-index: -10;
 }
 
 .page.front-page {
-    padding: 100px 80px;
-    position: relative;
-    z-index: 9999999;
-    background-color: #fff;
+  padding: 100px 80px;
+  position: relative;
+  z-index: 9999999;
+  background-color: #fff;
 }
-
-body .page.front-page-2024 {
-    padding: 90px 0 0;
-    text-align:left;
-    background-color: #fef2ec;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: bottom;
+.page.front-page .intro {
+  text-align: center;
+  margin: 60px 0;
+  padding: 6px 0;
+  border-top: 0.5px solid #222;
+  border-bottom: 0.5px solid #222;
 }
-body .page.front-page-2024.dcr_reports {
-    background-size: 2000px auto;
-    background-position: bottom right;
+.page.front-page .intro .org-name {
+  margin-top: 0;
+  padding: 0;
+  font-size: 20px;
 }
-
+.page.front-page .intro .title {
+  margin: 40px auto;
+  font-size: 20px;
+}
+.page.front-page .intro .year {
+  margin-bottom: 0;
+  padding: 0;
+  font-size: 20px;
+}
 .page.front-page .content {
-    padding: 0px 80px 40px;
+  padding: 0px 80px 40px;
 }
-
 .page.front-page .content h1 {
-    margin-top: 44px;
-    margin-bottom: 0;
-    font-size: 50px;
-    line-height: 124%;
+  margin-top: 44px;
+  margin-bottom: 0;
+  font-size: 50px;
+  line-height: 124%;
 }
 .page.front-page .content h2 {
-    margin-top: 16px;
-    margin-bottom: 20px;
-    font-size: 32px;
-    line-height: 130%;
-    color: #3d3d3d;
+  margin-top: 16px;
+  margin-bottom: 20px;
+  font-size: 32px;
+  line-height: 130%;
+  color: #3d3d3d;
 }
-
-.front-page .intro{
-    text-align: center;
-    margin: 60px 0;
-    padding: 6px 0;
-    border-top: 0.5px solid #222;
-    border-bottom: 0.5px solid #222;
+.page.front-page-2024 {
+  padding: 90px 0 0;
+  text-align: left;
+  background-color: #fef2ec;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: bottom;
 }
-
-.front-page .intro .org-name {
-    margin-top: 0;
-    padding: 0;
-    font-size: 20px;
-}
-
-.front-page .intro .title{
-    margin: 40px auto;
-    font-size: 20px;
-}
-
-.front-page .intro .year {
-    margin-bottom: 0;
-    padding: 0;
-    font-size: 20px;
+.page.front-page-2024.dcr_reports {
+  background-size: 2000px auto;
+  background-position: bottom right;
 }
 
 .footer {
-    width: 100%;
+  width: 100%;
 }
-
 .footer a {
-    text-decoration: none;
+  text-decoration: none;
 }
-
 .footer .hypelinks-list a {
-    color: #333;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
+  color: #333;
 }
 
 caption {
-    margin-top: 16px;
-    text-align: left;
-    font-size: 11pt;
-    font-style: italic;
+  margin-top: 16px;
+  text-align: left;
+  font-size: 11pt;
+  font-style: italic;
 }
 
-table.recom-table {
-    border: 1px solid #333;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
-
-table.recom-table tr:nth-child(even) td {
-    background-color: white!important;
-}
-
-table.recom-table th {
-    margin: 0;
-    padding: 6px 10px;
-    text-align: left;
-    border: 1px solid #333;
-}
-
-table.recom-table th:last-child {
-    border-left: none!important;
-}
-
-table.recom-table td {
-    margin: 0;
-    padding: 16px 10px;
-    text-align: left;
-    vertical-align: top;
-    border-left: 1px solid #333;
-    border-bottom: 1px solid #333;
-}
-
-table.recom-table td:last-child {
-    border-right: 1px solid #333!important;
-}
-
-table.recom-table ul p {
-    margin-bottom: 16px;
-}
-
-table.table-3 th {
-    padding: 0 10px 16px;
-    width: 20%;
-    text-align: left;
-    padding-top: 0;
-    vertical-align: text-top;
-    line-height: 140%;
-}
-
-table.table-3 td {
-    padding: 10px 10px 30px;
-    border: 1px solid #98c2ff;
-    border-left: none;
-    text-align: right;
-}
-
-table.table-3 td:first-child {
-    text-align: right;
-    border-bottom: none;
-    background-color: none;
-}
-
-table.table-5 th {
-    padding: 10px 10px 20px 0;
-    text-align: right;
-    line-height: 150%;
-}
-
-table.table-5 td {
-    padding: 10px 10px 20px 0;
-    text-align: right;
-    border: 1px solid #98c2ff;
-    border-left: none;
-}
-
 table tr:nth-child(even) td {
-    background-color: aliceblue!important;
+  background-color: aliceblue !important;
+}
+table.recom-table {
+  border: 1px solid #333;
+}
+table.recom-table tr:nth-child(even) td {
+  background-color: white !important;
+}
+table.recom-table th {
+  margin: 0;
+  padding: 6px 10px;
+  text-align: left;
+  border: 1px solid #333;
+}
+table.recom-table th:last-child {
+  border-left: none !important;
+}
+table.recom-table td {
+  margin: 0;
+  padding: 16px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-left: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+table.recom-table td:last-child {
+  border-right: 1px solid #333 !important;
+}
+table.recom-table ul p {
+  margin-bottom: 16px;
+}
+table.table-3 th {
+  padding: 0 10px 16px;
+  width: 20%;
+  text-align: left;
+  padding-top: 0;
+  vertical-align: text-top;
+  line-height: 140%;
+}
+table.table-3 td {
+  padding: 10px 10px 30px;
+  border: 1px solid #98c2ff;
+  border-left: none;
+  text-align: right;
+}
+table.table-3 td:first-child {
+  text-align: right;
+  border-bottom: none;
+  background-color: none;
+}
+table.table-5 th {
+  padding: 10px 10px 20px 0;
+  text-align: right;
+  line-height: 150%;
+}
+table.table-5 td {
+  padding: 10px 10px 20px 0;
+  text-align: right;
+  border: 1px solid #98c2ff;
+  border-left: none;
+}
+table.dcr-table {
+  font-size: 10pt;
+  border-color: #999 !important;
+}
+table.dcr-table th {
+  font-size: 9pt;
+  border-color: #999 !important;
+  vertical-align: top;
+  white-space: nowrap;
+  background-color: aliceblue;
+}
+table.dcr-table td {
+  font-size: 9pt;
+  line-height: 1.5;
+  border-color: #999 !important;
+}
+table.dcr-table td * {
+  font-size: 9pt;
+}
+table.dcr-table td.no-padding {
+  padding: 0 !important;
+}
+table.dcr-table td table {
+  border-bottom: none !important;
+}
+table.dcr-table td table td {
+  padding: 10px;
+  border-left: none !important;
+}
+table.dcr-table td table td:last-child {
+  border-bottom: none !important;
+}
+table.dcr-table .accepted {
+  color: green;
+}
+table.dcr-table .rejected {
+  color: darkred;
 }
 
 img.chart {
-    margin: auto;
-    width: 100%;
-    max-width: 100%;
+  margin: auto;
+  width: 100%;
+  max-width: 100%;
 }
 
 .recommendations-table {
-    border-left: 1px solid #333;
-    border-bottom: 1px solid #333;
-    border-right: 1px solid #333;
+  border-left: 1px solid #333;
+  border-bottom: 1px solid #333;
+  border-right: 1px solid #333;
 }
-
 .recommendations-table .col {
-    padding: 10px;
-    border-top: 1px solid #333;
+  padding: 10px;
+  border-top: 1px solid #333;
 }
 
 .generic-page table {
-    margin: 16px 0;
-    border-left: 1px solid #333;
+  margin: 16px 0;
+  border-left: 1px solid #333;
 }
-
 .generic-page table th {
-    padding: 16px;
-    line-height: 140%;
-    border: none;
-    background: none;
+  padding: 16px;
+  line-height: 140%;
+  border: none;
+  background: none;
 }
-
 .generic-page table td {
-    padding: 14px 16px;
-    border: 1px solid #333;
-    border-left: none;
-    text-align: left;
-    line-height: 140%;
+  padding: 14px 16px;
+  border: 1px solid #333;
+  border-left: none;
+  text-align: left;
+  line-height: 140%;
 }
 
-.page table.dcr-table th {
-    vertical-align: top;
-    white-space: nowrap;
-    background-color: aliceblue;
-}
-.page table.dcr-table td {
-    line-height: 1.5;
-}
-.page table.dcr-table,
-.page table.dcr-table th, 
-.page table.dcr-table td {
-    font-size: 12px;
-    border-color: #999;
-}
-.page table.dcr-table li {
-    font-size: 12px;
-}
-table.dcr-table .accepted {
-    color: green;
-}
-table.dcr-table .rejected {
-    color: darkred;
-}
-
+/*# sourceMappingURL=data:application/json;charset=utf-8,%7B%22version%22:3,%22sourceRoot%22:%22%22,%22sources%22:%5B%22../scss/report-pdf-style.scss%22%5D,%22names%22:%5B%5D,%22mappings%22:%22AAAA;AAEA;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;AAAA;EAEI;EACA;EACA;EACA;EACA;;;AAGA;EACI;EACA;EACA;;AAGJ;EACI;EACA;EACA;;;AAGR;AAAA;EAEI;;;AAEJ;EACI;EACA;;;AAEJ;EACI;EACA;;;AAEJ;AAAA;EAEI;EACA;;;AAEJ;EACI;EACA;EACA;EACA;;;AAEJ;EACI;EACA;;;AAEJ;EACI;EACA;EACA;EACA;EACA;EACA;EACA;EACA;EACA;;AAEA;EACI;;;AAGR;EACI;EACA;EACA;EACA;EACA;;;AAGA;EACI;EACA;EACA;EACA;;AACA;EACI;EACA;EACA;EACA;EACA;;AACA;EACI;EACA;EACA;;AAEJ;EACI;EACA;;AAEJ;EACI;EACA;EACA;;AAGR;EACI;;AACA;EACI;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;EACA;;AAIZ;EACI;EACA;EACA;EACA;EACA;EACA;;AAEA;EACI;EACA;;;AAKZ;EACI;;AAEA;EACI;;AAGJ;EACI;;;AAGR;EACI;EACA;EACA;EACA;;;AAEJ;EACI;EACA;;AACA;EACI;;AAGJ;EACI;;AACA;EACI;;AAEJ;EACI;EACA;EACA;EACA;;AACA;EACI;;AAGR;EACI;EACA;EACA;EACA;EACA;EACA;;AACA;EACI;;AAGR;EACI;;AAKJ;EACI;EACA;EACA;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;;AACA;EACI;EACA;EACA;;AAMR;EACI;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;;AAIR;EACI;EACA;;AACA;EACI;EACA;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;;AACA;EACI;;AAEJ;EACI;;AAEJ;EACI;;AACA;EACI;EACA;;AACA;EACI;;AAKhB;EACI;;AAEJ;EACI;;;AAKZ;EACI;EACA;EACA;;;AAGJ;EACI;EACA;EACA;;AAEA;EACI;EACA;;;AAKJ;EACI;EACA;;AACA;EACI;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;EACA%22,%22file%22:%22report-pdf-style.css%22%7D */

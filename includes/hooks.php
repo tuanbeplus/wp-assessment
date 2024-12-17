@@ -85,3 +85,38 @@ function sf_update_contact_quick_10_field($post_id) {
     }
 }
 add_action('publish_submissions', 'sf_update_contact_quick_10_field');
+
+
+function wpa_update_missing_created_date_meta() {
+    if ($_GET['action'] == 'wpa_update_missing_created_date_meta') {
+        $posts = get_posts(array(
+            'post_type'      => 'dcr_submissions', // Replace with your desired post type or 'any' for all post types
+            'post_status'    => 'any', // Include published, draft, etc.
+            'numberposts'    => -1,    // Get all posts
+            'fields'         => 'ids', // Only fetch post IDs for better performance
+        ));
+        foreach ($posts as $post_id) {
+            // Check if 'created_date' meta exists or is null
+            $created_date_meta = get_post_meta($post_id, 'created_date', true);
+    
+            if (empty($created_date_meta)) {
+                // Get the post's original creation date (post_date)
+                $post_date = get_post_field('post_date', $post_id);
+                // Update the meta field with the post_date
+                $updated = update_post_meta($post_id, 'created_date', $post_date);
+    
+                if ($updated) {
+                    echo 'Updated "created_date" meta for post ID: '.$post_id.' with date: '.$post_date;
+                    echo '<br>';
+                    echo '<br>';
+                }
+                else {
+                    echo '[Failed] to update "created_date" meta for post ID: '.$post_id;
+                    echo '<br>';
+                    echo '<br>';
+                }
+            }
+        }
+    }
+}
+// add_action('init', 'wpa_update_missing_created_date_meta');

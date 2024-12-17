@@ -1070,7 +1070,7 @@
     $(document).on('click', function(event) {
         // Check if the click is outside the dropdown and the button that opens it
         if (!$(event.target).closest('.submission-vers').length) {
-            $('.submission-vers-list').slideUp(200); // Close the dropdown
+            $('.sub-vers-list').slideUp(200); // Close the dropdown
         }
     });
 
@@ -1081,7 +1081,7 @@
     $(document).on('click', '#btn-show-submission-vers', function (e){
         e.preventDefault();
         let wrapper = $(this).closest('.submission-vers');
-        let sub_vers_list = wrapper.find('.submission-vers-list');
+        let sub_vers_list = wrapper.find('.sub-vers-list');
         sub_vers_list.slideToggle(200);
     });
 

@@ -229,14 +229,14 @@ body {
         }
     }
 
-    .submission-ver-current .icon {
+    .sub-ver-item-current .icon {
         position: relative;
         right: -4px;
         color: #555;
         font-size: 15px;
     }
 
-    .submission-vers-list {
+    .sub-vers-list {
         display: none;
         position: absolute;
         bottom: 2px;
@@ -251,7 +251,7 @@ body {
         border-radius: 0 0 4px 4px;
         z-index: 10;
 
-        .submission-ver {
+        .sub-ver-item {
             font-size: 1rem;
             margin-bottom: 20px;
 

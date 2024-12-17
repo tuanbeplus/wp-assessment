@@ -1107,7 +1107,9 @@ jQuery(document).ready(function ($) {
 
         console.log(response);
 
-        alert(message);
+        setTimeout(() => {
+            alert(message);
+        }, 100);
 
         if (status == true) {
             $('#submitpost input[name="save"]').click();

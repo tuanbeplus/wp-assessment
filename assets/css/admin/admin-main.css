@@ -612,7 +612,7 @@
 
 .submission-view-item-row .card textarea.feedback-input,
 .submission-view-item-row .card textarea.and-feedback-input {
-  min-height: 140px;
+  min-height: 160px;
   font-size: 0.9rem;
   padding: 8px;
   width: 100%;
@@ -763,8 +763,7 @@
 }
 .submission-view-item-row .card .files-list.azure {
   margin-top: 4px;
-  padding: 4px;
-  background-color: #fbfbfb;
+  padding: 2px;
   border: 1px solid #ccc;
 }
 

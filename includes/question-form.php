@@ -357,7 +357,6 @@ class WPA_Question_Form
                     'post_status' => 'publish'
                 ));
                 if (!$submission) throw new Exception('Failed to created a new submission!');
-
                 $post_id = $submission;
             }
             // If existing Progress on Submission
@@ -399,10 +398,20 @@ class WPA_Question_Form
             // Update post meta
             $this->update_submission_meta_data($user_id, $organisation_id, $assessment_id, $post_id, 'pending');  
 
+            $current_time = current_time('Y-m-d H:i:s');
+            // Update created date meta
+            update_post_meta($post_id, 'created_date', $current_time);
+
             // Get submission url
             $submission_url = get_permalink( $post_id );
 
-            return wp_send_json(array('message' => 'This Submission has been saved.', 'submission_url' => $submission_url, 'status' => true, 'submission_id' => $post_id));
+            return wp_send_json(array(
+                'status' => true, 
+                'message' => 'This Submission has been saved.', 
+                'submission_url' => $submission_url, 
+                'submission_id' => $post_id,
+                'created_date' => $current_time,
+            ));
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }
@@ -472,6 +481,10 @@ class WPA_Question_Form
                 if (!$submission) throw new Exception('Cannot submit progress to this assessment!');
 
                 $post_id = $submission;
+
+                // Update version meta
+                update_post_meta($post_id, 'submission_version', '1');
+                update_post_meta($post_id, 'is_latest_version', true);
             }
             // Exist a progress submission
             elseif ($is_submission_progress_exist) {
@@ -484,7 +497,7 @@ class WPA_Question_Form
                 $post_id = $is_submission_progress_exist;
             }
             // Exist a submission
-            elseif($is_submission_exist) {
+            elseif ($is_submission_exist) {
                 // Is DCR submission
                 if ($assessment_terms[0] == 'dcr') {
                     $new_submission = wp_insert_post(array(
@@ -492,8 +505,22 @@ class WPA_Question_Form
                         'post_title' => $submission_title,
                         'post_status' => 'draft'
                     ));
-                    if (!$new_submission) throw new Exception('Cannot resubmit progress to this assessment!');
+                    if (is_wp_error($new_submission) || !$new_submission) {
+                        throw new Exception('Cannot resubmit progress to this assessment: ' . ($new_submission->get_error_message() ?? 'Unknown error'));
+                    }
                     $post_id = $new_submission;
+                    $submission_ver = 1;
+
+                    $all_sub_vers = $main->get_all_dcr_submission_vers($assessment_id, $organisation_id) ?? '';
+                    if (!empty($all_sub_vers) && is_array($all_sub_vers)) {
+                        $submission_ver = count($all_sub_vers) + 1;
+                        foreach ($all_sub_vers as $submission) {
+                            update_post_meta($submission->ID, 'is_latest_version', false);
+                        }
+                    }
+                    // Update version meta
+                    update_post_meta($post_id, 'submission_version', $submission_ver);
+                    update_post_meta($post_id, 'is_latest_version', true);
                 }
                 // Is Index & other submission
                 else {
@@ -556,33 +583,27 @@ class WPA_Question_Form
         if ($existing_user_id == null) {
             update_post_meta($post_id, 'user_id', $user_id);
         }
-
         // Update Salsesforce Org ID meta
         if ($existing_org_id == null) {
             update_post_meta($post_id, 'organisation_id', $org_id);
         }
-
         // Update Assessment ID meta
         if ($existing_assessment_id == null) {
             update_post_meta($post_id, 'assessment_id', $assessment_id);
         }
-
         // Update Submission ID meta
         if ($existing_submission_id == null) {
             update_post_meta($post_id, 'submission_id', $post_id);
         }
-
         // Update Submission status
         if (isset($status)) {
             update_post_meta($post_id, 'assessment_status', $status);
         }
-
         // Update Salsforce Org data meta
         if (empty($existing_org_metadata)) {
             $org_metadata = get_sf_organisation_data($user_id, $org_id);
             update_post_meta($post_id, 'org_data', $org_metadata);
         }
-
         // Update user info
         if(isset($_COOKIE['userId'])) {
             update_field('sf_user_id' , $_COOKIE['userId'], $post_id);

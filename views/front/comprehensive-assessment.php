@@ -56,9 +56,18 @@ $saturn_invite_status = get_saturn_invite_status($user_id, $post_id);
 // Get all answers desciption of all submissions
 $all_quiz_pre_cmts = $main->get_dcr_quiz_answers_pre_submissions($post_id, $submission_id, $organisation_id);
 
-$is_disabled = $assessment_status === 'pending' && !in_array('dcr', $terms);
+$is_disabled = ($assessment_status === 'pending');
 $is_publish = $assessment_status === 'publish';
 $is_accepted = $assessment_status === 'accepted';
+
+if (($terms[0] == 'dcr')) {
+    if (isset($_GET['submission_id'])) {
+        $is_disabled = true;
+    }
+    else {
+        $is_disabled = false;
+    }
+}
 
 // Get the Exception Organisations ID
 $exception_orgs_id = get_exception_orgs_id();
@@ -128,18 +137,24 @@ $exception_orgs_id = get_exception_orgs_id();
             <div class="container">
                 <div class="topBar <?php if (!in_array('dcr', $terms) || empty($all_submission_vers)) echo 'flex'; ?>">
                     <h1><?php echo $quiz_title; ?></h1>
-                    <?php if( (!$is_disabled && !$is_accepted) || in_array($organisation_id, $exception_orgs_id) ): ?>
+                    <?php if( (!$is_disabled && !$is_accepted) || in_array($organisation_id, $exception_orgs_id) || $terms[0] == 'dcr' ): ?>
                     <div class="topbar-action">
                         <?php if ($terms[0] == 'dcr' && !empty($all_submission_vers) && is_array($all_submission_vers)): 
-                            $all_submissions_sort_asc = array_reverse($all_submission_vers);
-                            $all_submissions = array_combine(range(1, count($all_submissions_sort_asc)), $all_submissions_sort_asc);
+                            $count_vers = 0;
+                            foreach ($all_submission_vers as $submission) {
+                                if ($submission->post_status == 'publish') {
+                                    $count_vers++;
+                                }
+                            }
                             $subm_current_name = '';
-                            foreach ($all_submissions as $index => $submission): 
-                                if ($submission->ID == $submission_id):
-                                    $subm_current_name = 'Submission No. '.$index.' at '.get_the_date('j M Y h:i a', $submission_id);
-                                    continue;
-                                endif;
-                            endforeach;
+                            $next_ver = $count_vers ? '( #'. $count_vers + 1 .' )': '';
+                            if (isset($_GET['submission_id']) && !empty($_GET['submission_id'])) {
+                                $current_sub_id = $_GET['submission_id'];
+                                $subm_current_name = get_submission_version_name($current_sub_id);
+                            }
+                            else {
+                                $subm_current_name = 'New Submission '. $next_ver;
+                            }
                             ?>
                             <div class="submission-vers">
                                 <p>Choose Submission Version</p>
@@ -147,42 +162,47 @@ $exception_orgs_id = get_exception_orgs_id();
                                     <span><?php echo $subm_current_name; ?></span>
                                     <span class="icon"><i class="fa-solid fa-chevron-down"></i></span>
                                 </button>
-                                <ul class="submission-vers-list">
-                                <?php foreach ($all_submissions as $index => $submission): 
-                                    $submission_ver_name = 'Submission No. '.$index.' at '.get_the_date('j M Y h:i a', $submission->ID);
-                                    ?>
-                                    <li class="submission-ver">
-                                        <?php if ($submission_id != $submission->ID): ?>
-                                            <a href="<?php echo get_the_permalink() .'?submission_id='. $submission->ID ?>">
-                                                <?php echo $submission_ver_name; ?>
-                                            </a>
-                                        <?php else: ?>
-                                            <span><?php echo $submission_ver_name; ?></span>
-                                        <?php endif; ?>
+                                <ul class="sub-vers-list">
+                                    <li class="sub-ver-item">
+                                        <a href="<?php echo get_the_permalink() ?>">New Submission <?php echo $next_ver ?></a>
                                     </li>
+                                <?php foreach ($all_submission_vers as $submission): 
+                                    if ($submission->post_status == 'publish'):
+                                        $sub_ver_name = get_submission_version_name($submission->ID);
+                                        $is_current = ($_GET['submission_id'] == $submission->ID) ? 'current' : '';
+                                        ?>
+                                        <li class="sub-ver-item <?php echo $is_current ?>">
+                                            <a href="<?php echo get_the_permalink() .'?submission_id='. $submission->ID ?>">
+                                                <?php echo $sub_ver_name; ?>
+                                            </a>
+                                        </li>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                                 </ul>
                             </div>
                         <?php endif; ?>
-                        <button id="save-progress-btn" class="progressBtn" <?php echo $is_disabled ? 'disabled' : '' ?>>
-                            <span class="text">Save Progress</span>
-                            <div class="spinner-wrapper"><div class="wpa-spinner"></div></div>
-                        </button>
+                        <?php if (!$is_disabled && !$is_accepted): ?>
+                            <button id="save-progress-btn" class="progressBtn" <?php echo $is_disabled ? 'disabled' : '' ?>>
+                                <span class="text">Save Progress</span>
+                                <div class="spinner-wrapper"><div class="wpa-spinner"></div></div>
+                            </button>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
                 </div>
 
-                <?php if($assessment_status == 'pending'): ?>
+                <?php if( $is_disabled ): ?>
                     <!-- Notification Box -->
                     <div class="notificationBar pending">
-                        <h3 style="text-align:center;">Your assessment is under pending review!</h3>
+                        <h3>Your submission is under pending review!</h3>
+                        <p>Not enable to edit.</p>
                     </div><!-- .Notification Box -->
                 <?php endif; ?>
 
                 <?php if($is_accepted && !in_array($organisation_id, $exception_orgs_id)): ?>
                     <!-- Notification Box -->
                     <div class="notificationBar accepted">
-                        <h3 style="text-align:center;">Your assessment is accepted!</h3>
+                        <h3>Your submission is accepted.</h3>
                     </div><!-- .Notification Box -->
                 <?php endif; ?>
 
@@ -508,6 +528,7 @@ $exception_orgs_id = get_exception_orgs_id();
 
                                                 <?php if ($question_advice) : ?>
                                                     <div class="quizAdvice">
+                                                        <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
                                                         <p>Tips and examples</p>
                                                         <div class="advice-area"><?php echo $question_advice; ?></div>
                                                     </div>
@@ -515,6 +536,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                 <?php if ($terms[0] == 'dcr'): ?>
                                                     <?php if (!empty($dcr_feedbacks[$group_id][$sub_id])): ?>
                                                         <div class="quizAdvice feedback-area">
+                                                            <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
                                                             <p>Feedbacks</p>
                                                             <ul class="feedback-list">
                                                                 <?php $quiz_feedbacks = array_reverse($dcr_feedbacks[$group_id][$sub_id]); ?>
@@ -535,6 +557,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                 <?php else: ?>
                                                     <?php if (!empty($feedback)) : ?>
                                                         <div class="quizAdvice feedback-area">
+                                                            <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
                                                             <p>Feedbacks</p>
                                                             <div><?php echo $feedback; ?></div>
                                                         </div>

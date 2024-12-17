@@ -173,7 +173,7 @@ $submission_score_arr = array();
                                     <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $quiz_id ?>" class="quiz-input"/>
                                     <?php if (is_array($answers) && count($answers) > 0) : ?>
                                         <div class="submission-answers-list">
-                                            <strong>Selected Answers</strong>
+                                            <strong>Selected Answer</strong>
                                             <ul>
                                                 <?php foreach ($answers as $answer) : ?>
                                                     <li><?php echo $answer->title; ?></li>
@@ -183,7 +183,7 @@ $submission_score_arr = array();
                                     <?php endif; ?>
                                     <?php if ($field->description): ?>
                                         <div class="user-comment-area">
-                                            <p class="description-label"><strong>User Comment: </strong></p>
+                                            <p class="description-label"><strong>User Comment</strong></p>
                                             <div class="description-thin"><?php echo htmlentities(stripslashes($field->description)); ?></div>
                                         </div>
                                     <?php endif; ?>

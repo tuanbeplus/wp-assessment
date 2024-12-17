@@ -72,9 +72,14 @@ body {
 }
 .formWrapper .notificationBar.pending {
     border-left: 5px solid orange;
+    text-align: center;
+}
+.formWrapper .notificationBar.pending h3 {
+    margin-bottom: 10px;
 }
 .formWrapper .notificationBar.accepted {
     border-left: 5px solid green;
+    text-align: center;
 }
 .formWrapper .notificationBar h2 {
     font-size: 1.75rem;
@@ -171,7 +176,7 @@ body {
 
 .submission-vers {
     position: relative;
-    min-width: 370px;
+    min-width: 364px;
 }
 .submission-vers > * {
     font-size: 1rem;
@@ -202,12 +207,12 @@ body {
     color: #555;
     font-size: 15px;
 }
-.submission-vers .submission-vers-list{
+.submission-vers .sub-vers-list{
     display: none;
     position: absolute;
     bottom: 2px;
     transform: translateY(100%);
-    padding: 16px;
+    padding: 6px 0;
     width: 100%;
     max-height: 400px;
     overflow: auto;
@@ -217,17 +222,25 @@ body {
     border-radius: 0 0 4px 4px;
     z-index: 10;
 }
-.submission-vers .submission-vers-list .submission-ver {
+.submission-vers .sub-vers-list .sub-ver-item {
     font-size: 1rem;
-    margin-bottom: 20px;
 }
-.submission-vers .submission-vers-list .submission-ver:last-child {
-    margin-bottom: 0;
+.submission-vers .sub-vers-list .sub-ver-item.current {
+    background-color: #eeeeee;
 }
-.submission-vers .submission-vers-list .submission-ver a {
+.submission-vers .sub-vers-list .sub-ver-item:hover {
+    background-color: #f1f1f1;
+}
+.submission-vers .sub-vers-list .sub-ver-item a {
+    padding: 12px 16px;
+    display: block;
     color: #6e297b;
     font-family: "Avenir-Medium";
     text-decoration: none!important;
+}
+.submission-vers .sub-vers-list .sub-ver-item a:focus {
+    border: 1px solid #005fcc !important;
+    box-shadow: none !important;
 }
 
 #toggle-invite-colleagues {
@@ -566,21 +579,23 @@ body {
     font-family: "Avenir-Medium";
 }
 .fieldDetails .question-description ul {
-    margin: 14px 0 24px 32px;
+    margin: 12px 0 20px 30px;
     list-style: disc;
 }
-.fieldDetails .question-description ul li {
-    font-size: 1.125rem;
-    margin-bottom: 14px;
-    list-style-type: disc;
-}
 .fieldDetails .question-description ol {
-    margin: 0 0 32px 32px;
+    margin: 0 0 30px 30px;
     list-style: decimal;
 }
+.fieldDetails .question-description ul li {
+    list-style-type: disc;
+}
 .fieldDetails .question-description ol li {
-    margin-bottom: 10px;
     list-style-type: decimal;
+}
+.fieldDetails .question-description li {
+    font-size: 1.125rem;
+    line-height: 1.4;
+    margin-bottom: 10px;
 }
 .fieldDetails .question-description strong * {
     font-weight: 700;
@@ -605,7 +620,7 @@ body {
     line-height: 125%;
     font-weight: normal;
     color: #212529;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .fieldsWrapper .checkBox {
@@ -723,9 +738,9 @@ body {
 }
 
 .textAreaWrap textarea {
-    padding: 20px;
+    padding: 12px 16px;
     width: 100%;
-    height: 120px;
+    height: 200px;
     border-radius: 8px;
     font-size: 1.125rem;
     line-height: 150%;
@@ -753,10 +768,11 @@ body {
     padding: 24px 80px 30px;
     font-weight: normal;
     font-size: 1.125rem;
-    list-style: 140%;
     position: relative;
 }
-
+.quizAdvice.feedback-area {
+    background-color: #e8e8e8;
+}
 .quizAdvice .advice-area > *:first-child {
     margin-top: 0;
 }
@@ -795,17 +811,15 @@ body {
     margin: 14px 0;
 }
 
-.quizAdvice:before {
-    content: "";
+.quizAdvice .icon-info {
     width: 40px;
     height: 40px;
-    background-image: url(/wp-content/plugins/wp-assessment/assets/images/front/advice-icon.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+    display: block;
     position: absolute;
-    left: 36px;
-    top: 16px;
+    left: 40px;
+    top: 22px;
+    font-size: 26px;
+    color: #424242;
 }
 
 .quizAdvice > p {
@@ -1725,6 +1739,9 @@ body.single-reports {
     .formWrapper {
         padding-bottom: 40px;
     }
+    .formWrapper .notificationBar {
+        padding: 14px;
+    }
     .stepsWrap .step {
         min-width: auto;
         width: auto;
@@ -1745,7 +1762,11 @@ body.single-reports {
     .fieldDetails {
         margin-top: 16px;
     }
-    .fieldDetails .question-description>* {
+    .fieldDetails .question-description > * {
+        font-size: 1rem;
+    }
+    .fieldDetails .question-description ul li,
+    .fieldDetails .question-description ol li {
         font-size: 1rem;
     }
     .quizAdvice p {
@@ -1761,6 +1782,13 @@ body.single-reports {
     .textAreaWrap {
         margin-top: 24px;
     }
+    .textAreaWrap label {
+        font-size: 1rem;
+    }
+    .textAreaWrap textarea {
+        height: 140px;
+        font-size: 1rem;
+    }
     .question-add-files-container ._label {
         font-size: 1.125rem;
     }
@@ -1773,8 +1801,9 @@ body.single-reports {
     .quizAdvice {
         padding: 24px 24px 24px 50px;
     }
-    .quizAdvice::before {
-        left: 10px
+    .quizAdvice .icon-info {
+        left: 16px;
+        font-size: 24px;
     }
     .quizAdvice .advice-area ul li,
     .quizAdvice .advice-area ol li {
@@ -1811,10 +1840,6 @@ body.single-reports {
     }
     .fieldDetails {
         margin: 24px 0 16px;
-    }
-    .textAreaWrap textarea {
-        height: 140px;
-        font-size: 16px;
     }
 }
 

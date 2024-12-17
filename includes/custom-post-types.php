@@ -435,15 +435,20 @@ class WPA_CustomPostType
 
     function customize_submissions_admin_column($columns)
     {
+        global $post_type;
         $columns['user_id'] = 'Submitted by';
         $columns['organisation'] = 'Organisation';
+        if ($post_type == 'dcr_submissions') {
+            $columns['version'] = 'Version';
+        }
         return $columns;
     }
 
     function customize_submissions_admin_column_value($column_key, $post_id): void
     {
+        global $post_type;
         // Column "Submitted by"
-        if ($column_key == 'user_id') {
+        if ($column_key === 'user_id') {
             $user_id = get_post_meta($post_id, 'user_id', true);
             $sf_user_id = get_post_meta($post_id, 'sf_user_id', true);
             if ($sf_user_id) {
@@ -454,12 +459,28 @@ class WPA_CustomPostType
                 if (isset ($user->display_name)) echo $user->display_name;
             }
         }
-
         // Column "Organisation"
-        if ($column_key == 'organisation') {
+        if ($column_key === 'organisation') {
             $org_metadata = get_post_meta($post_id, 'org_data', true);
             if (!empty($org_metadata)) {
                 echo $org_metadata['Name'];
+            }
+        }
+        // Column "Version"
+        if ($column_key === 'version' && $post_type === 'dcr_submissions') {
+            // Retrieve meta values
+            $this_sub_ver = get_post_meta($post_id, 'submission_version', true);
+            $is_latest_version = get_post_meta($post_id, 'is_latest_version', true);
+            // Check if current post is the latest
+            $is_latest = ($is_latest_version == true) ? '(Latest)' : '';
+            // Display Version Information
+            if (!empty($this_sub_ver)) {
+                echo 'Version ' . esc_html($this_sub_ver) . ' ' . esc_html($is_latest) . '<br><br>';
+            }
+            // Display Created Date
+            $created_date = get_post_meta($post_id, 'created_date', true);
+            if (!empty($created_date)) {
+                echo 'Created on: <br>' . esc_html(date('Y/m/d \a\t H:i a', strtotime($created_date)));
             }
         }
     }

@@ -181,7 +181,7 @@ $submission_score_arr = array();
                                     <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $sub_id ?>" class="quiz-input"/>
                                     <?php if (is_array($answers) && count($answers) > 0) : ?>
                                         <div class="submission-answers-list">
-                                            <strong>Selected Answers</strong>
+                                            <strong>Selected Answer</strong>
                                             <ul>
                                                 <?php foreach ($answers as $answer) : ?>
                                                     <li><?php echo $answer->title; ?></li>
@@ -191,7 +191,7 @@ $submission_score_arr = array();
                                     <?php endif; ?>
                                     <?php if (!empty($all_answers_desc)): ?>
                                         <div class="user-comment-area">
-                                            <p class="description-label"><strong>User Comment: </strong></p>
+                                            <p class="description-label"><strong>User Comments</strong></p>
                                             <?php foreach ($all_answers_desc as $row): 
                                                 if (isset($row->parent_id) && isset($row->quiz_id)):
                                                     if ($row->parent_id == $group_id && $row->quiz_id == $sub_id):

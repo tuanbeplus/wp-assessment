@@ -52,10 +52,10 @@ foreach ($questions as $group_id => $field_group) {
                     foreach ($feedbacks_list as $feedback) {
                         $assessor_name = $feedback['user_name'] ?? '';
                         $date_time = $feedback['time'] ?? '';
-                        $assessor_info .= '<li>'. $assessor_name .'<br>'. $date_time .'</li>';
+                        $assessor_info .= '<tr><td>'. $assessor_name .'<br>'. $date_time .'</td></tr>';
 
                         $comment = $feedback['feedback'] ?? '';
-                        $assessor_comments .= '<li>'. $comment .'</li>';
+                        $assessor_comments .= '<tr><td>'. $comment .'</td></tr>';
                     }
                 }
 
@@ -67,15 +67,15 @@ foreach ($questions as $group_id => $field_group) {
                     <td>'. $first_name .' '. $last_name .'<br>'. $quiz->time .'</td>
                     <td>'. $main->wpa_stripslashes_string($quiz->description) .'</td>
                     <td><div class="docs-upload">'. $documents_list .'</div></td>
-                    <td><ol>'. $assessor_info .'</ol></td>
-                    <td><ol>'. $assessor_comments .'</ol></td>
+                    <td class="no-padding"><table class="dcr-table">'. $assessor_info .'</table></td>
+                    <td class="no-padding"><table class="dcr-table">'. $assessor_comments .'</table></td>
                     <td class="'.$quiz->status.'">'. ucfirst($quiz->status) .'</td> 
                 </tr>';
                 $count_quiz++;
             }
         }
         if ($count_quiz <= 0) {
-            $draft_table .= '<tr><td> No data yet </td></tr>';
+            $draft_table .= '<tr><td>No data.</td></tr>';
         }
     $draft_table .= 
         '</table>

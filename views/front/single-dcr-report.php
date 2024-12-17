@@ -8,10 +8,12 @@
 
 // Check user permission
 if (! current_user_can('administrator')) {
-    get_header();
-    get_template_part( '404' ); 
-    get_footer();
-    exit();
+    global $wp_query;
+    $wp_query->set_404();
+    status_header(404);
+    // Redirect to 404 template
+    include(get_query_template('404'));
+    exit;
 }
 global $post;
 $post_id = $post->ID;
