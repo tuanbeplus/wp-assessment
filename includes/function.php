@@ -13,7 +13,6 @@ class WP_Assessment
 
         add_action('pre_get_posts', array($this, 'filter_assessment_list_admin'));
         add_filter('views_edit-assessments', array($this, 'update_assessment_list_filters_view'));
-        add_filter('theme_page_templates', array($this, 'register_custom_template_for_quiz'));
         add_filter('upload_size_limit', array($this, 'override_file_size'));
         add_filter('wp_mail_content_type', array($this, 'set_email_content_type'));
         add_filter('tiny_mce_before_init', array($this, 'wpa_ptags_tinymce_fix')); 
@@ -47,15 +46,10 @@ class WP_Assessment
             'publish_posts' => true,
             'upload_files' => true,
         ));
-
-        add_role('student', 'Student', array(
-            'read' => true,
-        ));
     }
 
     function remove_custom_roles(): void
     {
-        remove_role('student');
         remove_role('moderator');
     }
 
@@ -91,7 +85,6 @@ class WP_Assessment
     {
         $admin_role = get_role('administrator');
         $moderator_role = get_role('moderator');
-        $student_role = get_role('student');
 
         $admin_role->add_cap('read_assessment');
         $admin_role->add_cap('publish_assessments');
@@ -143,17 +136,6 @@ class WP_Assessment
         $moderator_role->add_cap('delete_submission');
         $moderator_role->add_cap('edit_published_submission');
         $moderator_role->add_cap('edit_published_submissions');
-
-
-        $student_role->add_cap('read_assessment');
-        $student_role->add_cap('publish_assessments');
-        $student_role->add_cap('edit_assessments');
-        $student_role->add_cap('edit_others_assessments');
-        $student_role->add_cap('delete_assessments');
-        $student_role->add_cap('edit_assessment');
-        $student_role->add_cap('delete_assessment');
-        $student_role->add_cap('edit_published_assessment');
-        $student_role->add_cap('edit_published_assessments');
     }
 
     function update_assessment_list_filters_view($views): array
@@ -179,12 +161,6 @@ class WP_Assessment
         } else {
             return array();
         }
-    }
-
-    function register_custom_template_for_quiz($templates)
-    {
-        $templates['custom_quiz_template'] = 'Quiz Template';
-        return $templates;
     }
 
     function override_file_size($size)
@@ -648,7 +624,6 @@ class WP_Assessment
                 }
             }
         }
-
         return $data;
     }
 
@@ -675,27 +650,6 @@ class WP_Assessment
         }
 
         return $data;
-    }
-
-    function is_section_quiz_completed($parent_id, $obj, $organisation_id)
-    {
-        try {
-            $is_section_completed = false;
-
-            foreach ($obj as $item) {
-                if ($item->organisation_id == $organisation_id && $item->parent_id == $parent_id) {
-                    $is_answer = $item->answers;
-                    $is_description = $item->description;
-
-                    // if (condition) {
-                    //     # code...
-                    // }
-                }
-            }
-
-        } catch (Exception $exception) {
-            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
-        }
     }
 
     function is_check_save_progress_quiz($assessment_id, $organisation_id = null)
@@ -866,7 +820,7 @@ class WP_Assessment
 
         $post_metadata_unserialize = unserialize($post_metadata);
 
-        return $post_metadata_unserialize;
+        return wp_unslash($post_metadata_unserialize) ?? array();
     }
 
     function create_comprehensive_report() {
@@ -1078,17 +1032,6 @@ class WP_Assessment
 
             return $self_assessed_score;
         }
-    }
-
-    /**
-     * remove Slashes of Quotes character(\", \')
-     * 
-     * @param string The string need to stripslashes
-     * @return string The string after stripslashes
-     */
-    function wpa_stripslashes_string($string) {
-        if (!isset($string) || empty($string)) return;
-        return htmlentities(stripslashes(mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8')));
     }
 
     // echo $wpdb->last_query;

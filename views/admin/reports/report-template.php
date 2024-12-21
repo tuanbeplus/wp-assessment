@@ -1,17 +1,17 @@
 <?php 
 global $post;
-
-if ($post->post_type == 'reports') {
+$assessment_id = '';
+$report_template = '';
+if ($post->post_type == 'assessments') {
+    $assessment_id = $post->ID;
+    $report_template = get_post_meta($assessment_id, 'report_template', true);
+}
+else {
     $assessment_id = get_post_meta($post->ID, 'assessment_id', true);
     $report_template = get_post_meta($post->ID, 'report_template', true);
-
     if (empty($report_template)) {
         $report_template = get_post_meta($assessment_id, 'report_template', true);
     }
-} 
-else {
-    $assessment_id = $post->ID;
-    $report_template = get_post_meta($post->ID, 'report_template', true);
 }
 
 $report_logo_url = $report_template['front_page']['logo_url'] ?? null;
@@ -20,11 +20,10 @@ $report_front_title = $report_template['front_page']['title'] ?? null;
 $report_front_content = $report_template['front_page']['content'] ?? null;
 $report_front_heading_2 = $report_template['front_page']['heading_2'] ?? null;
 $is_include_toc = $report_template['is_include_toc'] ?? null;
-$terms = get_assessment_terms($post->ID);
 $index_2023 = get_field('assessment_index_2023', 'option');
 $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
 ?>
-
+<!-- Begin Report Template -->
 <div id="report-template-wrapper" class="report-template-wrapper">
     <div class="field-include-toc">
         <label for="report-include-toc">
@@ -34,7 +33,6 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
             Include Table of Contents
         </label>
     </div>
-    <!-- begin Report section -->
     <div id="report-template" class="report-template">
         <!-- Front page -->
         <div id="report-front-page" class="_section">
@@ -43,7 +41,7 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                 <label for="heading-1">Report Title</label>
                 <input id="heading-1" type="text" name="report_template[front_page][title]" 
                         placeholder="Enter report title"
-                        value="<?php echo $report_front_title; ?>">
+                        value="<?php echo esc_attr($report_front_title) ?>">
                 
                 <?php if ($assessment_id == $index_2023_id): ?>
                 <label for="wp-report-front-page-wpeditor-wrap">Content</label>
@@ -62,7 +60,7 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                     <label for="heading-2">Sub Title</label>
                     <input id="heading-2" type="text" name="report_template[front_page][heading_2]" 
                             placeholder="Enter report sub title"
-                            value="<?php echo $report_front_heading_2; ?>">
+                            value="<?php echo esc_attr($report_front_heading_2) ?>">
                 <?php endif; ?>
             </div>
             <div class="_container">
@@ -99,8 +97,7 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                     </div>
                 <?php endif; ?>
             </div>
-        </div>
-        <!-- /Front page -->
+        </div><!-- /Front page -->
         <?php 
         $generic_page_type = array(
             array(
@@ -123,7 +120,7 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                         + Add row
                     </a>
                 </div>
-                <!-- Generic Pages before List -->
+                <!-- Generic Pages -->
                 <ul class="generic-pages-list <?php echo $page_type['type']; ?>" 
                     data-position="<?php echo $page_type['type']; ?>">
                 <?php if (!empty($report_template['generic_page_'.$page_type['type']])): ?>
@@ -135,7 +132,7 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                             </h3>
                             <input type="text" name="report_template[generic_page_<?php echo $page_type['type']; ?>][<?php echo $index; ?>][title]" 
                                     placeholder="Add title" 
-                                    value="<?php echo $generic_page['title'] ?? null; ?>">
+                                    value="<?php echo esc_attr($generic_page['title'] ?? null) ?>">
                             <?php
                                 $content   = $generic_page['content'] ?? null;
                                 $editor_id = 'report-generic-wpeditor-'.$page_type['type'].$index;
@@ -162,8 +159,7 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                         </li>
                     <?php endforeach; ?>
                 <?php endif; ?>
-                </ul>
-                <!-- /Generic Pages before List -->
+                </ul><!-- /Generic Pages -->
             </div>
         <?php endforeach; ?>
             
@@ -182,8 +178,7 @@ $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
                 );
                 wp_editor( $content, $editor_id, $editor_settings );
             ?>
-        </div>
-        <!-- /Report Footer -->
+        </div><!-- /Report Footer -->
     </div>
-    <!-- end Report section -->
 </div>
+<!-- End Report Template -->

@@ -172,18 +172,18 @@ class WPA_CustomPostType
     function register_index_submissions_post_type(): void
     {
         $labels = array(
-            'name'               => _x('Index submissions', 'wp-assessment'),
-            'singular_name'      => _x('Index submission', 'wp-assessment'),
+            'name'               => _x('Index Submissions', 'wp-assessment'),
+            'singular_name'      => _x('Index Submission', 'wp-assessment'),
             'add_new'            => _x('Add New', 'wp-assessment'),
-            'add_new_item'       => _x('Add New Index submission', 'wp-assessment'),
+            'add_new_item'       => _x('Add New Submission', 'wp-assessment'),
             'edit_item'          => _x('Edit Index submission', 'wp-assessment'),
             'new_item'           => _x('New Index submission', 'wp-assessment'),
-            'view_item'          => _x('View Index submission', 'wp-assessment'),
-            'search_items'       => _x('Search Index submissions', 'wp-assessment'),
-            'not_found'          => _x('No Index submissions found', 'wp-assessment'),
-            'not_found_in_trash' => _x('No Index submissions found in Trash', 'wp-assessment'),
+            'view_item'          => _x('View Submission', 'wp-assessment'),
+            'search_items'       => _x('Search Submissions', 'wp-assessment'),
+            'not_found'          => _x('No Submissions found', 'wp-assessment'),
+            'not_found_in_trash' => _x('No Submissions found in Trash', 'wp-assessment'),
             'parent_item_colon'  => _x('Parent Index submission:', 'wp-assessment'),
-            'menu_name'          => _x('Index submissions', 'wp-assessment'),
+            'menu_name'          => _x('Index Submissions', 'wp-assessment'),
         );
 
         $args = array(
@@ -228,18 +228,18 @@ class WPA_CustomPostType
     function register_dcr_submissions_post_type(): void
     {
         $labels = array(
-            'name'               => _x('DCR submissions', 'wp-assessment'),
-            'singular_name'      => _x('DCR submission', 'wp-assessment'),
+            'name'               => _x('DCR Submissions', 'wp-assessment'),
+            'singular_name'      => _x('DCR Submission', 'wp-assessment'),
             'add_new'            => _x('Add New', 'wp-assessment'),
-            'add_new_item'       => _x('Add New DCR submission', 'wp-assessment'),
+            'add_new_item'       => _x('Add New Submission', 'wp-assessment'),
             'edit_item'          => _x('Edit DCR submission', 'wp-assessment'),
             'new_item'           => _x('New DCR submission', 'wp-assessment'),
             'view_item'          => _x('View DCR submission', 'wp-assessment'),
-            'search_items'       => _x('Search DCR submissions', 'wp-assessment'),
-            'not_found'          => _x('No DCR submissions found', 'wp-assessment'),
-            'not_found_in_trash' => _x('No DCR submissions found in Trash', 'wp-assessment'),
-            'parent_item_colon'  => _x('Parent DCR submission:', 'wp-assessment'),
-            'menu_name'          => _x('DCR submissions', 'wp-assessment'),
+            'search_items'       => _x('Search Submissions', 'wp-assessment'),
+            'not_found'          => _x('No Submissions found', 'wp-assessment'),
+            'not_found_in_trash' => _x('No Submissions found in Trash', 'wp-assessment'),
+            'parent_item_colon'  => _x('Parent DCR Submission:', 'wp-assessment'),
+            'menu_name'          => _x('DCR Submissions', 'wp-assessment'),
         );
 
         $args = array(
@@ -480,7 +480,7 @@ class WPA_CustomPostType
             // Display Created Date
             $created_date = get_post_meta($post_id, 'created_date', true);
             if (!empty($created_date)) {
-                echo 'Created on: <br>' . esc_html(date('Y/m/d \a\t H:i a', strtotime($created_date)));
+                echo 'Created on: <br>' . esc_html(date('M d, Y \a\t H:i a', strtotime($created_date)));
             }
         }
     }

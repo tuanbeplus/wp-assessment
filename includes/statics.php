@@ -62,10 +62,6 @@ function wpa_enqueue_scripts()
 /**
  * Loads an admin template from the plugin's template directory.
  *
- * This function constructs the file path for a template based on the provided
- * folder and file name. If the file exists, it includes the template file.
- * If the file does not exist, an error message is displayed.
- *
  * @param string $folder    The folder name where the template is located.
  * @param string $file_name The base file name of the template (without the `.php` extension).
  * @return void
@@ -82,10 +78,6 @@ function wpa_get_template_admin_view( $folder, $file_name ) {
 /**
  * Loads the front template from the plugin's template directory.
  *
- * This function constructs the file path for a front template 
- * based on the provided file name. If the file exists, it includes the template file.
- * If the file does not exist, an error message is displayed.
- *
  * @param string $file_name The base file name of the template (without the `.php` extension).
  * @return void
  */
@@ -95,5 +87,21 @@ function wpa_get_template_front_view( $file_name ) {
         include_once $file;
     } else {
         echo 'File not found.';
+    }
+}
+
+/**
+ * Loads an admin module from the plugin's template directory.
+ *
+ * @param string $module_name The base file name of the module (without the `.php` extension).
+ * @return void
+ */
+function wpa_get_admin_module( $module_name ) {
+    $module_name = sanitize_file_name($module_name);
+    $file = WP_ASSESSMENT_ADMIN_VIEW_DIR . "/modules/{$module_name}.php";
+    if ( file_exists( $file ) ) {
+        require_once $file;
+    } else {
+        echo 'Module not found.';
     }
 }

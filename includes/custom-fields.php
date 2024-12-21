@@ -107,7 +107,7 @@ class WPA_Custom_Fields
 
     function report_template_meta_box_callback()
     {
-        return wpa_get_template_admin_view('reports', 'report-section');
+        return wpa_get_template_admin_view('reports', 'report-template');
     }
 
     function report_dashboard_chart_meta_box_callback()
@@ -129,20 +129,23 @@ class WPA_Custom_Fields
     }
     /* ------------------------------ */
 
-
     function assessment_meta_boxs_save($post_id): void
     {
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
-
-        if (!current_user_can('edit_post', $post_id))
+        }
+        if (!current_user_can('edit_post', $post_id)) {
             return;
-
-        if (get_post_type($post_id) != 'assessments') 
+        }
+        if (get_post_type($post_id) != 'assessments') {
             return;
+        }
+        if (isset( $_POST['_inline_edit'] )) {
+            return;
+        }
 
         $assessment_template = $_POST['assessment_template'] ?? null;
-        $group_questions = $_POST['group_questions'] ?? array();
+        $group_questions = $_POST['group_questions'] ? wp_unslash($_POST['group_questions']) : array();
         $is_required_answer_all = $_POST['is_required_answer_all'] ?? 0;
         $is_required_document_all = $_POST['is_required_document_all'] ?? 0;
         $is_invite_colleagues = $_POST['is_invite_colleagues'] ?? 0;
@@ -162,7 +165,6 @@ class WPA_Custom_Fields
             $new_group_questions[$item] = $value;
             $item++;
         }
-
         // Renew Index of Members array
         $new_assigned_members = array();
         $index = 1;
@@ -191,11 +193,15 @@ class WPA_Custom_Fields
 
     function report_template_meta_box_save($post_id): void
     {
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
-
-        if (!current_user_can('edit_post', $post_id))
+        }
+        if (!current_user_can('edit_post', $post_id)) {
             return;
+        }
+        if (isset( $_POST['_inline_edit'] )) {
+            return;
+        }
 
         $post_types_allow = array('assessments', 'reports', 'dcr_reports');
         
@@ -254,10 +260,21 @@ class WPA_Custom_Fields
     function on_save_submission_custom_fields($post_id): void
     {
         $post_type = get_post_type($post_id);
-        if ($post_type != 'submissions') return;
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-        if (!current_user_can('edit_post', $post_id)) return;
-        if (is_single() || is_page()) return;
+        if ($post_type != 'submissions') {
+            return;
+        }
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+        if (is_single() || is_page()) {
+            return;
+        }
+        if (isset($_POST['_inline_edit'])) {
+            return;
+        }
 
         $question_form = new WPA_Question_Form();
         $assessment_id = get_post_meta($post_id, 'assessment_id', true);
@@ -358,6 +375,9 @@ class WPA_Custom_Fields
 
     function save_assigned_moderator($post_id): void
     {
+        if (isset( $_POST['_inline_edit'] )) {
+            return;
+        }
         $post_type = get_post_type($post_id);
 
         if (isset($_POST['assigned_moderator'])) {
@@ -374,13 +394,15 @@ class WPA_Custom_Fields
 
     function save_assigned_collaborator($post_id): void
     {
-
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
-
-        if (!current_user_can('edit_post', $post_id))
+        }
+        if (!current_user_can('edit_post', $post_id)) {
             return;
-
+        }
+        if (isset( $_POST['_inline_edit'] )) {
+            return;
+        }
         $assigned_collaborator = isset($_POST['assigned_collaborator']) ? $_POST['assigned_collaborator'] : '';
 
         update_post_meta($post_id, 'assigned_collaborator', $assigned_collaborator);

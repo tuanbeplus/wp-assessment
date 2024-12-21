@@ -47,84 +47,25 @@ $submission_score_arr = array();
 <input type="hidden" id="organisation_id" name="organisation_id" value="<?php echo $organisation_id ?>"/>
 
 <div class="container">
-    <?php if ($assessment_meta == 'Simple Assessment'): ?>
-        <!-- Begin Simple Submission -->
-        <?php if ($quizzes && is_array($quizzes)) : ?>
-            <?php foreach ($quizzes as $field) :
-                $i++;
-                $answers = [];
-                $attachment_id = null;
-                $attachment_type = null;
-                $url = null;
-                $feedback = null;
-                $status_types = null;
-
-                if ($field->answers) {
-                    $answers = json_decode($field->answers);
-                }
-                if ($field->feedback) {
-                    $feedback = $field->feedback;
-                }
-                if ($field->status) {
-                    $status_types = $field->status;
-                }
-                if ($field->attachment_id) {
-                    $attachment_id = $field->attachment_id;
-                    $url = wp_get_attachment_url($attachment_id);
-                    $attachment_type = get_post_mime_type($attachment_id);
-                }
-                $question_title = $questions[$i]['title'] ?? null;
-                $question_des = ($questions[$i]['description']) ?? null;
-                ?>
-                <div class="submission-view-item-row" id="<?php echo $i ?>-main-container">
-                    <div class="card">
-                        <div class="card-body">
-                            <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $i ?>" class="quiz-input" />
-                            <h4 class="quiz-title"><?php echo $question_title; ?></h4>
-                            <div class="question-des"><?php echo $question_des; ?></div>
-                            <?php if (is_array($answers) && count($answers) > 0) : ?>
-                                <div class="submission-answers-list">
-                                    <strong>Selected Answer:</strong>
-                                    <ul>
-                                        <?php foreach ($answers as $answer) : ?>
-                                            <li><?php echo $answer->title; ?></li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                </div>
-                            <?php endif; ?>
-                            <?php if ($field->description): ?>
-                                <div class="user-comment-area">
-                                    <p class="description-label"><strong>User Comment: </strong></p>
-                                    <div class="description-thin"><?php echo htmlentities(stripslashes($field->description)); ?></div>
-                                </div>
-                            <?php endif; ?>
-                            <?php if ($attachment_id) : ?>
-                                <a href="<?php echo $url ?>" target="_blank"><p>View Supporting Documentation</p></a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
-        <!-- End Simple Submission -->
-    <?php endif; ?>
-
+    <?php 
+    if ($assessment_meta == 'Simple Assessment'):
+        set_query_var('questions', $questions);
+        set_query_var('quizzes', $quizzes);
+        wpa_get_admin_module('simple-submission');
+    endif; 
+    ?>
     <?php if ($assessment_meta == 'Comprehensive Assessment'): ?>
         <!-- Begin Comprehensive Submission -->
-        <?php 
-            $group_count = count($questions); 
-        ?>
         <?php foreach ($questions as $group_id => $field_group):  
-                $group_title = $field_group['title'];
-                $group_title = htmlentities(stripslashes(utf8_decode($group_title)));
+                $group_title = $field_group['title'] ?? '';
                 $group_max_point = $field_group['point'] ?? null;
                 $sub_questions = $field_group['list'] ?? array();
                 $group_point = $group_quiz_points[$group_id]['point'] ?? null;
                 $section_score_arr = array();
             ?>
             <div class="group-quiz-wrapper dcr">
-                <p class="group-title"><?php echo $group_id.' - '.$group_title; ?></p>
-                <input type="hidden" name="recommentdation[<?php echo $group_id; ?>][key_area]" value="<?php echo $group_title; ?>">
+                <p class="group-title"><?php echo $group_id.' - '. esc_html($group_title); ?></p>
+                <input type="hidden" name="recommentdation[<?php echo $group_id; ?>][key_area]" value="<?php echo esc_attr($group_title) ?>">
                 <?php if (!empty($sub_questions) && !empty($quizzes)) : ?>
                     <?php foreach ($sub_questions as $sub_id => $sub_field) :
                         if (!empty($sub_field)):
@@ -141,7 +82,7 @@ $submission_score_arr = array();
                             $quiz_point = 0;
                         }
 
-                        $sub_title = htmlentities(stripslashes(utf8_decode($sub_field['sub_title'])));
+                        $sub_title = $sub_field['sub_title'] ?? '';
                         $weighting = $sub_field['point'] ?? 0;
                         $key_area = $sub_field['key_area'] ?? null;
                         $required_desc = $sub_field['is_description'] ?? false;
@@ -151,22 +92,20 @@ $submission_score_arr = array();
 
                         if ($current_quiz_sub) {
                             if (array_key_exists('answers', $current_quiz_sub)) {
-                                $answers = $current_quiz_sub['answers'];
+                                $answers = $current_quiz_sub['answers'] ?? [];
                             }
                             if (array_key_exists('description', $current_quiz_sub)) {
-                                $description = $current_quiz_sub['description'];
-                                $description = htmlentities(stripslashes(utf8_decode($description)));
+                                $description = $current_quiz_sub['description'] ?? '';
                             }
                             if (array_key_exists('attachment_ids', $current_quiz_sub)) {
-                                $arr_attachmentID = $current_quiz_sub['attachment_ids'];
+                                $arr_attachmentID = $current_quiz_sub['attachment_ids'] ?? '';
                                 $arr_attachmentID = json_decode($arr_attachmentID, true);
                             }
                             if (array_key_exists('feedback', $current_quiz_sub)) {
-                                $feedback = $current_quiz_sub['feedback'];
-                                $feedback = htmlentities(stripslashes(utf8_decode($feedback)));
+                                $feedback = $current_quiz_sub['feedback'] ?? '';
                             }
                             if (array_key_exists('status', $current_quiz_sub)) {
-                                $status_types = $current_quiz_sub['status'];
+                                $status_types = $current_quiz_sub['status'] ?? '';
                             }
                         }
                         ?>
@@ -174,7 +113,7 @@ $submission_score_arr = array();
                         <!-- Sub Question Row -->
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>">
                             <div class="card-header">
-                                <h4 class="quiz-title"><?php echo $group_id.'.'.$sub_id.' - '.$sub_title; ?></h4>
+                                <h4 class="quiz-title"><?php echo $group_id.'.'.$sub_id.' - '. esc_html($sub_title); ?></h4>
                             </div>
                             <div class="card content">
                                 <div class="card-body">
@@ -196,13 +135,13 @@ $submission_score_arr = array();
                                                 if (isset($row->parent_id) && isset($row->quiz_id)):
                                                     if ($row->parent_id == $group_id && $row->quiz_id == $sub_id):
                                                         $cmt_time = date("M d Y H:i a", strtotime($row->time));
-                                                        $cmt_desc = htmlentities(stripslashes($row->description));
+                                                        $cmt_desc = $row->description;
                                                         $cmt_class = ($row->submission_id == $post_id) ? 'current' : '';
                                                         ?>
                                                         <?php if ($cmt_desc != null): ?>
                                                             <div class="description-thin <?php echo $cmt_class; ?>">
                                                                 <span class="datetime"><?php echo $cmt_time; ?></span>
-                                                                <div class="description"><?php echo $cmt_desc; ?></div>
+                                                                <div class="description"><?php echo wp_unslash($cmt_desc); ?></div>
                                                             </div>
                                                         <?php endif; ?>
                                                     <?php endif; ?>

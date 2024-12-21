@@ -449,7 +449,7 @@
         let type_quiz = $('input[name="type_quiz"]').val();
 
         const data = {
-            'action': 'save_question',
+            'action': 'save_answers_assessment',
             'answers': answers,
             'quiz_id': activeQuizId,
             'organisation_id' : organisationId,
@@ -517,10 +517,9 @@
             data: data,
         });
         const {status, message, submission_id} = response;
+        // console.log(response);
 
         $('#submission_id').attr('value', submission_id);
-
-        console.log(response);
 
         return submission_id;
     }

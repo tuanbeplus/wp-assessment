@@ -6,8 +6,8 @@ class WPA_Question_Form
 
     public function __construct()
     {
-        add_action('wp_ajax_save_question', array($this, 'save_question'));
-        add_action('wp_ajax_nopriv_save_question', array($this, 'save_question'));
+        add_action('wp_ajax_save_answers_assessment', array($this, 'save_answers_assessment_ajax'));
+        add_action('wp_ajax_nopriv_save_answers_assessment', array($this, 'save_answers_assessment_ajax'));
 
         add_action('wp_ajax_create_assessment_submission', array($this, 'create_assessment_submission'));
         add_action('wp_ajax_nopriv_create_assessment_submission', array($this, 'create_assessment_submission'));
@@ -47,261 +47,210 @@ class WPA_Question_Form
     }
 
     /**
-     * Save answers question by ajax
-     * 
+     * Save answers assessment by AJAX
+     * This function handles saving quiz answers via an AJAX request.
      */
-    function save_question()
-    {
+    function save_answers_assessment_ajax() {
         try {
-            $assessment_id = intval($_POST['assessment_id']);
-            if (empty($assessment_id))
-                throw new Exception('Assessment not found.');
+            // Retrieve the assessment ID from the request and validate it
+            $assessment_id = intval($_POST['assessment_id'] ?? '');
+            if (empty($assessment_id)) throw new Exception('Assessment not found.');
 
-            if (isset($_COOKIE['userId'])) {
-                $user_id = $_COOKIE['userId'];
-            } else {
-                $user_id = get_current_user_id();
-            }
+            // Retrieve the user ID from cookies or user meta and validate it
+            $user_id = $_COOKIE['userId'] ?? '';
+            $user_id = !empty($user_id) ? $user_id : get_user_meta(get_current_user_id(), '__salesforce_user_id', true);
+            if (empty($user_id)) throw new Exception('User not found.');
 
-            $organisation_id = $_POST['organisation_id'];
-            if (empty($organisation_id))
-                throw new Exception('Organisation not found.');
+            // Validate the organisation ID from the request
+            $organisation_id = sanitize_text_field($_POST['organisation_id'] ?? '');
+            if (empty($organisation_id)) throw new Exception('Organisation not found.');
 
-            $arr_attachment_ids = $_POST['attachment_ids'];
+            // Retrieve quiz data from the request
+            $quiz_id = intval($_POST['quiz_id'] ?? 0);
+            if (empty($quiz_id)) throw new Exception('Question not found.');
 
-            $data_quiz = $_POST['data_quiz'];
-            $type_quiz = $_POST['type_quiz'];
-            $quiz_id = intval($_POST['quiz_id']);
-            if (empty($quiz_id) || !$quiz_id)
-                throw new Exception('Question not found.');
-
-            $status_submisstion = '';
+            // Check if a submission in progress exists
             $submission_id = $this->is_submission_progress_exist($organisation_id, $assessment_id);
-            $assessment_terms = get_assessment_terms($assessment_id);
+            $main = new WP_Assessment();
 
-            if ($type_quiz == 'Comprehensive Assessment') {
-
-                $list_quiz = array();
-                foreach ($data_quiz as $id => $f) {
-                    $exp   = explode('_',$f['name']);
-                    $value = $f['value'];
-                    if($exp[0] == 'questions'){
-                        $id_question = $exp[1];
-                        $id_quiz     = $exp[3];
-                        $name        = $exp[4];
-
-                        if($name == 'choice'){
-                            $choice_value = isset($list_quiz[$id_question][$id_quiz][$name]) ? $list_quiz[$id_question][$id_quiz][$name] : array();
-                            $count_choice = count($choice_value);
-                            $item = [];
-                            $item['id'] = $count_choice > 0 ? $count_choice++ : 0;
-                            $item['title'] = $value;
-
-                            $choice_value[] = $item;
-                            $list_quiz[$id_question][$id_quiz][$name] = $choice_value;
-                        }
-                        elseif($name == 'attachmentIDs'){
-                            $attachment_value = isset($list_quiz[$id_question][$id_quiz][$name]) ? $list_quiz[$id_question][$id_quiz][$name] : array();
-                            $count_attachment = count($attachment_value);
-                            $att_item = [];
-                            $att_item['id'] = $count_attachment > 0 ? $count_attachment++ : 0;
-                            $att_item['value'] = $value;
-
-                            $attachment_value[] = $att_item;
-                            $list_quiz[$id_question][$id_quiz][$name] = $attachment_value;
-                        }
-                        else {
-                            $list_quiz[$id_question][$id_quiz][$name] = $value;
-                        }
-                    }
-                }
-
-                //Save quiz
-                $main = new WP_Assessment();
+            // Process data based on quiz type
+            $quiz_action = '';
+            if ($_POST['type_quiz'] == 'Comprehensive Assessment') {
+                $list_quiz = $this->process_comprehensive_assessment($_POST['data_quiz']);
 
                 foreach ($list_quiz as $parent_id => $quiz_post) {
+                    if ($quiz_id != $parent_id) continue;
 
-                    if($quiz_id != $parent_id) continue;
+                    foreach ($quiz_post as $quiz_id => $field) {
+                        $answers = $field['choice'] ?? null;
+                        $description = $field['description'] ?? null;
+                        $attachment_ids = $field['attachmentIDs'] ?? null;
+                        $quiz_point = $field['point'] ?? null;
 
-                    foreach ($quiz_post as $quiz_id => $p) {
+                        $quiz_data = $submission_id 
+                            ? $main->get_quiz_by_assessment_id_and_submission_parent($assessment_id, $submission_id, $quiz_id, $organisation_id, $parent_id)
+                            : $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id, $parent_id);
 
-                        $answers = $p['choice'] ?? null;
-                        $description = $p['description'] ?? null;
-                        $attachment_id = $p['attachment'] ?? null;
-                        $attachmentIDs = $p['attachmentIDs'] ?? null;
-                        $quiz_point = $p['point'] ?? null;
+                        $input = $this->prepare_quiz_input_data([
+                            'user_id'         => $user_id, 
+                            'organisation_id' => $organisation_id, 
+                            'submission_id'   => $submission_id, 
+                            'answers'         => $answers, 
+                            'description'     => $description, 
+                            'attachment_ids'  => $attachment_ids, 
+                            'quiz_point'      => $quiz_point,
+                        ]);
 
-                        if ($submission_id) {
-                            $quiz_data = $main->get_quiz_by_assessment_id_and_submission_parent(
-                                $assessment_id, 
-                                $submission_id, 
-                                $quiz_id, 
-                                $organisation_id, 
-                                $parent_id,
-                            );
-                        } 
-                        else {
-                            $quiz_data = $main->get_quiz_by_assessment_id_and_parent(
-                                $assessment_id, 
-                                $quiz_id, 
-                                $organisation_id , 
-                                $parent_id,
-                            );
-                        }
+                        $conditions = ['organisation_id' => $organisation_id, 'assessment_id' => $assessment_id, 'quiz_id' => $quiz_id, 'parent_id' => $parent_id];
+                        if ($submission_id) $conditions['submission_id'] = $submission_id;
 
-                        $input = [];
-
-                        if (!empty($user_id))
-                            $input['user_id'] = $user_id;
-
-                        if (!empty($organisation_id))
-                            $input['organisation_id'] = $organisation_id;
-
-                        if (!empty($submission_id))
-                            $input['submission_id'] = $submission_id;
-
-                        if (!empty($answers)) {
-                            $input['answers'] = json_encode($answers);
-                        }
-                        else {
-                            $input['answers'] = null;
-                        }
-
-                        if (!empty($description)) {
-                            $input['description'] = $description;
-                        }
-                        else {
-                            $input['description'] = null;
-                        }
-
-                        if (!empty($attachment_id))
-                            $input['attachment_id'] = $attachment_id;
-
-                        if (!empty($attachmentIDs))
-                            $input['attachment_ids'] = json_encode($attachmentIDs);
-
-                        if ($quiz_point != null)
-                            $input['quiz_point'] = $quiz_point;
-
-                        if($submission_id){
-                            $conditions = array(
-                                // 'user_id' => $user_id,
-                                'organisation_id' => $organisation_id,
-                                'assessment_id' => $assessment_id,
-                                'quiz_id' => $quiz_id,
-                                'parent_id' => $parent_id,
-                                'submission_id' => $submission_id
-                            );
-                        }else{
-                            $conditions = array(
-                                // 'user_id' => $user_id,
-                                'organisation_id' => $organisation_id,
-                                'assessment_id' => $assessment_id,
-                                'quiz_id' => $quiz_id,
-                                'parent_id' => $parent_id,
-                            );
-                        }
-
-                        $quiz_action = '';
                         if (!$quiz_data) {
-                            // Insert Quiz record if quiz_data not exist
                             $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                             $quiz_action = 'Inserted';
                         } else {
-                            // Update Quiz record if quiz_data exist
                             $main->update_quiz_assessment($input, $conditions);
                             $quiz_action = 'Updated';
                         }
                     }
                 }
-            }
-            else {
-
-                $answers = $_POST['answers'] ?? null;
-                $description = $_POST['description'] ?? null;
+            } else {
+                // Regular quiz processing
+                $answers = $_POST['answers'] ? wp_unslash($_POST['answers']) : null;
+                $description = $_POST['description'] ? wp_unslash($_POST['description']) : null;
                 $attachment_id = $_POST['attachment_id'] ?? null;
 
-                $main = new WP_Assessment();
+                $quiz_data = $submission_id
+                    ? $main->get_quiz_by_assessment_id_and_submission($assessment_id, $submission_id, $quiz_id, $organisation_id)
+                    : $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id);
 
-                if ($submission_id) {
-                    $quiz_data = $main->get_quiz_by_assessment_id_and_submission(
-                        $assessment_id, 
-                        $submission_id, 
-                        $quiz_id, 
-                        $organisation_id,
-                    );
-                }
-                else {
-                    $quiz_data = $main->get_quiz_by_assessment_id(
-                        $assessment_id, 
-                        $quiz_id, 
-                        $organisation_id,
-                    );
-                }
+                $input = $this->prepare_quiz_input_data([
+                    'user_id'         => $user_id, 
+                    'organisation_id' => $organisation_id, 
+                    'submission_id'   => $submission_id, 
+                    'attachment_id'   => $attachment_id,
+                    'answers'         => $answers, 
+                    'description'     => $description, 
+                ]);
 
-                $input = [];
+                $conditions = ['organisation_id' => $organisation_id, 'assessment_id' => $assessment_id, 'quiz_id' => $quiz_id];
+                if ($submission_id) $conditions['submission_id'] = $submission_id;
 
-                if (!empty($user_id))
-                    $input['user_id'] = $user_id;
-
-                if (!empty($organisation_id))
-                    $input['organisation_id'] = $organisation_id;
-
-                if (!empty($submission_id))
-                    $input['submission_id'] = $submission_id;
-
-                $input['answers'] = json_encode($answers);
-
-                if (!empty($description))
-                    $input['description'] = $description;
-
-                if (!empty($attachment_id))
-                    $input['attachment_id'] = $attachment_id;
-
-                if($submission_id){
-                    $conditions = array(
-                        // 'user_id' => $user_id,
-                        'organisation_id' => $organisation_id,
-                        'assessment_id' => $assessment_id,
-                        'quiz_id' => $quiz_id,
-                        'submission_id' => $submission_id
-                    );
-                }else{
-                    $conditions = array(
-                        // 'user_id' => $user_id,
-                        'organisation_id' => $organisation_id,
-                        'assessment_id' => $assessment_id,
-                        'quiz_id' => $quiz_id
-                    );
-                }
-
-                $quiz_action = '';
                 if (!$quiz_data) {
-                    // Insert Quiz record if quiz_data not exist
                     $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
                     $quiz_action = 'Inserted';
                 } else {
-                    // Update Quiz record if quiz_data exist
                     $main->update_quiz_assessment($input, $conditions);
                     $quiz_action = 'Updated';
                 }
             }
 
-            return wp_send_json(array(
-                    'message' => 'Answers has been saved', 
-                    'status' => true, 
-                    'data' => array_merge($input, $conditions),
-                    'quiz_action' => $quiz_action,
-                )
-            );
+            return wp_send_json([
+                'message' => 'Answers have been saved',
+                'status' => true,
+                'data' => array_merge($input, $conditions),
+                'quiz_action' => $quiz_action,
+            ]);
         } catch (Exception $exception) {
-            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+            // Return error response
+            return wp_send_json(["message" => $exception->getMessage(), "status" => false]);
         }
     }
 
     /**
-     * Create a publish Submission by ajax
+     * Helper function to prepare the quiz input array.
      * 
+     * @param array $args
+     * @return array An associative array containing the prepared quiz input data.
+     */
+    function prepare_quiz_input_data($args = []) {
+        // Define defaults
+        $defaults = [
+            'user_id'         => null,
+            'organisation_id' => null,
+            'submission_id'   => null,
+            'attachment_id'   => null,
+            'answers'         => null,
+            'description'     => null,
+            'attachment_ids'  => null,
+            'quiz_point'      => null,
+        ];
+        // Merge provided arguments with defaults
+        $args = array_merge($defaults, $args);
+    
+        // Prepare the input data
+        $input = [];
+        if (!empty($args['user_id'])) {
+            $input['user_id'] = $args['user_id'];
+        }
+        if (!empty($args['organisation_id'])) {
+            $input['organisation_id'] = $args['organisation_id'];
+        }
+        if (!empty($args['submission_id'])) {
+            $input['submission_id'] = $args['submission_id'];
+        }
+        if (!empty($args['attachment_id'])) {
+            $input['attachment_id'] = $args['attachment_id'];
+        }
+        $input['answers'] = !empty($args['answers']) ? json_encode($args['answers']) : null;
+        $input['description'] = $args['description'] ?? null;
+        $input['attachment_ids'] = !empty($args['attachment_ids']) ? json_encode($args['attachment_ids']) : null;
+        $input['quiz_point'] = $args['quiz_point'] ?? null;
+    
+        return $input;
+    }
+
+    /**
+     * Process comprehensive assessment data.
+     * Organizes data into a structured format.
+     *
+     * @param array $data_quiz The raw quiz data.
+     * @return array The processed quiz data.
+     */
+    function process_comprehensive_assessment($data_quiz)
+    {
+        if (empty($data_quiz)) {
+            return array();
+        }
+        $data_quiz = wp_unslash($data_quiz);
+        $list_quiz = array();
+        foreach ($data_quiz as $id => $field) {
+            $exploded   = explode('_',$field['name']);
+            $value = $field['value'];
+            if ($exploded[0] == 'questions') {
+                $group_id = $exploded[1];
+                $quiz_id  = $exploded[3];
+                $name     = $exploded[4];
+
+                if ($name == 'choice') {
+                    $choice_value = isset($list_quiz[$group_id][$quiz_id][$name]) ? $list_quiz[$group_id][$quiz_id][$name] : array();
+                    $count_choice = count($choice_value);
+                    $item = [];
+                    $item['id'] = $count_choice > 0 ? $count_choice++ : 0;
+                    $item['title'] = $value;
+
+                    $choice_value[] = $item;
+                    $list_quiz[$group_id][$quiz_id][$name] = $choice_value;
+                }
+                elseif ($name == 'attachmentIDs') {
+                    $attachment_value = isset($list_quiz[$group_id][$quiz_id][$name]) ? $list_quiz[$group_id][$quiz_id][$name] : array();
+                    $count_attachment = count($attachment_value);
+                    $att_item = [];
+                    $att_item['id'] = $count_attachment > 0 ? $count_attachment++ : 0;
+                    $att_item['value'] = $value;
+
+                    $attachment_value[] = $att_item;
+                    $list_quiz[$group_id][$quiz_id][$name] = $attachment_value;
+                }
+                else {
+                    $list_quiz[$group_id][$quiz_id][$name] = $value;
+                }
+            }
+        }
+        return $list_quiz;
+    }
+
+    /**
+     * Create a publish Submission by ajax
      */
     function create_assessment_submission()
     {
@@ -419,7 +368,6 @@ class WPA_Question_Form
 
     /**
      * Create a draft Submission by ajax
-     * 
      */
     function submit_assessment_progress()
     {
@@ -561,58 +509,57 @@ class WPA_Question_Form
     }
 
     /**
-     * Update metadata to Submission
+     * Update metadata for a submission.
      *
-     * @param int $user_id   	    SF User ID
-     * @param int $org_id   	    Organisation ID
-     * @param int $assessment_id   	Assessment ID
-     * @param int $post_id   	    Submission ID
-     * @param int $status   	    draft, pending
-     * 
+     * @param string $user_id        Salesforce User ID.
+     * @param string $org_id         Organisation ID.
+     * @param int    $assessment_id  Assessment ID.
+     * @param int    $post_id        Submission ID.
+     * @param string $status         Submission status ('draft', 'pending').
      */
-    function update_submission_meta_data($user_id, $org_id, $assessment_id, $post_id, $status) 
-    {
-        // Get existing meta data in Submission
+    function update_submission_meta_data($user_id, $org_id, $assessment_id, $post_id, $status) {
+        // Sanitize input data
+        $user_id = sanitize_text_field($user_id);
+        $org_id = sanitize_text_field($org_id);
+        $assessment_id = (int) $assessment_id;
+        $post_id = (int) $post_id;
+        // Update or add metadata for user_id
         $existing_user_id = get_post_meta($post_id, 'user_id', true);
-        $existing_org_id = get_post_meta($post_id, 'organisation_id', true);
-        $existing_assessment_id = get_post_meta($post_id, 'assessment_id', true);
-        $existing_submission_id = get_post_meta($post_id, 'submission_id', true);
-        $existing_org_metadata = get_post_meta($post_id, 'org_data', true);
-
-        // Update Salsesforce User ID meta
-        if ($existing_user_id == null) {
+        if (empty($existing_user_id)) {
             update_post_meta($post_id, 'user_id', $user_id);
         }
-        // Update Salsesforce Org ID meta
-        if ($existing_org_id == null) {
+        // Update or add metadata for organisation_id
+        $existing_org_id = get_post_meta($post_id, 'organisation_id', true);
+        if (empty($existing_org_id)) {
             update_post_meta($post_id, 'organisation_id', $org_id);
         }
-        // Update Assessment ID meta
-        if ($existing_assessment_id == null) {
+        // Update or add metadata for assessment_id
+        $existing_assessment_id = get_post_meta($post_id, 'assessment_id', true);
+        if (empty($existing_assessment_id)) {
             update_post_meta($post_id, 'assessment_id', $assessment_id);
         }
-        // Update Submission ID meta
-        if ($existing_submission_id == null) {
+        // Update or add metadata for submission_id
+        $existing_submission_id = get_post_meta($post_id, 'submission_id', true);
+        if (empty($existing_submission_id)) {
             update_post_meta($post_id, 'submission_id', $post_id);
         }
-        // Update Submission status
-        if (isset($status)) {
-            update_post_meta($post_id, 'assessment_status', $status);
+        // Update metadata for submission status
+        if (!empty($status)) {
+            update_post_meta($post_id, 'assessment_status', sanitize_text_field($status));
         }
-        // Update Salsforce Org data meta
+        // Update org_data metadata if not already set
+        $existing_org_metadata = get_post_meta($post_id, 'org_data', true);
         if (empty($existing_org_metadata)) {
             $org_metadata = get_sf_organisation_data($user_id, $org_id);
-            update_post_meta($post_id, 'org_data', $org_metadata);
+            if (!empty($org_metadata)) {
+                update_post_meta($post_id, 'org_data', $org_metadata);
+            }
         }
-        // Update user info
-        if(isset($_COOKIE['userId'])) {
-            update_field('sf_user_id' , $_COOKIE['userId'], $post_id);
-        }
-        if(isset($_COOKIE['sf_name'])) {
-            update_field('sf_user_name' , $_COOKIE['sf_name'], $post_id);
-        }
-        if(isset($_COOKIE['sf_user_email'])) {
-            update_post_meta($post_id, 'sf_user_email' , $_COOKIE['sf_user_email']);
+        // Update user-related metadata from cookies
+        if (isset($_COOKIE['userId'], $_COOKIE['sf_name'], $_COOKIE['sf_user_email'])) {
+            update_field('sf_user_id', sanitize_text_field($_COOKIE['userId']), $post_id);
+            update_field('sf_user_name', sanitize_text_field($_COOKIE['sf_name']), $post_id);
+            update_post_meta($post_id, 'sf_user_email', sanitize_email($_COOKIE['sf_user_email']));
         }
     }
 
@@ -885,7 +832,7 @@ class WPA_Question_Form
         $submission_id = $_POST['submission_id'] ?? null;
         $assessment_id = get_post_meta($submission_id, 'assessment_id', true) ?? null;
         $organisation_id = $_POST['organisation_id'] ?? null;
-        $quiz_feedback_arr = $_POST['quiz_feedback'] ?? array();
+        $quiz_feedback_arr = $_POST['quiz_feedback'] ? wp_unslash($_POST['quiz_feedback']) : array();
         $assessment_terms = get_assessment_terms($assessment_id);
 
         if (!empty($quiz_feedback_arr) && isset($submission_id) && isset($assessment_id) && isset($organisation_id)) {
@@ -1008,7 +955,6 @@ class WPA_Question_Form
                     wp_delete_attachment( $img_id, true );
                 }
             }
-
             // Upload all new Chart images to Media
             foreach ($data_imgs_arr as $record) {
 

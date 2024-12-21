@@ -239,7 +239,7 @@ body {
     text-decoration: none!important;
 }
 .submission-vers .sub-vers-list .sub-ver-item a:focus {
-    border: 1px solid #005fcc !important;
+    border: 1px solid #333 !important;
     box-shadow: none !important;
 }
 
@@ -293,6 +293,9 @@ body {
 .topBar .progressBtn:hover {
     background-color: #5f5f5f;
     color: #f1f1f1;
+}
+.progressBtn.loading {
+    pointer-events: none !important;
 }
 .progressBtn.loading .text{
     opacity: 0;
@@ -601,6 +604,11 @@ body {
     font-weight: 700;
     font-family: "Avenir-Heavy";
 }
+.fieldDetails .question-description a {
+    color: #6e297b;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
 
 .fieldsWrapper {
     padding: 0 80px 50px;
@@ -644,7 +652,7 @@ body {
 
 .fieldsWrapper .checkBox label {
     width: 100%;
-    background: #d8d9d9;
+    background: #dee0e0;
     margin-left: 0;
     margin-top: 0;
     border-radius: 8px;
@@ -716,11 +724,11 @@ body {
 }
 
 .fieldsWrapper .checkBox input.form-check-input:focus+label {
-    border: 1px solid #222;
+    border: 1px solid #333;
 }
 
 .fieldsWrapper .checkBox input.form-check-input:checked+label {
-    background-color: #ffb838;
+    background-color: #ffc151;
 }
 
 .textAreaWrap {
@@ -745,7 +753,8 @@ body {
     font-size: 1.125rem;
     line-height: 150%;
     border: 1px solid #979797;
-    background-color: #d8d8d82e;
+    background-color: #f8f8f8;
+    box-shadow: inset 3px 3px 5px 0px #eaeaea;
     transition: none;
 }
 
@@ -776,41 +785,38 @@ body {
 .quizAdvice .advice-area > *:first-child {
     margin-top: 0;
 }
-
 .quizAdvice .advice-area > *:last-child {
     margin-bottom: 0;
 }
-
 .quizAdvice .advice-area {
     line-height: 140%;
 }
-
 .quizAdvice .advice-area p{
     margin: 14px 0;
 }
-
 .quizAdvice .advice-area ul{
     margin-left: 20px;
     list-style: disc;
 }
-
 .quizAdvice .advice-area ul li{
     list-style-type: disc;
     line-height: 130%;
     margin: 12px 0;
 }
-
 .quizAdvice .advice-area ol{
     margin-left: 20px;
     list-style: decimal;
 }
-
 .quizAdvice .advice-area ol li{
     list-style-type: decimal;
     line-height: 130%;
     margin: 14px 0;
 }
-
+.quizAdvice .advice-area a {
+    color: #6e297b;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
 .quizAdvice .icon-info {
     width: 40px;
     height: 40px;
@@ -934,7 +940,9 @@ body {
 .formController.disabled .primaryBtn{
     visibility: hidden;
 }
-
+.primaryBtn.loading {
+    pointer-events: none !important;
+}
 .primaryBtn.loading .text {
     opacity: 0;
 }

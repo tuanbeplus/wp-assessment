@@ -1,8 +1,8 @@
 <?php
 global $post;
 $main = new WP_Assessment();
-$single_repeater_group = get_post_meta($post->ID, 'question_group_repeater', true);
-$single_repeater_group = $main->wpa_unserialize_metadata($single_repeater_group);
+$questions_repeater = get_post_meta($post->ID, 'question_group_repeater', true);
+$questions_repeater = $main->wpa_unserialize_metadata($questions_repeater);
 $question_templates = get_post_meta($post->ID, 'question_templates', true);
 $is_assessment_completed = get_post_meta($post->ID, 'is_assessment_completed', true);
 $report_key_areas = get_assessment_key_areas($post->ID);
@@ -33,13 +33,12 @@ $i = 0; $j = 0;
         </div>
 
         <!-- Begin Comprehensive Assessment -->
-        <?php if ($question_templates == 'Comprehensive Assessment' && $single_repeater_group) : ?>
+        <?php if ($question_templates == 'Comprehensive Assessment' && !empty($questions_repeater)) : ?>
             <?php $i = 0; $j = 0; ?>
-            <?php foreach ($single_repeater_group as $group_id => $group_field) : ?>
+            <?php foreach ($questions_repeater as $group_id => $group_field) : ?>
                 <?php
                     $group_question_title = $group_field['title'] ?? null;
                     $is_locked_group = $group_field['is_locked'] ?? null;
-                    $group_question_title = htmlentities(stripslashes(utf8_decode($group_question_title)));
                     $group_question_point = $group_field['point'] ?? null;
                     $group_question_sub = isset($group_field['list'] )?  $group_field['list'] : array();
                 ?>
@@ -66,7 +65,7 @@ $i = 0; $j = 0;
                             <h5 class="admin-question-group-label">Question #<?php echo $group_id; ?></h5>
                             <input class="form-field group-question-admin-title form-control"
                                     name="group_questions[<?php echo $group_id; ?>][title]"
-                                    value="<?php echo $group_question_title; ?>"
+                                    value="<?php echo esc_attr($group_question_title) ?>"
                                     placeholder="Group Question Title"
                                     tabindex="<?php if($is_locked_group == true) echo '-1'; ?>"/>
                         </div>
@@ -78,7 +77,6 @@ $i = 0; $j = 0;
                         ?>
                         <?php foreach ($group_question_sub as $question_id => $field) : ?>
                                 <?php
-                                // $sub_question_index++;
                                 $parent_question_id = $group_id;
                                 $multiple_choice = $field['choice'] ?? '';
                                 $sub_title = $field['sub_title'] ?? '';
@@ -90,11 +88,6 @@ $i = 0; $j = 0;
                                 $supporting_doc = $field['supporting_doc'] ?? '';
                                 $is_description = $field['is_description'] ?? '';
                                 $selected_key_area = $field['key_area'] ?? '';
-
-                                // remove Slashes of Quotes character(\", \')
-                                $sub_title = htmlentities(stripslashes(utf8_decode($sub_title)));
-                                $question_description = stripslashes($question_description);
-                                $question_advice = stripslashes($question_advice);
                                 ?>
 
                                 <input type="hidden" name="question_repeater[]"/>
@@ -316,24 +309,18 @@ $i = 0; $j = 0;
         <!-- End Comprehensive Assessment -->
 
         <!-- Begin Simple Assessment -->
-        <?php if ($question_templates == 'Simple Assessment' && $single_repeater_group) : ?>
+        <?php if ($question_templates == 'Simple Assessment' && !empty($questions_repeater)) : ?>
             <?php $i = 0; $j = 0; ?>
-            <?php foreach ($single_repeater_group as $question_id => $field) : ?>
-                <?php
-                    $i++;
-                    $multiple_choice = $field['choice'];
-                    $question_title = $field['title'] ?? '';
-                    $is_locked_question = $field['is_locked'] ?? '';
-                    $question_point = $field['point'] ?? '';
-                    $question_advice = $field['advice'] ?? '';
-                    $question_description = $field['description'] ?? '';
-                    $is_question_description = $field['is_description'] ?? '';
-                    $is_question_supporting = $field['is_question_supporting'] ?? '';
-
-                    // remove Slashes of Quotes character(\", \')
-                    $question_title = htmlentities(stripslashes(utf8_decode($question_title)));
-                    $question_description = stripslashes($question_description);
-                    $question_advice = stripslashes($question_advice);
+            <?php foreach ($questions_repeater as $question_id => $field): 
+                $i++;
+                $multiple_choice = $field['choice'];
+                $question_title = $field['title'] ?? '';
+                $is_locked_question = $field['is_locked'] ?? '';
+                $question_point = $field['point'] ?? '';
+                $question_advice = $field['advice'] ?? '';
+                $question_description = $field['description'] ?? '';
+                $is_question_description = $field['is_description'] ?? '';
+                $is_question_supporting = $field['is_question_supporting'] ?? '';
                 ?>
                 <div id="question-main-row-<?php echo $i; ?>" 
                     class="simple-question-container question question-row-container <?php if($is_locked_question == true) echo 'disabled'; ?>">
@@ -358,7 +345,7 @@ $i = 0; $j = 0;
                             <p class="admin-question-row-label">Question #<?php echo $i; ?></p>
                             <input class="form-field question-admin-title form-control"
                                     name="group_questions[<?php echo $i; ?>][title]"
-                                    value="<?php echo $question_title; ?>"
+                                    value="<?php echo esc_attr($question_title) ?>"
                                     placeholder="Question Title"
                                     tabindex="<?php if($is_locked_question == true) echo '-1'; ?>"/>
                             <div class="admin-question-row-textarea">

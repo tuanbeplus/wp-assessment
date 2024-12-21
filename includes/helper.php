@@ -1011,7 +1011,6 @@ function get_assessment_key_areas($assessment_id) {
  * Remove attributes from HTML tags
  * 
  * @param string $html_string	HTML string
- *
  * @return string Clean HTML string
  * 
  */
@@ -1029,6 +1028,53 @@ function clean_html_report_pdf($html_string) {
 		$html_string
 	);
 	return $clean_html;
+}
+
+/**
+ * remove Slashes of Quotes character(\", \')
+ * 
+ * @param string The string need to stripslashes
+ * @return string The string after stripslashes
+ */
+function wpa_stripslashes_string($string) {
+	if (!isset($string) || empty($string)) return;
+	return htmlentities(stripslashes(mb_convert_encoding($string, 'ISO-8859-1', 'UTF-8')));
+}
+
+/**
+ * Remove attributes from HTML tags, preserving specific attributes for certain tags.
+ * 
+ * @param string $html_string HTML string
+ * @return string Clean HTML string
+ */
+function wpa_clean_html_string($html_string) {
+    return preg_replace_callback(
+        '/<([a-zA-Z0-9]+)([^>]*)>/',
+        function ($matches) {
+            $tag = strtolower($matches[1]);
+            $attributes = $matches[2];
+            // Allowed attributes for specific tags
+            $allowed_attributes = [
+                'a'   => ['href', 'target', 'title'],
+                'img' => ['src', 'alt', 'title', 'width', 'height', 'class'],
+            ];
+            if (array_key_exists($tag, $allowed_attributes)) {
+                // Extract and filter attributes
+                preg_match_all('/([a-zA-Z0-9\-:]+)="([^"]*)"/', $attributes, $attr_matches, PREG_SET_ORDER);
+                $filtered_attrs = [];
+                foreach ($attr_matches as $attr) {
+                    if (in_array($attr[1], $allowed_attributes[$tag])) {
+                        $filtered_attrs[] = "{$attr[1]}=\"{$attr[2]}\"";
+                    }
+                }
+                $filtered_attr_string = implode(' ', $filtered_attrs);
+                return "<{$tag}" . (!empty($filtered_attr_string) ? " $filtered_attr_string" : '') . ">";
+            }
+            // For other tags, strip all attributes
+            return "<{$tag}>";
+        },
+        $html_string
+    );
 }
 
 /**

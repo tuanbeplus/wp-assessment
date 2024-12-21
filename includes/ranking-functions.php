@@ -99,13 +99,18 @@ class AndAssessmentRanking {
    * Function to save ranking info
    */
   function save_post_for_ranking($post_id): void {
-
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
-            return;
-
-        if (!current_user_can('edit_post', $post_id) || get_post_type($post_id) != 'ranking')
-            return;
-
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+          return;
+        }
+        if (get_post_type($post_id) != 'ranking') {
+          return;
+        }
+        if (!current_user_can('edit_post', $post_id)) {
+          return;
+        }
+        if (isset( $_POST['_inline_edit'] )) {
+          return;
+        }
         $assessment_id = get_field('assessment', $post_id);
         // Get Scoring formula type
 		    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);

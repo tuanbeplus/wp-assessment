@@ -10,7 +10,7 @@ if (empty($questions) || empty($quizzes)) {
     return;
 }
 foreach ($questions as $group_id => $field_group) {
-    $group_title = $main->wpa_stripslashes_string($field_group['title']) ?? '';
+    $group_title = wpa_stripslashes_string($field_group['title']) ?? '';
     $draft_table = 
     '<div class="page">
         <h2>Section '. $group_id .': '. $group_title .'</h2>
@@ -65,7 +65,7 @@ foreach ($questions as $group_id => $field_group) {
                     <td>'. $quiz->parent_id .'.'. $quiz->quiz_id .'</td>
                     <td>'. $quiz->submission_id .'</td>
                     <td>'. $first_name .' '. $last_name .'<br>'. $quiz->time .'</td>
-                    <td>'. $main->wpa_stripslashes_string($quiz->description) .'</td>
+                    <td>'. wpa_stripslashes_string($quiz->description) .'</td>
                     <td><div class="docs-upload">'. $documents_list .'</div></td>
                     <td class="no-padding"><table class="dcr-table">'. $assessor_info .'</table></td>
                     <td class="no-padding"><table class="dcr-table">'. $assessor_comments .'</table></td>

@@ -56,7 +56,7 @@ $saturn_invite_status = get_saturn_invite_status($user_id, $post_id);
 // Get all answers desciption of all submissions
 $all_quiz_pre_cmts = $main->get_dcr_quiz_answers_pre_submissions($post_id, $submission_id, $organisation_id);
 
-$is_disabled = ($assessment_status === 'pending');
+$is_disabled = $assessment_status === 'pending';
 $is_publish = $assessment_status === 'publish';
 $is_accepted = $assessment_status === 'accepted';
 
@@ -102,15 +102,15 @@ $exception_orgs_id = get_exception_orgs_id();
                             <div class="notifiDetails">
                             <?php foreach ($questions as $group_id => $gr_field) :
                                 $submission_data = $main->is_quiz_exist_in_object($group_id, $quizzes, $organisation_id);
-                                $section_title = $main->wpa_stripslashes_string($gr_field['title']) ?? '';
+                                $section_title = $gr_field['title'] ?? '';
                                 $sub_questions = $gr_field['list'] ?? array();
                                 ?>
-                                <h3><?php echo $group_id .'. '. $section_title; ?></h3>
+                                <h3><?php echo $group_id .'. '. esc_html($section_title); ?></h3>
                                 <ul>
                                 <?php
                                 foreach ($sub_questions as $sub_id => $field) :
                                     $submission_data_sub = $main->get_quiz_object_sub_question($group_id, $sub_id, $quizzes, $organisation_id);
-                                    $sub_title = $main->wpa_stripslashes_string($field['sub_title']) ?? '';
+                                    $sub_title = $field['sub_title'] ?? '';
                                     $all_status = $submission_data_sub['status'] ?? array();
                                     if (!empty($all_status)):
                                         $latest_status = '';
@@ -147,13 +147,13 @@ $exception_orgs_id = get_exception_orgs_id();
                                 }
                             }
                             $subm_current_name = '';
-                            $next_ver = $count_vers ? '( #'. $count_vers + 1 .' )': '';
+                            $next_ver = $count_vers ? $count_vers + 1 : 1;
                             if (isset($_GET['submission_id']) && !empty($_GET['submission_id'])) {
                                 $current_sub_id = $_GET['submission_id'];
                                 $subm_current_name = get_submission_version_name($current_sub_id);
                             }
                             else {
-                                $subm_current_name = 'New Submission '. $next_ver;
+                                $subm_current_name = 'New Submission ( #'. $next_ver .' )';
                             }
                             ?>
                             <div class="submission-vers">
@@ -164,7 +164,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                 </button>
                                 <ul class="sub-vers-list">
                                     <li class="sub-ver-item">
-                                        <a href="<?php echo get_the_permalink() ?>">New Submission <?php echo $next_ver ?></a>
+                                        <a href="<?php echo get_the_permalink() ?>">New Submission ( #<?php echo $next_ver ?> )</a>
                                     </li>
                                 <?php foreach ($all_submission_vers as $submission): 
                                     if ($submission->post_status == 'publish'):
@@ -247,54 +247,47 @@ $exception_orgs_id = get_exception_orgs_id();
                                 <?php foreach ($questions as $group_id => $field): 
 
                                     $group_question_title = $field['title'] ?? '';
-                                    $group_question_title = htmlentities(stripslashes(mb_convert_encoding($group_question_title, 'ISO-8859-1', 'UTF-8')));
                                     $sub_questions = $field['list'] ?? array();
                                     $item_class = $group_id === 1 ? 'active' : '';
                                     ?>
                                     <div class="group-question quiz <?php echo $item_class; ?>" id="quiz-item-<?php echo $group_id; ?>" data-group="<?php echo $group_id; ?>">
-                                        <div class="quizTitle"><?php echo $group_question_title; ?></div>
+                                        <div class="quizTitle"><?php echo esc_html($group_question_title); ?></div>
                                         <?php foreach ($sub_questions as $sub_id => $field): ?>
                                             <?php
                                                 $multiple_choice = $field['choice'] ?? null;
-                                                $sub_title = $main->wpa_stripslashes_string($field['sub_title']) ?? '';
-                                                $question_description = $field['description'] ?? '';
-                                                $question_advice = $field['advice'] ?? '';
+                                                $sub_title = $field['sub_title'] ?? '';
+                                                $question_description = wpa_clean_html_string($field['description']) ?? '';
+                                                $question_advice = wpa_clean_html_string($field['advice']) ?? '';
                                                 $choices_index = 0;
                                                 $additional_files = $field['additional_files'] ?? null;
                                                 $is_attachment = $field['supporting_doc'] ?? null;
                                                 $is_question_description = $field['is_description'] ?? null;
                                                 $arr_attachmentID = '';
                                                 $answers = '';
-
-                                                // remove all attr of html tags before print
-                                                $question_description = stripslashes($question_description);
-                                                $question_description = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $question_description);
-                                                $question_advice = stripslashes($question_advice);
-                                                $question_advice = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $question_advice);
+                                                $description = '';
+                                                $feedback = '';
 
                                                 $current_quiz_sub = $main->get_quiz_object_sub_question($group_id, $sub_id, $quizzes, $organisation_id);
 
                                                 if ($current_quiz_sub) {
                                                     if (array_key_exists('answers', $current_quiz_sub)) {
-                                                        $answers = $current_quiz_sub['answers'];
+                                                        $answers = $current_quiz_sub['answers'] ?? '';
                                                     }
                                                     if (array_key_exists('description', $current_quiz_sub)) {
-                                                        $description = $current_quiz_sub['description'];
-                                                        $description = $main->wpa_stripslashes_string($description);
+                                                        $description = $current_quiz_sub['description'] ?? '';
                                                     }
                                                     if (array_key_exists('attachment_ids', $current_quiz_sub)) {
-                                                        $arr_attachmentID = $current_quiz_sub['attachment_ids'];
+                                                        $arr_attachmentID = $current_quiz_sub['attachment_ids'] ?? '';
                                                         $arr_attachmentID = json_decode($arr_attachmentID, true);
                                                     }
                                                     if (array_key_exists('feedback', $current_quiz_sub)) {
-                                                        $feedback = $current_quiz_sub['feedback'];
-                                                        $feedback = $main->wpa_stripslashes_string($feedback);
+                                                        $feedback = $current_quiz_sub['feedback'] ?? '';
                                                     }
                                                 }
                                             ?>
                                             <div class="fieldsWrapper sub-quiz-<?php echo $sub_id; ?>" data-sub="<?php echo $sub_id; ?>">
                                                 <div class="fieldDetails">
-                                                    <h3 class="sub-quiz-title"><?php echo $group_id.'.'.$sub_id.' '.$sub_title; ?></h3>
+                                                    <h3 class="sub-quiz-title"><?php echo $group_id.'.'.$sub_id.' '. esc_html($sub_title); ?></h3>
                                                     <div class="question-description"><?php echo $question_description; ?></div>
                                                 </div>
                                                 <?php if (is_array($multiple_choice) && count($multiple_choice) > 0) : ?>
@@ -322,7 +315,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                     </div>
                                                 <?php endif; ?>
 
-                                                <?php if ($is_question_description) : ?>
+                                                <?php if ($is_question_description == true) : ?>
                                                     <div class="textAreaWrap">
                                                         <label for="quiz-description-<?php echo $group_id; ?>-<?php echo $sub_id; ?>">
                                                             Your comments 
@@ -333,7 +326,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 <?php echo $is_disabled ? 'disabled' : '' ?> 
                                                                 class="quiz-description textarea medium" 
                                                                 placeholder="Enter comments"
-                                                                rows="10"><?php if (isset($current_quiz_sub['description'])) echo $description; ?></textarea>
+                                                                rows="10"><?php echo wp_unslash($description); ?></textarea>
                                                     </div>
                                                     <?php if (!empty($all_quiz_pre_cmts) && $terms[0] == 'dcr'): ?>
                                                         <div class="pre-comments">
@@ -344,7 +337,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 if (isset($row->parent_id) && isset($row->quiz_id)):
                                                                     if ($row->parent_id == $group_id && $row->quiz_id == $sub_id && $submission_status != 'draft'):
                                                                         $cmt_time = date("M d Y H:i a", strtotime($row->time));
-                                                                        $cmt_desc = !empty($row->description) ? htmlentities(stripslashes($row->description)) : '';
+                                                                        $cmt_desc = !empty($row->description) ? wp_unslash($row->description) : '';
                                                                         $cmt_class = (strlen($cmt_desc) > 400) ? 'show_less' : '';
                                                                         ?>
                                                                         <?php if ($cmt_desc != null): ?>
@@ -378,7 +371,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                     <!-- / -->
                                                 <?php endif; ?>
 
-                                                <?php if ($is_attachment) : ?>
+                                                <?php if ($is_attachment == true) : ?>
                                                     <div class="question-add-files-container">
                                                         <div class="upload-files-top">
                                                             <button <?php echo $is_disabled ? 'disabled' : ''; ?> class="btn-open-upload-area">

@@ -20,7 +20,6 @@ if (isset($_COOKIE['userId']) && !empty($_COOKIE['userId'])) {
 
 $main = new WP_Assessment();
 $question_form = new WPA_Question_Form();
-$azure = new WP_Azure_Storage();
 $organisation_id = getUser($user_id)->records[0]->AccountId ?? '';
 $org_name = '';
 $org_data = sf_get_object_metadata('Account', $organisation_id);
@@ -131,24 +130,18 @@ $is_disabled = $status === 'pending';
                             <div class="quizDetails">
                                 <?php foreach ($questions as $quiz_id => $field): 
                                     $multiple_choice = $field['choice'] ?? array();
-                                    $question_description = $field['description'] ?? '';
-                                    $question_advice = $field['advice'] ?? '';
+                                    $question_description = wpa_clean_html_string($field['description']) ?? '';
+                                    $question_advice = wpa_clean_html_string($field['advice']) ?? '';
                                     $choices_index = 0;
-                                    $is_attachment = isset($field['is_question_supporting']) ? 1 : '';
-                                    $is_question_description = isset($field['is_description']) ? 1 : '';
-                                    $question_title = $main->wpa_stripslashes_string($field['title']) ?? '';
+                                    $is_attachment = $field['is_question_supporting'] ?? '';
+                                    $is_question_description = $field['is_description'] ?? '';
+                                    $question_title = $field['title'] ?? '';
                                     $item_class = $quiz_id === 1 ? 'active' : '';
                                     $answers = null;
                                     $description = null;
                                     $attachment_id = null;
                                     $feedback = null;
                                     $current_quiz = $main->is_quiz_exist_in_object($quiz_id, $quizzes, $organisation_id);
-
-                                    // remove all attr of html tags before print
-                                    $question_description = stripslashes($question_description);
-                                    $question_description = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $question_description);
-                                    $question_advice = stripslashes($question_advice);
-                                    $question_advice = preg_replace("/<([a-z][a-z0-9]*)[^>]*?(\/?)>/si",'<$1$2>', $question_advice);
 
                                     if ($current_quiz) {
                                         $item_class = $total_quiz === $quiz_id ? 'active' : '';
@@ -174,7 +167,7 @@ $is_disabled = $status === 'pending';
                                     }
                                     ?>
                                     <div class="quiz <?php echo $item_class; ?> quiz-<?php echo $quiz_id; ?>" id="quiz-item-<?php echo $quiz_id ?>" data-group="<?php echo $quiz_id ?>" data-quiz="<?php echo $quiz_id ?>">
-                                        <div class="quizTitle"><?php echo $question_title; ?></div>
+                                        <div class="quizTitle"><?php echo esc_html($question_title); ?></div>
                                         <div class="fieldsWrapper">
                                             <div class="fieldDetails">
                                                 <div class="question-description"><?php echo $question_description; ?></div>
@@ -206,7 +199,7 @@ $is_disabled = $status === 'pending';
                                                 </div>
                                             <?php endif; ?>
 
-                                            <?php if ($is_question_description) : ?>
+                                            <?php if ($is_question_description == true) : ?>
                                                 <div class="textAreaWrap">
                                                     <label for="quiz-description-<?php echo $quiz_id; ?>">
                                                         Your comments 
@@ -219,7 +212,7 @@ $is_disabled = $status === 'pending';
                                                             rows="10"><?php if (isset($current_quiz['description'])) echo $description; ?></textarea>
                                                 </div>
                                             <?php endif; ?>
-                                            <?php if ($is_attachment) : ?>
+                                            <?php if ($is_attachment == true) : ?>
                                                 <div class="fileUploaderWrap">
                                                     <input type="file" class="assessment-file" <?php echo $is_disabled ? 'disabled' : '' ?> />
                                                     <div class="uploading-wrapper">
