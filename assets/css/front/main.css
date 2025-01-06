@@ -10,7 +10,6 @@ span,
 ul,
 li,
 a,
-.btn-default,
 textarea {
     margin: 0;
     padding: 0;
@@ -777,10 +776,16 @@ body {
     padding: 24px 80px 30px;
     font-weight: normal;
     font-size: 1.125rem;
+    line-height: 1.3;
     position: relative;
 }
 .quizAdvice.feedback-area {
+    overflow-y: auto;
+    max-height: 500px;
     background-color: #e8e8e8;
+}
+.quizAdvice.feedback-area.expand {
+    max-height: 100%;
 }
 .quizAdvice .advice-area > *:first-child {
     margin-top: 0;
@@ -836,7 +841,8 @@ body {
 /* style Feedbacks area */
 
 .feedback-list .feedback-item {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed #999;
 }
 
 .feedback-list .feedback-item:last-child {
@@ -860,9 +866,54 @@ body {
 
 .feedback-item ._content {
     margin-left: 16px;
-    font-size: 1.125rem;
     line-height: 140%;
     white-space: pre-wrap;
+    font-size: 1rem;
+}
+.feedback-item ._content:last-child  {
+    margin-bottom: 0;
+}
+.feedback-item ._content * {
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+.feedback-item ._content h1 {
+    font-size: 1.5rem;
+}
+.feedback-item ._content h2 {
+    font-size: 1.4rem;
+}
+.feedback-item ._content h3 {
+    font-size: 1.3rem;
+}
+.feedback-item ._content h4 {
+    font-size: 1.2rem;
+}
+.feedback-item ._content h5 {
+    font-size: 1.1rem;
+}
+.feedback-item ._content h6 {
+    font-size: 1rem;
+}
+.feedback-item ._content ul {
+    list-style: disc;
+    margin-left: 30px;
+}
+.feedback-item ._content a {
+    color: #663077;
+}
+.feedback-area-toggle {
+    margin-top: 16px;
+    text-align: center;
+}
+.feedback-area-toggle .btn-toggle-feedback {
+    margin: auto;
+    width: fit-content;
+    font-size: 1rem;
+    font-family: "Avenir-Medium";
+    text-decoration: underline !important;
+    text-underline-offset: 2px;
+    color: #663077 !important;
 }
 
 /* .style Feedbacks area */
@@ -872,7 +923,6 @@ body {
     position: relative;
     margin-top: 40px;
 }
-
 .fileUploaderWrap input[type="file"] {
     border: none;
     max-width: 400px;
@@ -881,19 +931,16 @@ body {
     border-radius: 8px;
     padding: 8px 20px;
 }
-
 .fileUploaderWrap .uploading-wrapper {
     display: none;
     top: -10px;
     right: -70px;
     position: absolute;
 }
-
 .fileUploaderWrap .uploading-wrapper img {
     width: 70px;
     height: 70px;
 }
-
 .fileInstruct {
     margin-top: 20px;
 }
@@ -906,7 +953,6 @@ body {
     position: relative;
     text-align: center;
 }
-
 .formController button {
     position: relative;
     display: flex;
@@ -929,7 +975,6 @@ body {
 .formController button .icon {
     font-size: 16px;
 }
-
 .formController .__center{
     display: flex;
     gap: 24px;
@@ -949,31 +994,26 @@ body {
 .primaryBtn.loading .wpa-spinner {
     display: block;
 }
-
 .formController button.nextPrevBtn {
     padding: 14px 32px;
     transition: all 0s;
 }
-
 .nextPrevBtn {
     visibility: hidden;
 }
 .nextPrevBtn.show {
     visibility: visible;
 }
-
 .formController.not-allowed button {
     opacity: 0.5;
     cursor: not-allowed;
 }
-
 .formController.not-allowed button:hover {
     opacity: 0.5;
     cursor: not-allowed;
     background-color: #dfdfdf;
     color: #212529;
 }
-
 .formController #saving-spinner {
     width: fit-content;
     height: 100%;
@@ -984,7 +1024,6 @@ body {
     transform: translate(-50%, -50%);
     text-align: center;
 }
-
 .formController #saving-spinner img {
     width: 70px;
     height: 70px;
@@ -1034,6 +1073,10 @@ body {
     color: #212529;
     font-weight: normal;
     font-family: "Avenir-Medium";
+}
+.question-add-files-container .additional-files {
+    visibility: hidden;
+    position: absolute;
 }
 
 .btn-add-files-wrapper {
@@ -1590,7 +1633,6 @@ body.single-reports {
 .pre-comments {
     margin-top: 20px;
 }
-
 .comment {
     display: flex;
     flex-direction: column;
@@ -1602,7 +1644,6 @@ body.single-reports {
     border-radius: 4px;
     line-height: 140%;
 }
-
 .comment ._datetime {
     width: 100%;
     margin-bottom: 8px;
@@ -1611,15 +1652,12 @@ body.single-reports {
     line-height: 1;
     opacity: 0.8;
 }
-
 .comment ._content {
     width: 100%;
 }
-
 .comment ._content .show_full {
     display: none;
 }
-
 .comment a.btn-showmore-cmt {
     width: fit-content;
     color: #0d6efd!important;

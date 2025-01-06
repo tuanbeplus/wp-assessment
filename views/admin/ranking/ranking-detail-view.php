@@ -129,7 +129,7 @@ $ranking_by_key_areas = $and_ranking->ranking_orgs_group_question($assessment_id
                 <div class="fr-row">
                   <div class="pr-info">
                     <h3><?php echo $gr_id.' - '.$gr_title; ?></h3>
-                    <a class="btn-expland-fr active" role="button">
+                    <a class="btn-expand-fr active" role="button">
                         <span class="text">Collapse</span>
                         <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
                     </a>

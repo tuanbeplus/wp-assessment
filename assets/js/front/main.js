@@ -1,4 +1,4 @@
-!(function ($) {
+(function ($) {
 	"use strict";
 
     const assessmentIdInstance = $('#assessment_id');
@@ -276,12 +276,14 @@
      */
     function updateFormController() {
         let countQuizzes = getQuizzesCount();
-        let activeQuizId = getActiveQuizId();
+        let activeQuizId = getActiveQuizId();        
 
         if (activeQuizId == 1) {
             btn_Prev.removeClass('show');
+            btn_Next.addClass('show');
         }
         else if (activeQuizId >= countQuizzes) {
+            btn_Prev.addClass('show');
             btn_Next.removeClass('show');
         }
         else {
@@ -311,7 +313,7 @@
         if (!mainWrapper.length) return false; // Ensure the main wrapper exists
     
         const countQuizzes = getQuizzesCount();
-        if (quizId < 1 || quizId > countQuizzes) return false; // Validate quizId range
+        if (!quizId || !countQuizzes) return false;
     
         const stepTarget = mainWrapper.find(`#step-${quizId}`);
         const quizTarget = mainWrapper.find(`#quiz-item-${quizId}`);
@@ -327,54 +329,50 @@
     
             return true; // Successfully activated
         }
-        return false; // Targets not found
+        else {
+            return false; // Targets not found
+        }
     }
 
     /**
-     * Upload multiple attachment files
+     * Upload multiple attachment files.
+     * 
+     * @param {FileList} filesInput - List of files to be uploaded.
+     * @param {jQuery} inputElement - The input element that triggered the upload.
      */
     function uploadMultipleAttachments(filesInput, inputElement) {
-
-        let group_questions_id =  inputElement.closest('.group-question').data('group')
-        let sub_question_id = inputElement.closest('.fieldsWrapper').data('sub')
-        let add_files_container = inputElement.closest('.question-add-files-container')
-        let upload_message_error = add_files_container.find('.upload-message._error')
-
-        var file_id_input = '';
-        var file_item = '';
-        var item_index = '';
-        var fileName = '';
-        var filesList = add_files_container.find(".filesList");
-        var file_ext = '';
-
-        upload_message_error.hide()
-
-        for (var i = 0; i < filesInput.length; i++) {
-            // Upload droppedFiles[i] to Media
-            file_item = $('<span/>', {class: 'file-item', style: 'display:none;',})
-            // fileName = $('<a/>', { class: 'name', href: '', text: filesInput.item(i).name,})
-            fileName = $('<span/>', { class: 'name', text: filesInput.item(i).name,})
-            fileName.prepend('<i class="fa-solid fa-paperclip"></i>')
-            file_id_input  = '<input name="" type="hidden" class="input-file-hiden additional-files" value=""/>';
-
-            file_item
-                .append(fileName)
-                .append(file_id_input)
-                .append('<button class="file-delete" aria-label="Remove this uploaded file"><i class="fa-regular fa-trash-can"></i></button>')
-
-            file_ext = filesInput.item(i).name.split('.').pop().toLowerCase();
-                
-            filesList.append(file_item);
-
-            item_index = filesList.children().length
-
-            file_item.addClass('file-item-' + item_index)
-            file_item.find('input.input-file-hiden').attr('name', 'questions_'+group_questions_id+'_quiz_'+sub_question_id+'_attachmentIDs_'+ item_index )
-            file_item.find('input.input-file-hiden').addClass('additional-file-id-'+ item_index)
-            file_item.find('span.name').addClass('file-name-'+ item_index)
-
-            frontUploadAdditionalFiles(filesInput[i], inputElement, item_index);
-        }
+        // Fetch relevant DOM elements and data attributes
+        const groupQuestionsId = inputElement.closest('.group-question').data('group');
+        const subQuestionId = inputElement.closest('.fieldsWrapper').data('sub');
+        const addFilesContainer = inputElement.closest('.question-add-files-container');
+        const uploadMessageError = addFilesContainer.find('.upload-message._error');
+        const filesList = addFilesContainer.find(".filesList");
+        // Hide any existing error messages
+        uploadMessageError.hide();
+        // Iterate through the files and process each one
+        Array.from(filesInput).forEach((file, index) => {
+            const fileIndex = filesList.children().length + 1; // Calculate the file index
+            // Template for creating a file item
+            const fileItemHTML = (`
+                <span class="file-item file-item-${fileIndex}" style="display:none;">
+                    <span class="name file-name-${fileIndex}">
+                        <i class="fa-solid fa-paperclip"></i> ${file.name}
+                    </span>
+                    <input 
+                        type="hidden" 
+                        class="input-file-hidden additional-files additional-file-id-${fileIndex}" 
+                        name="questions_${groupQuestionsId}_quiz_${subQuestionId}_attachmentIDs_${fileIndex}"
+                    />
+                    <button class="file-delete" aria-label="Remove this uploaded file">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </span>
+            `);
+            // Append the generated file item to the files list
+            filesList.append(fileItemHTML);
+            // Handle file upload
+            frontUploadAdditionalFiles(file, inputElement, fileIndex);
+        });
     }
 
     function getDescriptionValue() {
@@ -611,14 +609,14 @@
                     fileUploaderWrap.find('.btn-add-files-wrapper').removeClass('not-allowed')
                     fileUploaderWrap.find('.additional-file-id-' + index).val(attachment_id)
                     fileUploaderWrap.find('.file-item-' + index).removeAttr('style')
-                    console.log(response.message);
+                    console.log(response);
                 } 
                 else {
                     fileUploaderWrap.find('.spinner-upload').hide()
                     dropArea.removeClass('uploading')
                     upload_message_error.find('.message').text('There was aproblem attaching one of your files. Please try again.')
                     upload_message_error.css('display', 'flex')
-                    console.log(response.message);
+                    console.log(response);
                 }
                 fileUploaderWrap.find('.spinner-upload').hide()
                 dropArea.removeClass('uploading')
@@ -775,7 +773,7 @@
         if (movedQuiz) {
             updateFormController();
         }
-    })
+    });
 
     // Click to go to Prev Quiz
     $(document).on('click', '#go-back-quiz-btn', function (e) {
@@ -908,43 +906,57 @@
         e.preventDefault();
     });
 
-    // EventListener for delete file item
-    $(document).on('click', '.file-delete', function(){
-        // Delete confirm
-        if ( ! confirm('Do you want to delete this file?')) {
+    // Event Listener for deleting a file item
+    $(document).on('click', '.file-delete', function () {
+        // Confirm before deletion
+        if (!confirm('Do you want to delete this file?')) {
             return;
         }
-        let file_item = $(this).closest('.file-item')
-        let input_file_hiden = file_item.find('.input-file-hiden')
-        let attachmentId = input_file_hiden.val()
-        let assessmentId = assessmentIdInstance.val();
-        let organisationId = organisationIdInstance.val();
-        let upload_file_container = $(this).closest('.question-add-files-container')
-        let upload_message = upload_file_container.find('.upload-message._success')
+        // Fetch relevant elements and data
+        const fileItem = $(this).closest('.file-item');
+        const attachmentId = fileItem.find('input.input-file-hidden').val();
+        const assessmentId = assessmentIdInstance.val();
+        const organisationId = organisationIdInstance.val();
+        const uploadFileContainer = $(this).closest('.question-add-files-container');
+        const uploadMessage = uploadFileContainer.find('.upload-message._success');
 
+        if (!attachmentId || !assessmentId || !organisationId) {
+            alert('Missing required data for deletion.');
+            return;
+        }
+        // AJAX request for deleting the file
         $.ajax({
             type: 'POST',
             url: ajaxUrl,
-            data:{
-                'action' : 'delete_azure_attachments_ajax',
-                'attachment_id' : attachmentId,
-                'assessment_id' : assessmentId,
-                'organisation_id' : organisationId,
+            data: {
+                action: 'delete_azure_attachments_ajax',
+                attachment_id: attachmentId,
+                assessment_id: assessmentId,
+                organisation_id: organisationId,
             },
-            beforeSend : function ( xhr ) {
-                file_item.css('opacity', '0.5').attr('disable')
+            beforeSend: function () {
+                fileItem.css('opacity', '0.5').prop('disabled', true);
             },
-            success:function(response){
+            success: function (response) {
                 console.log(response);
-                file_item.remove();
-                upload_message.text('Delete file successfully.');
-                setTimeout(function() {
-                    upload_message.show()
-                }, 100)
-                setTimeout(function() {
-                    upload_message.hide()
-                }, 10000)
-            }
+                if (response.status) {
+                    fileItem.remove();
+                    uploadMessage.text('File deleted successfully.').show();
+                } else {
+                    uploadMessage.text('Failed to delete the file.').show();
+                    alert(response.message || 'An unknown error occurred.');
+                    fileItem.css('opacity', '1').prop('disabled', false);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(`Error: ${error}`);
+                fileItem.css('opacity', '1').prop('disabled', false);
+            },
+            complete: function () {
+                setTimeout(() => {
+                    uploadMessage.hide();
+                }, 10000); // Hide the message after 10 seconds
+            },
         });
     });
 
@@ -1082,6 +1094,21 @@
         let wrapper = $(this).closest('.submission-vers');
         let sub_vers_list = wrapper.find('.sub-vers-list');
         sub_vers_list.slideToggle(200);
+    });
+
+    $(document).on('click', '.btn-toggle-feedback', function (e){
+        e.preventDefault();
+        const questionWrapper = $(this).closest('.fieldsWrapper');
+        const feedbacksArea = questionWrapper.find('.feedback-area');
+        if (feedbacksArea.hasClass('expand')) {
+            feedbacksArea.removeClass('expand');
+            $(this).text('Expand feedbacks');
+            $('html, body').animate({ scrollTop: feedbacksArea.offset().top - 30 }, 200);
+        }
+        else {
+            feedbacksArea.addClass('expand');
+            $(this).text('Collapse feedbacks');
+        }
     });
 
 })(jQuery);

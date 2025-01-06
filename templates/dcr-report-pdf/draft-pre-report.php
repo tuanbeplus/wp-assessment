@@ -33,7 +33,7 @@ foreach ($questions as $group_id => $field_group) {
                 $first_name = get_user_meta($wp_user_id, 'first_name', true);
                 $last_name = get_user_meta($wp_user_id, 'last_name', true);
                 $documents_list = '';
-                $documents_uploaded = $azure->get_azure_attachments_uploaded($quiz->parent_id, $quiz->quiz_id, $assessment_id, $organisation_id) ?? array();
+                $documents_uploaded = $azure_documents_uploaded[$quiz->parent_id][$quiz->quiz_id] ?? '';
                 if (!empty($documents_uploaded)) {
                     foreach ($documents_uploaded as $document) {
                         $documents_list .= '<div>
@@ -47,15 +47,14 @@ foreach ($questions as $group_id => $field_group) {
                 }
                 $assessor_info = '';
                 $assessor_comments = '';
-                $feedbacks_list = $assessor_feedbacks[$quiz->parent_id][$quiz->quiz_id] ?? array();
+                $feedbacks_list = $assessor_feedbacks[$quiz->parent_id][$quiz->quiz_id] ?? '';
                 if (!empty($feedbacks_list)) {
                     foreach ($feedbacks_list as $feedback) {
                         $assessor_name = $feedback['user_name'] ?? '';
                         $date_time = $feedback['time'] ?? '';
                         $assessor_info .= '<tr><td>'. $assessor_name .'<br>'. $date_time .'</td></tr>';
-
                         $comment = $feedback['feedback'] ?? '';
-                        $assessor_comments .= '<tr><td>'. $comment .'</td></tr>';
+                        $assessor_comments .= '<tr><td>'. wp_kses_post(htmlspecialchars_decode($comment)) .'</td></tr>';
                     }
                 }
 

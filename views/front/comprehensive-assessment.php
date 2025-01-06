@@ -36,7 +36,15 @@ $terms = get_assessment_terms($post_id);
 $submission_id = $main->get_latest_submission_id($post_id, $organisation_id);
 $all_submission_vers = $main->get_all_dcr_submission_vers($post_id, $organisation_id);
 $quizzes = $main->get_quizzes_by_assessment_and_submissions($post_id, $submission_id, $organisation_id);
-
+$reorganize_quizzes = [];
+// Loop through the original array and reorganize the data
+if (!empty($quizzes)) {
+    foreach ($quizzes as $row) {
+        // Create the structure based on parent_id and quiz_id
+        $reorganize_quizzes[$row->parent_id][$row->quiz_id][] = $row;
+    }
+}
+$azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($post_id, $organisation_id);
 $show_first_active_view = false;
 $total_quiz = is_array($questions) ? count($questions) : 0;
 
@@ -60,28 +68,23 @@ $is_disabled = $assessment_status === 'pending';
 $is_publish = $assessment_status === 'publish';
 $is_accepted = $assessment_status === 'accepted';
 
-if (($terms[0] == 'dcr')) {
-    if (isset($_GET['submission_id'])) {
-        $is_disabled = true;
-    }
-    else {
-        $is_disabled = false;
-    }
+if (($terms[0] === 'dcr')) {
+    $is_disabled = isset($_GET['submission_id']);
 }
 
 // Get the Exception Organisations ID
 $exception_orgs_id = get_exception_orgs_id();
 ?>
 
-<?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
+<?php if (current_user_can('administrator') || ($user_id && is_user_logged_in())): ?>
 
     <?php if (current_user_can('administrator') || $is_all_users_can_access == true || $saturn_invite_status == 'Active'): ?>
 
-        <?php if (isset($_COOKIE['userId'])): ?>
-            <input type="hidden" id="sf_user_id" value="<?php echo $_COOKIE['userId']; ?>" />
+        <?php if (!empty($user_id)): ?>
+            <input type="hidden" id="sf_user_id" value="<?php echo $user_id ?>" />
         <?php endif; ?>
 
-        <?php if (isset($_COOKIE['sf_name'])): ?>
+        <?php if (!empty($_COOKIE['sf_name'])): ?>
             <input type="hidden" id="sf_user_name" value="<?php echo $_COOKIE['sf_name']; ?>" />
         <?php endif; ?>
         
@@ -90,49 +93,53 @@ $exception_orgs_id = get_exception_orgs_id();
         <input type="hidden" id="org_name" value="<?php echo $org_name; ?>"/>
 
         <section id="assessment-main-wrapper" class="formWrapper" 
-                data-required_answer_all="<?php echo $is_required_answer_all ?>"
-                data-required_document_all="<?php echo $is_required_document_all ?>">
+            data-required_answer_all="<?php echo $is_required_answer_all ?>"
+            data-required_document_all="<?php echo $is_required_document_all ?>">
 
-                <?php if ($assessment_status == 'rejected' && $questions && !$is_disabled) : ?>
-                    <!-- Notification Box -->
-                    <div class="notificationBar rejected">
-                        <div class="bgRed"><h2>ATTENTION</h2></div>
-                        <div class="messageBox">
-                            <p class="result">Your submission has been rejected by the moderator, please see the results below.</p>
-                            <div class="notifiDetails">
-                            <?php foreach ($questions as $group_id => $gr_field) :
-                                $submission_data = $main->is_quiz_exist_in_object($group_id, $quizzes, $organisation_id);
-                                $section_title = $gr_field['title'] ?? '';
-                                $sub_questions = $gr_field['list'] ?? array();
+            <?php if ($assessment_status == 'rejected' && $questions): ?>
+                <!-- Notification Box -->
+                <div class="notificationBar rejected">
+                    <div class="bgRed"><h2>ATTENTION</h2></div>
+                    <div class="messageBox">
+                        <p class="result">Your submission has been rejected by the moderator, please see the results below.</p>
+                        <div class="notifiDetails">
+                        <?php foreach ($questions as $group_id => $gr_field) :
+                            $section_title = $gr_field['title'] ?? '';
+                            $sub_questions = $gr_field['list'] ?? array();
+                            ?>
+                            <h3><?php echo $group_id .'. '. esc_html($section_title); ?></h3>
+                            <ul>
+                            <?php
+                            foreach ($sub_questions as $sub_id => $field):
+                                $submission_data_sub = $reorganize_quizzes[$group_id][$sub_id] ?? '';
+                                $sub_title = $field['sub_title'] ?? '';
+                                if (!empty($submission_data_sub)) {
+                                    $latest_status = '';
+                                    foreach ($submission_data_sub as $row) {
+                                        if (strtolower($row->status) === 'accepted') {
+                                            $latest_status = 'Accepted';
+                                            break;
+                                        }
+                                        if ($row->submission_id == $submission_id) {
+                                            $latest_status = ucwords($row->status);
+                                        } 
+                                        elseif (!$latest_status) { // Assign only if no status is set yet
+                                            $latest_status = ucwords($row->status);
+                                        }
+                                    }
+                                    if (!empty($latest_status)) {
+                                        echo '<li>'.$group_id.'.'.$sub_id.' - <strong class="remarks '.wpa_convert_to_slug($latest_status).'">'.$latest_status.'</strong></li>';
+                                    }
+                                }
                                 ?>
-                                <h3><?php echo $group_id .'. '. esc_html($section_title); ?></h3>
-                                <ul>
-                                <?php
-                                foreach ($sub_questions as $sub_id => $field) :
-                                    $submission_data_sub = $main->get_quiz_object_sub_question($group_id, $sub_id, $quizzes, $organisation_id);
-                                    $sub_title = $field['sub_title'] ?? '';
-                                    $all_status = $submission_data_sub['status'] ?? array();
-                                    if (!empty($all_status)):
-                                        $latest_status = '';
-                                        foreach ($all_status as $status):
-                                            if ($status == 'accepted'):
-                                                $latest_status = 'accepted';
-                                                break;
-                                            endif;
-                                            $latest_status = $status;
-                                        endforeach;
-                                        echo '<li>'.$group_id.'.'.$sub_id.' - <strong class="remarks '.$latest_status.'">'.$latest_status.'</strong></li>';
-                                    endif;
-                                    ?>
-                                <?php endforeach; ?>
-                                </ul>
                             <?php endforeach; ?>
-                            </div>
+                            </ul>
+                        <?php endforeach; ?>
                         </div>
-                        <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
-                    </div><!-- .Notification Box -->
-                    
-                <?php endif; ?>
+                    </div>
+                    <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
+                </div><!-- .Notification Box -->
+            <?php endif; ?>
 
             <div class="container">
                 <div class="topBar <?php if (!in_array('dcr', $terms) || empty($all_submission_vers)) echo 'flex'; ?>">
@@ -221,11 +228,11 @@ $exception_orgs_id = get_exception_orgs_id();
                                 <img class="form-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="Spinner"> 
                             </div>
                             <div class="stepsWrap">
-                                <?php foreach ($questions as $group_id => $field):
-                                    $questions_list = $field['list'] ?? array();
+                                <?php foreach ($questions as $group_id => $gr_field):
+                                    $questions_list = $gr_field['list'] ?? array();
                                     $is_step_completed = $main->is_group_quiz_completed($questions_list, $group_id, $quizzes);
                                     $step_completed_class = $is_step_completed ? 'completed' : '';
-                                ?>
+                                    ?>
                                     <button id="step-<?php echo $group_id; ?>" class="step step-item-container <?php echo $step_completed_class; ?> step-<?php echo $group_id; ?>" data-id="<?php echo $group_id; ?>">
                                         <span class="editImg">
                                             <img src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/edit.svg" alt="edit"> 
@@ -244,46 +251,49 @@ $exception_orgs_id = get_exception_orgs_id();
                             </div>
 
                             <div class="quizDetails">
-                                <?php foreach ($questions as $group_id => $field): 
-
-                                    $group_question_title = $field['title'] ?? '';
-                                    $sub_questions = $field['list'] ?? array();
+                                <?php foreach ($questions as $group_id => $gr_field): 
+                                    $group_question_title = $gr_field['title'] ?? '';
+                                    $sub_questions = $gr_field['list'] ?? array();
                                     $item_class = $group_id === 1 ? 'active' : '';
                                     ?>
                                     <div class="group-question quiz <?php echo $item_class; ?>" id="quiz-item-<?php echo $group_id; ?>" data-group="<?php echo $group_id; ?>">
                                         <div class="quizTitle"><?php echo esc_html($group_question_title); ?></div>
-                                        <?php foreach ($sub_questions as $sub_id => $field): ?>
-                                            <?php
-                                                $multiple_choice = $field['choice'] ?? null;
-                                                $sub_title = $field['sub_title'] ?? '';
-                                                $question_description = wpa_clean_html_string($field['description']) ?? '';
-                                                $question_advice = wpa_clean_html_string($field['advice']) ?? '';
-                                                $choices_index = 0;
-                                                $additional_files = $field['additional_files'] ?? null;
-                                                $is_attachment = $field['supporting_doc'] ?? null;
-                                                $is_question_description = $field['is_description'] ?? null;
-                                                $arr_attachmentID = '';
-                                                $answers = '';
-                                                $description = '';
-                                                $feedback = '';
+                                        <?php foreach ($sub_questions as $sub_id => $sub_field): 
+                                            $multiple_choice = $sub_field['choice'] ?? null;
+                                            $sub_title = $sub_field['sub_title'] ?? '';
+                                            $question_description = wpa_clean_html_string($sub_field['description']) ?? '';
+                                            $question_advice = wpa_clean_html_string($sub_field['advice']) ?? '';
+                                            $choices_index = 0;
+                                            $additional_files = $sub_field['additional_files'] ?? null;
+                                            $is_attachment = $sub_field['supporting_doc'] ?? null;
+                                            $is_question_desc = $sub_field['is_description'] ?? null;
+                                            $arr_attachmentID = '';
+                                            $answers = '';
+                                            $description = '';
+                                            $pre_cmts = [];
+                                            $feedback = '';
+                                            $current_quiz_rows = $reorganize_quizzes[$group_id][$sub_id] ?? '';
+                                            $azure_attachment_rows = $azure_attachments_uploaded[$group_id][$sub_id] ?? '';
 
-                                                $current_quiz_sub = $main->get_quiz_object_sub_question($group_id, $sub_id, $quizzes, $organisation_id);
-
-                                                if ($current_quiz_sub) {
-                                                    if (array_key_exists('answers', $current_quiz_sub)) {
-                                                        $answers = $current_quiz_sub['answers'] ?? '';
+                                            if (!empty($current_quiz_rows)) {
+                                                foreach ($current_quiz_rows as $row) {
+                                                    if ($row->submission_id == $submission_id) {
+                                                        $feedback = !empty($row->feedback) ? $row->feedback : '';
                                                     }
-                                                    if (array_key_exists('description', $current_quiz_sub)) {
-                                                        $description = $current_quiz_sub['description'] ?? '';
+                                                    else {
+                                                        $pre_cmts[] = $row;
                                                     }
-                                                    if (array_key_exists('attachment_ids', $current_quiz_sub)) {
-                                                        $arr_attachmentID = $current_quiz_sub['attachment_ids'] ?? '';
-                                                        $arr_attachmentID = json_decode($arr_attachmentID, true);
+                                                    if (empty($answers)) {
+                                                        $answers = !empty($row->answers) ? json_decode($row->answers) : '';
                                                     }
-                                                    if (array_key_exists('feedback', $current_quiz_sub)) {
-                                                        $feedback = $current_quiz_sub['feedback'] ?? '';
+                                                    if (empty($description)) {
+                                                        $description = !empty($row->description) ? $row->description : '';
+                                                    }
+                                                    if (empty($arr_attachmentID)) {
+                                                        $arr_attachmentID = !empty($row->attachment_ids) ? json_decode($row->attachment_ids) : '';
                                                     }
                                                 }
+                                            }
                                             ?>
                                             <div class="fieldsWrapper sub-quiz-<?php echo $sub_id; ?>" data-sub="<?php echo $sub_id; ?>">
                                                 <div class="fieldDetails">
@@ -295,7 +305,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                         <?php foreach ($multiple_choice as $item) :
                                                             $choices_index++;
                                                             $is_checked = $main->is_answer_exist_title($item['answer'], $answers) ? 'checked' : '';
-                                                        ?>
+                                                            ?>
                                                             <div class="checkBox">
                                                                 <input class="form-check-input <?php echo $is_checked; ?>" 
                                                                         type="radio" value="<?php echo $item['answer']; ?>" <?php echo $is_disabled ? 'disabled' : '' ?>
@@ -315,7 +325,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                     </div>
                                                 <?php endif; ?>
 
-                                                <?php if ($is_question_description == true) : ?>
+                                                <?php if ($is_question_desc == true) : ?>
                                                     <div class="textAreaWrap">
                                                         <label for="quiz-description-<?php echo $group_id; ?>-<?php echo $sub_id; ?>">
                                                             Your comments 
@@ -328,47 +338,43 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 placeholder="Enter comments"
                                                                 rows="10"><?php echo wp_unslash($description); ?></textarea>
                                                     </div>
-                                                    <?php if (!empty($all_quiz_pre_cmts) && $terms[0] == 'dcr'): ?>
-                                                        <div class="pre-comments">
-                                                            <p>Previous comments:</p>
-                                                            <ul class="pre-comments-list">
-                                                            <?php foreach ($all_quiz_pre_cmts as $row): 
-                                                                $submission_status = get_post_meta($row->submission_id, 'assessment_status', true);
-                                                                if (isset($row->parent_id) && isset($row->quiz_id)):
-                                                                    if ($row->parent_id == $group_id && $row->quiz_id == $sub_id && $submission_status != 'draft'):
-                                                                        $cmt_time = date("M d Y H:i a", strtotime($row->time));
-                                                                        $cmt_desc = !empty($row->description) ? wp_unslash($row->description) : '';
-                                                                        $cmt_class = (strlen($cmt_desc) > 400) ? 'show_less' : '';
-                                                                        ?>
-                                                                        <?php if ($cmt_desc != null): ?>
-                                                                            <li class="comment <?php echo $cmt_class; ?>">
-                                                                                <span class="_datetime"><?php echo $cmt_time; ?></span>
-                                                                                <div class="_content">
-                                                                                <?php 
-                                                                                    if (strlen($cmt_desc) > 400) {
-                                                                                        echo '<div class="show_less">'.substr($cmt_desc, 0, 400).'...</div>';
-                                                                                        echo '<div class="show_full">'.$cmt_desc.'</div>';
-                                                                                    }
-                                                                                    else {
-                                                                                        echo $cmt_desc;
-                                                                                    }
-                                                                                ?>
-                                                                                </div>
-                                                                                <?php if (strlen($cmt_desc) > 400) echo '<a class="btn-showmore-cmt">Show more</a>';?>
-                                                                            </li>
-                                                                        <?php endif; ?>
-                                                                    <?php endif; ?>
-                                                                <?php endif; ?>
-                                                            <?php endforeach; ?>
-                                                            </ul>
-                                                        </div>
-                                                    <?php endif; ?>
                                                 <?php else: ?>
                                                     <!-- For NULL description if assessment don't required -->
                                                     <div class="textAreaWrap" style="display:none;">
                                                         <textarea class="quiz-description textarea">description</textarea>
                                                     </div>
                                                     <!-- / -->
+                                                <?php endif; ?>
+
+                                                <?php if (!empty($pre_cmts) && $terms[0] == 'dcr'): ?>
+                                                    <div class="pre-comments">
+                                                        <p>Previous comments:</p>
+                                                        <ul class="pre-comments-list">
+                                                        <?php foreach ($pre_cmts as $row): 
+                                                            $cmt_time = date("M d Y H:i a", strtotime($row->time)) ?? '';
+                                                            $cmt_desc = !empty($row->description) ? wp_unslash($row->description) : '';
+                                                            $cmt_class = (strlen($cmt_desc) > 400) ? 'show_less' : '';
+                                                            ?>
+                                                            <?php if (!empty($cmt_desc)): ?>
+                                                                <li class="comment <?php echo $cmt_class; ?>">
+                                                                    <span class="_datetime"><?php echo $cmt_time; ?></span>
+                                                                    <div class="_content">
+                                                                    <?php 
+                                                                        if (strlen($cmt_desc) > 400) {
+                                                                            echo '<div class="show_less">'.substr($cmt_desc, 0, 400).'...</div>';
+                                                                            echo '<div class="show_full">'.$cmt_desc.'</div>';
+                                                                        }
+                                                                        else {
+                                                                            echo $cmt_desc;
+                                                                        }
+                                                                    ?>
+                                                                    </div>
+                                                                    <?php if (strlen($cmt_desc) > 400) echo '<a class="btn-showmore-cmt">Show more</a>';?>
+                                                                </li>
+                                                            <?php endif; ?>
+                                                        <?php endforeach; ?>
+                                                        </ul>
+                                                    </div>
                                                 <?php endif; ?>
 
                                                 <?php if ($is_attachment == true) : ?>
@@ -419,7 +425,6 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                             class="additional-files"
                                                                             type="file"
                                                                             name="file[]"
-                                                                            style="visibility: hidden; position: absolute;"
                                                                             multiple />
                                                                 </div>
                                                             </div>
@@ -427,17 +432,14 @@ $exception_orgs_id = get_exception_orgs_id();
                                                         <!-- /Drag & drop file -->
 
                                                         <div class="filesList">
-                                                        <?php 
-                                                            $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($group_id, $sub_id, $post_id, $organisation_id);
-                                                        ?>
-                                                        <!-- WP media attachment file -->
+                                                        
                                                         <?php if ($arr_attachmentID): ?>
-                                                            <?php foreach($arr_attachmentID as $key => $field): ?>
-                                                                <?php
-                                                                    $file_id = $field['value'];
-                                                                    $file_url = wp_get_attachment_url($file_id);
-                                                                    $file_name = get_the_title($file_id);
-                                                                    $file_index = $key + 1;
+                                                            <!-- WP media attachments -->
+                                                            <?php foreach($arr_attachmentID as $key => $field): 
+                                                                $file_id = $field->value ?? '';
+                                                                $file_url = wp_get_attachment_url($file_id);
+                                                                $file_name = get_the_title($file_id);
+                                                                $file_index = $key + 1;
                                                                 ?>
                                                                 <?php if ($file_url): ?>
                                                                 <span class="file-item file-item-<?php echo $file_index; ?>">
@@ -459,28 +461,28 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 </span>
                                                                 <?php endif; ?>
                                                             <?php endforeach; ?>
+                                                            <!-- /WP media attachments -->
                                                         <?php endif; ?>
-
-                                                        <!-- Azure Storage attachment file -->
-                                                        <?php if ($azure_attachments_uploaded): ?>
-                                                            <?php foreach($azure_attachments_uploaded as $key => $field): ?>
-                                                                <?php
-                                                                    $file_id = $field->attachment_id;
-                                                                    $file_name = $field->attachment_name;
-                                                                    $file_url = $field->attachment_path;
-                                                                    $file_index = $key + 1;
+                                                        
+                                                        <?php if ( !empty($azure_attachment_rows) ): ?>
+                                                            <!-- Azure Storage attachments -->
+                                                            <?php foreach($azure_attachment_rows as $key => $row): 
+                                                                $file_id = $row->attachment_id ?? '';
+                                                                $file_name = $row->attachment_name ?? '';
+                                                                $file_url = $row->attachment_path ?? '';
+                                                                $file_index = $key + 1;
                                                                 ?>
-                                                                <?php if ($file_url): ?>
+                                                                <?php if ( !empty($file_url) ): ?>
                                                                 <span class="file-item file-item-<?php echo $file_index; ?>">
                                                                     <button class="name sas-blob-cta" data-blob="<?php echo $file_url; ?>">
-                                                                            <i class="fa-solid fa-paperclip"></i>
-                                                                            <?php echo $file_name; ?>
+                                                                        <i class="fa-solid fa-paperclip"></i>
+                                                                        <?php echo $file_name; ?>
                                                                     </button>
                                                                     <input name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
-                                                                            class="input-file-hiden additional-files additional-file-id-<?php echo $file_index; ?>"
+                                                                            class="input-file-hidden additional-files additional-file-id-<?php echo $file_index; ?>"
                                                                             value="<?php echo $file_id; ?>">
-                                                                    <?php if($is_disabled): ?>
+                                                                    <?php if ($is_disabled): ?>
                                                                         <span class="icon-checked"><i class="fa-solid fa-circle-check"></i></span>
                                                                     <?php else: ?>
                                                                         <button class="file-delete" aria-label="Remove this uploaded file">
@@ -490,6 +492,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 </span>
                                                                 <?php endif; ?>
                                                             <?php endforeach; ?>
+                                                            <!-- /Azure Storage attachments -->
                                                         <?php endif; ?>
                                                         </div>
                                                     </div>
@@ -501,20 +504,19 @@ $exception_orgs_id = get_exception_orgs_id();
                                                             Additional resources:
                                                         </p>
                                                         <div class="files-list">
-                                                            <?php foreach ($additional_files as $file) : ?>
-                                                                <?php 
-                                                                    $file_url = wp_get_attachment_url($file);
-                                                                    $file_name = get_the_title($file)
-                                                                ?>
-                                                                <?php if ($file_url): ?>
-                                                                    <li class="file-item">
-                                                                        <a href="<?php echo $file_url; ?>" target="_blank">
-                                                                            <span><i class="fa-solid fa-link"></i></span>
-                                                                            <?php echo $file_name; ?>
-                                                                        </a>
-                                                                    </li>
-                                                                <?php endif; ?>
-                                                            <?php endforeach; ?>
+                                                        <?php foreach ($additional_files as $file):  
+                                                            $file_url = wp_get_attachment_url($file);
+                                                            $file_name = get_the_title($file)
+                                                            ?>
+                                                            <?php if ($file_url): ?>
+                                                                <li class="file-item">
+                                                                    <a href="<?php echo $file_url; ?>" target="_blank">
+                                                                        <span><i class="fa-solid fa-link"></i></span>
+                                                                        <?php echo $file_name; ?>
+                                                                    </a>
+                                                                </li>
+                                                            <?php endif; ?>
+                                                        <?php endforeach; ?>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
@@ -526,7 +528,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                         <div class="advice-area"><?php echo $question_advice; ?></div>
                                                     </div>
                                                 <?php endif; ?>
-                                                <?php if ($terms[0] == 'dcr'): ?>
+                                                <?php if ($terms[0] == 'dcr'): $feedbacks_chars = ''; ?>
                                                     <?php if (!empty($dcr_feedbacks[$group_id][$sub_id])): ?>
                                                         <div class="quizAdvice feedback-area">
                                                             <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
@@ -540,21 +542,27 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                                 <strong class="author"><?php echo $feedback['user_name'] ?></strong> - 
                                                                                 <span class="datetime"><?php echo date("M d Y H:i a", strtotime($feedback['time'])); ?></span>
                                                                             </div>
-                                                                            <div class="_content"><?php echo $feedback['feedback']; ?></div>
+                                                                            <div class="_content"><?php echo wp_kses_post(htmlspecialchars_decode($feedback['feedback'])); ?></div>
                                                                         </li>
+                                                                        <?php $feedbacks_chars .= $feedback['feedback']; ?>
                                                                     <?php endif; ?>
                                                                 <?php endforeach; ?>
                                                             </ul>
                                                         </div>
                                                     <?php endif; ?>
                                                 <?php else: ?>
-                                                    <?php if (!empty($feedback)) : ?>
+                                                    <?php if (!empty($feedback)): ?>
                                                         <div class="quizAdvice feedback-area">
                                                             <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
                                                             <p>Feedbacks</p>
-                                                            <div><?php echo $feedback; ?></div>
+                                                            <div class="feedback"><?php echo wp_unslash($feedback); ?></div>
                                                         </div>
                                                     <?php endif; ?>
+                                                <?php endif; ?>
+                                                <?php if ( strlen($feedbacks_chars) > 1000 ): ?>
+                                                    <div class="feedback-area-toggle">
+                                                        <a type="button" class="btn-toggle-feedback" tabindex="1">Expand feedbacks</a>
+                                                    </div>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>

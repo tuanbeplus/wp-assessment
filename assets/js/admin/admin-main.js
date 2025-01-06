@@ -1,555 +1,524 @@
+
 jQuery(document).ready(function ($) {
     const ajaxUrl = ajax_object.ajax_url;
-    const organisationIdInstance = $('#organisation_id');
-    var groupCount = 0;
-    if ($(".group-question-wrapper").length) {
-        groupCount = $(".group-question-wrapper").length;
-    }
+    const mainWrapper = $('#question-group-repeater');
+    let isChanged = false;
 
+    // Detect changes in various elements
+    $('#questions-repeater-field').on('change input', 'input, textarea, select, [contenteditable="true"], input[type="file"], input[type="range"]', function () {
+        isChanged = true;
+    });
+    // Exclude WordPress save post action
+    $('form#post').on('submit', function () {
+        isChanged = false; // Reset the flag when saving a post
+    });
+    // Warn the user before leaving the page
+    // $(window).on('beforeunload', function (e) {
+    //     if (isChanged) {
+    //         const message = 'You have unsaved changes. Are you sure you want to leave this page?';
+    //         e.preventDefault(); // For modern browsers
+    //         e.returnValue = message; // For older browsers
+    //         return message;
+    //     }
+    // });
+
+    let groupCount = mainWrapper.find(".group-question-wrapper").length;
+    // Add Comprehensive Group Question
     $(document).on("click", "#add-group-row", function () {
-
-        let group_parent_repeater = $("#question-group-repeater")
-        groupCount = groupCount + 1;
-
-        let group_questions_html  = '<div class="group-question-wrapper question" id="question-group-row-' + groupCount + '" data-id="' + groupCount + '">';
-            group_questions_html += '    <input class="is_locked_input" type="hidden" name="group_questions[' + groupCount + '][is_locked]" value="0">';
-            group_questions_html += '    <div class="question-wrapper-top">';
-            group_questions_html += '       <span class="button btn-remove-group">- Remove Group';
-            group_questions_html += '           <div class="remove-message">Are you sure?';
-            group_questions_html += '               <span class="btn-remove">Remove</span>';
-            group_questions_html += '               <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>';
-            group_questions_html += '           </div>';
-            group_questions_html += '       </span>';
-            group_questions_html += '       <span class="icon-toggle"></span>';
-            group_questions_html += '    </div>';
-            group_questions_html += '    <div class="row">';
-            group_questions_html += '        <div class="col-12">';
-            group_questions_html += '            <h5 class="admin-question-group-label">Question #' + groupCount + '</h5>';
-            group_questions_html += '            <input class="form-field group-question-admin-title form-control" name="group_questions[' + groupCount + '][title]" placeholder="Group Question Title"/>';
-            group_questions_html += '        </div>';
-            group_questions_html += '        <!-- <div class="col-2 question-row-points-container">';
-            group_questions_html += '            <label><strong>Question Point</strong></label>';
-            group_questions_html += '            <input type="number" step="0.01" class="question-point-input" name="group_questions[' + groupCount + '][point]"/>';
-            group_questions_html += '            <div class="question-points-actions-container">';
-            group_questions_html += '                <div class="increment-question-point" aria-hidden="true">';
-            group_questions_html += '                    <i class="fa fa-plus"></i>';
-            group_questions_html += '                </div>';
-            group_questions_html += '                <div class="decrement-question-point" aria-hidden="true">';
-            group_questions_html += '                    <i class="fa fa-minus"></i>';
-            group_questions_html += '                </div>';
-            group_questions_html += '            </div>';
-            group_questions_html += '        </div> -->';
-            group_questions_html += '    </div>';
-            group_questions_html += '    <div class="question-field-container"></div>';
-            group_questions_html += '    <!-- Button add more sub questions -->';
-            group_questions_html += '    <div class="add-row-field"><span class="add-row button button-primary">Add Sub Questions</span></div>';
-            group_questions_html += '    <div class="question-wrapper-bottom">';
-            group_questions_html += '       <a class="btn-lock-question" role="button">';
-            group_questions_html += '           <img class="locked-icon" src="/wp-content/plugins/wp-assessment/assets/images/lock.svg" width="36" height="36">';
-            group_questions_html += '           <span class="lock-text">Lock</span>';
-            group_questions_html += '       </a>';
-            group_questions_html += '       <a class="btn-expland-wrapper" role="button">';
-            group_questions_html += '           <span class="text">Expland Group</span>';
-            group_questions_html += '           <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>';
-            group_questions_html += '       </a>';
-            group_questions_html += '    </div>';
-            group_questions_html += '</div>';
-
-        group_parent_repeater.append(group_questions_html)
-  });
-
-    $(document).on("click", ".add-row", function () {
-
-        let group_questions_wrapper = $(this).closest(".group-question-wrapper")
-        let group_id = group_questions_wrapper.attr("data-id")
-        let sub_question_length = group_questions_wrapper.find(".question-row-container").length
-        let rowCount = '';
-        if (sub_question_length) {
-        rowCount = sub_question_length + 1;
-        }
-        else {
-        rowCount = 1;
-        }
-        let wp_editor = 'wp-editor-question-' + Date.now();
-        let wp_advice_editor = 'question-advice-row-' + Date.now();
-
-        let question_row_html  = '<div class="question-row-container" id="question-main-row-' + rowCount + '" data-id="'+rowCount+'">';
-            question_row_html += '    <input type="hidden" name="question_repeater[]"/>';
-            question_row_html += '    <div class="remove-question-block">';
-            question_row_html += '        <span class="button btn-remove-question">- Remove Question';
-            question_row_html += '            <div class="remove-message from-left">Are you sure?';
-            question_row_html += '                <span class="btn-remove">Remove</span>';
-            question_row_html += '                <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>';
-            question_row_html += '            </div>';
-            question_row_html += '        </span>';
-            question_row_html += '    </div>';
-            question_row_html += '    <div class="row question-input-area-container">';
-            question_row_html += '        <div class="col-10">';
-            question_row_html += '            <p class="admin-question-row-label">Sub Question ' + group_id + '.' + rowCount + '</p>';
-            question_row_html += '            <input class="form-field question-admin-title form-control" name="group_questions[' + group_id + '][list][' + rowCount + '][sub_title]" placeholder="Sub Question Title"/>';
-            question_row_html += '            <div class="admin-question-row-textarea">';
-            question_row_html += '                <textarea id="'+wp_editor+'" name="group_questions[' + group_id + '][list][' + rowCount + '][description]" rows="10" class="sub-question-wpeditor"></textarea>';
-            question_row_html += '                <div class="col-12">';
-            question_row_html += '                    <div class="question-rule-checkbox-inner-container">';
-            question_row_html += '                        <label>Requires a custom answer.. </label>';
-            question_row_html += '                        <input type="checkbox" class="question-rule-description-checkbox"/>';
-            question_row_html += '                        <input type="hidden" class="question-rule-description-checkbox-input" name="group_questions[' + group_id + '][list][' + rowCount + '][is_description]"/>';
-            question_row_html += '                    </div>';
-            question_row_html += '                </div>';
-            question_row_html += '            </div>';
-            question_row_html += '            <div class="question-advice-row-container">';
-            question_row_html += '                <div class="btn-toggle-advice-area">Advice <span class="toggle-icon"></span></div>';
-            question_row_html += '                <div class="visual-textarea-wrapper">';
-            question_row_html += '                    <textarea id="'+ wp_advice_editor +'" class="form-control advice-area-wpeditor" name="group_questions[' + group_id + '][list][' + rowCount + '][advice]" rows="10"></textarea>';
-            question_row_html += '                </div>';
-            question_row_html += '            </div>';
-            question_row_html += '        </div>';
-            question_row_html += '        <div class="col-2 sub-point question-row-points-container">';
-            question_row_html += '            <label><strong>Question Point</strong></label>';
-            question_row_html += '            <input type="number" step="0.01" class="question-point-input" name="group_questions[' + group_id + '][list][' + rowCount + '][point]"/>';
-            question_row_html += '            <div class="question-points-actions-container">';
-            question_row_html += '                <div class="increment-question-point" aria-hidden="true">';
-            question_row_html += '                    <i class="fa fa-plus"></i>';
-            question_row_html += '                </div>';
-            question_row_html += '                <div class="decrement-question-point" aria-hidden="true">';
-            question_row_html += '                    <i class="fa fa-minus"></i>';
-            question_row_html += '                </div>';
-            question_row_html += '            </div>';
-            question_row_html += '        </div>';
-            question_row_html += '    </div>';
-            question_row_html += '    <div class="question-other-info-container">';
-            question_row_html += '        <div>';
-            question_row_html += '            <strong class="checkbox-label-heading">Rules:</strong>';
-            question_row_html += '            <div class="question-rule-checkbox-inner-container">';
-            question_row_html += '                <label>Supporting documentation required.. </label>';
-            question_row_html += '                <input type="checkbox" class="question-rule-checkbox"/>';
-            question_row_html += '                <input type="hidden" class="question-rule-checkbox-input" name="group_questions[' + group_id + '][list][' + rowCount + '][supporting_doc]"/>';
-            question_row_html += '            </div>';
-            question_row_html += '        </div>';
-            question_row_html += '        <div class="multi-choice-btn-container">';
-            question_row_html += '            <button class="button add-multi-choice-btn" type="button" data-group-id=' + group_id + ' data-id="' + rowCount + '">';
-            question_row_html += '              <i class="fa-solid fa-plus"></i> Add Multiple Choice';
-            question_row_html += '            </button>';
-            question_row_html += '            <div class="multi-choice-btn-table-container">';
-            question_row_html += '                <table class="multi-choice-table" id="multi-check-table-' + group_id + '_' + rowCount + '">';
-            question_row_html += '                    <tbody>';
-            question_row_html += '                    </tbody>';
-            question_row_html += '                </table>';
-            question_row_html += '            </div>';
-            question_row_html += '        </div>';
-            question_row_html += '    </div>';
-            question_row_html += '    <div class="question-add-files-container">'
-            question_row_html += '        <div>'
-            question_row_html += '            <div class="btn-add-files-wrapper">'
-            question_row_html += '                <label for="additional-files-' + group_id + '-' + rowCount + '">'
-            question_row_html += '                    <span class="button" role="button" aria-disabled="false"><i class="fa-solid fa-file-arrow-up"></i> Add Additional Files</span>'
-            question_row_html += '                </label>'
-            question_row_html += '                <input id="additional-files-' + group_id + '-' + rowCount + '"'
-            question_row_html += '                        class="additional-files"'
-            question_row_html += '                        type="file" '
-            question_row_html += '                        name="file[]" '
-            question_row_html += '                        style="visibility: hidden; position: absolute;"/>'
-            question_row_html += '                <div class="uploading-wrapper">'
-            question_row_html += '                    <img src="../wp-content/plugins/wp-assessment/assets/images/front/Spinner-0.7s-200px.svg" alt="uploading">'
-            question_row_html += '                </div>'
-            question_row_html += '            </div>'
-            question_row_html += '            <div class="filesList"></div>'
-            question_row_html += '        </div>'
-            question_row_html += '    </div>'
-            question_row_html += '    <div class="key-areas">'
-            question_row_html += '        <label class="col-12"><strong>Select Key Area</strong></label>'
-            question_row_html += '        <select id="select-key-area-'+ group_id +'-'+ rowCount +'" class="select-key-area"'
-            question_row_html += '                name="group_questions['+ group_id +'][list]['+ rowCount +'][key_area]">'
-            question_row_html += '            <option value="">Choose Key Area</option>'
-            question_row_html += '        </select>'
-            question_row_html += '    </div>'
-            question_row_html += '</div>';
-
-        group_questions_wrapper.addClass('toggle')
-        group_questions_wrapper.find('.question-wrapper-top').addClass('active')
-        group_questions_wrapper.find('.btn-expland-wrapper').addClass('active')
-        row_parent = group_questions_wrapper.find(".question-field-container")
-        row_parent.append(question_row_html);
-
-        let wpeditor_des_wrapper = $('#' + wp_editor)
-        let wpeditor_advice_wrapper = $('#' + wp_advice_editor)
-
-        // Render WP Editor
-        append_wpeditor(wpeditor_des_wrapper, false)
-        append_wpeditor(wpeditor_advice_wrapper, false)
-
-        // Render Key Area
-        render_key_area_question($('#select-key-area-'+ group_id +'-'+ rowCount ))
-
-        return false;
+        const groupParentRepeater = $("#question-group-repeater");
+        groupCount += 1;
+        const groupQuestionsHtml = (`
+            <div class="group-question-wrapper question" id="question-group-row-${groupCount}" data-id="${groupCount}">
+                <input class="is_locked_input" type="hidden" name="group_questions[${groupCount}][is_locked]" value="0">
+                <div class="question-wrapper-top">
+                    <span class="button btn-remove-group">- Remove Group
+                        <div class="remove-message">Are you sure?
+                            <span class="btn-remove">Remove</span>
+                            <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>
+                        </div>
+                    </span>
+                    <span class="icon-toggle"></span>
+                </div>
+                <h3 class="admin-question-group-label">Question #${groupCount}</h3>
+                <input type="text" class="form-field group-question-admin-title form-control"
+                    name="group_questions[${groupCount}][title]" 
+                    placeholder="Group Question Title" required/>
+                <div class="question-field-container"></div>
+                <div class="add-row-field">
+                    <span class="add-question-row button button-primary">Add Sub Question</span>
+                </div>
+                <div class="question-wrapper-bottom">
+                    <a class="btn-lock-question" role="button">
+                        <img class="locked-icon" 
+                            src="/wp-content/plugins/wp-assessment/assets/images/img-lock.png">
+                        <span class="lock-text">Lock</span>
+                    </a>
+                    <a class="btn-expand-wrapper" role="button">
+                        <span class="text">Expand Group</span>
+                        <span class="icon-chevron-down">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        `);
+        groupParentRepeater.append(groupQuestionsHtml);
+        renewAllQuestionsIndex(); // Renew Index
     });
 
-    function render_key_area_question(select_key_area) {
-        let key_area_input = $('.key-areas-list .key-area-input')
+    // Template for question title
+    const getTitleRow = (groupId, rowCount) => (`
+        <div class="question-input-area-container">
+            <div class="question-title">
+                <label>Title</label>
+                <textarea rows="2" class="form-field question-admin-title form-control"
+                    name="group_questions[${groupId}][list][${rowCount}][sub_title]"
+                    placeholder="Question Title"></textarea>
+            </div>
+            <div class="sub-point question-row-points-container">
+                <label>Question Point</label>
+                <input id="question-point-${groupId}-${rowCount}"
+                    type="number" step="0.1" class="question-point-input"
+                    name="group_questions[${groupId}][list][${rowCount}][point]" value=""/>
+            </div>
+        </div>
+    `);
 
+    // Template for description
+    const getDescriptionRow = (editorId, groupId, rowCount) => (`
+        <div class="question-row-desc question-row">
+            <label>Description</label>
+            <div class="visual-textarea-wrapper">
+                <textarea id="${editorId}" name="group_questions[${groupId}][list][${rowCount}][description]"
+                    rows="12" class="sub-question-wpeditor"></textarea>
+            </div>
+        </div>
+    `);
+
+    // Template for answer choices
+    const getAnswerChoicesRow = (groupId, rowCount) => (`
+        <div class="multi-choices-container question-row">
+            <label>Answer Choices</label>
+            <button class="button add-multi-choice-btn" type="button" data-group-id="${groupId}" data-id="${rowCount}">
+                <span>Add Choice</span>
+            </button>
+            <div class="multi-choices-table-container">
+                <table class="multi-choices-table" id="multi-choices-table-${groupId}-${rowCount}">
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    `);
+
+    // Template for client comment area checkbox
+    const getClientCommentCheckbox = (groupId, rowCount) => (`
+        <div class="checkbox-field question-row">
+            <input id="desc-checkbox-${groupId}-${rowCount}" type="checkbox"
+                name="group_questions[${groupId}][list][${rowCount}][is_description]" value="1"/>
+            <label for="desc-checkbox-${groupId}-${rowCount}">Show client comment area</label>
+        </div>
+    `);
+
+    // Template for supporting docs checkbox
+    const getSupportingDocsCheckbox = (groupId, rowCount) => (`
+        <div class="checkbox-field question-row">
+            <input id="upload-docs-checkbox-${groupId}-${rowCount}" type="checkbox"
+                name="group_questions[${groupId}][list][${rowCount}][supporting_doc]" value="1"/>
+            <label for="upload-docs-checkbox-${groupId}-${rowCount}">Show upload supporting documentation area</label>
+        </div>
+    `);
+
+    // Template for advice section
+    const getAdviceRow = (editorId, groupId, rowCount) => (`
+        <div class="question-advice-container question-row">
+            <div class="btn-toggle-advice-area">
+                <label>Advice (Tips and examples)</label>
+                <span class="toggle-icon"><i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+            <div class="advice-editor-wrapper">
+                <textarea id="${editorId}" class="form-control advice-area-wpeditor"
+                    name="group_questions[${groupId}][list][${rowCount}][advice]" rows="10"></textarea>
+            </div>
+        </div>
+    `);
+
+    // Template for additional files section
+    const getAdditionalFilesRow = (groupId, rowCount) => (`
+        <div class="question-add-files-container question-row">
+            <div class="btn-add-files-wrapper">
+                <label>Additional Files</label>
+                <label class="additional-files-label" for="additional-files-${groupId}-${rowCount}">
+                    <span class="button" role="button" aria-disabled="false">
+                        <span class="icon"><i class="fa-solid fa-file-arrow-up"></i></span>
+                        <span>Upload Files</span>
+                    </span>
+                </label>
+                <input id="additional-files-${groupId}-${rowCount}" class="additional-files" type="file" name="file[]" multiple/>
+                <div class="uploading-wrapper">
+                    <img src="../wp-content/plugins/wp-assessment/assets/images/front/Spinner-0.7s-200px.svg" alt="">
+                </div>
+                <div class="_message">File uploaded</div>
+            </div>
+            <div class="filesList"></div>
+        </div>
+    `);
+
+    // Template for key areas
+    const getKeyAreasRow = (groupId, rowCount) => (`
+        <div class="question-key-areas">
+            <label class="col-12"><strong>Select Key Area</strong></label>
+            <select id="select-key-area-${groupId}-${rowCount}" class="select-key-area"
+                name="group_questions[${groupId}][list][${rowCount}][key_area]">
+                <option value="">Choose Key Area</option>
+            </select>
+        </div>
+    `);
+    
+    let rowCount = mainWrapper.find(".group-question-wrapper .question-row-container").length;
+    // Add the Sub Question Row
+    $(document).on("click", ".add-question-row", function () {
+        rowCount += 1;
+        const groupQuestionsWrapper = $(this).closest(".group-question-wrapper");
+        const groupId = groupQuestionsWrapper.attr("data-id");
+        const wpDescEditorId = `wp-editor-question-${Date.now()}`;
+        const wpAdviceEditorId = `question-advice-row-${Date.now()}`;
+        const rowParent = groupQuestionsWrapper.find(".question-field-container");
+
+        // Add classes to toggle visibility
+        groupQuestionsWrapper.addClass('toggle');
+        groupQuestionsWrapper.find('.question-wrapper-top').addClass('active');
+        groupQuestionsWrapper.find('.btn-expand-wrapper').addClass('active');
+
+        const questionRowHtml = (`
+            <div class="question-row-container" id="question-main-row-${groupId}-${rowCount}" data-id="${rowCount}">
+                <div class="question-name">
+                    <h4 class="admin-question-row-label">Sub Question ${groupId}.${rowCount}</h4>
+                    <span class="button btn-remove-question">- Remove Question
+                        <div class="remove-message from-left">Are you sure? 
+                            <span class="btn-remove">Remove</span>
+                            <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>
+                        </div>
+                    </span>
+                </div>
+                ${getTitleRow(groupId, rowCount)}
+                ${getDescriptionRow(wpDescEditorId, groupId, rowCount)}
+                ${getAnswerChoicesRow(groupId, rowCount)}
+                ${getClientCommentCheckbox(groupId, rowCount)}
+                ${getSupportingDocsCheckbox(groupId, rowCount)}
+                ${getAdviceRow(wpAdviceEditorId, groupId, rowCount)}
+                ${getAdditionalFilesRow(groupId, rowCount)}
+                ${getKeyAreasRow(groupId, rowCount)}
+            </div>
+        `);
+
+        rowParent.append(questionRowHtml); // Append the new question to the container
+        renderWpVisualEditor($(`#${wpDescEditorId}`), false); // Render description visual editor
+        renderWpVisualEditor($(`#${wpAdviceEditorId}`), false); // Render advice visual editor
+        renderQuestionKeyAreas($(`#select-key-area-${groupId}-${rowCount}`)); // Render Key Area
+        renewAllQuestionsIndex(); // Renew Index
+    });
+
+    // Template for question title
+    const getTitleRow_Simple = (index) => (`
+        <h3 class="admin-question-group-label">Question #${index}</h3>
+        <input type="text" class="form-field question-admin-title form-control"
+            name="group_questions[${index}][title]"
+            value="" placeholder="Question Title" required/>
+    `);
+
+    // Template for description editor
+    const getDescriptionRow_Simple = (editorId, index) => (`
+        <div class="question-row-desc question-row">
+            <label>Description</label>
+            <div class="visual-textarea-wrapper">
+                <textarea id="${editorId}" name="group_questions[${index}][description]"
+                    rows="12" class="question-wpeditor"></textarea>
+            </div>
+        </div>
+    `);
+
+    // Template for answer choices
+    const getChoicesRow_Simple = (index) => (`
+        <div class="multi-choices-container question-row">
+            <label>Answer Choices</label>
+            <button class="button add-multi-choice-simple" type="button" data-id="${index}">Add Choice</button>
+            <div class="multi-choices-table-container">
+                <table class="multi-choices-table" id="multi-choice-table-${index}">
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    `);
+
+    // Template for comment area checkbox
+    const getCommentCheckbox_Simple = (index) => (`
+        <div class="checkbox-field question-row">
+            <input id="desc-checkbox-${index}" type="checkbox"
+                name="group_questions[${index}][is_description]" value="1" />
+            <label for="desc-checkbox-${index}">Show client comment area</label>
+        </div>
+    `);
+
+    // Template for advice editor
+    const getAdviceRow_Simple = (editorId, index) => (`
+        <div class="question-advice-container">
+            <label>Advice (Tips and examples)</label>
+            <div class="advice-editor-wrapper">
+                <textarea id="${editorId}" class="advice-area-wpeditor"
+                    name="group_questions[${index}][advice]" rows="10"></textarea>
+            </div>
+        </div>
+    `);
+    
+    let grSimpleCount = mainWrapper.find(".simple-question-container").length;
+    // Add Simple Question Row
+    $(document).on("click", "#add-simple-row", function () {
+        // Increment the count for the new question
+        grSimpleCount += 1;
+        const questionMainWrapper = $("#question-group-repeater");
+        // Generate unique IDs for editors
+        const wpDescEditorId = `wp-editor-question-${Date.now()}`;
+        const wpAdviceEditorId = `wp-advice-editor-${Date.now()}`;
+    
+        // Generate the complete HTML for the new question
+        const simpleQuestionHTML = (`
+            <div id="question-main-row-${grSimpleCount}" class="simple-question-container question question-row-container toggle">
+                <input class="is_locked_input" type="hidden" name="group_questions[${grSimpleCount}][is_locked]" value="0">
+                <div class="question-wrapper-top active">
+                    <span class="button btn-remove-question">- Remove Question
+                        <div class="remove-message">Are you sure? 
+                            <span class="btn-remove">Remove</span>
+                            <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>
+                        </div>
+                    </span>
+                    <span class="icon-toggle"></span>
+                </div>
+                ${getTitleRow_Simple(grSimpleCount)}
+                ${getDescriptionRow_Simple(wpDescEditorId, grSimpleCount)}
+                ${getChoicesRow_Simple(grSimpleCount)}
+                ${getCommentCheckbox_Simple(grSimpleCount)}
+                ${getAdviceRow_Simple(wpAdviceEditorId, grSimpleCount)}
+                <div class="question-wrapper-bottom">
+                    <a class="btn-lock-question" role="button">
+                        <img class="locked-icon" 
+                            src="/wp-content/plugins/wp-assessment/assets/images/img-lock.png">
+                        <span class="lock-text">Lock</span>
+                    </a> 
+                    <a class="btn-expand-wrapper active" role="button">
+                        <span class="text">Collapse Question</span>
+                        <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>
+                    </a>
+                </div>
+            </div>
+        `);
+    
+        questionMainWrapper.append(simpleQuestionHTML); // Append the new question to the container
+        renderWpVisualEditor($(`#${wpDescEditorId}`), false); // Render description visual editor
+        renderWpVisualEditor($(`#${wpAdviceEditorId}`), false); // Render advice visual editor
+        renewAllQuestionsIndex();
+    });
+
+    // Save all changes by trigger WP save button
+    $(document).on("click", "#btn-save-changes", function (e) {
+        e.preventDefault(); // Prevent default behavior
+        const saveButton = $('#submitpost input[type=submit][name=save]');
+    
+        if (saveButton.length > 0) {
+            // Disable the button to prevent multiple clicks
+            $(this).addClass('saving').text("Saving...");
+            // Trigger the save action
+            saveButton.click();
+            // Re-enable after a short delay (you can adjust based on your save action)
+            setTimeout(() => {
+                $(this).removeClass('saving').text("Save Changes");
+            }, 5000);
+        } else {
+            console.error("Save button not found.");
+            alert("Unable to save changes. Please try again.");
+        }
+    });
+
+    function renderQuestionKeyAreas(select_key_area) {
+        let key_area_input = $('.key-areas-list .key-area-input');
         key_area_input.each(function(e) {
             let option_item = '<option value="'+ $(this).val() +'">'+ $(this).val() +'</option>';
-            select_key_area.append(option_item)
+            select_key_area.append(option_item);
         })
     }
 
-    var groupCount_Simple = 0;
-    if ($(".simple-question-container").length) {
-        groupCount_Simple = $(".simple-question-container").length;
-    }
-
-    $(document).on("click", "#add-simple-row", function () {
-
-        groupCount_Simple = groupCount_Simple + 1;
-        let wp_editor = 'wp-editor-question-' + Date.now();
-        let wp_advice_editor = 'wp-advice-editor-' + Date.now();
-
-        let simple_question_html  = '<div class="simple-question-container question question-row-container" id="question-main-row-' + groupCount_Simple + '">';
-            simple_question_html += '    <input class="is_locked_input" type="hidden" name="group_questions[' + groupCount_Simple + '][is_locked]" value="0">';
-            simple_question_html += '    <div class="question-wrapper-top">';
-            simple_question_html += '       <span class="button btn-remove-question">- Remove Question';
-            simple_question_html += '           <div class="remove-message">Are you sure? ';
-            simple_question_html += '               <span class="btn-remove">Remove</span>';
-            simple_question_html += '               <span class="icon-close"><i class="fa-solid fa-circle-xmark"></i></span>';
-            simple_question_html += '           </div>';
-            simple_question_html += '       </span>';
-            simple_question_html += '       <span class="icon-toggle"></span>';
-            simple_question_html += '    </div>';
-            simple_question_html += '    <input type="hidden" name="question_repeater[]"/>';
-            simple_question_html += '    <div class="row question-input-area-container">';
-            simple_question_html += '        <div class="col-12">';
-            simple_question_html += '            <p class="admin-question-row-label">Question #' + groupCount_Simple + '</p>';
-            simple_question_html += '            <input class="form-field question-admin-title form-control" name="group_questions[' + groupCount_Simple + '][title]" placeholder="Question Title"/>';
-            simple_question_html += '            <div class="admin-question-row-textarea">';
-            simple_question_html += '                <textarea id="'+wp_editor+'" name="group_questions[' + groupCount_Simple + '][description]" rows="10" class="question-wpeditor"></textarea>';
-            simple_question_html += '                <div class="col-12">';
-            simple_question_html += '                    <div class="question-rule-checkbox-inner-container">';
-            simple_question_html += '                        <label>Requires a custom answer.. </label>';
-            simple_question_html += '                        <input type="checkbox" class="question-rule-description-checkbox"/>';
-            simple_question_html += '                        <input type="hidden" class="question-rule-description-checkbox-input" name="group_questions[' + groupCount_Simple + '][is_description]"/>';
-            simple_question_html += '                    </div>';
-            simple_question_html += '                </div>';
-            simple_question_html += '            </div>';
-            simple_question_html += '            <div class="question-advice-row-container">';
-            simple_question_html += '                <label for="question-advice-row-0">Advice:</label>';
-            simple_question_html += '                <textarea id="'+ wp_advice_editor +'" class="advice-area-wpeditor" name="group_questions[' + groupCount_Simple + '][advice]" rows="10"></textarea>';
-            simple_question_html += '            </div>';
-            simple_question_html += '        </div>';
-            simple_question_html += '        <div class="col-2 question-row-points-container">';
-            simple_question_html += '            <!-- <label for="question_point[]"><strong>Question Point</strong></label>';
-            simple_question_html += '            <input type="number" class="question-point-input" name="group_questions[' + groupCount_Simple + '][point]"/>';
-            simple_question_html += '            <div class="question-points-actions-container">';
-            simple_question_html += '                <div class="increment-question-point" aria-hidden="true">';
-            simple_question_html += '                    <i class="fa fa-plus"></i>';
-            simple_question_html += '                </div>';
-            simple_question_html += '                <div class="decrement-question-point" aria-hidden="true">';
-            simple_question_html += '                    <i class="fa fa-minus"></i>';
-            simple_question_html += '                </div>';
-            simple_question_html += '            </div> -->';
-            simple_question_html += '        </div>';
-            simple_question_html += '    </div>';
-            simple_question_html += '    <div class="row question-other-info-container">';
-            simple_question_html += '        <div class="col-12">';
-            simple_question_html += '            <strong class="checkbox-label-heading">Rules:</strong>';
-            simple_question_html += '            <div class="question-rule-checkbox-inner-container" style="display:none;">';
-            simple_question_html += '                <label>Supporting documentation required. </label>';
-            simple_question_html += '                <input type="checkbox" class="question-rule-checkbox"/>';
-            simple_question_html += '                <input type="hidden" class="question-rule-checkbox-input" name="group_questions[' + groupCount_Simple + '][is_question_supporting]"/>';
-            simple_question_html += '            </div>';
-            simple_question_html += '        </div>';
-            simple_question_html += '        <div class="col-10 multi-choice-btn-container">';
-            simple_question_html += '            <button class="button add-multi-choice-simple" type="button" data-id="' + groupCount_Simple + '">Add multi choice button</button>';
-            simple_question_html += '            <div class="multi-choice-btn-table-container">';
-            simple_question_html += '                <table class="multi-choice-table" id="multi-check-table-' + groupCount_Simple + '">';
-            simple_question_html += '                    <tbody>';
-            simple_question_html += '                    </tbody>';
-            simple_question_html += '                </table>';
-            simple_question_html += '            </div>';
-            simple_question_html += '        </div>';
-            simple_question_html += '    </div>';
-            simple_question_html += '    <div class="question-wrapper-bottom">';
-            simple_question_html += '       <a class="btn-lock-question" role="button">';
-            simple_question_html += '           <img class="locked-icon" src="/wp-content/plugins/wp-assessment/assets/images/lock.svg" width="36" height="36">';
-            simple_question_html += '           <span class="lock-text">Lock</span>';
-            simple_question_html += '       </a>';
-            simple_question_html += '       <a class="btn-expland-wrapper" role="button">';
-            simple_question_html += '           <span class="text">Expland Question</span>';
-            simple_question_html += '           <span class="icon-chevron-down"><i class="fa-solid fa-chevron-down"></i></span>';
-            simple_question_html += '       </a>';
-            simple_question_html += '    </div>';
-            simple_question_html += '</div>';
-
-        let question_main_wrapper = $("#question-group-repeater")
-
-        question_main_wrapper.append(simple_question_html)
-
-        let wpeditor_wrapper = $('#' + wp_editor)
-        let wpeditor_advice_wrapper = $('#' + wp_advice_editor)
-
-        append_wpeditor(wpeditor_wrapper, false)
-        append_wpeditor(wpeditor_advice_wrapper, false)
-
-    })
-
-    function append_wpeditor(wpeditor_wrapper, is_media_button) {
-
-        $.each( $(wpeditor_wrapper), function( i, editor ) {
-
-        // console.log(editor);
-        var editor_id = $(editor).attr('id');
-
-        wp.editor.initialize(
-            editor_id,
-            {
-                tinymce: {
-                    wpautop: true,
-                    plugins : 'charmap colorpicker compat3x directionality fullscreen hr image lists media paste tabfocus textcolor wordpress wpautoresize wpdialogs wpeditimage wpemoji wpgallery wplink wptextpattern wpview',
-                    toolbar1: 'bold italic underline strikethrough | bullist numlist | blockquote hr wp_more | alignleft aligncenter alignright | link unlink | fullscreen | wp_adv',
-                    toolbar2: 'formatselect alignjustify forecolor | pastetext removeformat charmap | outdent indent | undo redo | wp_help'
-                },
+    function renderWpVisualEditor(textarea, isMediaButton) {
+        // Ensure the wrapper is valid
+        const editors = $(textarea);
+        if (!editors.length) {
+            console.warn('No editors found for the given textarea:', textarea);
+            return;
+        }
+        // Common TinyMCE configuration
+        const tinymceConfig = {
+            wpautop: true,
+            plugins: 'charmap colorpicker compat3x directionality fullscreen hr image lists media paste tabfocus textcolor wordpress wpautoresize wpdialogs wpeditimage wpemoji wpgallery wplink wptextpattern wpview',
+            toolbar1: 'bold italic underline strikethrough | bullist numlist | blockquote hr wp_more | alignleft aligncenter alignright alignjustify | link unlink | fullscreen | wp_adv',
+            toolbar2: 'formatselect forecolor | pastetext removeformat charmap | outdent indent | undo redo | wp_help',
+            fontsize_formats: '8pt 10pt 12pt 14pt 18pt 24pt 36pt',
+        };
+        // Iterate and initialize editors
+        editors.each(function () {
+            const editorId = $(this).attr('id');
+            // Initialize the editor
+            wp.editor.initialize(editorId, {
+                tinymce: tinymceConfig,
                 quicktags: true,
-                mediaButtons: is_media_button,
-            }
-        );
-
+                mediaButtons: isMediaButton,
+            });
         });
     }
 
+    function toggleQuestionState(wrapper, action) {
+        const isGroup = wrapper.hasClass('group-question-wrapper');
+        const btn = wrapper.find('.btn-expand-wrapper');
+        const top = wrapper.find('.question-wrapper-top');
+    
+        if (action === 'collapse') {
+            btn.removeClass('active');
+            top.removeClass('active');
+            btn.find('.text').text(isGroup ? 'Expand Group' : 'Expand Question');
+        } else {
+            btn.addClass('active');
+            top.addClass('active');
+            btn.find('.text').text(isGroup ? 'Collapse Group' : 'Collapse Question');
+        }
+        wrapper.toggleClass('toggle', action === 'expand');
+    }
+
     $(document).on("click", ".question-wrapper-top", function () {
-        let wrapper_top = $(this)
-        let question_wrapper = wrapper_top.closest('#question-template-wrapper .question')
-        let btn_expland = question_wrapper.find('.btn-expland-wrapper')
-
-        if (wrapper_top.hasClass('active')) {
-            wrapper_top.removeClass('active')
-            btn_expland.removeClass('active')
-
-            if (question_wrapper.hasClass('group-question-wrapper')) {
-                btn_expland.find('.text').text('Expland Group')
-            }
-            else {
-                btn_expland.find('.text').text('Expland Question')
-            }
-        }
-        else {
-            btn_expland.addClass('active')
-            wrapper_top.addClass('active')
-
-            if (question_wrapper.hasClass('group-question-wrapper')) {
-                btn_expland.find('.text').text('Collapse Group')
-            }
-            else {
-                btn_expland.find('.text').text('Collapse Question')
-            }
-        }
-        question_wrapper.toggleClass('toggle')
-    })
-
-    $(document).on("click", ".btn-expland-wrapper", function () {
-        let btn = $(this)
-        let question_wrapper = btn.closest('#question-template-wrapper .question')
-        let wrapper_top = question_wrapper.find('.question-wrapper-top')
-
-        if (btn.hasClass('active')) {
-            btn.removeClass('active')
-            wrapper_top.removeClass('active')
-
-            if (question_wrapper.hasClass('group-question-wrapper')) {
-                btn.find('.text').text('Expland Group')
-            }
-            else {
-                btn.find('.text').text('Expland Question')
-            }
-
+        const wrapper = $(this).closest('#question-template-wrapper .question');
+        const action = $(this).hasClass('active') ? 'collapse' : 'expand';
+        toggleQuestionState(wrapper, action);
+    });
+    
+    $(document).on("click", ".btn-expand-wrapper", function () {
+        const wrapper = $(this).closest('#question-template-wrapper .question');
+        const action = $(this).hasClass('active') ? 'collapse' : 'expand';
+        toggleQuestionState(wrapper, action);
+    
+        if (action === 'collapse') {
             $('html, body').animate({
-                scrollTop: question_wrapper.offset().top - 50
+                scrollTop: wrapper.offset().top - 50
             }, 100);
         }
-        else {
-            btn.addClass('active')
-            wrapper_top.addClass('active')
+    });
 
-            if (question_wrapper.hasClass('group-question-wrapper')) {
-                btn.find('.text').text('Collapse Group')
+    // Variable to store the previously selected value
+    let previousTemplate = $("input[type=radio][name=assessment_template]:checked").val();
+
+    $(document).on("change", "input[type=radio][name=assessment_template]", function () {
+        const existingQuestions = mainWrapper.find('.question');
+        const actionsBlock = $('#actions-row-block');
+        const selectedTemplate = $(this).val();
+        // Handle existing questions
+        if (existingQuestions.length > 0) {
+            const userConfirmed = confirm(
+                'If you change the assessment template, all questions in the current template will be removed.'
+            );
+            if (!userConfirmed) {
+                // Restore the previously selected radio button
+                $(`input[type=radio][name=assessment_template][value="${previousTemplate}"]`).prop("checked", true);
+                return; // Exit if user cancels the action
             }
-            else {
-                btn.find('.text').text('Collapse Question')
-            }
+            // Remove existing questions if confirmed
+            existingQuestions.remove();
         }
-        question_wrapper.toggleClass('toggle')
-    })
-
-  $(document).on("click", "#simple_assessment_input", function () {
-    let template_main_wrapper = $('#question-template-wrapper');
-    groupCount_Simple = 0;
-    let add_simple_block_count = $('#add-simple-row-block').length;
-    let add_simple_template_block  = '<p id="add-simple-row-block">'
-        add_simple_template_block += '  <span id="add-simple-row" class="button button-primary">Add Simple Question</span>'
-        add_simple_template_block += '</p>'
-
-    let group_template_block = $('#add-group-row-block')
-    let group_questions_wrapper = $('.group-question-wrapper')
-
-    if ($(this).is(":checked")) {
-
-      if ((group_questions_wrapper.length) > 0) {
-        if (confirm('If you change the assessment template, all questions in the current template will be removed.')) {
-          template_main_wrapper.append(add_simple_template_block)
-          group_template_block.remove()
-          group_questions_wrapper.remove()
+        // Update the previously selected template
+        previousTemplate = selectedTemplate; 
+        // Remove existing buttons
+        actionsBlock.find("#add-simple-row, #add-group-row").remove(); 
+        // Append appropriate button based on selected template
+        if (selectedTemplate === 'Comprehensive Assessment') {
+            actionsBlock.append(
+                '<span id="add-group-row" class="button button-primary button-large">Add Group Question</span>'
+            );
+        } else if (selectedTemplate === 'Simple Assessment') {
+            actionsBlock.append(
+                '<span id="add-simple-row" class="button button-primary button-large">Add Simple Question</span>'
+            );
         }
-        else {
-          return false;
-        }
-      }
-      else {
-        if (add_simple_block_count == 0) {
-          template_main_wrapper.append(add_simple_template_block)
-        }
-        group_template_block.remove()
-      }
+    });
+
+    // change or type point for Sub question
+    $(document).on("change keyup keypress", ".input-answer-point", function () {
+        let answer_point = $(this).val()
+        let weighting_wrapper = $(this).closest('.weighting')
+        let quiz_wrapper = $(this).closest('.submission-view-item-row')
+        let section_wrapper = $(this).closest('.group-quiz-wrapper')
+        let total_section_score = section_wrapper.find('.total-section-score-val')
+        let quiz_weighting = weighting_wrapper.data('weighting')
+        let sub_score = quiz_wrapper.find('.sub-total-score-val')
+        let all_sub_score = section_wrapper.find('.sub-total-score-val')
+        let all_sections_score = $('.total-section-score-val')
+        let total_score_element = $('.total-submission-score')
+        let input_total_score = $('input[name="total_submission_score"]')
+        var sub_scores_arr = [];
+        var section_scores_arr = [];
+        var total_section_score_val = 0;
+        var total_submission_score_val = 0;
+
+        // Sub questions Scoring
+        sub_score.text(parseFloat(answer_point * quiz_weighting).toFixed(1));
+
+        all_sub_score.each(function(e) {
+        let sub_score_fl = parseFloat($(this).text());
+            sub_scores_arr.push(sub_score_fl);
+        })
+        sub_scores_arr.forEach( num => {
+            total_section_score_val += num;
+        })
+
+        // Section Scoring
+        total_section_score.text(total_section_score_val.toFixed(1));
+
+        all_sections_score.each(function(e) {
+            let section_score_fl = parseFloat($(this).text());
+            section_scores_arr.push(section_score_fl);
+        })
+        section_scores_arr.forEach( num => {
+            total_submission_score_val += num;
+        })
+
+        // Total Submission Scoring
+        total_score_element.text(total_submission_score_val.toFixed(1));
+        input_total_score.val(total_submission_score_val.toFixed(1))
+    });
+
+    function renewAllQuestionsIndex() {
+        let groupQuestions = mainWrapper.find('.question');
+        $(groupQuestions).each(function(grIndex, groupRow) {            
+            grIndex = grIndex + 1;
+            $(groupRow).find('.admin-question-group-label').first().text(`Question #${grIndex}`);
+            let subQuestions = $(groupRow).find('.question-row-container');
+            $(subQuestions).each(function(subIndex, subRow) {
+                subIndex = subIndex + 1;
+                $(subRow).find('.admin-question-row-label').first().text(`Sub Question ${grIndex}.${subIndex}`);
+            });
+        });
     }
-  })
 
-  $(document).on("click", "#comprehensive_assessment_input", function () {
-    let template_main_wrapper = $('#question-template-wrapper');
-    groupCount = 0;
-    let add_group_block_count = $('#add-group-row-block').length;
-    let add_group_template_block  = '<p id="add-group-row-block">'
-        add_group_template_block += '  <span id="add-group-row" class="button button-primary">Add Group Question</span>'
-        add_group_template_block += '</p>'
+    $(document).on("click", ".btn-remove-group", function (e) {
+        e.stopPropagation();
+        let remove_message = $(this).find('.remove-message');
+        remove_message.toggleClass('active');
+    });
 
-    let simple_template_block = $('#add-simple-row-block')
-    let simple_question_wrapper = $('.simple-question-container')
-
-    if ($(this).is(":checked")) {
-
-      if ((simple_question_wrapper.length) > 0) {
-        if (confirm('If you change the assessment template, all questions in the current template will be removed.')) {
-          template_main_wrapper.append(add_group_template_block)
-          simple_template_block.remove()
-          simple_question_wrapper.remove()
-        }
-        else {
-          return false;
-        }
-      }
-      else {
-        if (add_group_block_count == 0) {
-          template_main_wrapper.append(add_group_template_block)
-        }
-        simple_template_block.remove()
-      }
-    }
-  })
-
-  // change or type point for Sub question
-  $(document).on("change keyup keypress", ".input-answer-point", function () {
-    let answer_point = $(this).val()
-    let weighting_wrapper = $(this).closest('.weighting')
-    let quiz_wrapper = $(this).closest('.submission-view-item-row')
-    let section_wrapper = $(this).closest('.group-quiz-wrapper')
-    let total_section_score = section_wrapper.find('.total-section-score-val')
-    let quiz_weighting = weighting_wrapper.data('weighting')
-    let sub_score = quiz_wrapper.find('.sub-total-score-val')
-    let all_sub_score = section_wrapper.find('.sub-total-score-val')
-    let all_sections_score = $('.total-section-score-val')
-    let total_score_element = $('.total-submission-score')
-    let input_total_score = $('input[name="total_submission_score"]')
-    var sub_scores_arr = [];
-    var section_scores_arr = [];
-    var total_section_score_val = 0;
-    var total_submission_score_val = 0;
-
-    // Sub questions Scoring
-    sub_score.text(parseFloat(answer_point * quiz_weighting).toFixed(1));
-
-    all_sub_score.each(function(e) {
-      let sub_score_fl = parseFloat($(this).text());
-      sub_scores_arr.push(sub_score_fl);
-    })
-    sub_scores_arr.forEach( num => {
-      total_section_score_val += num;
-    })
-
-    // Section Scoring
-    total_section_score.text(total_section_score_val.toFixed(1));
-
-    all_sections_score.each(function(e) {
-        let section_score_fl = parseFloat($(this).text());
-        section_scores_arr.push(section_score_fl);
-    })
-    section_scores_arr.forEach( num => {
-        total_submission_score_val += num;
-    })
-
-    // Total Submission Scoring
-    total_score_element.text(total_submission_score_val.toFixed(1));
-    input_total_score.val(total_submission_score_val.toFixed(1))
-  });
-
-  // change or type point for Group question
-  // $(document).on("change keyup keypress", ".input-group-weighting", function () {
-  //   let group_quiz_wrapper = $(this).closest('.group-quiz-wrapper')
-  //   let group_quiz_point = $(this).val()
-
-  //   let count_weighting = group_quiz_wrapper.find('.input-weighting').length
-
-  //   for (let index = 1; index <= count_weighting; index++) {
-  //     let sub_weighting_input = group_quiz_wrapper.find(`#input-weighting-${index}`).val()
-  //     let sub_total_score = group_quiz_point * sub_weighting_input
-  //     group_quiz_wrapper.find(`#sub-total-score-val-${index}`).text(sub_total_score)
-  //   }
-
-  // });
-
-  $(document).on("click", ".btn-remove-group", function (e) {
-    e.stopPropagation();
-    let remove_message = $(this).find('.remove-message')
-    remove_message.toggleClass('active')
-  });
-
-  $(document).on("click", ".btn-remove-group .btn-remove", function (e) {
-    e.stopPropagation();
-    let group_remove = $(this).closest('.group-question-wrapper')
-    group_remove.remove()
-  });
-
-  const updateQuestionsIndex = (group_question_wrapper) => {
-
-    let get_sub_questions = group_question_wrapper.find('.question-row-container');
-    let group_id = group_question_wrapper.data('id')
-
-    $(get_sub_questions).each(function(index, item) {
-        let _index = index + 1;
-        let firstHeading = $(item).find('.admin-question-row-label').first();
-        let value = `Sub Question 1.${_index}`;
-        let item_id = 'question-main-row-'+ group_id +'_'+ _index;
-        let input_question = $(this).find('input.question-admin-title')
-        let input_point = $(this).find('input.question-point-input')
-        let textarea_description = $(this).find('textarea.sub-question-wpeditor')
-        let textarea_advice = $(this).find('textarea.advice-area-wpeditor')
-        let btn_multi_choice = $(this).find('button.add-multi-choice-btn')
-        let table_multi_choice = $(this).find('table.multi-choice-table')
-        let input_supporting_doc = $(this).find('input.question-rule-checkbox-input')
-        let add_files_wrapper = $(this).find('.btn-add-files-wrapper')
-        let label_add_files = add_files_wrapper.find('label')
-        let input_add_files = $(this).find('input.additional-files')
-
-        $(this).attr('data-id', _index )
-        $(this).attr('id', item_id )
-        firstHeading.text(value);
-        input_question.attr('name', 'group_questions['+ group_id +'][list]['+ _index +'][sub_title]')
-        input_point.attr('name', 'group_questions['+ group_id +'][list]['+ _index +'][point]')
-        textarea_description.attr('name', 'group_questions['+ group_id +'][list]['+ _index +'][description]')
-        textarea_advice.attr('name', 'group_questions['+ group_id +'][list]['+ _index +'][advice]')
-        btn_multi_choice.attr('data-id', _index)
-        table_multi_choice.attr('id', 'multi-check-table-'+ group_id +'_'+ _index )
-        input_supporting_doc.attr('name', 'group_questions['+ group_id +'][list]['+ _index +'][supporting_doc]')
-        label_add_files.attr('for', 'additional-files-'+ group_id +'-'+ _index)
-        input_add_files.attr('id', 'additional-files-'+ group_id +'-'+ _index)
-    })
-  }
+    $(document).on("click", ".btn-remove-group .btn-remove", function (e) {
+        e.stopPropagation();
+        let groupRow = $(this).closest('.group-question-wrapper');
+        groupRow.addClass('removing');
+        setTimeout(() => {
+            groupRow.remove();
+        }, 200);
+        setTimeout(() => {
+            renewAllQuestionsIndex();
+        }, 600);
+    });
 
     $(document).on("click", ".btn-remove-question", function (e) {
         e.stopPropagation()
@@ -558,124 +527,72 @@ jQuery(document).ready(function ($) {
     });
 
     $(document).on("click", ".btn-remove-question .btn-remove", function (e) {
-        e.stopPropagation()
-
+        e.stopPropagation();
         let group_question_wrapper = $(this).closest('.group-question-wrapper');
-        let question_remove = $(this).closest('.question-row-container')
+        let questionRow = $(this).closest('.question-row-container');
 
-        question_remove.remove();
+        questionRow.addClass('removing');
+        setTimeout(() => {
+            questionRow.remove();
+            let num_question_row = group_question_wrapper.find('.question-row-container').length
+            if (num_question_row == 0) {
+                if (group_question_wrapper.hasClass('toggle')) {
+                    group_question_wrapper.removeClass('toggle')
+                }
+                let btn_expand = group_question_wrapper.find('.btn-expand-wrapper.active')
+                let wrapper_top = group_question_wrapper.find('.question-wrapper-top.active')
 
-        updateQuestionsIndex(group_question_wrapper);
-
-        let num_question_row = group_question_wrapper.find('.question-row-container').length
-
-        if (num_question_row == 0) {
-            if (group_question_wrapper.hasClass('toggle')) {
-                group_question_wrapper.removeClass('toggle')
+                wrapper_top.removeClass('active')
+                btn_expand.removeClass('active')
+                btn_expand.find('.text').text('Expand Group')
             }
-            let btn_expland = group_question_wrapper.find('.btn-expland-wrapper.active')
-            let wrapper_top = group_question_wrapper.find('.question-wrapper-top.active')
-
-            wrapper_top.removeClass('active')
-            btn_expland.removeClass('active')
-            btn_expland.find('.text').text('Expland Group')
-        }
+        }, 200);
+        setTimeout(() => {
+            renewAllQuestionsIndex();
+        }, 600);
     });
 
     $(document).on("click", ".icon-close", function (e) {
         e.stopPropagation()
-        $(this).closest('.remove-message').removeClass('active')
+        $(this).closest('.remove-message').removeClass('active');
     });
 
     $(document).on("click", ".btn-remove-choice", function () {
         $(this).parents("tr").remove();
-        return false;
-    });
-
-    $(document).on("click", ".increment-question-point", function () {
-        const that = $(this);
-        const parent = that.parent(".question-points-actions-container");
-        const input = parent.siblings(".question-point-input");
-
-        let value = input.val();
-        value = value !== "" ? value : "0";
-        input.val(parseInt(value) + 1);
-    });
-
-    $(document).on("click", ".decrement-question-point", function () {
-        const that = $(this);
-        const parent = that.parent(".question-points-actions-container");
-        const input = parent.siblings(".question-point-input");
-
-        let value = input.val();
-        value = value !== "" ? value : "0";
-        value = parseInt(value);
-        if (value <= 0) return;
-
-        input.val(value - 1);
-    });
-
-    $(document).on("change", ".question-rule-checkbox", function () {
-        const that = $(this);
-        const input = that.siblings(".question-rule-checkbox-input");
-        let val = 0;
-
-        if (that.is(":checked")) {
-            val = 1;
-        }
-        input.val(val);
-    });
-
-    $(document).on("change", ".question-rule-description-checkbox", function () {
-        const that = $(this);
-        const input = that.siblings(".question-rule-description-checkbox-input");
-        let val = 0;
-
-        if (that.is(":checked")) {
-            val = 1;
-        }
-        input.val(val);
     });
 
     $(document).on("click", ".add-multi-choice-btn", function () {
-        let index = $(this).data("id");
-        let group_index = $(this).data("group-id");
-        let currentIndex = index;
-        let table = $(`#multi-check-table-${group_index}_${index}`);
-        let row = table.find(".multi-choice-list-item");
-        let row_count = (row.length) + 1;
+        let wrapper = $(this).closest('.multi-choices-container');
+        let currentId = $(this).data("id");
+        let groupId = $(this).data("group-id");
+        let table = wrapper.find(`table#multi-choices-table-${groupId}-${currentId}`);
+        let choiceIndex = Date.now();
 
-        let table_row_html = '<tr class="multi-choice-list-item">';
-            table_row_html += '   <td><label>Answer</label><input type="text" name="group_questions[' + group_index + '][list][' + currentIndex + '][choice][' + row_count + '][answer]"/></td>';
-            table_row_html += '   <td><label>Point</label><input type="number" step="0.01" name="group_questions[' + group_index + '][list][' + currentIndex + '][choice][' + row_count + '][point]"/></td>';
-            table_row_html += '   <td><label></label><input type="checkbox" name="group_questions[' + group_index + '][list][' + currentIndex + '][choice][' + row_count + '][is_correct]"/></td>';
-            table_row_html += '   <td><label></label><span class="button btn-remove-choice">Remove</span></td>';
-            table_row_html += '</tr>';
-
-        let parent_row = $(`#multi-check-table-${group_index}_${index} tbody`)
-        parent_row.append(table_row_html)
-
-        return false;
+        let table_row_html  = (`
+            <tr class="multi-choice-list-item">
+                <td><label>Answer</label><input type="text" name="group_questions[${groupId}][list][${currentId}][choice][${choiceIndex}][answer]"/></td>
+                <td><label>Point</label><input type="number" step="0.1" name="group_questions[${groupId}][list][${currentId}][choice][${choiceIndex}][point]"/></td>
+                <td><label>True</label><input type="checkbox" name="group_questions[${groupId}][list][${currentId}][choice][${choiceIndex}][is_correct]"/></td>
+                <td><label></label><span class="button btn-remove-choice">Remove</span></td>
+            </tr>
+        `);
+        table.find('tbody').append(table_row_html)
     });
 
     $(document).on("click", ".add-multi-choice-simple", function () {
-        let index = $(this).data("id");
-        let currentIndex = index;
-        let table = $(`#multi-check-table-${index}`);
-        let row = table.find(".multi-choice-list-item");
-        let row_count = (row.length) + 1;
+        let wrapper = $(this).closest('.multi-choices-container');
+        let currentId = $(this).data("id");
+        let table = wrapper.find(`table#multi-choice-table-${currentId}`);
+        let choiceIndex = Date.now();
 
-        let table_row_html = '<tr class="multi-choice-list-item">';
-            table_row_html += '   <td><label>Answer</label><input type="text" class="choice-item-answer" name="group_questions[' + currentIndex + '][choice][' + row_count + '][answer]"/></td>';
-            // table_row_html += '   <td><label>Point</label><input type="number" name="group_questions[' + currentIndex + '][choice][' + row_count + '][point]"/></td>';
-            table_row_html += '   <td><label></label><input type="checkbox" name="group_questions[' + currentIndex + '][choice][' + row_count + '][is_correct]"/></td>';
-            table_row_html += '   <td><label></label><span class="button btn-remove-choice">Remove</span></td>';
-            table_row_html += '</tr>';
-
-        let parent_row = $(`#multi-check-table-${index} tbody`)
-        parent_row.append(table_row_html)
-
-        return false;
+        let table_row_html = (`
+            <tr class="multi-choice-list-item">
+                <td><label>Answer</label><input type="text" class="choice-item-answer" name="group_questions[${currentId}][choice][${choiceIndex}][answer]"/></td>
+                <td><label>True</label><input type="checkbox" name="group_questions[${currentId}][choice][${choiceIndex}][is_correct]"/></td>
+                <td><label></label><span class="button btn-remove-choice">Remove</span></td>
+            </tr>
+        `);
+        table.find('tbody').append(table_row_html);
     });
 
     $(document).on("change", ".multi-choice-check-input", function () {
@@ -687,18 +604,6 @@ jQuery(document).ready(function ($) {
         val = 1;
         }
         input.val(val);
-    });
-
-    $(".accept-quiz-feedback").on("click", async function (e) {
-        e.preventDefault();
-        await markFeedbackSubmissionAnswers($(this), "accepted");
-        getQuizsStatus($(this))
-    });
-
-    $(".reject-quiz-feedback").on("click", async function (e) {
-        e.preventDefault();
-        await markFeedbackSubmissionAnswers($(this));
-        getQuizsStatus($(this))
     });
 
     function getQuizsStatus(btn) {
@@ -818,61 +723,6 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    $(document).on("click", "#btn-add-report-option", async function (e) {
-
-        let report_sections ='<div id="intro-section" class="_section">'
-            report_sections +='    <h3 class="_heading">Intro</h3>'
-            report_sections +='    <textarea id="intro-section-wpeditor-'+ Date.now() +'" name="report_sections[intro]" rows="12" class="report-section-wpeditor"></textarea>'
-            report_sections +='</div>'
-            report_sections +='<div id="outro-section" class="_section">'
-            report_sections +='    <h3 class="_heading">Outro</h3>'
-            report_sections +='    <textarea id="outro-section-wpeditor'+ Date.now() +'" name="report_sections[outro]" rows="12" class="report-section-wpeditor"></textarea>'
-            report_sections +='</div>'
-            report_sections +='<div id="address-section" class="_section">'
-            report_sections +='    <h3 class="_heading">Address</h3>'
-            report_sections +='    <textarea id="address-section-wpeditor'+ Date.now() +'" name="report_sections[address]" rows="12" class="report-section-wpeditor"></textarea>'
-            report_sections +='</div>'
-            report_sections +='<div id="appendix-section" class="_section">'
-            report_sections +='    <h3 class="_heading">Appendix</h3>'
-            report_sections +='    <textarea id="appendix-section-wpeditor'+ Date.now() +'" name="report_sections[appendix]" rows="12" class="report-section-wpeditor"></textarea>'
-            report_sections +='</div>'
-
-        let report_section_wrapper = $('#report-section-container')
-        let count_report_item = report_section_wrapper.find('._section').length
-
-        if (count_report_item == 0) { // if has data on report section editor
-
-            $(this).text('- Remove report section').addClass('remove')
-            report_section_wrapper.append(report_sections);
-
-            let report_wpeditor_textarea = $('#report-section-container').find('textarea.report-section-wpeditor')
-            report_wpeditor_textarea.each(function () {
-                let report_wpeditor_id = $(this).attr('id')
-                report_wpeditor_id = '#' + report_wpeditor_id
-                append_wpeditor(report_wpeditor_id, true)
-            })
-        }
-        else { // if don't has data on report section editor
-            if (confirm('Remove all content of report section')) {
-                $('#report-section-container ._section').each(function () {
-                $(this).remove()
-                })
-                $(this).text('+ Add report section')
-            }
-            else {
-                return false;
-            }
-        }
-    });
-
-  $(document).ready(function (e){
-    let count_report_item = $('#report-section-container').find('._section').length
-
-    if (count_report_item > 0) {
-      $('#btn-add-report-option').text('- Remove report section').addClass('remove')
-    }
-  });
-
     var key_recom_container = $('#report-key-areas-field .key-areas-list')
     var row_recom_index = 0;
     if ($(".row-key-area").length) {
@@ -909,9 +759,9 @@ jQuery(document).ready(function ($) {
     });
 
     $(document).on('click', '.btn-toggle-advice-area', function (e){
-        let advice_container = $(this).closest('.question-advice-row-container')
+        let advice_container = $(this).closest('.question-advice-container')
         $(this).toggleClass('active')
-        advice_container.find('.visual-textarea-wrapper').slideToggle()
+        advice_container.find('.advice-editor-wrapper').slideToggle(200);
     });
 
     $(document).on('click', '.field-select2 .sf-products-list .item', function (e){
@@ -965,67 +815,50 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    async function markFeedbackSubmissionAnswers(instance, type = "rejected") {
+    $(document).on('change', "select.select-quiz-status", async function (e) {
+        e.preventDefault();
+        const quizStatus = $(this).val();
+        const quizId = $(this).data("quiz-id");
+        const groupId = $(this).data("group-id");
+        const wrapper = $(this).closest(`#main-container-${groupId}_${quizId}`);
+        const assessmentId = $('input#assessment_id').val();
+        const submissionId = $('input#submission_id').val();
+        const organisationId = $('input#organisation_id').val();
 
-        let quizId = instance.data("id");
-        let parent_quiz_id = instance.data("group-id");
-        let parent = $(`#main-container-${parent_quiz_id}_${quizId}`);
-        let feedback = parent.find(".feedback-input").val();
-        let assessmentId = $(`[name="assessment_id"]`).val();
-        let submissionId = $('#submission_id').val();
-        let organisationId = $('#organisation_id').val();
-        // let userId = parent.find(`[name="user_id"]`).val();
-        let quizPoint = parent.find(`[name="quiz_point"]`).val();
-
-        await updateQuizStatusSusmission(instance, type, {
-            feedback,
-            assessment_id: assessmentId,
-            submission_id: submissionId,
-            organisation_id: organisationId,
-            // user_id: userId,
-            quiz_id: quizId,
-            parent_quiz_id: parent_quiz_id,
-            quiz_point: quizPoint,
-            type,
-        });
-    }
-
-    async function updateQuizStatusSusmission(instance, type, data = {}) {
-
-        let quiz_row = instance.closest('.submission-view-item-row')
-        let row_status = quiz_row.find('.quiz-status')
-
-        const payload = {
-        action: "update_quiz_status_submission",
-        ...data,
-        };
+        if (!quizStatus || quizStatus === '' || quizStatus === null) return;
 
         let response = await $.ajax({
             type: "POST",
             url: ajaxUrl,
-            data: payload,
+            data: {
+                action: "update_quiz_status_submission",
+                assessment_id: assessmentId,
+                submission_id: submissionId,
+                organisation_id: organisationId,
+                quiz_id: quizId,
+                parent_id: groupId,
+                quiz_status: quizStatus,
+            },
             beforeSend : function ( xhr ) {
-                quiz_row.addClass('loading')
+                wrapper.addClass('loading');
             },
             success:function(response){
-                quiz_row.removeClass('loading')
+                wrapper.removeClass('loading');
             }
         });
-        const { quiz_id, parent_id, status, message } = response;
-        console.log(response);
+        const { status, message, saved_status } = response;
+        // console.log(response);
+
+        const statusClass = saved_status.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
 
         if (status == true) {
-            row_status.removeClass('accepted')
-            row_status.removeClass('rejected')
-            row_status.addClass(type)
-            row_status.find('strong').text(type)
+            wrapper.find('.quiz-status strong').removeClass().addClass(statusClass).text(saved_status);
         }
         else {
-            alert(response.message)
+            alert(message);
         }
 
-        return status;
-    }
+    });
 
     $(".btn-save-feedback").on("click", function (e) {
         e.preventDefault();
@@ -1130,73 +963,83 @@ jQuery(document).ready(function ($) {
         $(this).attr('value', input_val)
     });
 
-    // upload additional files on admin fields
-    $(document).on('change', ".additional-files", async function(e){
-
-        let that = $(this);
-        let file = e.target.files[0];
-        let group_questions_id =  $(this).closest('.group-question-wrapper').data('id')
-        let sub_question_id = $(this).closest('.question-row-container').data('id')
-        let add_files_container = $(this).closest('.question-add-files-container')
-        let message = add_files_container.find('.__message')
-        let count_file_item = Date.now();
-
-        var file_id_input = '';
-        var file_item = '';
-        var fileName = '';
-        var filesList = add_files_container.find(".filesList");
-        var new_file_id = '';
-        var new_file_url = '';
-
+    // Upload additional files on Admin Assessment
+    $(document).on('change', ".additional-files", async function (e) {
+        const files = Array.from(this.files);
+        const groupQuestionsId = $(this).closest('.group-question-wrapper').data('id');
+        const subQuestionId = $(this).closest('.question-row-container').data('id');
+        const addFilesContainer = $(this).closest('.question-add-files-container');
+        const message = addFilesContainer.find('._message');
+        const filesList = addFilesContainer.find(".filesList");
+        const spinner = addFilesContainer.find('.uploading-wrapper');
         // Hide the message
-        message.hide();
-
-        for (var i = 0; i < this.files.length; i++){
-            file_item = $('<span/>', {class: 'file-item'})
-            file_item.hide()
-            fileName = $('<a/>', {
-                class: 'name',
-                text: this.files.item(i).name,
-                target: '_blank'
+        message.removeClass('error').hide();
+        if (!files.length) return;
+        $(this).prop('disabled', true);
+        spinner.show();
+        try {
+            // Upload all files in parallel
+            const uploadPromises = files.map(async (file, index) => {
+                const fileIndex = Date.now() + index; // Ensure unique index
+                const fileItem = $('<span/>', { class: 'file-item', style: 'display: none;' });
+                const fileName = $('<a/>', { class: 'name', text: file.name, target: '_blank' });
+                const fileIcon = $('<span class="icon"><i class="fa-solid fa-paperclip"></i></span>');
+                const deleteIcon = $('<span class="file-delete"><i class="fa-solid fa-xmark"></i></span>');
+                const hiddenInput = $(`<input/>`, {
+                    type: "hidden",
+                    class: `input-file-hidden additional-file-id-${fileIndex}`,
+                    name: `group_questions[${groupQuestionsId}][list][${subQuestionId}][additional_files][${fileIndex}]`,
+                    value: "",
+                });
+    
+                fileName.prepend(fileIcon);
+                fileItem.append(fileName, deleteIcon, hiddenInput);
+                filesList.append(fileItem);
+    
+                // Perform upload
+                const fileId = await admin_upload_additional_file(file);
+    
+                // Update hidden input with the uploaded file ID
+                hiddenInput.val(fileId);
+    
+                // Fetch the file URL using WordPress media API
+                const attachment = wp.media.attachment(fileId);
+                await attachment.fetch();
+                const fileUrl = attachment.get("url");
+    
+                // Update file link and show the item
+                fileName.attr("href", fileUrl);
+                fileItem.fadeIn(200);
+    
+                return fileItem;
             });
-
-            file_id_input  = '<input name="group_questions['+group_questions_id+'][list]['+sub_question_id+'][additional_files]['+ count_file_item +']" ';
-            file_id_input += 'type="hidden" class="input-file-hiden additional-file-id-'+ count_file_item +'" value="" />';
-
-            file_item.append(fileName)
-                .append('<span class="file-delete"><i class="fa-solid fa-xmark"></i></span>')
-                .append(file_id_input)
-
-            filesList.append(file_item);
-
-            await admin_upload_additional_files(file, that, count_file_item);
-
-            new_file_id = filesList.find('.additional-file-id-'+ count_file_item).val()
-
-            wp.media.attachment(new_file_id).fetch().then(function (data) {
-                // preloading finished
-                // after this you can use your attachment normally
-                new_file_url = wp.media.attachment(new_file_id).get('url');
-                fileName.attr('href', new_file_url)
-            });
-
-            file_item.show()
-
-            // Show the message
-            message.text('File Uploaded');
-            message.show();
-            // Hide the message after 10 seconds
-            setTimeout(function() {
-                message.hide();
-            }, 10000);
-        };
+    
+            // Wait for all uploads to complete
+            await Promise.all(uploadPromises);
+            // Show success message
+            message.text("Files uploaded successfully!").fadeIn(200);
+            // Hide message after 10 seconds
+            setTimeout(() => message.fadeOut(), 10000);
+        } 
+        catch (error) {
+            console.error("Error uploading files:", error);
+            message.addClass('error').text("An error occurred while uploading files.").fadeIn(200);
+            // Hide error message after 10 seconds
+            setTimeout(() => message.fadeOut(), 10000);
+        }
+        finally {
+            // Re-enable input and remove spinner
+            $(this).prop('disabled', false);
+            spinner.hide();
+        }
     });
 
     // EventListener for delete file item
     $(document).on('click', '.file-delete', function(){
-        let btn = $(this)
-        let add_files_container = btn.closest('.question-add-files-container')
-        let message = add_files_container.find('.__message')
+        let btn = $(this);
+        let add_files_container = btn.closest('.question-add-files-container');
+        let this_file_item = btn.closest('.file-item');
+        let message = add_files_container.find('._message')
         let input_file_hiden = btn.parent().find('.input-file-hiden')
         let file_ID = input_file_hiden.val()
 
@@ -1210,15 +1053,14 @@ jQuery(document).ready(function ($) {
                     'file_id' : file_ID,
                 },
                 beforeSend : function ( xhr ) {
+                    this_file_item.css('opacity', '0.5')
                     // Hide the message
-                    message.hide();
+                    message.removeClass('error').hide();
                 },
                 success:function(response){
-                    btn.parent().remove()
-
+                    this_file_item.remove();
                     // Show the message
-                    message.text('File Deleted');
-                    message.show();
+                    message.text('File deleted').show();
                     // Hide the message after 10 seconds
                     setTimeout(function() {
                         message.hide();
@@ -1228,11 +1070,9 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    async function admin_upload_additional_files(file, inputInstance, index) {
+    async function admin_upload_additional_file(file_upload) {
         let formData = new FormData();
-        let fileUploaderWrap = inputInstance.closest(".question-add-files-container")
-
-        formData.append("file", file)
+        formData.append("file", file_upload)
         formData.append("action", 'upload_assessment_attachment')
         formData.append("security", ajax_object.security)
 
@@ -1242,30 +1082,24 @@ jQuery(document).ready(function ($) {
             processData: false,
             contentType: false,
             data: formData,
-            beforeSend : function ( xhr ) {
-                fileUploaderWrap.find('.uploading-wrapper').show()
-                fileUploaderWrap.find('.btn-add-files-wrapper').addClass('not-allowed')
-            },
-            success:function(response){
-                fileUploaderWrap.find('.uploading-wrapper').hide()
-                fileUploaderWrap.find('.btn-add-files-wrapper').removeClass('not-allowed')
-            }
+            beforeSend:function(xhr){},
+            success:function(response){}
         });
 
         const { status, message } = response;
-        // toggleMessageWrap(message)
 
-        if (status) {
-            fileUploaderWrap.find('.additional-file-id-' + index).val(response?.attachment_id)
+        if (status == true) {
+            return response.attachment_id;
         } else {
-
+            alert(message);
+            return false;
         }
     }
 
     $(document).on('click', '.sas-blob-cta', function (e){
-
-        let blobUrl = $(this).data('blob')
-
+        const thisBtn = $(this);
+        const blobUrl = thisBtn.data('blob');
+        if (!blobUrl) return;
         $.ajax({
             type: 'POST',
             url: ajaxUrl,
@@ -1274,7 +1108,7 @@ jQuery(document).ready(function ($) {
                 'blob_url' : blobUrl,
             },
             beforeSend : function ( xhr ) {
-                $(this).focus()
+                thisBtn.addClass('loading');
             },
             success:function(response){
                 if (response.status) {
@@ -1283,44 +1117,61 @@ jQuery(document).ready(function ($) {
                         '_blank',
                       );
                 } else {
-                    alert(response.message)
+                    alert(response.message);
                 }
-                $(this).focusout()
+                thisBtn.removeClass('loading');
             }
         });
     });
 
-    $(document).on('click', '.btn-lock-question', function (e){
-
-        let question_wrapper = $(this).closest('#question-group-repeater .question')
-        let is_locked_input = question_wrapper.find('input.is_locked_input')
-        let locked_icon = $(this).find('.locked-icon');
-        let lock_text = $(this).find('.lock-text');
-        let btn_collapse = question_wrapper.find('.btn-expland-wrapper.active')
-        let group_title = question_wrapper.find('input.group-question-admin-title')
-        let question_title = question_wrapper.find('input.question-admin-title')
-
-        if (question_wrapper.hasClass('disabled')) {
-            // Unlock
-            question_wrapper.removeClass('disabled')
-            locked_icon.hide()
-            lock_text.text('Lock')
-            is_locked_input.val('0')
-            group_title.removeAttr('tabindex')
-            question_title.removeAttr('tabindex')
-        }
-        else {
-            // Collapse Question before lock
-            btn_collapse.click();
-            // Lock
-            question_wrapper.addClass('disabled')
-            locked_icon.show()
-            lock_text.text('Unlock')
-            is_locked_input.val('1')
-            group_title.attr('tabindex', '-1')
-            question_title.attr('tabindex', '-1')
+    $(document).on('click', '.btn-lock-question', function () {
+        let $this = $(this);  // Cache the button
+        let questionWrapper = $this.closest('#question-group-repeater .question'); // Find the question wrapper
+        let isLockedInput = questionWrapper.find('input.is_locked_input');
+        let lockedIcon = $this.find('.locked-icon');
+        let lockText = $this.find('.lock-text');
+        let btnCollapse = questionWrapper.find('.btn-expand-wrapper.active');
+        let groupTitle = questionWrapper.find('input.group-question-admin-title');
+        let questionTitle = questionWrapper.find('input.question-admin-title');
+        // Determine if the question is currently locked
+        let isLocked = questionWrapper.hasClass('disabled');
+        // If locked, unlock; if unlocked, lock
+        if (isLocked) {
+            unlockQuestion(questionWrapper, lockedIcon, lockText, isLockedInput, groupTitle, questionTitle);
+        } else {
+            // Collapse the question first before locking
+            btnCollapse.click();
+            lockQuestion(questionWrapper, lockedIcon, lockText, isLockedInput, groupTitle, questionTitle);
         }
     });
+    
+    // Unlock the question
+    function unlockQuestion(questionWrapper, lockedIcon, lockText, isLockedInput, groupTitle, questionTitle) {
+        questionWrapper.removeClass('disabled');
+        lockedIcon.hide();
+        lockText.text('Lock');
+        isLockedInput.val('0'); // Set the lock state as unlocked
+        // Make the input fields focusable again
+        groupTitle.removeAttr('tabindex');
+        questionTitle.removeAttr('tabindex');
+        // ARIA attributes for accessibility
+        groupTitle.attr('aria-disabled', 'false');
+        questionTitle.attr('aria-disabled', 'false');
+    }
+    
+    // Lock the question
+    function lockQuestion(questionWrapper, lockedIcon, lockText, isLockedInput, groupTitle, questionTitle) {
+        questionWrapper.addClass('disabled');
+        lockedIcon.show();
+        lockText.text('Unlock');
+        isLockedInput.val('1'); // Set the lock state as locked
+        // Disable focusability of the input fields
+        groupTitle.attr('tabindex', '-1');
+        questionTitle.attr('tabindex', '-1');
+        // ARIA attributes for accessibility
+        groupTitle.attr('aria-disabled', 'true');
+        questionTitle.attr('aria-disabled', 'true');
+    }
 
     $(document).on('change', '#is_assessment_completed', function (e){
         let checkbox = $(this)
@@ -1538,7 +1389,7 @@ jQuery(document).ready(function ($) {
             $(this).closest('.generic-pages-list .generic-page').after(generic_page_item)
         }
         // Append WP editor
-        append_wpeditor('#'+ textarea_id, true);
+        renderWpVisualEditor('#'+ textarea_id, true);
 
         // Renew pages index
         setTimeout(function() {
@@ -1787,11 +1638,6 @@ jQuery(document).ready(function ($) {
         let bl_item = $(this).closest('.blacklist-item')
         bl_item.find('.confirm-remove').hide()
     });
-
-    // require assessment admin fields
-    $('input.group-question-admin-title').prop('required',true);
-    $('input.question-admin-title').prop('required',true);
-    $('input.choice-item-answer').prop('required',true);
 
     //Share Reports
     if($('.post-type-reports').length > 0){

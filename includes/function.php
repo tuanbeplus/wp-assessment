@@ -16,6 +16,7 @@ class WP_Assessment
         add_filter('upload_size_limit', array($this, 'override_file_size'));
         add_filter('wp_mail_content_type', array($this, 'set_email_content_type'));
         add_filter('tiny_mce_before_init', array($this, 'wpa_ptags_tinymce_fix')); 
+        add_filter('upload_mimes', array($this, 'wpa_allow_svg_upload'), 999);
         
         add_action('wp_ajax_create_comprehensive_report', array($this, 'create_comprehensive_report'));
         add_action('wp_ajax_nopriv_create_comprehensive_report', array($this, 'create_comprehensive_report'));
@@ -205,7 +206,7 @@ class WP_Assessment
             submit_version int(11) DEFAULT 1,
             answers JSON,
             description LONGTEXT,
-            status ENUM ('pending','completed','accepted','rejected') DEFAULT 'pending',
+            status VARCHAR(100) DEFAULT 'Pending',
             feedback LONGTEXT,
             quiz_point int(11),
             PRIMARY KEY  (id)
@@ -249,7 +250,7 @@ class WP_Assessment
             attachment_ids JSON,
             answers JSON,
             description LONGTEXT,
-            status ENUM ('pending','completed','accepted','rejected') DEFAULT 'pending',
+            status VARCHAR(100) DEFAULT 'Pending',
             feedback LONGTEXT,
             quiz_point int(11),
             PRIMARY KEY  (id)
@@ -451,7 +452,8 @@ class WP_Assessment
                     FROM $table 
                     WHERE assessment_id = %d 
                     AND submission_id IN ($submission_ids_list) 
-                    AND organisation_id = %s",
+                    AND organisation_id = %s
+                    ORDER BY time DESC",
                     $assessment_id,
                     $organisation_id
                 )
@@ -634,7 +636,7 @@ class WP_Assessment
         } else {
             $user_id = get_current_user_id();
         }
-        $data = null;
+        $data = array();
 
         if ($quizzes && is_array($quizzes)) {
             foreach ($quizzes as $item) {
@@ -1032,6 +1034,11 @@ class WP_Assessment
 
             return $self_assessed_score;
         }
+    }
+
+    function wpa_allow_svg_upload($mimes) {
+        $mimes['svg'] = 'image/svg+xml';
+        return $mimes;
     }
 
     // echo $wpdb->last_query;

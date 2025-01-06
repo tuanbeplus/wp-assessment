@@ -35,21 +35,16 @@ $report_template = get_post_meta($post_id, 'report_template', true);
 if (empty($report_template)) {
     $report_template = get_post_meta($assessment_id, 'report_template', true);
 }
-// Get all Quizzes records
 $quizzes = $main->get_quizzes_by_assessment_and_submissions($assessment_id, $submission_id, $organisation_id);
-
-// Get all feedbacks for assessment
 $assessor_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id, $organisation_id);
+$azure_documents_uploaded = $azure->get_azure_attachments_uploaded($assessment_id, $organisation_id);
 
-$documents_uploaded = $azure->get_azure_attachments_uploaded(1, 1, $assessment_id, $organisation_id);
-
-
-if ($_GET['test'] == 'test') {
-    echo "<pre>";
-    print_r($documents_uploaded);
-    echo "</pre>";
-    die;
-}
+// if ($_GET['test'] == 'test') {
+//     echo "<pre>";
+//     print_r($documents_uploaded);
+//     echo "</pre>";
+//     die;
+// }
 
 // get mPDF fontDir
 $defaultConfig = (new Mpdf\Config\ConfigVariables())->getDefaults();

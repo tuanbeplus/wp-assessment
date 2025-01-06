@@ -31,7 +31,7 @@ class AndSubmissionFeedbacks {
   function submission_feedbacks_enqueue_scripts(): void {
     global $post_type;
     if( $post_type == 'dcr_submissions' || $post_type == 'submissions' ) {
-      wp_enqueue_script('admin-feedbacks-js', WP_ASSESSMENT_ASSETS . '/js/admin/feedbacks.js', true, WP_ASSESSMENT_VER);
+      wp_enqueue_script('admin-feedbacks-js', WP_ASSESSMENT_ASSETS . '/js/admin/feedbacks.js', array(), WP_ASSESSMENT_VER, true);
       wp_localize_script(
         'admin-feedbacks-js',
         'fb_object',
@@ -138,8 +138,8 @@ class AndSubmissionFeedbacks {
         'feedback_id' => $wpdb->insert_id, 
         'user_name' => $current_user->display_name,
         'message' => 'Feedback for this quiz has been added', 
-        'status' => true )
-      );
+        'status' => true 
+      ));
     } catch (Exception $exception) {
       return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
     }

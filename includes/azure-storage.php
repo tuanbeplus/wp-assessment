@@ -150,29 +150,43 @@ class WP_Azure_Storage {
     }
 
     /**
-	 * Get Azure attachments uploaded in table
-	 *
-	 */
-    function get_azure_attachments_uploaded($parent_id, $quiz_id, $assessment_id, $organisation_id) {
+     * Get Azure attachments uploaded in table.
+     *
+     * @param int $assessment_id The ID of the assessment.
+     * @param string $organisation_id The ID of the organisation.
+     * @return array|null|WP_Error The list of attachments, null if none found, or WP_Error on failure.
+     */
+    function get_azure_attachments_uploaded($assessment_id, $organisation_id) {
+        global $wpdb;
         try {
-            global $wpdb;
+            // Get the Azure storage table name.
             $table = $this->get_azure_storage_table();
-
-            $sql = "SELECT * FROM $table 
-                    WHERE parent_id = $parent_id 
-                    AND quiz_id = $quiz_id 
-                    AND assessment_id = $assessment_id 
-                    AND organisation_id = '$organisation_id'";
-
-            $result = $wpdb->get_results($sql);
-
-            return !empty($result) ? $result : null;
-
+            // Prepare the query to prevent SQL injection.
+            $query = $wpdb->prepare(
+                "SELECT * FROM $table WHERE assessment_id = %d AND organisation_id = %s",
+                $assessment_id,
+                $organisation_id
+            );
+            // Execute the query.
+            $result = $wpdb->get_results($query);
+            // Check for database errors.
             if ($wpdb->last_error) {
                 throw new Exception($wpdb->last_error);
             }
-        } catch (Exception $exception) {
-            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+            $azure_attachments = [];
+            // Loop through the original array and reorganize the data
+            if (!empty($result)) {
+                foreach ($result as $row) {
+                    // Create the structure based on parent_id and quiz_id
+                    $azure_attachments[$row->parent_id][$row->quiz_id][] = $row;
+                }
+            }
+            // Return the result or null if empty.
+            return !empty($azure_attachments) ? $azure_attachments : null;
+        } 
+        catch (Exception $exception) {
+            // Return a WP_Error object for better error handling.
+            return new WP_Error('database_error', $exception->getMessage());
         }
     }
 
@@ -405,11 +419,14 @@ class WP_Azure_Storage {
             if (empty($organisation_id))
                 throw new Exception('Organisation not found.');
 
-            if(isset($attachment_id)) {
-                $delete_row_id = $this->delete_azure_attachment_uploaded($attachment_id, $assessment_id, $organisation_id);
+            if (!empty($attachment_id)) {
+                $deleted_row_id = $this->delete_azure_attachment_uploaded($attachment_id, $assessment_id, $organisation_id);
             }
 
-            return wp_send_json(array('delete_row_id' => $delete_row_id));
+            return wp_send_json(array(
+                'deleted_row_id' => $deleted_row_id,
+                'status' => true,
+            ));
 
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));

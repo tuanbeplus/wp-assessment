@@ -8,7 +8,7 @@
     });
 
     $(".pr-info").on("click", function () {
-      $(this).find(".btn-expland-fr").toggleClass("active");
+      $(this).find(".btn-expand-fr").toggleClass("active");
       $(this).next(".pr-ranking-lst").toggleClass("hide");
 
       let expand_text = $(this).find(".text");

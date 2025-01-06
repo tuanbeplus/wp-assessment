@@ -7,49 +7,42 @@
 
 $questions = get_query_var('questions') ?? [];
 $quizzes = get_query_var('quizzes') ?? [];
+$reorganize_quizzes = [];
+foreach ($quizzes as $row) {
+    $reorganize_quizzes[$row->quiz_id] = $row;
+}
 ?>
 <!-- Begin Simple Submission -->
 <?php if (!empty($quizzes)): 
-    foreach ($quizzes as $field):
-        $quiz_id = $field->quiz_id;
-        $attachment_id = null;
-        $attachment_type = null;
-        $url = null;
-
-        $answers = [];
-        if (!empty($field->answers)) {
-            $answers = json_decode($field->answers);
-        }
-        $description = null;
-        if (!empty($field->description)) {
-            $description = $field->description;
-        }
-        if (!empty($field->attachment_id)) {
-            $attachment_id = $field->attachment_id;
-            $url = wp_get_attachment_url($attachment_id);
+    foreach ($questions as $field_id => $field):
+        $question_title = $field['title'] ?? '';
+        $question_des = $field['description'] ?? '';
+        $quiz_row = $reorganize_quizzes[$field_id] ?? null;
+        if (!empty($quiz_row)) {
+            $answers = json_decode($quiz_row->answers) ?? null;
+            $description = $quiz_row->description ?? '';
+            $attachment_id = $quiz_row->attachment_id ?? null;
+            $attachment_url = wp_get_attachment_url($attachment_id);
             $attachment_type = get_post_mime_type($attachment_id);
         }
-        $question_title = $questions[$quiz_id]['title'] ?? null;
-        $question_des = $questions[$quiz_id]['description'] ?? null;
         ?>
-        <div class="submission-view-item-row simple" id="<?php echo $quiz_id ?>-main-container">
+        <div class="submission-view-item-row simple" id="main-container-<?php echo $field_id ?>">
             <div class="card">
                 <div class="card-body">
-                    <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $quiz_id ?>" class="quiz-input"/>
                     <h4 class="quiz-title"><?php echo esc_html($question_title); ?></h4>
                     <div class="question-des"><?php echo $question_des; ?></div>
-                    <?php if (is_array($answers) && count($answers) > 0) : ?>
+                    <?php if ( !empty($answers) ): ?>
                         <div class="submission-answers-list">
                             <strong>Selected Answer:</strong>
                             <ul>
                             <?php foreach ($answers as $answer): ?>
-                                <li><?php echo $answer->title; ?></li>
+                                <li><?php echo $answer->title ?? ''; ?></li>
                             <?php endforeach; ?>
                             </ul>
                         </div>
                     <?php else: ?>
                         <ul>
-                            <li>No answer</li>
+                            <li>No answer.</li>
                         </ul>
                     <?php endif; ?>
                     <?php if (!empty($description)): ?>
@@ -58,12 +51,20 @@ $quizzes = get_query_var('quizzes') ?? [];
                             <div class="description-thin"><?php echo esc_html($description); ?></div>
                         </div>
                     <?php endif; ?>
-                    <?php if ($attachment_id) : ?>
-                        <a href="<?php echo esc_attr($url) ?>" target="_blank"><p>View Supporting Documentation</p></a>
+                    <?php if (!empty($attachment_id)) : ?>
+                        <a href="<?php echo esc_attr($attachment_url) ?>" target="_blank"><p>View Supporting Documentation</p></a>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     <?php endforeach; ?>
 <?php endif; ?>
+<style>
+    .submission-view-item-row:last-of-type {
+        margin-bottom: 10px;
+    }
+    .submission-view-item-row .card {
+        width: 100% !important;
+    }
+</style>
 <!-- End Simple Submission -->

@@ -1204,3 +1204,49 @@ function get_submission_version_name($submission_id) {
 	$submission_name = 'Submission '.$this_sub_ver.' on '. date('M d, Y \a\t H:i a', strtotime($created_date));
 	return $submission_name;
 }
+
+/**
+ * Get Submission Quiz Status Options.
+ * 
+ * @return array Key-value pairs of submission quiz status options.
+ */
+function get_submission_quiz_status_options() {
+	$default_options = array(
+		'Pending',
+		'Accepted',
+		'Rejected',
+		'Not Applicable',
+		'Criteria Satisfied',
+		'Criteria Not Yet Satisfied',
+	);
+	// Fetch custom options from ACF (saved in Options Page).
+    $status_options = get_field('submission_quiz_status_options', 'option');
+    // Validate and process the custom options.
+    if (!empty($status_options) && is_array($status_options)) {
+        $processed_options = array();
+        foreach ($status_options as $option) {
+            if (!empty($option['status_name'])) {
+                $processed_options[] = $option['status_name'];
+            }
+        }
+        // Return custom options if available.
+        if (!empty($processed_options)) {
+            return $processed_options;
+        }
+    }
+    // Fallback to default options if custom options are not properly set.
+    return $default_options;
+} 
+
+/**
+ * Convert normal string to slug format.
+ */
+function wpa_convert_to_slug($string) {
+    // Convert to lowercase
+    $slug = strtolower($string);
+    // Replace spaces with hyphens
+    $slug = str_replace(' ', '-', $slug);
+    // Remove special characters (optional)
+    $slug = preg_replace('/[^a-z0-9\-]/', '', $slug);
+    return $slug;
+}

@@ -160,11 +160,24 @@ class WPA_Custom_Fields
 
         // Renew Index of Questions array
         $new_group_questions = array();
-        $item = 1;
-        foreach ($group_questions as $value) {
-            $new_group_questions[$item] = $value;
-            $item++;
+        if (!empty($group_questions)) {
+            $gr_index = 1;
+            foreach ($group_questions as $gr_question) {
+                $sub_questions = $gr_question['list'] ?? array();
+                $new_sub_questions = array();
+                if (isset($sub_questions) && !empty($sub_questions)) {
+                    $sub_index = 1;
+                    foreach ($sub_questions as $question) {
+                        $new_sub_questions[$sub_index] = $question;
+                        $sub_index++;
+                    }
+                    $gr_question['list'] = $new_sub_questions;
+                }
+                $new_group_questions[$gr_index] = $gr_question;
+                $gr_index++;
+            }
         }
+        
         // Renew Index of Members array
         $new_assigned_members = array();
         $index = 1;
@@ -500,6 +513,23 @@ class WPA_Custom_Fields
                                 'wrapper' => array(
                                     'width' => '50%',
                                 ),
+                            ),
+                        ),
+                    ),
+                    array(
+                        'key' => 'field_submission_quiz_status_options',
+                        'label' => 'Submission Quiz Status Options',
+                        'name' => 'submission_quiz_status_options',
+                        'type' => 'repeater',
+                        'layout' => 'table',
+                        'button_label' => 'Add Status',
+                        'sub_fields' => array(
+                            array(
+                                'key' => 'field_status_name',
+                                'label' => 'Status Name',
+                                'name' => 'status_name',
+                                'type' => 'text',
+                                'required' => 1,
                             ),
                         ),
                     ),

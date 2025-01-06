@@ -58,15 +58,15 @@ $saturn_invite_status = get_saturn_invite_status($user_id, $post_id);
 $is_disabled = $status === 'pending';
 ?>
 
-<?php if (current_user_can('administrator') || ($_COOKIE['userId'] && is_user_logged_in())): ?>
+<?php if (current_user_can('administrator') || ($user_id && is_user_logged_in())): ?>
 
     <?php if (current_user_can('administrator') || $is_all_users_can_access == true || $saturn_invite_status == 'Active'): ?>
 
-        <?php if (isset($_COOKIE['userId'])): ?>
-            <input type="hidden" id="sf_user_id" value="<?php echo $_COOKIE['userId']; ?>" />
+        <?php if (!empty($user_id)): ?>
+            <input type="hidden" id="sf_user_id" value="<?php echo $user_id ?>" />
         <?php endif; ?>
 
-        <?php if (isset($_COOKIE['sf_name'])): ?>
+        <?php if (!empty($_COOKIE['sf_name'])): ?>
             <input type="hidden" id="sf_user_name" value="<?php echo $_COOKIE['sf_name']; ?>" />
         <?php endif; ?>
         

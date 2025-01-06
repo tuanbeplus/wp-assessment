@@ -717,49 +717,42 @@ class WPA_Question_Form
     function update_quiz_status_submission()
     {
         try {
-            global $post;
-            $post_id = $post->ID;
             $main = new WP_Assessment();
-            $submission_id = intval($_POST['submission_id']);
 
-            $assessment_id = intval($_POST['assessment_id']);
-            if (empty($assessment_id))
-                throw new Exception('Assessment not found.');
+            $submission_id = intval($_POST['submission_id'] ?? '');
+            if (empty($submission_id)) throw new Exception('Submission not found.');
 
-            $organisation_id = $_POST['organisation_id'];
-            if (empty($organisation_id))
-                throw new Exception('Organisation not found.');
+            $assessment_id = intval($_POST['assessment_id'] ?? '');
+            if (empty($assessment_id)) throw new Exception('Assessment not found.');
 
-            $quiz_id = intval($_POST['quiz_id']);
-            if (empty($quiz_id))
-                throw new Exception('Quiz not found.');
+            $organisation_id = sanitize_text_field($_POST['organisation_id'] ?? '');
+            if (empty($organisation_id)) throw new Exception('Organisation not found.');
 
-            $type = $_POST['type'];
-            if (empty($type))
-                throw new Exception('Invalid type');
+            $parent_id = intval($_POST['parent_id'] ?? '');
+            if (empty($parent_id)) throw new Exception('Group quiz not found.');
 
-            $parent_quiz_id = intval($_POST['parent_quiz_id']);
-            if (empty($parent_quiz_id))
-                throw new Exception('Invalid Group ID');
+            $quiz_id = intval($_POST['quiz_id'] ?? '');
+            if (empty($quiz_id)) throw new Exception('Quiz not found.');
 
-            $input = [];            
-            $input['status'] = $type;
+            $quiz_status = sanitize_text_field($_POST['quiz_status']) ?? '';
+            if (empty($quiz_status)) throw new Exception('Invalid quiz status value.');
 
+            $input = array(
+                'status' => $quiz_status,
+            );    
             $conditions = array(
                 'organisation_id' => $organisation_id,
                 'quiz_id' => $quiz_id,
-                'parent_id' => $parent_quiz_id,
+                'parent_id' => $parent_id,
                 'assessment_id' => $assessment_id,
                 'submission_id' => $submission_id,
             );
 
             $main->update_quiz_assessment($input, $conditions);
 
-            return wp_send_json(array(
-                'quiz_id' => $quiz_id, 
-                'parent_id' => $parent_quiz_id, 
-                'message' => 'Quiz status '.$parent_quiz_id.'.'.$quiz_id.' has been updated', 
-                'quiz_status' => $type,
+            return wp_send_json(array( 
+                'message' => 'Quiz status '.$parent_id.'.'.$quiz_id.' has been updated', 
+                'saved_status' => $quiz_status,
                 'status' => true,
             ));
         

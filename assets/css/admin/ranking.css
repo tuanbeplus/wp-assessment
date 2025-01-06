@@ -140,20 +140,20 @@ tr:nth-child(even) {
   margin: 0;
   font-size: 1.5rem;
 }
-.pr-info .btn-expland-fr {
+.pr-info .btn-expand-fr {
   display: flex;
   align-items: center;
   text-decoration: none;
   font-size: 16px;
   color: blue;
 }
-.pr-info .btn-expland-fr .icon-chevron-down {
+.pr-info .btn-expand-fr .icon-chevron-down {
   transition: ease 0.25s all;
 }
-.pr-info .btn-expland-fr.active .icon-chevron-down {
+.pr-info .btn-expand-fr.active .icon-chevron-down {
   transform: rotate(180deg);
 }
-.pr-info .btn-expland-fr .text {
+.pr-info .btn-expand-fr .text {
   margin-right: 8px;
 }
 
