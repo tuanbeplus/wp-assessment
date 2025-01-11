@@ -531,7 +531,6 @@ class WP_Assessment
             
             $table = $this->get_quiz_submission_table_name($conditions['assessment_id']);
 
-            $data['time'] = current_time( 'mysql' );
             $wpdb->update($table, $data, $conditions, array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' , '%s', '%s', '%s' ), array('%s', '%s', '%s', '%s') );
 
             if ($wpdb->last_error) {

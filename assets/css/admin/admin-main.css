@@ -27,10 +27,20 @@
 }
 #btn-save-changes {
   min-width: 110px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
 }
-#btn-save-changes.saving {
+#btn-save-changes.loading {
   pointer-events: none;
+}
+#btn-save-changes .wpa-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px #ffffff40 solid;
+  border-top: 3px #ffffff solid;
+  animation-duration: 0.6s !important;
 }
 
 .select-template {
@@ -520,6 +530,11 @@
   margin-top: 15px;
 }
 
+.submission-view-item-row.empty .card {
+  opacity: 0.8;
+  background-color: #f8f8f8;
+}
+
 .submission-view-item-row.loading {
   opacity: 0.5;
   pointer-events: none;
@@ -688,7 +703,7 @@
 }
 .feedback .wp-editor-wrap {
   position: relative;
-  margin-top: -24px;
+  margin-top: -28px;
 }
 .feedback .wp-editor-wrap.loading {
   opacity: 0.5;
@@ -1889,14 +1904,11 @@ ul.dashboard-charts-list li.chart:last-child {
   pointer-events: none !important;
   opacity: 0.7 !important;
 }
-.and-btn .fb-spinner {
+.wpa-spinner {
   display: none;
   margin: 0;
   width: 24px;
   height: 24px;
-  position: absolute;
-  left: -36px;
-  top: 2px;
   border-radius: 50%;
   border: 3px #2271b130 solid;
   border-top: 3px #2271b1 solid;
@@ -1905,8 +1917,8 @@ ul.dashboard-charts-list li.chart:last-child {
   animation: effectSpinnerRotate 0.5s infinite linear;
   background-color: unset;
 }
-.and-btn.loading .fb-spinner {
-  display: block;
+.loading .wpa-spinner {
+  display: block !important;
 }
 @keyframes effectSpinnerRotate {
 	from { transform: rotate(0deg); }
@@ -1984,7 +1996,10 @@ ul.dashboard-charts-list li.chart:last-child {
   font-size: 22px;
 }
 .fb h2 {
-  font-size: 20px;
+  margin-bottom: 8px !important;
+  padding: 0 !important;
+  font-size: 20px !important;
+  font-weight: 500 !important;
 }
 .fb h3 {
   font-size: 18px;

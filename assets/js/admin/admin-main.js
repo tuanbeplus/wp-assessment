@@ -5,7 +5,7 @@ jQuery(document).ready(function ($) {
     let isChanged = false;
 
     // Detect changes in various elements
-    $('#questions-repeater-field').on('change input', 'input, textarea, select, [contenteditable="true"], input[type="file"], input[type="range"]', function () {
+    $('#questions-repeater-field').on('change input', 'input, textarea, [contenteditable="true"], input[type="file"], input[type="range"]', function () {
         isChanged = true;
     });
     // Exclude WordPress save post action
@@ -40,7 +40,7 @@ jQuery(document).ready(function ($) {
                     <span class="icon-toggle"></span>
                 </div>
                 <h3 class="admin-question-group-label">Question #${groupCount}</h3>
-                <input type="text" class="form-field group-question-admin-title form-control"
+                <input type="text" class="group-question-admin-title form-control"
                     name="group_questions[${groupCount}][title]" 
                     placeholder="Group Question Title" required/>
                 <div class="question-field-container"></div>
@@ -71,7 +71,7 @@ jQuery(document).ready(function ($) {
         <div class="question-input-area-container">
             <div class="question-title">
                 <label>Title</label>
-                <textarea rows="2" class="form-field question-admin-title form-control"
+                <textarea rows="2" class="question-admin-title form-control"
                     name="group_questions[${groupId}][list][${rowCount}][sub_title]"
                     placeholder="Question Title"></textarea>
             </div>
@@ -221,7 +221,7 @@ jQuery(document).ready(function ($) {
     // Template for question title
     const getTitleRow_Simple = (index) => (`
         <h3 class="admin-question-group-label">Question #${index}</h3>
-        <input type="text" class="form-field question-admin-title form-control"
+        <input type="text" class="question-admin-title form-control"
             name="group_questions[${index}][title]"
             value="" placeholder="Question Title" required/>
     `);
@@ -322,17 +322,32 @@ jQuery(document).ready(function ($) {
     $(document).on("click", "#btn-save-changes", function (e) {
         e.preventDefault(); // Prevent default behavior
         const saveButton = $('#submitpost input[type=submit][name=save]');
-    
+        const inputsRequired = mainWrapper.find('input[required]');         
+        let isValid = true; // Flag to track validation status
+
+        // Validate required inputs
+        inputsRequired.each(function () {
+            const value = $(this).val().trim();
+            if (!value || value === '') {
+                $(this).focus(); // Highlight the invalid input
+                isValid = false; // Set flag to invalid
+                return false; // Break out of the .each() loop
+            }
+        });
+
+        if (!isValid) {
+            setTimeout(() => {
+                alert("Please fill in all required fields.");
+            }, 200);
+            return; // Stop further execution if validation fails
+        }
         if (saveButton.length > 0) {
-            // Disable the button to prevent multiple clicks
-            $(this).addClass('saving').text("Saving...");
             // Trigger the save action
             saveButton.click();
-            // Re-enable after a short delay (you can adjust based on your save action)
-            setTimeout(() => {
-                $(this).removeClass('saving').text("Save Changes");
-            }, 5000);
-        } else {
+            // Disable the button to prevent multiple clicks
+            $(this).addClass('loading').find('.text').text("Saving...");
+        } 
+        else {
             console.error("Save button not found.");
             alert("Unable to save changes. Please try again.");
         }
@@ -820,9 +835,9 @@ jQuery(document).ready(function ($) {
         const quizStatus = $(this).val();
         const quizId = $(this).data("quiz-id");
         const groupId = $(this).data("group-id");
-        const wrapper = $(this).closest(`#main-container-${groupId}_${quizId}`);
+        const wrapper = $(this).closest('.submission-view-item-row');
         const assessmentId = $('input#assessment_id').val();
-        const submissionId = $('input#submission_id').val();
+        const submissionId = wrapper.data('submission');
         const organisationId = $('input#organisation_id').val();
 
         if (!quizStatus || quizStatus === '' || quizStatus === null) return;

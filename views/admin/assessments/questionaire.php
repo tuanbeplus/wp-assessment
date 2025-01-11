@@ -57,7 +57,7 @@ $report_key_areas = get_assessment_key_areas($post->ID);
                     </div>
 
                     <h3 class="admin-question-group-label">Question #<?php echo $group_id; ?></h3>
-                    <input type="text" class="form-field group-question-admin-title form-control"
+                    <input type="text" class="group-question-admin-title form-control"
                         name="group_questions[<?php echo $group_id; ?>][title]"
                         value="<?php echo esc_attr($group_question_title) ?>"
                         placeholder="Group Question Title" required
@@ -95,7 +95,7 @@ $report_key_areas = get_assessment_key_areas($post->ID);
                                 <div class="question-input-area-container">
                                     <div class="question-title">
                                         <label>Title</label>
-                                        <textarea rows="2" class="form-field question-admin-title form-control"
+                                        <textarea rows="2" class="question-admin-title form-control"
                                             name="group_questions[<?php echo $group_id; ?>][list][<?php echo $question_id; ?>][sub_title]"
                                             placeholder="Question Title" ><?php echo esc_html($sub_title) ?></textarea>
                                     </div>
@@ -438,7 +438,10 @@ $report_key_areas = get_assessment_key_areas($post->ID);
 
     <!-- Save changes & Add Row -->
     <div id="actions-row-block">
-        <span id="btn-save-changes" class="button button-primary button-large">Save Changes</span>
+        <span id="btn-save-changes" class="button button-primary button-large">
+            <div class="wpa-spinner"></div>
+            <span class="text">Save Changes</span>
+        </span>
         <?php if ($question_templates === 'Comprehensive Assessment'): ?>
             <span id="add-group-row" class="button button-primary button-large">Add Group Question</span>
         <?php elseif ($question_templates === 'Simple Assessment'): ?>

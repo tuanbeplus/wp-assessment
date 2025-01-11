@@ -44,8 +44,7 @@ foreach ($assigned_members as $member) {
             <!-- List items selected -->
             <ul id="members-selected-area" class="list-items-selected-area">
                 <input type="search" id="search-members" class="search-item" placeholder="Enter member name" autocomplete="off">              
-            </ul>
-            <!-- /List items selected -->
+            </ul><!-- /List items selected -->
 
             <!-- List items dropdown -->
             <ul id="list-members-dropdown" class="list-items-dropdown" style="display:none;">
@@ -58,11 +57,9 @@ foreach ($assigned_members as $member) {
                     </li>
                 <?php endforeach; ?>
             <?php endif; ?>
-            </ul>
-            <!-- /List items dropdown -->
+            </ul><!-- /List items dropdown -->
         </div>
-    </div>
-    <!-- /Member Option -->
+    </div><!-- /Member Option -->
 
     <div class="accessible-members-wrapper">
         <!-- Assigned Members -->
@@ -89,8 +86,7 @@ foreach ($assigned_members as $member) {
                 <?php endforeach; ?>
             <?php endif; ?>
             </ul>
-        </div>
-        <!-- /Assigned Members -->
+        </div><!-- /Assigned Members -->
 
         <!-- Invited Members -->
         <div class="assigned-members">
@@ -126,7 +122,6 @@ foreach ($assigned_members as $member) {
                 <?php endforeach; ?>
             <?php endif; ?>
             </ul>
-        </div>
-        <!-- /Invited Members -->
+        </div><!-- /Invited Members -->
     </div>
 </div>

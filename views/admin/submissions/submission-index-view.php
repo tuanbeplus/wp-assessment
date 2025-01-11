@@ -33,13 +33,7 @@ foreach ($quizzes as $row) {
 }
 $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment_id, $organisation_id);
 $quiz_status_options = get_submission_quiz_status_options();
-$i = 0;
 $submission_score_arr = array();
-
-// echo "<pre>";
-// print_r($reorganize_quizzes);
-// echo "</pre>";
-// die;
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -50,9 +44,7 @@ $submission_score_arr = array();
 <div class="container">
     <?php 
     if ($assessment_meta == 'Simple Assessment'):
-        set_query_var('questions', $questions);
-        set_query_var('quizzes', $quizzes);
-        wpa_get_admin_module('simple-submission');
+        require_once WP_ASSESSMENT_ADMIN_VIEW_DIR . "/submissions/submission-simple-view.php";
     endif; 
     ?>
     <?php if ($assessment_meta == 'Comprehensive Assessment'): ?>
@@ -89,6 +81,7 @@ $submission_score_arr = array();
                                 $feedback = $row->feedback ?? '';
                                 $quiz_status = $row->status ?? '';
                                 $arr_attachmentID = json_decode($row->attachment_ids) ?? [];
+                                $row_submission_id = $row->submission_id ?? null;
 
                                 if (isset($quiz_answer_points[$group_id][$sub_id])) {
                                     $quiz_point = $quiz_answer_points[$group_id][$sub_id];
@@ -102,7 +95,8 @@ $submission_score_arr = array();
 
                         if (!empty($current_quiz_rows)):
                         ?>
-                        <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>">
+                        <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>"
+                            data-submission="<?php echo esc_attr($row_submission_id) ?>">
                             <div class="card-header">
                                 <h4 class="quiz-title"><?php echo $group_id.'.'.$sub_id.' - '. esc_html($sub_title); ?></h4>
                             </div>

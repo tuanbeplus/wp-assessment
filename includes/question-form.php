@@ -92,6 +92,7 @@ class WPA_Question_Form
                             : $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id, $parent_id);
 
                         $input = $this->prepare_quiz_input_data([
+                            'time'            => current_time('mysql'),
                             'user_id'         => $user_id, 
                             'organisation_id' => $organisation_id, 
                             'submission_id'   => $submission_id, 
@@ -124,6 +125,7 @@ class WPA_Question_Form
                     : $main->get_quiz_by_assessment_id($assessment_id, $quiz_id, $organisation_id);
 
                 $input = $this->prepare_quiz_input_data([
+                    'time'            => current_time('mysql'),
                     'user_id'         => $user_id, 
                     'organisation_id' => $organisation_id, 
                     'submission_id'   => $submission_id, 
@@ -165,6 +167,7 @@ class WPA_Question_Form
     function prepare_quiz_input_data($args = []) {
         // Define defaults
         $defaults = [
+            'time'            => null,
             'user_id'         => null,
             'organisation_id' => null,
             'submission_id'   => null,
@@ -179,6 +182,9 @@ class WPA_Question_Form
     
         // Prepare the input data
         $input = [];
+        if (!empty($args['time'])) {
+            $input['time'] = $args['time'];
+        }
         if (!empty($args['user_id'])) {
             $input['user_id'] = $args['user_id'];
         }
@@ -260,10 +266,10 @@ class WPA_Question_Form
 
             $assessment = get_post($assessment_id);
 
-            if (isset($_COOKIE['userId'])) {
+            if (!empty($_COOKIE['userId'])) {
                 $user_id = $_COOKIE['userId'];
             } else {
-                $user_id = get_current_user_id();
+                $user_id = get_user_meta(get_current_user_id(), '__salesforce_user_id', true);
             }
 
             $organisation_id = $_POST['organisation_id'];
@@ -379,10 +385,10 @@ class WPA_Question_Form
 
             $assessment = get_post($assessment_id);            
 
-            if (isset($_COOKIE['userId'])) {
+            if (!empty($_COOKIE['userId'])) {
                 $user_id = $_COOKIE['userId'];
             } else {
-                $user_id = get_current_user_id();
+                $user_id = get_user_meta(get_current_user_id(), '__salesforce_user_id', true);
             }
 
             $org_name = $_POST['org_name'];
