@@ -37,31 +37,22 @@ $submission_id = $main->get_latest_submission_id($post_id, $organisation_id);
 $all_submission_vers = $main->get_all_dcr_submission_vers($post_id, $organisation_id);
 $quizzes = $main->get_quizzes_by_assessment_and_submissions($post_id, $submission_id, $organisation_id);
 $reorganize_quizzes = [];
-// Loop through the original array and reorganize the data
 if (!empty($quizzes)) {
     foreach ($quizzes as $row) {
-        // Create the structure based on parent_id and quiz_id
         $reorganize_quizzes[$row->parent_id][$row->quiz_id][] = $row;
     }
 }
 $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($post_id, $organisation_id);
 $show_first_active_view = false;
 $total_quiz = is_array($questions) ? count($questions) : 0;
-
 $is_submission_exist = $question_form->is_submission_exist($user_id, $post_id);
 $assessment_status = get_post_meta($submission_id, 'assessment_status', true);
 $is_required_answer_all = get_post_meta($post_id, 'is_required_answer_all', true);
 $is_required_document_all = get_post_meta($post_id, 'is_required_document_all', true);
 $is_invite_colleagues = get_post_meta($post_id, 'is_invite_colleagues', true);
 $dcr_feedbacks = $feedback_cl->format_feedbacks_by_question($post_id, $organisation_id);
-
-// Check user access to asessment
 $is_all_users_can_access = get_post_meta($post_id, 'is_all_users_can_access', true);
-
-// Get Status of the Saturn Invite
 $saturn_invite_status = get_saturn_invite_status($user_id, $post_id);
-
-// Get all answers desciption of all submissions
 $all_quiz_pre_cmts = $main->get_dcr_quiz_answers_pre_submissions($post_id, $submission_id, $organisation_id);
 
 $is_disabled = $assessment_status === 'pending';
@@ -276,6 +267,9 @@ $exception_orgs_id = get_exception_orgs_id();
                                             $azure_attachment_rows = $azure_attachments_uploaded[$group_id][$sub_id] ?? '';
 
                                             if (!empty($current_quiz_rows)) {
+                                                usort($current_quiz_rows, function($a, $b) {
+                                                    return $b->id <=> $a->id; // Compare in descending order
+                                                });
                                                 foreach ($current_quiz_rows as $row) {
                                                     if ($row->submission_id == $submission_id) {
                                                         $feedback = !empty($row->feedback) ? $row->feedback : '';

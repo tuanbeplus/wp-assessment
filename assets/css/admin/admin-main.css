@@ -661,11 +661,12 @@
   padding: 6px 10px;
   border-radius: 2px;
   white-space: break-spaces;
+  scrollbar-width: thin;
 }
 
 .submission-view-item-row .card textarea.feedback-input,
 .submission-view-item-row .card textarea.and-feedback-input {
-  min-height: 160px;
+  min-height: 200px;
   font-size: 0.9rem;
   padding: 8px;
   width: 100%;
@@ -835,6 +836,7 @@
   margin: 0;
   overflow-y: auto;
   max-height: 300px;
+  scrollbar-width: thin;
 }
 .submission-view-item-row .card .files-list.azure {
   margin-top: 4px;

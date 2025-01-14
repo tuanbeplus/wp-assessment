@@ -2,25 +2,6 @@
 jQuery(document).ready(function ($) {
     const ajaxUrl = ajax_object.ajax_url;
     const mainWrapper = $('#question-group-repeater');
-    let isChanged = false;
-
-    // Detect changes in various elements
-    $('#questions-repeater-field').on('change input', 'input, textarea, [contenteditable="true"], input[type="file"], input[type="range"]', function () {
-        isChanged = true;
-    });
-    // Exclude WordPress save post action
-    $('form#post').on('submit', function () {
-        isChanged = false; // Reset the flag when saving a post
-    });
-    // Warn the user before leaving the page
-    // $(window).on('beforeunload', function (e) {
-    //     if (isChanged) {
-    //         const message = 'You have unsaved changes. Are you sure you want to leave this page?';
-    //         e.preventDefault(); // For modern browsers
-    //         e.returnValue = message; // For older browsers
-    //         return message;
-    //     }
-    // });
 
     let groupCount = mainWrapper.find(".group-question-wrapper").length;
     // Add Comprehensive Group Question

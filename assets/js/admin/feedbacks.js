@@ -60,7 +60,7 @@
 
       // Validate feedback
       if (!feedbackValue) {
-        const errorText = instance.hasClass("private-note") ? "Must add private note above!!" : "Must add feedback above!!";
+        const errorText = instance.hasClass("private-note") ? "Please enter your note in the textarea." : "Please enter your feedback in the editor.";
         feedbackMessage.text(errorText);
         feedbackElement.addClass("error");
         setTimeout(() => {

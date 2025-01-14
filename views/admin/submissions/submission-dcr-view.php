@@ -78,7 +78,7 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                             $quiz_status = $current_quiz_row->status ?? '';
                         }
                         ?>
-                        <?php if (!empty($answers) || !empty($description) || !empty($azure_attachment_rows)): ?>
+                        <?php if ( !empty($current_quiz_row) ): ?>
                         <!-- Sub Question Row -->
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>"
                             data-submission="<?php echo esc_attr($row_submission_id) ?>">
