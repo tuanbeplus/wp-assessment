@@ -254,7 +254,7 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                                             data-quiz-id="<?php echo $sub_id ?>">
                                         <?php foreach ($quiz_status_options as $status_name): ?>
                                             <option value="<?php echo esc_attr($status_name) ?>"
-                                                <?php if ($status_name === $quiz_status) echo "selected"; ?>
+                                                <?php if (strtolower($status_name) === strtolower($quiz_status)) echo "selected"; ?>
                                                 ><?php echo esc_html($status_name) ?></option>
                                         <?php endforeach; ?>
                                         </select>
@@ -262,7 +262,7 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                                 </div>
                                 <div class="quiz-status">
                                     <span>Status: </span>
-                                    <strong class="<?php echo esc_attr(wpa_convert_to_slug($quiz_status)) ?>"><?php echo esc_html($quiz_status) ?></strong>
+                                    <strong class="<?php echo esc_attr(wpa_convert_to_slug($quiz_status)) ?>"><?php echo ucwords($quiz_status) ?></strong>
                                 </div>
                             </div>
                         </div>
