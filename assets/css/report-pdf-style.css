@@ -4,43 +4,36 @@
   line-height: 150%;
   letter-spacing: 0.3px !important;
 }
-
 h1 {
   font-size: 20pt;
   font-family: avenir-heavy;
   font-weight: 900;
 }
-
 h2 {
   font-size: 16pt;
   font-family: avenir-medium;
   font-weight: 800;
 }
-
 h3 {
   font-size: 15pt;
   font-family: avenir-medium;
   font-weight: 800;
 }
-
 h4 {
   font-size: 14pt;
   font-family: avenir-medium;
   font-weight: 800;
 }
-
 h5 {
   font-size: 13pt;
   font-family: avenir-medium;
   font-weight: 800;
 }
-
 h6 {
   font-size: 12pt;
   font-family: avenir-medium;
   font-weight: 800;
 }
-
 p,
 li {
   font-family: avenir-roman;
@@ -49,7 +42,6 @@ li {
   line-height: 150%;
   letter-spacing: 0.3px !important;
 }
-
 table th {
   font-size: 11pt;
   font-family: avenir-medium;
@@ -60,40 +52,33 @@ table td {
   font-family: avenir-roman;
   font-weight: 400;
 }
-
 ul li,
 ol li {
   margin-bottom: 10px;
 }
-
 a {
   font-family: avenir-roman;
   text-decoration: none !important;
 }
-
 span {
   font-family: avenir-roman;
   font-weight: 400;
 }
-
 strong,
 b {
   font-family: avenir-medium;
   font-weight: 800;
 }
-
 div {
   font-size: 11pt;
   line-height: 150%;
   font-family: avenir-roman;
   font-weight: 400;
 }
-
 .mpdf_toc span {
   font-family: avenir-medium;
   font-weight: 800;
 }
-
 .page {
   position: relative;
   width: 100%;
@@ -108,7 +93,6 @@ div {
 .page img {
   margin: auto;
 }
-
 .shape {
   position: absolute;
   margin-top: -400px;
@@ -116,7 +100,6 @@ div {
   top: 0;
   z-index: -10;
 }
-
 .page.front-page {
   padding: 100px 80px;
   position: relative;
@@ -168,11 +151,6 @@ div {
   background-size: contain;
   background-position: bottom;
 }
-.page.front-page-2024.dcr_reports {
-  background-size: 2000px auto;
-  background-position: bottom right;
-}
-
 .footer {
   width: 100%;
 }
@@ -182,14 +160,12 @@ div {
 .footer .hypelinks-list a {
   color: #333;
 }
-
 caption {
   margin-top: 16px;
   text-align: left;
   font-size: 11pt;
   font-style: italic;
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -257,36 +233,37 @@ table.table-5 td {
   border-left: none;
 }
 table.dcr-table {
-  font-size: 10pt;
-  border-color: #999 !important;
+  border-color: #bbb !important;
 }
 table.dcr-table th {
-  font-size: 9pt;
-  border-color: #999 !important;
+  border-color: #bbb !important;
   vertical-align: top;
   white-space: nowrap;
   background-color: aliceblue;
 }
 table.dcr-table td {
-  font-size: 9pt;
-  line-height: 1.5;
-  border-color: #999 !important;
-}
-table.dcr-table td * {
-  font-size: 9pt;
+  line-height: 1.4;
+  border-top: 1px solid #bbb !important;
+  border-right: 1px solid #bbb !important;
+  border-color: #bbb !important;
 }
 table.dcr-table td.no-padding {
   padding: 0 !important;
 }
 table.dcr-table td table {
-  border-bottom: none !important;
+  border: none !important;
 }
 table.dcr-table td table td {
   padding: 10px;
-  border-left: none !important;
+  border-left: none;
+  border-top: none;
+  border-right: none;
 }
 table.dcr-table td table td:last-child {
   border-bottom: none !important;
+}
+table.dcr-table td table tr:nth-child(even) td {
+  background-color: white !important;
 }
 table.dcr-table .accepted {
   color: green;
@@ -294,13 +271,11 @@ table.dcr-table .accepted {
 table.dcr-table .rejected {
   color: darkred;
 }
-
 img.chart {
   margin: auto;
   width: 100%;
   max-width: 100%;
 }
-
 .recommendations-table {
   border-left: 1px solid #333;
   border-bottom: 1px solid #333;
@@ -310,7 +285,6 @@ img.chart {
   padding: 10px;
   border-top: 1px solid #333;
 }
-
 .generic-page table {
   margin: 16px 0;
   border-left: 1px solid #333;
@@ -328,5 +302,3 @@ img.chart {
   text-align: left;
   line-height: 140%;
 }
-
-/*# sourceMappingURL=data:application/json;charset=utf-8,%7B%22version%22:3,%22sourceRoot%22:%22%22,%22sources%22:%5B%22../scss/report-pdf-style.scss%22%5D,%22names%22:%5B%5D,%22mappings%22:%22AAAA;AAEA;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;EACI;EACA;EACA;;;AAEJ;AAAA;EAEI;EACA;EACA;EACA;EACA;;;AAGA;EACI;EACA;EACA;;AAGJ;EACI;EACA;EACA;;;AAGR;AAAA;EAEI;;;AAEJ;EACI;EACA;;;AAEJ;EACI;EACA;;;AAEJ;AAAA;EAEI;EACA;;;AAEJ;EACI;EACA;EACA;EACA;;;AAEJ;EACI;EACA;;;AAEJ;EACI;EACA;EACA;EACA;EACA;EACA;EACA;EACA;EACA;;AAEA;EACI;;;AAGR;EACI;EACA;EACA;EACA;EACA;;;AAGA;EACI;EACA;EACA;EACA;;AACA;EACI;EACA;EACA;EACA;EACA;;AACA;EACI;EACA;EACA;;AAEJ;EACI;EACA;;AAEJ;EACI;EACA;EACA;;AAGR;EACI;;AACA;EACI;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;EACA;;AAIZ;EACI;EACA;EACA;EACA;EACA;EACA;;AAEA;EACI;EACA;;;AAKZ;EACI;;AAEA;EACI;;AAGJ;EACI;;;AAGR;EACI;EACA;EACA;EACA;;;AAEJ;EACI;EACA;;AACA;EACI;;AAGJ;EACI;;AACA;EACI;;AAEJ;EACI;EACA;EACA;EACA;;AACA;EACI;;AAGR;EACI;EACA;EACA;EACA;EACA;EACA;;AACA;EACI;;AAGR;EACI;;AAKJ;EACI;EACA;EACA;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;;AACA;EACI;EACA;EACA;;AAMR;EACI;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;;AAIR;EACI;EACA;;AACA;EACI;EACA;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;;AACA;EACI;;AAEJ;EACI;;AAEJ;EACI;;AACA;EACI;EACA;;AACA;EACI;;AAKhB;EACI;;AAEJ;EACI;;;AAKZ;EACI;EACA;EACA;;;AAGJ;EACI;EACA;EACA;;AAEA;EACI;EACA;;;AAKJ;EACI;EACA;;AACA;EACI;EACA;EACA;EACA;;AAEJ;EACI;EACA;EACA;EACA;EACA%22,%22file%22:%22report-pdf-style.css%22%7D */

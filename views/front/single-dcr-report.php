@@ -30,21 +30,18 @@ $questions = get_post_meta($assessment_id, 'question_group_repeater', true);
 $questions = $main->wpa_unserialize_metadata($questions);
 $report_title = get_the_title($post_id);
 $report_title = html_entity_decode($report_title, ENT_QUOTES, 'UTF-8');
-$report_file_name = !empty($report_title) ? $report_title : 'DCR - Draft Preliminary Report';
+$report_file_name = !empty($report_title) ? $report_title : 'DCR - 2024 Report';
 $report_template = get_post_meta($post_id, 'report_template', true);
 if (empty($report_template)) {
     $report_template = get_post_meta($assessment_id, 'report_template', true);
 }
 $quizzes = $main->get_quizzes_by_assessment_and_submissions($assessment_id, $submission_id, $organisation_id);
+$reorganize_quizzes = [];
+foreach ($quizzes as $row) {
+    $reorganize_quizzes[$row->parent_id][$row->quiz_id][] = $row;
+}
 $assessor_feedbacks = $feedback_cl->format_feedbacks_by_question($assessment_id, $organisation_id);
 $azure_documents_uploaded = $azure->get_azure_attachments_uploaded($assessment_id, $organisation_id);
-
-// if ($_GET['test'] == 'test') {
-//     echo "<pre>";
-//     print_r($documents_uploaded);
-//     echo "</pre>";
-//     die;
-// }
 
 // get mPDF fontDir
 $defaultConfig = (new Mpdf\Config\ConfigVariables())->getDefaults();
@@ -56,8 +53,6 @@ $fontData = $defaultFontConfig['fontdata'];
 
 // mPDF Configuration
 $mpdf = new \Mpdf\Mpdf([  
-    'format' => 'A4',
-    'orientation' => 'L',
     'fontDir' => array_merge($fontDirs, [
         ABSPATH .'wp-content/plugins/wp-assessment/assets/font/',
     ]),
@@ -95,10 +90,10 @@ require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-footer.php';
 // add margin for all pages below
 $mpdf->AddPageByArray(
     array(
-        'margin-top' => 34, 
-        'margin-bottom' => 24, 
-        'margin-left' => 14,
-        'margin-right' => 14,
+        'margin-top' => 32, 
+        'margin-bottom' => 22, 
+        'margin-left' => 12,
+        'margin-right' => 12,
     ),
 );
 
@@ -114,10 +109,10 @@ if (isset($report_template['is_include_toc'])) {
     }
 }
 
-require_once WP_ASSESSMENT_TEMPLATE.'/dcr-report-pdf/draft-pre-report.php';
-
 // Render All before generic pages
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-generic-page-before.php';
+
+require_once WP_ASSESSMENT_TEMPLATE.'/dcr-report-pdf/draft-pre-report.php';
 
 // Render All after generic pages
 require_once WP_ASSESSMENT_TEMPLATE.'/report-pdf/report-pdf-generic-page-after.php';

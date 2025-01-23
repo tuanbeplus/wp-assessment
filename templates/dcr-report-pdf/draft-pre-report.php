@@ -6,77 +6,100 @@
  * 
  */
 
-if (empty($questions) || empty($quizzes)) {
+if (empty($questions) || empty($reorganize_quizzes)) {
     return;
 }
 foreach ($questions as $group_id => $field_group) {
     $group_title = wpa_stripslashes_string($field_group['title']) ?? '';
-    $draft_table = 
+    $sub_questions = $field_group['list'] ?? [];
+    $count_quiz = 0;
+    $table_row_html = '';
+
+    foreach ($sub_questions as $sub_id => $sub_field) { 
+        $current_quiz_rows = $reorganize_quizzes[$group_id][$sub_id] ?? [];
+        $documents_uploaded = $azure_documents_uploaded[$group_id][$sub_id] ?? [];
+        $feedbacks_list = $assessor_feedbacks[$group_id][$sub_id] ?? [];
+
+        if (!empty($current_quiz_rows)) {
+            $wp_user_id = null;
+            $first_name = '';
+            $last_name = '';
+            $user_comment_entries = '';
+            $documents_list = '';
+            $assessor_comment_entries = '';
+            $status_entries = '';
+            $submission_ids = '';
+            $latest_row_time = $current_quiz_rows[0]->time ?? '';
+
+            foreach ($current_quiz_rows as $row) {
+                $wp_user_id = get_current_user_by_salesforce_id($row->user_id) ?? '';
+                $first_name = get_user_meta($wp_user_id, 'first_name', true);
+                $last_name = get_user_meta($wp_user_id, 'last_name', true);
+                $user_comment_entries .=
+                '<tr>
+                    <td' . ($row === end($current_quiz_rows) ? ' style="border-bottom:none;"' : '') . '>
+                        <strong style="font-family:avenir-heavy;">'. $first_name .' '. $last_name .'</strong> - '. date("M d Y H:i a", strtotime($row->time)) .'<br>'. wp_unslash($row->description).
+                    '</td>
+                </tr>';
+                $status_entries .= '<li>'. ucwords($row->status) .'</li><br>';
+                $submission_ids .= '<li>'. $row->submission_id .'</li><br>';
+            }
+            if (!empty($documents_uploaded)) {
+                foreach ($documents_uploaded as $document) {
+                    $documents_list .= 
+                    '<tr>
+                        <td' . ($document === end($documents_uploaded) ? ' style="border-bottom:none;"' : '') . '>
+                            <a href="?action=create_sas_blob_url&blob_url='. $document->attachment_path .'" style="color:#6e297b;">'
+                                . $document->attachment_name .
+                            '</a>
+                        </td>
+                    </tr>' ?? '';
+                }
+            }
+            if (!empty($feedbacks_list)) {
+                foreach ($feedbacks_list as $feedback) {
+                    $assessor_name = $feedback['user_name'] ?? '';
+                    $date_time = date("M d Y H:i a", strtotime($feedback['time'])) ?? '';
+                    $comment = $feedback['feedback'] ?? '';
+                    $assessor_comment_entries .= 
+                    '<tr>
+                        <td' . ($feedback === end($feedbacks_list) ? ' style="border-bottom:none;"' : '') . '>
+                            <strong style="font-family:avenir-heavy;">'.$assessor_name .'</strong> - '. $date_time .'<br>'. wp_kses_post(htmlspecialchars_decode($comment)) .
+                        '</td>
+                    </tr>';
+                }
+            }
+            $table_row_html .=
+            '<tr>
+                <td>'. $group_title .'</td>
+                <td>'. $group_id .'.'. $sub_id .'</td>
+                <td><ul>'. $submission_ids .'</ul></td>
+                <td class="no-padding"><table class="dcr-table">'. $user_comment_entries .'</table></td>
+                <td class="no-padding"><table class="dcr-table">'. $documents_list .'</table></td>
+                <td class="no-padding"><table class="dcr-table">'. $assessor_comment_entries .'</table></td>
+                <td><ul>'. $status_entries .'</ul>Latest changed at '. $latest_row_time .'</td> 
+            </tr>';
+            $count_quiz++;
+        }
+    }
+    if ($count_quiz <= 0) {
+        $table_row_html = '<tr><td colspan="7" style="text-align:center;">No data available.</td></tr>';
+    }
+    
+    $dcr_report_table = 
     '<div class="page">
         <h2>Section '. $group_id .': '. $group_title .'</h2>
         <table class="recom-table dcr-table" width="100%">
             <tr>
                 <th width="10%">Section <br> Name</th>
-                <th width="7%">Section <br> Number</th>
+                <th width="9%">Section <br> Number</th>
                 <th width="8%">Submission #</th>
-                <th width="11%">User Name <br> & Date of Entry</th>
-                <th width="15%">User Comments</th>
-                <th width="15%">Documents Upload</th>
-                <th width="12%">Assessor Name <br> & Date of Entry</th>
-                <th width="11%">Assessor <br> Comments</th>
-                <th width="11%">Criteria Status <br> & Date of Entry</th>
-            </tr>';
-        $count_quiz = 0;
-        foreach ($quizzes as $quiz) { 
-            if ($quiz->parent_id == $group_id && $quiz->submission_id == $submission_id) {
-                $wp_user_id = get_current_user_by_salesforce_id($quiz->user_id) ?? '';
-                $first_name = get_user_meta($wp_user_id, 'first_name', true);
-                $last_name = get_user_meta($wp_user_id, 'last_name', true);
-                $documents_list = '';
-                $documents_uploaded = $azure_documents_uploaded[$quiz->parent_id][$quiz->quiz_id] ?? '';
-                if (!empty($documents_uploaded)) {
-                    foreach ($documents_uploaded as $document) {
-                        $documents_list .= '<div>
-                            <a href="?action=create_sas_blob_url&blob_url='. $document->attachment_path .'" 
-                                style="color:#6e297b;"
-                                target="_blank">'
-                                . $document->attachment_name .
-                            '</a>
-                        </div>' ?? '';
-                    }
-                }
-                $assessor_info = '';
-                $assessor_comments = '';
-                $feedbacks_list = $assessor_feedbacks[$quiz->parent_id][$quiz->quiz_id] ?? '';
-                if (!empty($feedbacks_list)) {
-                    foreach ($feedbacks_list as $feedback) {
-                        $assessor_name = $feedback['user_name'] ?? '';
-                        $date_time = $feedback['time'] ?? '';
-                        $assessor_info .= '<tr><td>'. $assessor_name .'<br>'. $date_time .'</td></tr>';
-                        $comment = $feedback['feedback'] ?? '';
-                        $assessor_comments .= '<tr><td>'. wp_kses_post(htmlspecialchars_decode($comment)) .'</td></tr>';
-                    }
-                }
-
-                $draft_table .=
-                '<tr>
-                    <td>'. $group_title .'</td>
-                    <td>'. $quiz->parent_id .'.'. $quiz->quiz_id .'</td>
-                    <td>'. $quiz->submission_id .'</td>
-                    <td>'. $first_name .' '. $last_name .'<br>'. $quiz->time .'</td>
-                    <td>'. wpa_stripslashes_string($quiz->description) .'</td>
-                    <td><div class="docs-upload">'. $documents_list .'</div></td>
-                    <td class="no-padding"><table class="dcr-table">'. $assessor_info .'</table></td>
-                    <td class="no-padding"><table class="dcr-table">'. $assessor_comments .'</table></td>
-                    <td class="'.$quiz->status.'">'. ucfirst($quiz->status) .'</td> 
-                </tr>';
-                $count_quiz++;
-            }
-        }
-        if ($count_quiz <= 0) {
-            $draft_table .= '<tr><td>No data.</td></tr>';
-        }
-    $draft_table .= 
+                <th width="22%">User Name & Comment Entries</th>
+                <th width="18%">Documents Upload</th>
+                <th width="20%">Assessor Name & Comment Entries</th>
+                <th width="12%">Criteria Status & Date of Entry</th>
+            </tr>'
+            . $table_row_html .
         '</table>
         <caption>Table '. $group_id .' - '. $group_title .' entries</caption>
     </div>';
@@ -85,9 +108,11 @@ foreach ($questions as $group_id => $field_group) {
     $mpdf->TOC_Entry('Section '. $group_id .': '. $group_title, 0);
 
     // Render HTML
-    $mpdf->WriteHTML($draft_table);
+    $mpdf->WriteHTML($dcr_report_table);
 
-    // Insert page break
-    $mpdf->AddPage(); 
+    if ($field_group !== end($questions)) {
+        // Insert page break
+        $mpdf->AddPage(); 
+    }
 }
 
