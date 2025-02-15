@@ -1213,10 +1213,8 @@ function get_submission_version_name($submission_id) {
 function get_submission_quiz_status_options() {
 	$default_options = array(
 		'Pending',
-		'Accepted',
-		'Rejected',
-		'Not Applicable',
 		'Criteria Satisfied',
+		'Not Applicable',
 		'Criteria Not Yet Satisfied',
 	);
 	// Fetch custom options from ACF (saved in Options Page).

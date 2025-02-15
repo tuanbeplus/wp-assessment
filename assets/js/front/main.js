@@ -8,12 +8,10 @@
     const messageWrap = $('.progress-message');
     const ajaxUrl = ajax_object.ajax_url;
     const assessmentWrapper = $('#assessment-main-wrapper');
-    const btn_Continue = assessmentWrapper.find('#continue-quiz-btn');
-    const btn_Submit = assessmentWrapper.find('#submit-quiz-btn');
     const btn_Prev = assessmentWrapper.find('#go-back-quiz-btn');
     const btn_Next = assessmentWrapper.find('#go-next-quiz-btn');
-    const isRequiredAnswerAll = assessmentWrapper.data('required_answer_all');
-    const isRequiredDocumentAll = assessmentWrapper.data('required_document_all');
+    const isRequiredAnswerAll = $('input#required_answer_all').val();
+    const isRequiredDocumentAll = $('input#required_document_all').val();
     
     /**
      * Validate required quiz answers and documents before saving.
@@ -24,11 +22,11 @@
         let currentQuiz = $('#quiz-item-' + quizId);
         if (!currentQuiz.length) return false;
 
-        if (isRequiredAnswerAll) {
+        if (isRequiredAnswerAll == true) {
             let hasAnsweredAll = getDataQuizAnswered(currentQuiz);
             if (!hasAnsweredAll) return false;
         }
-        if (isRequiredDocumentAll) {
+        if (isRequiredDocumentAll == true) {
             let hasUploadedRequiredDocs = getUploadedDocumentRequired(currentQuiz);
             if (!hasUploadedRequiredDocs) return false;
         }
@@ -101,26 +99,21 @@
     /**
      * Check the section and mark it as completed if criteria are met
      */
-    function markAsCompletedSection() {
-        const isRequiredAllDocuments = $('#assessment-main-wrapper').data('required_document_all');
-        const allSections = $('#form_submit_quiz .quizDetails .quiz');
+    function markAsCompletedSection(sectionId) {
+        const $isRequiredAllDocuments = $('input#required_document_all').val();
+        const $thisStep = $(`.stepsWrap .step-${sectionId}`);
+        const $thisQuiz = $(`#form_submit_quiz #quiz-item-${sectionId}`);
+        // Check conditions
+        const hasCheckedAnswers = isAnswerChoicesChecked($thisQuiz);
+        const hasFilledComments = isAnswerCmtsFilled($thisQuiz);
+        const hasUploadedDocuments = ($isRequiredAllDocuments == true) ? getUploadedDocumentRequired($thisQuiz) : true;
 
-        allSections.each(function () {
-            const sectionId = $(this).data('group');
-            const section = $(`.stepsWrap .step-${sectionId}`);
-
-            // Check conditions
-            const hasCheckedAnswers = isAnswerChoicesChecked($(this));
-            const hasFilledComments = isAnswerCmtsFilled($(this));
-            const hasUploadedDocuments = isRequiredAllDocuments ? getUploadedDocumentRequired($(this)) : true;
-
-            // Mark section as completed if all conditions are met
-            if (hasCheckedAnswers && hasFilledComments && hasUploadedDocuments) {
-                section.addClass('completed');
-            } else {
-                section.removeClass('completed');
-            }
-        });
+        // Mark section as completed if all conditions are met
+        if (hasCheckedAnswers == true && hasFilledComments == true && hasUploadedDocuments == true) {
+            $thisStep.addClass('completed');
+        } else {
+            $thisStep.removeClass('completed');
+        }
     }
 
     /**
@@ -164,31 +157,24 @@
     /**
      * Validate the Documents required fields
      */
-    function getUploadedDocumentRequired(currentQuiz)
-    {
+    function getUploadedDocumentRequired(currentQuiz) {
         var upload_file_arr = [];
         let upload_doc_container = currentQuiz.find('.question-add-files-container')
-        
         upload_doc_container.each(function(e) {
-
             let upload_file_items = $(this).find('.filesList .file-item').length
-            let upload_message_error = $(this).find('.upload-message._error')
-            
+            let upload_message_error = $(this).find('.upload-message._error');
             if (upload_file_items == 0) {
                 $('#saving-spinner').hide()
                 $('.formController button').css('opacity', '1')
                 upload_message_error.find('.message').text('Supporting documentation is required!')
                 currentQuiz.find('.answer-notification').show()
                 upload_message_error.css('display', 'flex')
-
                 setTimeout(function() {
                     currentQuiz.find('.answer-notification').hide()
-                }, 15000)
-                
+                }, 15000);
             }
             upload_file_arr.push(upload_file_items)
-        })
-
+        });
         if (upload_file_arr.includes(0)) {
             return false
         }
@@ -634,7 +620,7 @@
         }, 8000)
     }
 
-    jQuery(document).ready(function ($) {
+    jQuery(document).ready(async function ($) {
         activeFirstPendingSection();
         updateFormController();
     });
@@ -642,7 +628,6 @@
     // Click to Save a Quiz Assessment
     $(document).on('click', '#continue-quiz-btn', async function (e) {
         e.preventDefault();
-
         const $button = $(this); // Cache the button for reuse
         const $activeQuizId = getActiveQuizId(); // Get the currently active quiz ID
         const $currentQuiz = $(`#quiz-item-${$activeQuizId}`); // Select the current quiz element
@@ -675,7 +660,7 @@
                 throw new Error('Failed to save the quiz assessment.');
             }
             // Mark section as completed
-            markAsCompletedSection();
+            markAsCompletedSection($activeQuizId);
             // Scroll to top of the assessment wrapper
             $('html, body').animate({ scrollTop: assessmentWrapper.offset().top - 32 }, 500);
             // Move to the next quiz
@@ -740,6 +725,10 @@
         }
         // Proceed to submission if validation passes
         try {
+            let currentQuiz = $('#quiz-item-' + getActiveQuizId());
+            let checkAnswers = getCheckAnswers(currentQuiz);
+
+            await saveQuizAssessment(checkAnswers);
             let response = await submitPublishSubmission();
 
             // Hide loading after submission
@@ -1061,20 +1050,16 @@
 
     $(document).on('click', '.btn-showmore-cmt', function (e){
         let cmt = $(this).closest('.comment')
-        let show_less = cmt.find('.show_less');
-        let show_full = cmt.find('.show_full');
 
         if ($(this).hasClass('active')) {
-            $(this).removeClass('active')
-            $(this).text('Show more')
-            show_less.show()
-            show_full.hide()
+            cmt.addClass('show_less');
+            $(this).removeClass('active');
+            $(this).text('Show more');
         }
         else {
-            $(this).addClass('active')
-            $(this).text('Show less')
-            show_full.show()
-            show_less.hide()
+            cmt.removeClass('show_less');
+            $(this).addClass('active');
+            $(this).text('Show less');
         }
     });
 

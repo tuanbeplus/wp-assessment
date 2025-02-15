@@ -44,6 +44,9 @@ class WPA_Question_Form
 
         // Save Charts image URL to meta
         add_action('wp_ajax_save_dashboard_charts_image_url', array($this, 'save_dashboard_charts_image_url'));
+
+        add_action('wp_ajax_update_submission_review_status_ajax', array($this, 'update_submission_review_status_ajax'));
+        add_action('wp_ajax_nopriv_update_submission_review_status_ajax', array($this, 'update_submission_review_status_ajax'));
     }
 
     /**
@@ -591,10 +594,10 @@ class WPA_Question_Form
     function is_submission_exist($organisation_id, $assessment_id)
     {
         $submission_id = null;
-        $assessment_terms = get_assessment_terms($assessment_id);
+        $assessment_cats = get_assessment_terms($assessment_id);
 
-        if (is_array($assessment_terms) && isset($assessment_terms[0])) {
-            if ($assessment_terms[0] == 'dcr') {
+        if (is_array($assessment_cats) && isset($assessment_cats[0])) {
+            if ($assessment_cats[0] == 'dcr') {
                 $post_type = 'dcr_submissions';
             }
             else {
@@ -743,6 +746,9 @@ class WPA_Question_Form
             $quiz_status = sanitize_text_field($_POST['quiz_status']) ?? '';
             if (empty($quiz_status)) throw new Exception('Invalid quiz status value.');
 
+            $all_quizzes_status = $_POST['all_quizzes_status'] ? $_POST['all_quizzes_status'] : [];
+            if (empty($all_quizzes_status)) throw new Exception('Invalid all quizzes status value.');
+
             $input = array(
                 'status' => $quiz_status,
             );    
@@ -753,12 +759,26 @@ class WPA_Question_Form
                 'assessment_id' => $assessment_id,
                 'submission_id' => $submission_id,
             );
-
             $main->update_quiz_assessment($input, $conditions);
+
+            $quizzes_status_meta = [];
+            foreach ($all_quizzes_status as $row) {
+                $group_id = intval($row['group_id']) ?? '';
+                $quiz_id = intval($row['quiz_id']) ?? '';
+                $status = sanitize_text_field($row['status']) ?? '';
+                if (wpa_convert_to_slug($status) !== 'pending') {
+                    $quizzes_status_meta[$group_id][$quiz_id] = $status;
+                }
+            }
+            // Update post meta
+            $meta_updated = update_post_meta($submission_id, 'quizzes_status', $quizzes_status_meta);
 
             return wp_send_json(array( 
                 'message' => 'Quiz status '.$parent_id.'.'.$quiz_id.' has been updated', 
                 'saved_status' => $quiz_status,
+                'status_class' => wpa_convert_to_slug($quiz_status),
+                'quizzes_status_meta' => $quizzes_status_meta,
+                'meta_updated' => $meta_updated,
                 'status' => true,
             ));
         
@@ -1123,6 +1143,62 @@ class WPA_Question_Form
                     'updated_meta' => $updated_meta,
                     'status' => true
                 ));
+
+        } catch (Exception $exception) {
+            return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
+        }
+    }
+
+    function update_submission_review_status_ajax()
+    {
+        try {
+            // Validate and sanitize inputs
+            $assessment_id = isset($_POST['assessment_id']) ? intval($_POST['assessment_id']) : 0;
+            $submission_id = isset($_POST['submission_id']) ? intval($_POST['submission_id']) : 0;
+            $review_status = isset($_POST['review_status']) ? sanitize_text_field($_POST['review_status']) : '';
+
+            if (!$assessment_id) {
+                throw new Exception('Assessment not found.');
+            }
+            if (!$submission_id) {
+                throw new Exception('Submission not found.');
+            }
+            if (empty($review_status)) {
+                throw new Exception('Review status not found.');
+            }
+
+            // Prepare necessary data
+            $assessment_title = get_the_title($assessment_id);
+            $assessment_link  = get_permalink($assessment_id);
+            $sf_user_email    = get_post_meta($submission_id, 'sf_user_email', true);
+            $sf_user_name     = get_post_meta($submission_id, 'sf_user_name', true);
+
+            if (empty($sf_user_email)) {
+                throw new Exception('User email not found.');
+            }
+
+            // Prepare email content
+            $content  = "<p>Hi {$sf_user_name},</p>";
+            $content .= "<p>Your submission on <strong>{$assessment_title}</strong> has been reviewed by the moderator.</p>";
+            $content .= "<p><a href='{$assessment_link}'>Click here to view the results</a> or <a href='".home_url('/login')."'>login to your account</a>.</p>";
+            $content .= "<p>Kind regards,</p>";
+            $content .= "<p>Australian Disability Network</p>";
+            $subject = "New update about your submission on {$assessment_title}";
+
+            // Update post meta
+            $meta_updated = update_post_meta($submission_id, 'assessment_status', wpa_convert_to_slug($review_status));
+
+            // Send email notification
+            $sent_mail = wp_mail($sf_user_email, $subject, $content);
+
+            return wp_send_json(array(
+                'message' => 'Review status changed successfully. A notification has been sent to '. $sf_user_email, 
+                'reviewed_status' => $review_status,
+                'status_class' => wpa_convert_to_slug($review_status) ?? '',
+                'meta_updated' => $meta_updated,
+                'sent_mail' => $sent_mail,
+                'status' => true,
+            ));
 
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));

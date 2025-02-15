@@ -748,20 +748,14 @@ class WP_Assessment
         if (isset($_GET['submission_id']) && !empty($_GET['submission_id'])) {
             return $_GET['submission_id'];
         }
-
         $submission_id = null;
         $terms = get_assessment_terms($assessment_id);
 
-        if (is_array($terms) && isset($terms[0])) {
-            if ($terms[0] == 'dcr') {
-                $post_type = 'dcr_submissions';
-            }
-            else {
-                $post_type = 'submissions';
-            }
+        if ($terms[0] === 'dcr') {
+            $post_type = 'dcr_submissions';
         }
         else {
-            return null;
+            $post_type = 'submissions';
         }
         
         $args = array(

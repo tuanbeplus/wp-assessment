@@ -820,8 +820,21 @@ jQuery(document).ready(function ($) {
         const assessmentId = $('input#assessment_id').val();
         const submissionId = wrapper.data('submission');
         const organisationId = $('input#organisation_id').val();
+        let allQuizzesStatus = [];
 
         if (!quizStatus || quizStatus === '' || quizStatus === null) return;
+
+        $(".submission-view-item-row select.select-quiz-status").each(function() {
+            let groupId = $(this).data("group-id");
+            let quizId = $(this).data("quiz-id");
+            let status = $(this).val();
+
+            allQuizzesStatus.push({
+                group_id: groupId,
+                quiz_id: quizId,
+                status: status
+            });
+        });
 
         let response = await $.ajax({
             type: "POST",
@@ -834,6 +847,7 @@ jQuery(document).ready(function ($) {
                 quiz_id: quizId,
                 parent_id: groupId,
                 quiz_status: quizStatus,
+                all_quizzes_status: allQuizzesStatus,
             },
             beforeSend : function ( xhr ) {
                 wrapper.addClass('loading');
@@ -842,13 +856,11 @@ jQuery(document).ready(function ($) {
                 wrapper.removeClass('loading');
             }
         });
-        const { status, message, saved_status } = response;
-        // console.log(response);
-
-        const statusClass = saved_status.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+        const { status, message, saved_status, status_class } = response;
+        console.log(response);
 
         if (status == true) {
-            wrapper.find('.quiz-status strong').removeClass().addClass(statusClass).text(saved_status);
+            wrapper.find('.quiz-status strong').removeClass().addClass(status_class).text(saved_status);
         }
         else {
             alert(message);
@@ -907,7 +919,6 @@ jQuery(document).ready(function ($) {
 
     async function submit_feedback_submission(btn, feedbackType) {
         let assessment_id = $("#assessment_id").val();
-        // let user_id = $("#user_id").val();
         let submission_id = $("#submission_id").val();
         let organisation_id = $("#organisation_id").val();
         let parent_wrapper = btn.closest('.submission-admin-view-footer')
@@ -946,13 +957,46 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    function toggleBtnDisable() {
-        let acceptBtn = $(`.accept-button`);
-        let rejectBtn = $(`.reject-button`);
+    $(document).on("click", ".btn-update-review-status", function (e) {
+        const $thisBtn = $(this);
+        const $assessmentId = $("input#assessment_id").val();
+        const $submissionId = $("input#submission_id").val();
+        const $reviewStatus = $thisBtn.data('status').trim();
+        const $wrapper = $thisBtn.closest('.submission-admin-view-footer');
+        const $currentStatusField = $wrapper.find('.current-status strong');
+        const $subInfoWrapper = $('#submitted_info_view');
+        
+        if ($reviewStatus == $currentStatusField.text().trim()) {
+            alert("The submission already has this status.");
+            return;
+        }
 
-        acceptBtn.attr("disabled", true);
-        rejectBtn.attr("disabled", false);
-    }
+        $.ajax({
+            type: "POST",
+            url: ajaxUrl,
+            data: {
+                action: "update_submission_review_status_ajax",
+                assessment_id: $assessmentId,
+                submission_id: $submissionId,
+                review_status: $reviewStatus,
+            },
+            beforeSend : function ( xhr ) {
+                $wrapper.addClass('loading');
+            },
+            success:function(response){
+                const {message, reviewed_status, status_class, status} = response;
+                if (status === true) {
+                    $wrapper.removeClass('loading');
+                    $currentStatusField.removeClass().addClass(status_class).text(reviewed_status);
+                    $subInfoWrapper.find('.status strong').removeClass().addClass(status_class).text(reviewed_status);
+                }
+                console.log(response);
+                setTimeout(() => {
+                    alert(message);
+                }, 100);
+            }
+        });
+    });
 
     $(".input-weighting").on("change", function () {
         let input_val = $(this).val()

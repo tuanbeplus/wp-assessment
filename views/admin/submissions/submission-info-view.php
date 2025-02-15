@@ -25,6 +25,7 @@ $this_sub_ver = get_post_meta($post_id, 'submission_version', true);
 $is_latest_version = get_post_meta($post_id, 'is_latest_version', true);
 $is_latest = ($is_latest_version == true) ? ' (Latest)' : '';
 $created_date = get_post_meta($post_id, 'created_date', true);
+$scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
 ?>
 
 <div class="submission-info-container">
@@ -48,7 +49,11 @@ $created_date = get_post_meta($post_id, 'created_date', true);
         <p>Industry: <strong><?php echo $org_metadata['Industry']; ?></strong></p>
     <?php endif; ?>
 
-    <p>Status: <strong><?php echo ucfirst($submission_status); ?></strong></p>
+    <p class="status">Status: 
+        <strong class="<?php echo $submission_status ?>">
+            <?php echo ucwords(str_replace('-', ' ', $submission_status)); ?>
+        </strong>
+    </p>
 
     <?php if (!empty($this_sub_ver) && $post_type === 'dcr_submissions'): ?>
         <p>Version: <strong><?php echo esc_html($this_sub_ver) . $is_latest; ?></strong></p>
@@ -61,8 +66,6 @@ $created_date = get_post_meta($post_id, 'created_date', true);
     <?php if (in_array('index', $terms)): ?>
         <?php
             $sum_key = 'sum';
-            // Get Scoring formula type
-		    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
             // Using Index formula 2024
             if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
                 $sum_key = 'sum';
@@ -100,6 +103,10 @@ $created_date = get_post_meta($post_id, 'created_date', true);
                     (<?php echo $total_agreed_score['percent'] ?? 0; ?>%)
                 </strong>
             </p>
+        <?php endif; ?>
+
+        <?php if (isset($scoring_formula) && !empty($scoring_formula)): ?>
+            <p class="post-status-display">Scoring formula: <strong><?php echo ucwords(str_replace('_', ' ', $scoring_formula)); ?></strong></p>
         <?php endif; ?>
     <?php endif; ?>
 </div>

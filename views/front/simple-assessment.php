@@ -71,12 +71,13 @@ $is_disabled = $status === 'pending';
         <?php endif; ?>
         
         <input type="hidden" id="assessment_id" value="<?php echo $post_id; ?>" />
+        <input type="hidden" id="assessment_cat" value="<?php echo $terms[0] ?? ''; ?>" />
         <input type="hidden" id="organisation_id" value="<?php echo $organisation_id; ?>"/>
         <input type="hidden" id="org_name" value="<?php echo $org_name; ?>"/>
+        <input type="hidden" id="required_answer_all" value="<?php echo $is_required_answer_all; ?>"/>
+        <input type="hidden" id="required_document_all" value="<?php echo $is_required_document_all; ?>"/>
 
-        <section id="assessment-main-wrapper" class="formWrapper" 
-                data-required_answer_all="<?php echo $is_required_answer_all ?>"
-                data-required_document_all="<?php echo $is_required_document_all ?>">
+        <section id="assessment-main-wrapper" class="formWrapper">
             <div class="container">
                 <div class="topBar <?php if (!in_array('dcr', $terms)) echo 'flex'; ?>">
                     <h1><?php echo get_the_title($post_id); ?></h1>

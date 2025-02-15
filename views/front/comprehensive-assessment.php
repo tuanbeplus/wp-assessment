@@ -43,9 +43,6 @@ if (!empty($quizzes)) {
     }
 }
 $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($post_id, $organisation_id);
-$show_first_active_view = false;
-$total_quiz = is_array($questions) ? count($questions) : 0;
-$is_submission_exist = $question_form->is_submission_exist($user_id, $post_id);
 $assessment_status = get_post_meta($submission_id, 'assessment_status', true);
 $is_required_answer_all = get_post_meta($post_id, 'is_required_answer_all', true);
 $is_required_document_all = get_post_meta($post_id, 'is_required_document_all', true);
@@ -53,16 +50,18 @@ $is_invite_colleagues = get_post_meta($post_id, 'is_invite_colleagues', true);
 $dcr_feedbacks = $feedback_cl->format_feedbacks_by_question($post_id, $organisation_id);
 $is_all_users_can_access = get_post_meta($post_id, 'is_all_users_can_access', true);
 $saturn_invite_status = get_saturn_invite_status($user_id, $post_id);
-$all_quiz_pre_cmts = $main->get_dcr_quiz_answers_pre_submissions($post_id, $submission_id, $organisation_id);
+$all_quizzes_status = get_post_meta($submission_id, 'quizzes_status', true);
 
 $is_disabled = $assessment_status === 'pending';
 $is_publish = $assessment_status === 'publish';
-$is_accepted = $assessment_status === 'accepted';
+$is_accepted = $assessment_status === 'accepted' || $assessment_status === 'criteria-satisfied';
 
-if (($terms[0] === 'dcr')) {
+if ($terms[0] === 'dcr') {
     $is_disabled = isset($_GET['submission_id']);
 }
-
+elseif ($terms[0] === 'index') {
+    $is_disabled = $assessment_status === 'pending' || $assessment_status === 'accepted';
+}
 // Get the Exception Organisations ID
 $exception_orgs_id = get_exception_orgs_id();
 ?>
@@ -80,57 +79,85 @@ $exception_orgs_id = get_exception_orgs_id();
         <?php endif; ?>
         
         <input type="hidden" id="assessment_id" value="<?php echo $post_id; ?>" />
+        <input type="hidden" id="assessment_cat" value="<?php echo $terms[0] ?? ''; ?>" />
         <input type="hidden" id="organisation_id" value="<?php echo $organisation_id; ?>"/>
         <input type="hidden" id="org_name" value="<?php echo $org_name; ?>"/>
-
-        <section id="assessment-main-wrapper" class="formWrapper" 
-            data-required_answer_all="<?php echo $is_required_answer_all ?>"
-            data-required_document_all="<?php echo $is_required_document_all ?>">
-
-            <?php if ($assessment_status == 'rejected' && $questions): ?>
-                <!-- Notification Box -->
-                <div class="notificationBar rejected">
-                    <div class="bgRed"><h2>ATTENTION</h2></div>
-                    <div class="messageBox">
-                        <p class="result">Your submission has been rejected by the moderator, please see the results below.</p>
-                        <div class="notifiDetails">
-                        <?php foreach ($questions as $group_id => $gr_field) :
-                            $section_title = $gr_field['title'] ?? '';
-                            $sub_questions = $gr_field['list'] ?? array();
-                            ?>
-                            <h3><?php echo $group_id .'. '. esc_html($section_title); ?></h3>
-                            <ul>
-                            <?php
-                            foreach ($sub_questions as $sub_id => $field):
-                                $submission_data_sub = $reorganize_quizzes[$group_id][$sub_id] ?? '';
-                                $sub_title = $field['sub_title'] ?? '';
-                                if (!empty($submission_data_sub)) {
-                                    $latest_status = '';
-                                    foreach ($submission_data_sub as $row) {
-                                        if (strtolower($row->status) === 'accepted') {
-                                            $latest_status = 'Accepted';
-                                            break;
-                                        }
-                                        if ($row->submission_id == $submission_id) {
-                                            $latest_status = ucwords($row->status);
-                                        } 
-                                        elseif (!$latest_status) { // Assign only if no status is set yet
-                                            $latest_status = ucwords($row->status);
-                                        }
-                                    }
-                                    if (!empty($latest_status)) {
-                                        echo '<li>'.$group_id.'.'.$sub_id.' - <strong class="remarks '.wpa_convert_to_slug($latest_status).'">'.$latest_status.'</strong></li>';
-                                    }
-                                }
+        <input type="hidden" id="required_answer_all" value="<?php echo $is_required_answer_all; ?>"/>
+        <input type="hidden" id="required_document_all" value="<?php echo $is_required_document_all; ?>"/>
+        
+        <section id="assessment-main-wrapper" class="formWrapper">
+            <?php if ($assessment_status !== 'draft'): ?>
+                <?php if ($terms[0] === 'dcr' && $assessment_status !== 'pending' && isset($_GET['submission_id']) && $questions): ?>
+                    <!-- Notification Box -->
+                    <div class="notificationBar rejected">
+                        <div class="bgRed"><h2>ATTENTION</h2></div>
+                        <div class="messageBox">
+                            <p class="result">Your submission has been reviewed by the moderator, please see the results below.</p>
+                            <p class="result">Submission status: 
+                                <strong class="<?php echo $assessment_status ?>">
+                                    <?php echo ucwords(str_replace('-', ' ', $assessment_status)); ?>
+                                </strong>
+                            </p>
+                            <p class="result">Details:</p>
+                            <div class="notifiDetails">
+                            <?php foreach ($questions as $group_id => $gr_field) :
+                                $section_title = $gr_field['title'] ?? '';
+                                $sub_questions = $gr_field['list'] ?? array();
                                 ?>
+                                <h3><?php echo $group_id .'. '. esc_html($section_title); ?></h3>
+                                <ul>
+                                <?php
+                                foreach ($sub_questions as $sub_id => $field):
+                                    $submission_data_sub = $reorganize_quizzes[$group_id][$sub_id] ?? '';
+                                    $meta_quiz_status = $all_quizzes_status[$group_id][$sub_id] ?? '';
+                                    $sub_title = $field['sub_title'] ?? '';
+                                    if (!empty($submission_data_sub)) {
+                                        $latest_status = '';
+                                        if (!empty($meta_quiz_status)) {
+                                            $latest_status = $meta_quiz_status;
+                                        }
+                                        else {
+                                            foreach ($submission_data_sub as $row) {
+                                                if (wpa_convert_to_slug($row->status) !== 'pending') {
+                                                    $latest_status = ucwords($row->status);
+                                                    break;
+                                                }
+                                                if ($row->submission_id == $submission_id) {
+                                                    $latest_status = ucwords($row->status);
+                                                } 
+                                                elseif (!$latest_status) { // Assign only if no status is set yet
+                                                    $latest_status = ucwords($row->status);
+                                                }
+                                            }
+                                        }
+                                        if (!empty($latest_status)) {
+                                            echo '<li>'.$group_id.'.'.$sub_id.' - <strong class="remarks '.wpa_convert_to_slug($latest_status).'">'.$latest_status.'</strong></li>';
+                                        }
+                                    }
+                                    ?>
+                                <?php endforeach; ?>
+                                </ul>
                             <?php endforeach; ?>
-                            </ul>
-                        <?php endforeach; ?>
+                            </div>
                         </div>
-                    </div>
-                    <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
-                </div><!-- .Notification Box -->
-            <?php endif; ?>
+                        <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
+                    </div><!-- .Notification Box -->
+                <?php endif; ?>
+                <?php if ($terms[0] === 'index' && $assessment_status !== 'pending' && $questions): ?>
+                    <!-- Notification Box -->
+                    <div class="notificationBar rejected">
+                        <div class="bgRed"><h2>ATTENTION</h2></div>
+                        <div class="messageBox">
+                            <p class="result">Your submission has been reviewed by the moderator, please see the results below.</p>
+                            <p class="result">Submission status: 
+                                <strong class="<?php echo $assessment_status ?>">
+                                    <?php echo ucwords(str_replace('-', ' ', $assessment_status)); ?>
+                                </strong>
+                            </p>                        
+                        </div>
+                    </div><!-- .Notification Box -->
+                <?php endif; ?>
+            <?php endif; // If status != draft ?>
 
             <div class="container">
                 <div class="topBar <?php if (!in_array('dcr', $terms) || empty($all_submission_vers)) echo 'flex'; ?>">
@@ -189,22 +216,15 @@ $exception_orgs_id = get_exception_orgs_id();
                     <?php endif; ?>
                 </div>
 
-                <?php if( $is_disabled ): ?>
+                <?php if ( $assessment_status === 'pending' ): ?>
                     <!-- Notification Box -->
                     <div class="notificationBar pending">
                         <h3>Your submission is under pending review!</h3>
-                        <p>Not enable to edit.</p>
+                        <p>Not enabled to edit.</p>
                     </div><!-- .Notification Box -->
                 <?php endif; ?>
 
-                <?php if($is_accepted && !in_array($organisation_id, $exception_orgs_id)): ?>
-                    <!-- Notification Box -->
-                    <div class="notificationBar accepted">
-                        <h3>Your submission is accepted.</h3>
-                    </div><!-- .Notification Box -->
-                <?php endif; ?>
-
-                <?php if ( ($question_templates == 'Comprehensive Assessment' && $questions && !$is_accepted) 
+                <?php if ( ($question_templates == 'Comprehensive Assessment' && $questions) 
                             || ($terms[0] == 'dcr' && in_array($organisation_id, $exception_orgs_id)) ): ?>
                     <!-- Begin Comprehensive Assessment -->
                     <div class="stepperFormWrap" id="main-quiz-form">
@@ -273,15 +293,13 @@ $exception_orgs_id = get_exception_orgs_id();
                                                 foreach ($current_quiz_rows as $row) {
                                                     if ($row->submission_id == $submission_id) {
                                                         $feedback = !empty($row->feedback) ? $row->feedback : '';
+                                                        $description = !empty($row->description) ? $row->description : '';
                                                     }
-                                                    else {
+                                                    if ($row->submission_id != $_GET['submission_id']) {
                                                         $pre_cmts[] = $row;
                                                     }
                                                     if (empty($answers)) {
                                                         $answers = !empty($row->answers) ? json_decode($row->answers) : '';
-                                                    }
-                                                    if (empty($description)) {
-                                                        $description = !empty($row->description) ? $row->description : '';
                                                     }
                                                     if (empty($arr_attachmentID)) {
                                                         $arr_attachmentID = !empty($row->attachment_ids) ? json_decode($row->attachment_ids) : '';
@@ -330,7 +348,19 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 <?php echo $is_disabled ? 'disabled' : '' ?> 
                                                                 class="quiz-description textarea medium" 
                                                                 placeholder="Enter comments"
-                                                                rows="10"><?php echo wp_unslash($description); ?></textarea>
+                                                                rows="10"><?php
+                                                            if ($terms[0] === 'dcr') {
+                                                                if (get_post_status($submission_id) == 'draft') {
+                                                                    echo wp_unslash($description);
+                                                                }
+                                                                elseif (!empty($_GET['submission_id']) && $_GET['submission_id'] == $submission_id) {
+                                                                    echo wp_unslash($description);
+                                                                }
+                                                            }
+                                                            else {
+                                                                echo wp_unslash($description);
+                                                            }
+                                                        ?></textarea>
                                                     </div>
                                                 <?php else: ?>
                                                     <!-- For NULL description if assessment don't required -->
@@ -347,23 +377,13 @@ $exception_orgs_id = get_exception_orgs_id();
                                                         <?php foreach ($pre_cmts as $row): 
                                                             $cmt_time = date("M d Y H:i a", strtotime($row->time)) ?? '';
                                                             $cmt_desc = !empty($row->description) ? wp_unslash($row->description) : '';
-                                                            $cmt_class = (strlen($cmt_desc) > 400) ? 'show_less' : '';
+                                                            $cmt_class = (strlen($cmt_desc) > 300) ? 'show_less' : '';
                                                             ?>
                                                             <?php if (!empty($cmt_desc)): ?>
                                                                 <li class="comment <?php echo $cmt_class; ?>">
                                                                     <span class="_datetime"><?php echo $cmt_time; ?></span>
-                                                                    <div class="_content">
-                                                                    <?php 
-                                                                        if (strlen($cmt_desc) > 400) {
-                                                                            echo '<div class="show_less">'.substr($cmt_desc, 0, 400).'...</div>';
-                                                                            echo '<div class="show_full">'.$cmt_desc.'</div>';
-                                                                        }
-                                                                        else {
-                                                                            echo $cmt_desc;
-                                                                        }
-                                                                    ?>
-                                                                    </div>
-                                                                    <?php if (strlen($cmt_desc) > 400) echo '<a class="btn-showmore-cmt">Show more</a>';?>
+                                                                    <div class="_content"><?php echo $cmt_desc;?></div>
+                                                                    <?php if (strlen($cmt_desc) > 300) echo '<a class="btn-showmore-cmt">Show more</a>';?>
                                                                 </li>
                                                             <?php endif; ?>
                                                         <?php endforeach; ?>
@@ -470,7 +490,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 <span class="file-item file-item-<?php echo $file_index; ?>">
                                                                     <button class="name sas-blob-cta" data-blob="<?php echo $file_url; ?>">
                                                                         <i class="fa-solid fa-paperclip"></i>
-                                                                        <?php echo $file_name; ?>
+                                                                        <span><?php echo $file_name; ?></span>
                                                                     </button>
                                                                     <input name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_attachmentIDs_<?php echo $file_index; ?>"
                                                                             type="hidden"
@@ -526,7 +546,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                     <?php if (!empty($dcr_feedbacks[$group_id][$sub_id])): ?>
                                                         <div class="quizAdvice feedback-area">
                                                             <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
-                                                            <p>Feedbacks</p>
+                                                            <p>Feedback</p>
                                                             <ul class="feedback-list">
                                                                 <?php $quiz_feedbacks = array_reverse($dcr_feedbacks[$group_id][$sub_id]); ?>
                                                                 <?php foreach ($quiz_feedbacks as $feedback): ?>
@@ -548,7 +568,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                     <?php if (!empty($feedback)): ?>
                                                         <div class="quizAdvice feedback-area">
                                                             <span class="icon-info"><i class="fa-solid fa-circle-info"></i></span>
-                                                            <p>Feedbacks</p>
+                                                            <p>Feedback</p>
                                                             <div class="feedback"><?php echo wp_unslash($feedback); ?></div>
                                                         </div>
                                                     <?php endif; ?>

@@ -32,7 +32,7 @@ foreach ($quizzes as $row) {
     $reorganize_quizzes[$row->parent_id][$row->quiz_id][] = $row;
 }
 $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment_id, $organisation_id);
-$quiz_status_options = get_submission_quiz_status_options();
+$quiz_status_options = array('Pending', 'Accepted', 'Rejected');
 $submission_score_arr = array();
 ?>
 
@@ -379,72 +379,15 @@ $submission_score_arr = array();
 
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">
-            <?php if ($is_required_answer_all == true): ?>
-                <div class="final-accept"
-                <?php 
-                    if ($get_quiz_accepted == true) {
-                        echo 'style="display:block;"';
-                    }
-                    else {
-                        echo 'style="display:none;"';
-                    }
-                ?>
-                >
-                    <p class="label">All individual answers from the user have been accepted. Click to accept this submission.</p>
-                    <a type="button" class="button button-primary button-large accept-button" title="Accept this Submission">
-                        Final Acccept
-                        <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
-                    </a>
-                </div>
-                <div class="final-reject"
-                <?php 
-                    if ($get_quiz_accepted != true) {
-                        echo 'style="display:block;"';
-                    }
-                    else {
-                        echo 'style="display:none;"';
-                    }
-                ?>
-                >
-                    <p class="label">Reject this submission until the user resubmits.</p>
-                    <a type="button" class="button button-large reject-button" title="Reject this Submission">
-                        Reject
-                        <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
-                    </a>
-                </div>
-                
-            <?php else: ?>
-                <p class="label">Accept or reject this submission</p>
+            <p class="label">Accept or reject this submission</p>
+            <div>
                 <a type="button" class="button button-primary button-large accept-button" title="Accept this Submission">
                     Accept this Submission
                 </a>
                 <a type="button" class="button button-large reject-button" title="Reject this Submission">
                     Reject
-                    <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
                 </a>
-            <?php endif; ?>
+            </div>
         </div>
     <?php endif; ?>
 </div>
-
-<?php if ($assessment_meta == 'Simple Assessment'): ?>
-    <style>
-        .submission-view-item-row:last-child {
-            margin-bottom: 8px;
-        }
-        .submission-view-item-row .card {
-            width: 100%;
-        }
-    </style>
-<?php endif; ?>
-
-<!-- Hide meta box if quizs don't exist -->
-<?php if (!empty($quizzes)): ?>
-    <style>
-        /* #submitted_info_view,
-        #questions-repeater-field {
-            display: block!important;
-        } */
-    </style>
-<?php endif; ?>
-

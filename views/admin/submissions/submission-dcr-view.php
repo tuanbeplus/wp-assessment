@@ -9,6 +9,7 @@ $post_meta = get_post_meta($post_id);
 $user_id = get_post_meta($post_id, 'user_id', true);
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
 $organisation_id = get_post_meta($post_id, 'organisation_id', true);
+$submission_status = get_post_meta($post_id, 'assessment_status', true);
 $assessment_meta = get_post_meta($assessment_id, 'question_templates', true);
 $report_template = get_post_meta($assessment_id, 'report_template', true);
 $is_required_answer_all = get_post_meta($assessment_id, 'is_required_answer_all', true);
@@ -23,6 +24,7 @@ foreach ($quizzes as $row) {
     $reorganize_quizzes[$row->parent_id][$row->quiz_id][$row->submission_id] = $row;
 }
 $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment_id, $organisation_id);
+$all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -60,6 +62,12 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                         $this_submission_row = $quiz_rows[$post_id] ?? null;
                         $current_quiz_row = null;
                         $azure_attachment_rows = $azure_attachments_uploaded[$group_id][$sub_id] ?? [];
+                        $meta_quiz_status = $all_quizzes_status[$group_id][$sub_id] ?? '';
+
+                        // Sort the rows by submission_id in DESC order
+                        usort($quiz_rows, function($a, $b) {
+                            return $b->submission_id <=> $a->submission_id;
+                        });
 
                         if (isset($this_submission_row) && !empty($this_submission_row)) {
                             $current_quiz_row = $this_submission_row;
@@ -75,7 +83,20 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                             $answers = !empty($current_quiz_row->answers) ? json_decode($current_quiz_row->answers) : '';
                             $arr_attachmentID = !empty($current_quiz_row->attachment_ids) ? json_decode($current_quiz_row->attachment_ids) : '';
                             $description = $current_quiz_row->description ?? '';
-                            $quiz_status = $current_quiz_row->status ?? '';
+
+                            if (!empty($meta_quiz_status)) {
+                                $quiz_status = $meta_quiz_status;
+                            }
+                            else {
+                                $quiz_status = $current_quiz_row->status ?? '';
+                                foreach ($quiz_rows as $row) {
+                                    $status_arr[] = $row->status;
+                                    if (wpa_convert_to_slug($row->status) !== 'pending') {
+                                        $quiz_status = $row->status;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                         ?>
                         <?php if ( !empty($current_quiz_row) ): ?>
@@ -98,12 +119,7 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                                             </ul>
                                         </div>
                                     <?php endif; ?>
-                                    <?php if (!empty($quiz_rows)): 
-                                        // Sort the rows by submission_id in DESC order
-                                        usort($quiz_rows, function($a, $b) {
-                                            return $b->submission_id <=> $a->submission_id;
-                                        });
-                                        ?>
+                                    <?php if (!empty($quiz_rows)): ?>
                                         <div class="user-comment-area">
                                             <p class="description-label"><strong>User Comments</strong></p>
                                             <?php foreach ($quiz_rows as $row): 
@@ -163,6 +179,9 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                                                                     <span class="icon-link"><i class="fa-solid fa-paperclip"></i></i></span>
                                                                     <?php echo $file_name; ?>
                                                                 </a>
+                                                                <?php if (!empty($file_datetime)): ?>
+                                                                    <span class="datetime"><?php echo $file_datetime ?></span>
+                                                                <?php endif; ?>
                                                             </span>
                                                         </li>
                                                     <?php endif; ?>
@@ -238,15 +257,6 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
                             </div>
                             <div class="card-footer">
                                 <div class="card-action">
-                                    <?php 
-                                    if (!empty($quiz_rows)):
-                                        foreach ($quiz_rows as $row):
-                                            if (strtolower($row->status) === 'accepted'):
-                                                $quiz_status = 'Accepted';
-                                                break;
-                                            endif;
-                                        endforeach;
-                                    endif; ?>
                                     <?php if (!empty($quiz_status_options)): ?>
                                         <strong class="label">Change Status</strong>
                                         <select class="select-quiz-status" 
@@ -275,14 +285,19 @@ $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment
         <?php endforeach;?>
 
         <div class="submission-admin-view-footer">
-            <p class="label">Accept or reject this submission</p>
-            <a type="button" class="button button-primary button-large accept-button" title="Accept this Submission">
-                Accept this Submission
-            </a>
-            <a type="button" class="button button-large reject-button" title="Reject this Submission">
-                Reject
-                <img class="icon-spinner" src="<?php echo WP_ASSESSMENT_FRONT_IMAGES; ?>/Spinner-0.7s-200px.svg" alt="loading">
-            </a>
+            <div>
+                <p>Change review status of this submission</p>
+                <?php foreach ($quiz_status_options as $status_name): ?>
+                    <a type="button" data-status="<?php echo esc_attr(ucwords($status_name)); ?>" class="btn-update-review-status button button-large">
+                        <?php echo ucwords($status_name); ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            <p class="current-status">Current status: 
+                <strong class="status-name <?php echo wpa_convert_to_slug($submission_status); ?>">
+                    <?php echo ucwords(str_replace('-', ' ', $submission_status)); ?>
+                </strong>
+            </p>
         </div>
          <!-- End Comprehensive Submission -->
     <?php endif; ?>
