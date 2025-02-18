@@ -728,6 +728,9 @@ class WPA_Question_Form
         try {
             $main = new WP_Assessment();
 
+            $post_id = intval($_POST['post_id'] ?? '');
+            if (empty($post_id)) throw new Exception('Post not found.');
+
             $submission_id = intval($_POST['submission_id'] ?? '');
             if (empty($submission_id)) throw new Exception('Submission not found.');
 
@@ -749,29 +752,29 @@ class WPA_Question_Form
             $all_quizzes_status = $_POST['all_quizzes_status'] ? $_POST['all_quizzes_status'] : [];
             if (empty($all_quizzes_status)) throw new Exception('Invalid all quizzes status value.');
 
-            $input = array(
-                'status' => $quiz_status,
-            );    
-            $conditions = array(
-                'organisation_id' => $organisation_id,
-                'quiz_id' => $quiz_id,
-                'parent_id' => $parent_id,
-                'assessment_id' => $assessment_id,
-                'submission_id' => $submission_id,
-            );
-            $main->update_quiz_assessment($input, $conditions);
+            if ($submission_id === $post_id) {
+                $input = array(
+                    'status' => $quiz_status,
+                );    
+                $conditions = array(
+                    'organisation_id' => $organisation_id,
+                    'quiz_id' => $quiz_id,
+                    'parent_id' => $parent_id,
+                    'assessment_id' => $assessment_id,
+                    'submission_id' => $submission_id,
+                );
+                $table_row_updated = $main->update_quiz_assessment($input, $conditions);
+            }
 
             $quizzes_status_meta = [];
             foreach ($all_quizzes_status as $row) {
                 $group_id = intval($row['group_id']) ?? '';
-                $quiz_id = intval($row['quiz_id']) ?? '';
+                $sub_id = intval($row['sub_id']) ?? '';
                 $status = sanitize_text_field($row['status']) ?? '';
-                if (wpa_convert_to_slug($status) !== 'pending') {
-                    $quizzes_status_meta[$group_id][$quiz_id] = $status;
-                }
+                $quizzes_status_meta[$group_id][$sub_id] = $status;
             }
             // Update post meta
-            $meta_updated = update_post_meta($submission_id, 'quizzes_status', $quizzes_status_meta);
+            $meta_updated = update_post_meta($post_id, 'quizzes_status', $quizzes_status_meta);
 
             return wp_send_json(array( 
                 'message' => 'Quiz status '.$parent_id.'.'.$quiz_id.' has been updated', 
@@ -779,6 +782,9 @@ class WPA_Question_Form
                 'status_class' => wpa_convert_to_slug($quiz_status),
                 'quizzes_status_meta' => $quizzes_status_meta,
                 'meta_updated' => $meta_updated,
+                'table_row_updated' => $table_row_updated,
+                'submission_id' => $submission_id,
+                'post_id' => $post_id,
                 'status' => true,
             ));
         

@@ -528,14 +528,26 @@ class WP_Assessment
     {
         try {
             global $wpdb;
-            
-            $table = $this->get_quiz_submission_table_name($conditions['assessment_id']);
-
-            $wpdb->update($table, $data, $conditions, array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' , '%s', '%s', '%s' ), array('%s', '%s', '%s', '%s') );
-
-            if ($wpdb->last_error) {
-                throw new Exception($wpdb->last_error);
+            // Validate conditions
+            if (empty($conditions['assessment_id'])) {
+                throw new Exception('Assessment ID is missing.');
             }
+            $table = $this->get_quiz_submission_table_name($conditions['assessment_id']);
+            // Ensure $data and $conditions are not empty
+            if (empty($data) || empty($conditions)) {
+                throw new Exception('Update data or conditions are empty.');
+            }
+            // Define data types dynamically based on input
+            $data_formats = array_fill(0, count($data), '%s'); 
+            $condition_formats = array_fill(0, count($conditions), '%s');
+            // Perform update
+            $update = $wpdb->update($table, $data, $conditions, $data_formats, $condition_formats);
+            // Check for errors
+            if ($update === false) {
+                throw new Exception($wpdb->last_error ?: 'Database update failed.');
+            }
+            return $update;
+            
         } catch (Exception $exception) {
             return wp_send_json(array('message' => $exception->getMessage(), 'status' => false));
         }

@@ -90,7 +90,6 @@ $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
                             else {
                                 $quiz_status = $current_quiz_row->status ?? '';
                                 foreach ($quiz_rows as $row) {
-                                    $status_arr[] = $row->status;
                                     if (wpa_convert_to_slug($row->status) !== 'pending') {
                                         $quiz_status = $row->status;
                                         break;

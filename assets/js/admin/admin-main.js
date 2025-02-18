@@ -815,9 +815,10 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         const quizStatus = $(this).val();
         const quizId = $(this).data("quiz-id");
-        const groupId = $(this).data("group-id");
+        const parentId = $(this).data("group-id");
         const wrapper = $(this).closest('.submission-view-item-row');
         const assessmentId = $('input#assessment_id').val();
+        const postId = $('input#submission_id').val();
         const submissionId = wrapper.data('submission');
         const organisationId = $('input#organisation_id').val();
         let allQuizzesStatus = [];
@@ -826,12 +827,12 @@ jQuery(document).ready(function ($) {
 
         $(".submission-view-item-row select.select-quiz-status").each(function() {
             let groupId = $(this).data("group-id");
-            let quizId = $(this).data("quiz-id");
+            let subId = $(this).data("quiz-id");
             let status = $(this).val();
 
             allQuizzesStatus.push({
                 group_id: groupId,
-                quiz_id: quizId,
+                sub_id: subId,
                 status: status
             });
         });
@@ -842,10 +843,11 @@ jQuery(document).ready(function ($) {
             data: {
                 action: "update_quiz_status_submission",
                 assessment_id: assessmentId,
+                post_id: postId,
                 submission_id: submissionId,
                 organisation_id: organisationId,
                 quiz_id: quizId,
-                parent_id: groupId,
+                parent_id: parentId,
                 quiz_status: quizStatus,
                 all_quizzes_status: allQuizzesStatus,
             },
@@ -857,7 +859,7 @@ jQuery(document).ready(function ($) {
             }
         });
         const { status, message, saved_status, status_class } = response;
-        console.log(response);
+        // console.log(response);
 
         if (status == true) {
             wrapper.find('.quiz-status strong').removeClass().addClass(status_class).text(saved_status);
@@ -865,7 +867,6 @@ jQuery(document).ready(function ($) {
         else {
             alert(message);
         }
-
     });
 
     $(".btn-save-feedback").on("click", function (e) {
