@@ -222,6 +222,11 @@ $exception_orgs_id = get_exception_orgs_id();
                         <h3>Your submission is under pending review!</h3>
                         <p>Not enabled to edit.</p>
                     </div><!-- .Notification Box -->
+                <?php elseif ( $is_disabled && $terms[0] === 'dcr' ): ?>
+                    <!-- Notification Box -->
+                    <div class="notificationBar pending">
+                        <p>This submisison version not enabled to edit.</p>
+                    </div><!-- .Notification Box -->
                 <?php endif; ?>
 
                 <?php if ( ($question_templates == 'Comprehensive Assessment' && $questions) 
