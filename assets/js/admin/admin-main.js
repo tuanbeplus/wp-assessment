@@ -821,21 +821,8 @@ jQuery(document).ready(function ($) {
         const postId = $('input#submission_id').val();
         const submissionId = wrapper.data('submission');
         const organisationId = $('input#organisation_id').val();
-        let allQuizzesStatus = [];
 
         if (!quizStatus || quizStatus === '' || quizStatus === null) return;
-
-        $(".submission-view-item-row select.select-quiz-status").each(function() {
-            let groupId = $(this).data("group-id");
-            let subId = $(this).data("quiz-id");
-            let status = $(this).val();
-
-            allQuizzesStatus.push({
-                group_id: groupId,
-                sub_id: subId,
-                status: status
-            });
-        });
 
         let response = await $.ajax({
             type: "POST",
@@ -849,7 +836,6 @@ jQuery(document).ready(function ($) {
                 quiz_id: quizId,
                 parent_id: parentId,
                 quiz_status: quizStatus,
-                all_quizzes_status: allQuizzesStatus,
             },
             beforeSend : function ( xhr ) {
                 wrapper.addClass('loading');
@@ -1546,7 +1532,6 @@ jQuery(document).ready(function ($) {
         let btn = $(this)
         let submissionId = $("#submission_id").val();
         let submissionType = $("#post_type").val();
-        
         $.ajax({
             type: 'POST',
             url: ajaxUrl,
@@ -1559,6 +1544,8 @@ jQuery(document).ready(function ($) {
                 btn.addClass('loading')
             },
             success:function(response){
+                console.log(response);
+                
                 btn.removeClass('loading')
                 if (response.report_id) {
                     $('#btn-view-report')

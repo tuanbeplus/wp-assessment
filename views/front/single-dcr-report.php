@@ -23,6 +23,7 @@ $feedback_cl = new AndSubmissionFeedbacks();
 $post_meta = get_post_meta($post_id);
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
 $submission_id = get_post_meta($post_id, 'submission_id', true);
+$report_post_type = get_post_type($post_id);
 $org_data = get_post_meta($submission_id, 'org_data', true);
 $organisation_id = $org_data['Id'] ?? '';
 $assessment_title = get_the_title($assessment_id);

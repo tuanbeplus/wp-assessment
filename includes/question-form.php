@@ -749,9 +749,6 @@ class WPA_Question_Form
             $quiz_status = sanitize_text_field($_POST['quiz_status']) ?? '';
             if (empty($quiz_status)) throw new Exception('Invalid quiz status value.');
 
-            $all_quizzes_status = $_POST['all_quizzes_status'] ? $_POST['all_quizzes_status'] : [];
-            if (empty($all_quizzes_status)) throw new Exception('Invalid all quizzes status value.');
-
             if ($submission_id === $post_id) {
                 $input = array(
                     'status' => $quiz_status,
@@ -766,13 +763,11 @@ class WPA_Question_Form
                 $table_row_updated = $main->update_quiz_assessment($input, $conditions);
             }
 
-            $quizzes_status_meta = [];
-            foreach ($all_quizzes_status as $row) {
-                $group_id = intval($row['group_id']) ?? '';
-                $sub_id = intval($row['sub_id']) ?? '';
-                $status = sanitize_text_field($row['status']) ?? '';
-                $quizzes_status_meta[$group_id][$sub_id] = $status;
-            }
+            $current_time = current_time('M d Y H:i a');
+            $quizzes_status_meta = get_post_meta($post_id, 'quizzes_status', true);
+            $quizzes_status_meta = !empty($quizzes_status_meta) ? $quizzes_status_meta : [];
+            $quizzes_status_meta[$parent_id][$quiz_id]['meta_status'] = $quiz_status;
+            $quizzes_status_meta[$parent_id][$quiz_id]['datetime'] = $current_time;
             // Update post meta
             $meta_updated = update_post_meta($post_id, 'quizzes_status', $quizzes_status_meta);
 
@@ -781,10 +776,11 @@ class WPA_Question_Form
                 'saved_status' => $quiz_status,
                 'status_class' => wpa_convert_to_slug($quiz_status),
                 'quizzes_status_meta' => $quizzes_status_meta,
-                'meta_updated' => $meta_updated,
+                'post_meta_updated' => $meta_updated,
                 'table_row_updated' => $table_row_updated,
                 'submission_id' => $submission_id,
                 'post_id' => $post_id,
+                'saved_time' => $current_time,
                 'status' => true,
             ));
         

@@ -109,7 +109,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                 <?php
                                 foreach ($sub_questions as $sub_id => $field):
                                     $submission_data_sub = $reorganize_quizzes[$group_id][$sub_id] ?? '';
-                                    $meta_quiz_status = $all_quizzes_status[$group_id][$sub_id] ?? '';
+                                    $meta_quiz_status = $all_quizzes_status[$group_id][$sub_id]['meta_status'] ?? '';
                                     $sub_title = $field['sub_title'] ?? '';
                                     if (!empty($submission_data_sub)) {
                                         $latest_status = '';

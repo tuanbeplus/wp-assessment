@@ -7,7 +7,6 @@
  */
 
 if (!empty($report_template['front_page'])) {
-
     // add page break
     $mpdf->AddPageByArray(
         array(
@@ -21,6 +20,8 @@ if (!empty($report_template['front_page'])) {
     $index_2023 = get_field('assessment_index_2023', 'option');
     $index_2023_id = !empty($index_2023) ? $index_2023 : 17158;
     $org_name = $org_data['Name'] ?? '';
+    $dcr_year = $org_data['Disability_Confident_Recruiter__c'] ?? '';
+    $dcr_year = 'Year 2';
     $front_page_logo_url = $report_template['front_page']['logo_url'] ?? '';
     $front_page_title = $report_template['front_page']['title'] ?? '';
     if (empty($front_page_title)) {
@@ -32,6 +33,11 @@ if (!empty($report_template['front_page'])) {
     }
     $front_page_bg_img = $report_template['front_page']['bg_img'] ?? '';
     $custom_class = get_post_type();
+
+    if (!empty($dcr_year) && !empty($front_page_title) && $report_post_type === 'dcr_reports') {
+        $title_suffix = (strpos($report_title, 'Renewal') !== false) ? 'Renewal' : ((strpos($report_title, 'Discovery') !== false) ? 'Discovery' : '');
+        $front_page_title .= ' - '. $dcr_year .' '. $title_suffix;
+    }
 
     $front_page = 
     '<div class="front-page page" style="text-align:center;">

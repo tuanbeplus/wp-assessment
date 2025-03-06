@@ -62,7 +62,8 @@ $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
                         $this_submission_row = $quiz_rows[$post_id] ?? null;
                         $current_quiz_row = null;
                         $azure_attachment_rows = $azure_attachments_uploaded[$group_id][$sub_id] ?? [];
-                        $meta_quiz_status = $all_quizzes_status[$group_id][$sub_id] ?? '';
+                        $meta_quiz_status = $all_quizzes_status[$group_id][$sub_id]['meta_status'] ?? '';
+                        $meta_status_time = $all_quizzes_status[$group_id][$sub_id]['datetime'] ?? '';
 
                         // Sort the rows by submission_id in DESC order
                         usort($quiz_rows, function($a, $b) {

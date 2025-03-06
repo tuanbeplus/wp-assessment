@@ -859,8 +859,10 @@ class WP_Assessment
             // Fetch submission meta
             $assessment_id = get_post_meta($post_id, 'assessment_id', true);
             $user_id = get_post_meta($post_id, 'user_id', true);
+            $wp_user_id = get_current_user_by_salesforce_id($user_id);
             $sf_user_name = get_post_meta($post_id, 'sf_user_name', true);
-            $org_data = get_post_meta($post_id, 'org_data', true);
+            $sf_account_json = get_user_meta($wp_user_id, '__salesforce_account_json', true);
+            $sf_account_data = json_decode($sf_account_json, true);
             $assessment_title = get_the_title($assessment_id);
     
             // Validate required meta
@@ -872,7 +874,7 @@ class WP_Assessment
                 $assessment_title = str_replace("Disability Confident Recruiter", "DCR", $assessment_title);
             }
             // Construct the report post title
-            $report_title = 'Report on ' . $assessment_title . ' - ' . ($org_data['Name'] ?? 'Unknown Organization');
+            $report_title = 'Report on ' . $assessment_title . ' - ' . ($sf_account_data['Name'] ?? 'Unknown Organization');
             // Create the report post
             $report_id = wp_insert_post([
                 'post_type' => $report_type,
@@ -884,10 +886,11 @@ class WP_Assessment
             }
             // Update report meta
             update_post_meta($report_id, 'user_id', $user_id);
+            update_post_meta($report_id, 'wp_user_id', $wp_user_id);
             update_post_meta($report_id, 'sf_user_name', $sf_user_name);
             update_post_meta($report_id, 'assessment_id', $assessment_id);
             update_post_meta($report_id, 'submission_id', $post_id);
-            update_post_meta($report_id, 'org_data', $org_data);
+            update_post_meta($report_id, 'org_data', $sf_account_data);
             // Link report ID to the submission
             update_post_meta($post_id, 'report_id', $report_id);
     
