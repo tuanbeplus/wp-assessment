@@ -2352,3 +2352,139 @@ table.saturn-invites-table #sort-org-name.active::after {
 #report-share .select2-container--default .select2-selection--multiple ul.select2-selection__rendered li {
   margin: 0;
 }
+
+/* Saturn Archive page */
+.saturn-archive-page {
+  width: 100%;
+  max-width: 1440px;
+  padding-right: 20px;
+}
+.saturn-archive-page form {
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #ddd;
+}
+.saturn-archive-page .archive-tables {
+  display: flex;
+  gap: 24px;
+}
+.saturn-archive-page .archive-tables > * {
+  width: 100%;
+}
+.saturn-archive-page h1 {
+  font-size: 26px;
+}
+.saturn-archive-page h3 {
+  margin-bottom: 12px;
+  font-weight: 400;
+  font-size: 18px;
+}
+.saturn-archive-page .form-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+.saturn-archive-page .form-actions button {
+  margin-right: 6px;
+}
+.saturn-archive-page table.placeholder tr td{
+  height: 35px !important;
+}
+.saturn-archive-page table th {
+  font-weight: 500;
+  white-space: nowrap;
+}
+.saturn-archive-page table td ul {
+  list-style: disc;
+  padding-left: 16px;
+  margin-bottom: 0;
+}
+.saturn-archive-page .org-table-wrapper {
+  position: relative;
+  padding-top: 20px;
+  margin-top: 10px;
+  border-top: 1px solid #ddd;
+}
+.saturn-archive-page .wpa-spinner {
+  position: absolute;
+  left: 49%;
+  top: 64%;
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+}
+.saturn-archive-page .loading .wpa-spinner{
+  display: block;
+}
+.saturn-archive-page .loading #org-data-result {
+  opacity: 0.5;
+}
+.saturn-archive-page .archive-tables table tr:nth-child(even) td {
+  background-color: #fafafa;
+}
+.saturn-archive-page #btn-delete-org {
+  color: #b32d2e;
+  border-color: #b32d2e;
+}
+.saturn-archive-page .btn-delete-archived-org {
+  border: none;
+  background: none;
+  padding: 0;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: #b32d2e;
+}
+.saturn-archive-page .btn-delete-archived-org:hover {
+  color: red;
+}
+.saturn-archive-page .btn-restore-archived-org {
+  margin-right: 10px;
+  border: none;
+  background: none;
+  padding: 0;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: #2271b1;
+}
+.saturn-archive-page .btn-restore-archived-org:hover {
+  color: #0d6efd;
+}
+#archived-orgs-table .btn-sort-by-name,
+#archived-orgs-table .btn-sort-by-time {
+  cursor: pointer;
+}
+#archived-orgs-table .btn-sort-by-name:hover .icon,
+#archived-orgs-table .btn-sort-by-time:hover .icon {
+  color: #555;
+}
+#archived-orgs-table .icon {
+  color: #999;
+  margin-left: 4px;
+  transition: all 0.2s;
+}
+.saturn-archive-page #btn-view-history {
+  font-weight: 500;
+}
+#archived-orgs-table tr.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.saturn-archive-page .history-content {
+  white-space: pre-line;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.saturn-archive-page .top-bar {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.saturn-archive-page #btn-back-to-saturn-archive {
+  font-weight: 500;
+}

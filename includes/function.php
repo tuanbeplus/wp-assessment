@@ -859,6 +859,7 @@ class WP_Assessment
             // Fetch submission meta
             $assessment_id = get_post_meta($post_id, 'assessment_id', true);
             $user_id = get_post_meta($post_id, 'user_id', true);
+            $organisation_id = get_post_meta($post_id, 'organisation_id', true);
             $wp_user_id = get_current_user_by_salesforce_id($user_id);
             $sf_user_name = get_post_meta($post_id, 'sf_user_name', true);
             $sf_account_json = get_user_meta($wp_user_id, '__salesforce_account_json', true);
@@ -886,6 +887,7 @@ class WP_Assessment
             }
             // Update report meta
             update_post_meta($report_id, 'user_id', $user_id);
+            update_post_meta($report_id, 'organisation_id', $user_id);
             update_post_meta($report_id, 'wp_user_id', $wp_user_id);
             update_post_meta($report_id, 'sf_user_name', $sf_user_name);
             update_post_meta($report_id, 'assessment_id', $assessment_id);

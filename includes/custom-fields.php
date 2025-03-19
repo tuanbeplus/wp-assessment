@@ -427,7 +427,7 @@ class WPA_Custom_Fields
     function add_assessments_options_page() {
         if( function_exists('acf_add_options_sub_page') ) {
             acf_add_options_sub_page(array(
-                'page_title'    => 'Assessments Settings',
+                'page_title'    => 'Saturn Settings',
                 'menu_title'    => 'Settings',
                 'parent_slug'   => 'edit.php?post_type=assessments',
                 'capability'    => 'manage_options',
@@ -445,6 +445,14 @@ class WPA_Custom_Fields
                 'key' => 'group_assessments_settings',
                 'title' => 'Settings',
                 'fields' => array(
+                    array(
+                        'key' => 'field_assessments_tab',
+                        'label' => 'Assessments',
+                        'name' => '',
+                        'type' => 'tab',
+                        'placement' => 'top',
+                        'endpoint' => 0,
+                    ),
                     array(
                         'key' => 'field_assessment_quick_10',
                         'label' => 'Assessment Quick 10',
@@ -532,6 +540,32 @@ class WPA_Custom_Fields
                                 'required' => 1,
                             ),
                         ),
+                    ),
+                    array(
+                        'key' => 'field_azure_archive_storage_tab',
+                        'label' => 'Azure Archive Storage',
+                        'name' => '',
+                        'type' => 'tab',
+                        'placement' => 'top',
+                        'endpoint' => 0,
+                    ),
+                    array(
+                        'key' => 'field_storage_account_name',
+                        'label' => 'Storage Account Name',
+                        'name' => 'archive_storage_account_name',
+                        'type' => 'text',
+                    ),
+                    array(
+                        'key' => 'field_storage_account_key',
+                        'label' => 'Storage Account Key',
+                        'name' => 'archive_storage_account_key',
+                        'type' => 'text',
+                    ),
+                    array(
+                        'key' => 'field_storage_container',
+                        'label' => 'Storage Container',
+                        'name' => 'archive_storage_container',
+                        'type' => 'text',
                     ),
                 ),
                 'location' => array(

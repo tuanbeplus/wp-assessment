@@ -1,4 +1,3 @@
-
 jQuery(document).ready(function ($) {
     const ajaxUrl = ajax_object.ajax_url;
     const mainWrapper = $('#question-group-repeater');
@@ -1738,5 +1737,391 @@ jQuery(document).ready(function ($) {
         // Toggle the sorting order for the next click
         ascending = !ascending;
     });
+
+    // Select Org to load their data
+    $(document).on("change", "select#select_org", async function (e) {
+        const orgId = $(this).val();
+        const orgTableWrapper = $('.org-table-wrapper');
+        const resultWrapper = $('#org-data-result');
+        orgTableWrapper.addClass('loading');
+
+        if (!orgId) {
+            resultWrapper.html(
+                `<h3>Organisation: </h3>
+                <table class="widefat placeholder">
+                    <thead><tr>
+                        <th>Contacts</th>
+                        <th>Index Submissions</th>
+                        <th>DCR Submissions</th>
+                        <th>Index Reports</th>
+                        <th>DCR Reports</th>
+                        <th>Documents uploaded</th>
+                    </tr></thead>
+                    <tbody><tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr></tbody>
+                </table>`
+            );
+            orgTableWrapper.removeClass('loading');
+        } else {
+            $.ajax({
+                url: ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'get_client_org_data_ajax',
+                    org_id: orgId,
+                    org_name: $(this).find('option:selected').text(),
+                },
+                success: function(response) {                    
+                    if (response.success) {
+                        resultWrapper.html(response.data.html);
+                    } else {
+                        alert(response.data.message);
+                    }
+                },
+                error: function() {
+                    alert('Server error occurred');
+                },
+                complete: function() {
+                    orgTableWrapper.removeClass('loading');
+                }
+            });
+        }
+    });
+
+    // Click to archive an org
+    $(document).on("click", "#btn-archive-org", function (e) {
+        e.preventDefault();
+        const orgTableWrapper = $('.org-table-wrapper');
+        const orgSelect = $('#select_org');
+        const orgId = orgSelect.val();
+        const orgName = orgSelect.find('option:selected').text();
+        const postIds = $('input[name=archive_posts]').val();
+        const userIds = $('input[name=archive_users]').val();
+        const attIds = $('input[name=archive_atts]').val();        
+
+        if (!orgId) {
+            alert('Please select an organisation first.');
+            return;
+        }
+        if (!confirm(`Are you sure you want to archive "${orgName}"?`)) {
+            return;
+        }
+
+        orgTableWrapper.addClass('loading');        
+
+        try {
+            $.ajax({
+                url: ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'archive_client_org_ajax',
+                    org_id: orgId,
+                    org_name: orgName,
+                    archive_posts: postIds,
+                    archive_users: userIds,
+                    archive_atts: attIds
+                },
+                success: function(response) {
+                    // console.log(response);
+                    if (response.status === true) {
+                        // Remove the archived org from select dropdown
+                        orgSelect.find(`option[value="${orgId}"]`).remove();
+                        // Reset select
+                        orgSelect.val('').trigger('change');
+                        // Append to tabel view
+                        addOrgToArchiveTableView(orgName, response.time, response.author, response.archive_id);
+                        setTimeout(() => {
+                            alert(response.message);
+                        }, 500);
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                },
+                complete: function() {
+                    orgTableWrapper.removeClass('loading');
+                }
+            });
+        } catch (error) {
+            alert('Server error occurred while trying to archive organization');
+        }
+    });
+
+    // Click to restore an org
+    $(document).on('click', '.btn-restore-archived-org', function() {
+        const restoreBtn = $(this);
+        const rowId = restoreBtn.data('row-id');
+        const row = restoreBtn.closest('tr');
+        
+        if (!rowId) {
+            alert('Archive record ID not found.');
+            return;
+        }
+        if (!confirm('Are you sure you want to restore this archived organisation?')) {
+            return;
+        }
+
+        restoreBtn.prop('disabled', true);
+        row.addClass('loading');
+
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'restore_archived_org_data_ajax',
+                archive_id: rowId
+            },
+            success: function(response) {
+                if (response.status) {
+                    row.fadeOut(400, function() {
+                        $(this).remove();
+                        // Update row numbers
+                        $('#archived-orgs-table tbody tr').each(function(index) {
+                            $(this).find('td:first').text(index + 1);
+                        });
+                    });
+                    let orgId = response.org_id;
+                    let orgName = response.org_name;
+                    let selectField = $('select#select_org');
+                    let option = $('<option>', {
+                        value: orgId,
+                        text: orgName
+                    });
+                    selectField.append(option);
+                    alert(response.message);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('An error occurred while trying to restore the organisation');
+            },
+            complete: function() {
+                restoreBtn.prop('disabled', false);
+                row.removeClass('loading');
+            }
+        });
+    });
+
+    // Click to delete an archived organisation permanently
+    $(document).on('click', '.btn-delete-archived-org', function() {
+        const deleteBtn = $(this);
+        const row = deleteBtn.closest('tr');
+        const rowId = deleteBtn.data('row-id');
+
+        if (!rowId) {
+            alert('Archive record ID not found.');
+            return;
+        }
+        if (!confirm('Are you sure you want to permanently delete this archived organisation? This action cannot be undone.')) {
+            return;
+        }
+
+        deleteBtn.prop('disabled', true);
+        row.addClass('loading');
+
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'delete_archived_org_data_ajax',
+                archive_id: rowId
+            },
+            success: function(response) {
+                if (response.status) {
+                    row.fadeOut(400, function() {
+                        $(this).remove();
+                        // Update row numbers
+                        $('#archived-orgs-table tbody tr').each(function(index) {
+                            $(this).find('td:first').text(index + 1);
+                        });
+                    });
+                    alert(response.message);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('An error occurred while trying to delete the organisation');
+            },
+            complete: function() {
+                deleteBtn.prop('disabled', false);
+                row.removeClass('loading');
+            }
+        });
+    });
+
+    // Click to delete an org from main system
+    $(document).on("click", "#btn-delete-org", function (e) {
+        e.preventDefault();
+        const orgTableWrapper = $('.org-table-wrapper');
+        const orgSelect = $('#select_org');
+        const orgId = orgSelect.val();
+        const orgName = orgSelect.find('option:selected').text();
+        const postIds = $('input[name=archive_posts]').val();
+        const userIds = $('input[name=archive_users]').val();
+        const attIds = $('input[name=archive_atts]').val();
+
+        if (!orgId) {
+            alert('Please select an organisation first.');
+            return;
+        }
+        if (!confirm(`Are you sure you want to permanently delete "${orgName}" and all its data? This action cannot be undone.`)) {
+            return;
+        }
+
+        orgTableWrapper.addClass('loading');
+
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'delete_current_org_ajax',
+                org_id: orgId,
+                org_name: orgName,
+                archive_posts: postIds,
+                archive_users: userIds,
+                archive_atts: attIds
+            },
+            success: function(response) {
+                if (response.status) {
+                    // Remove the org from select dropdown
+                    orgSelect.find(`option[value="${orgId}"]`).remove();
+                    // Reset select
+                    orgSelect.val('').trigger('change');
+                    setTimeout(function() {
+                        alert(response.message);
+                    }, 200);
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('An error occurred while trying to delete the organization');
+            },
+            complete: function() {
+                orgTableWrapper.removeClass('loading');
+            }
+        });
+    });
+
+    /**
+     * Add a new row to the archive/delete table view
+     * @param {string} orgName - Name of the organization
+     * @param {string} time - Timestamp of when action occurred
+     * @param {string} author - Name of user who performed the action
+     */
+    function addOrgToArchiveTableView(orgName, time, author, archiveId) {
+        const table = $('table#archived-orgs-table');
+        if (!table || !table.length) {
+            console.error('Invalid table element provided');
+            return;
+        }
+        const tableBody = table.find('tbody');
+        const countRows = tableBody.find('tr').length + 1;
+
+        // Escape HTML to prevent XSS
+        const escapedOrgName = $('<div>').text(orgName).html();
+        const escapedAuthor = $('<div>').text(author).html();
+        const escapedTime = $('<div>').text(time).html();
+
+        const newRow = $(`
+            <tr>
+                <td>${countRows}</td>
+                <td>${escapedOrgName}</td>
+                <td>${escapedTime}</td>
+                <td>${escapedAuthor}</td>
+                <td>
+                    <button class="btn-restore-archived-org" data-row-id="${archiveId}">Restore</button>
+                    <button class="btn-delete-archived-org" data-row-id="${archiveId}">Delete</button>
+                </td>
+            </tr>
+        `);
+
+        tableBody.append(newRow);
+        newRow.hide().fadeIn();
+    }
+
+    // Sort functionality for archived orgs table
+    let nameAscending = false;
+    let timeAscending = true;
+
+    $(document).on('click', '.btn-sort-by-name', function() {
+        const tbody = $('#archived-orgs-table tbody');
+        const rows = tbody.find('tr').toArray();
+
+        rows.sort((a, b) => {
+            const aText = $(a).find('td:eq(1)').text(); // Get org name from second column
+            const bText = $(b).find('td:eq(1)').text();
+            return nameAscending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+        });
+
+        nameAscending = !nameAscending;
+
+        tbody.empty();
+        rows.forEach(row => tbody.append(row));
+        
+        // Update row numbers
+        tbody.find('tr').each(function(index) {
+            $(this).find('td:first').text(index + 1);
+        });
+    });
+
+    $(document).on('click', '.btn-sort-by-time', function() {
+        const tbody = $('#archived-orgs-table tbody');
+        const rows = tbody.find('tr').toArray();
+    
+        rows.sort((a, b) => {
+            // Get text from the time column
+            const aText = $(a).find('td:eq(2)').text().trim();
+            const bText = $(b).find('td:eq(2)').text().trim();
+            
+            // Convert to timestamps for comparison
+            const aTimestamp = parseCustomDate(aText);
+            const bTimestamp = parseCustomDate(bText);
+            
+            return timeAscending ? aTimestamp - bTimestamp : bTimestamp - aTimestamp;
+        });
+    
+        timeAscending = !timeAscending;
+    
+        tbody.empty();
+        rows.forEach(row => tbody.append(row));
+        
+        // Update row numbers
+        tbody.find('tr').each(function(index) {
+            $(this).find('td:first').text(index + 1);
+        });
+    });
+
+    // Custom parsing function for "Mar 11 2025, 15:18 pm" format
+    function parseCustomDate(dateStr) {
+        // Extract parts from the string
+        const parts = dateStr.match(/(\w+)\s+(\d+)\s+(\d+),\s+(\d+):(\d+)\s+(\w+)/);
+        if (!parts) return 0; // Return 0 if format doesn't match
+        
+        const month = parts[1];
+        const day = parseInt(parts[2]);
+        const year = parseInt(parts[3]);
+        let hour = parseInt(parts[4]);
+        const minute = parseInt(parts[5]);
+        const ampm = parts[6].toLowerCase();
+        
+        // Convert month name to month number (0-11)
+        const months = {
+            'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+            'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11
+        };
+        
+        // Create date object
+        const date = new Date(year, months[month.toLowerCase()], day, hour, minute);
+        return date.getTime();
+    }
 
 });

@@ -7,6 +7,9 @@
  */
 
 use MicrosoftAzure\Storage\Common\Internal\Resources;
+use MicrosoftAzure\Storage\Blob\BlobRestProxy;
+use MicrosoftAzure\Storage\Blob\Models\ListBlobsOptions;
+use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
 
 class WP_Azure_Storage {
 
@@ -51,15 +54,16 @@ class WP_Azure_Storage {
     }
 
     /**
-	 * Create Azure Storage Attachment table
-	 *
-	 */
+     * Create Azure Storage Attachment table and add is_archived column if it doesn't exist
+     *
+     */
     function init_azure_storage_attachments()
     {
         global $wpdb;
         $table_name = $this->get_azure_storage_table();
         $charset_collate = $wpdb->get_charset_collate();
 
+        // Create table if it doesn't exist
         $sql = "CREATE TABLE IF NOT EXISTS $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -77,6 +81,22 @@ class WP_Azure_Storage {
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        // Check if is_archived column exists, if not add it
+        $column_exists = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = %s AND COLUMN_NAME = 'is_archived'",
+                $table_name
+            )
+        );
+
+        if (!$column_exists) {
+            $wpdb->query(
+                "ALTER TABLE $table_name 
+                ADD COLUMN is_archived BOOLEAN DEFAULT FALSE"
+            );
+        }
     }
 
     /**
@@ -163,7 +183,7 @@ class WP_Azure_Storage {
             $table = $this->get_azure_storage_table();
             // Prepare the query to prevent SQL injection.
             $query = $wpdb->prepare(
-                "SELECT * FROM $table WHERE assessment_id = %d AND organisation_id = %s",
+                "SELECT * FROM $table WHERE assessment_id = %d AND organisation_id = %s AND is_archived != 1",
                 $assessment_id,
                 $organisation_id
             );
@@ -183,6 +203,37 @@ class WP_Azure_Storage {
             }
             // Return the result or null if empty.
             return !empty($azure_attachments) ? $azure_attachments : null;
+        } 
+        catch (Exception $exception) {
+            // Return a WP_Error object for better error handling.
+            return new WP_Error('database_error', $exception->getMessage());
+        }
+    }
+
+    /**
+     * Get Azure files uploaded by org.
+     *
+     * @param string $organisation_id The ID of the organisation.
+     * @return array|null|WP_Error The list of attachments, null if none found, or WP_Error on failure.
+     */
+    function get_azure_files_uploaded_by_org($organisation_id) {
+        global $wpdb;
+        try {
+            // Get the Azure storage table name.
+            $table = $this->get_azure_storage_table();
+            // Prepare the query to prevent SQL injection.
+            $query = $wpdb->prepare(
+                "SELECT * FROM $table WHERE organisation_id = %s",
+                $organisation_id
+            );
+            // Execute the query.
+            $result = $wpdb->get_results($query);
+            // Check for database errors.
+            if ($wpdb->last_error) {
+                throw new Exception($wpdb->last_error);
+            }
+            // Return the result or null if empty.
+            return !empty($result) ? $result : null;
         } 
         catch (Exception $exception) {
             // Return a WP_Error object for better error handling.
@@ -455,6 +506,8 @@ class WP_Azure_Storage {
 
     /**
      * Create Shared Access Signature Blob URL at the URL
+     * 
+     * @return void
      */
     function report_create_azure_sas_blob_url() {
         if (isset($_GET['action']) && $_GET['action'] === 'create_sas_blob_url') {
@@ -479,6 +532,184 @@ class WP_Azure_Storage {
                 echo 'Error: Generate Azure Shared Access Signature failed.';
                 exit;
             }
+        }
+    }
+
+    /**
+     * Sanitize blob name for Azure storage
+     * 
+     * @param string $blob_name The blob name to sanitize
+     * @return string Sanitized blob name
+     */
+    private function sanitize_blob_name($blob_name) {
+        // Remove any characters that aren't alphanumeric, dash, underscore, forward slash, or period
+        $blob_name = preg_replace('/[^a-zA-Z0-9\-._\/]/', '-', $blob_name);
+        
+        // Replace multiple forward slashes with a single one
+        $blob_name = preg_replace('/\/+/', '/', $blob_name);
+        
+        // Remove leading and trailing slashes
+        $blob_name = trim($blob_name, '/');
+        
+        // Replace spaces with dashes (just in case)
+        $blob_name = str_replace(' ', '-', $blob_name);
+        
+        return $blob_name;
+    }
+
+    /**
+     * Move blob between two Azure storage accounts
+     * 
+     * @param string $source_url Source blob URL
+     * @param string $move_type Type of move operation (must be 'archive' or 'restore')
+     * @return array Status and result message
+     */
+    public function move_blob_between_storage_accounts($source_url, $move_type) {
+        try {
+            // Input validation
+            if (empty($source_url)) {
+                throw new Exception('Source URL is required');
+            }
+            if ($move_type !== 'archive' && $move_type !== 'restore') {
+                throw new Exception('Move type must be either "archive" or "restore"');
+            }
+
+            // Get account configurations
+            $main_account = [
+                'name'      => get_option('azure_storage_account_name'),
+                'key'       => get_option('azure_storage_account_primary_access_key'),
+                'container' => get_option('default_azure_storage_account_container_name'),
+            ];
+            $archive_account = [
+                'name'      => get_field('archive_storage_account_name', 'option'),
+                'key'       => get_field('archive_storage_account_key', 'option'),
+                'container' => get_field('archive_storage_container', 'option')
+            ];
+
+            // Set source and destination based on move type
+            $source_account = $move_type === 'archive' ? $main_account : $archive_account;
+            $dest_account = $move_type === 'archive' ? $archive_account : $main_account;
+
+            // Validate account configurations
+            if (empty($source_account['name']) || empty($source_account['key'])) {
+                throw new Exception('Source account details are required');
+            }
+            if (empty($dest_account['name']) || empty($dest_account['key']) || empty($dest_account['container'])) {
+                throw new Exception('Destination account details are required'); 
+            }
+
+            // Parse and validate URL
+            $url_parts = parse_url($source_url);
+            if (!$url_parts || empty($url_parts['path'])) {
+                throw new Exception('Invalid source URL format');
+            }
+
+            // Extract container and blob path
+            $path_parts = explode('/', trim($url_parts['path'], '/'));
+            if (count($path_parts) < 2) {
+                throw new Exception('Invalid blob path format');
+            }
+
+            $source_container = $this->sanitize_blob_name($path_parts[0]);
+            $blob_name = $this->sanitize_blob_name(implode('/', array_slice($path_parts, 1))); // Preserve path structure
+
+            // Initialize blob clients
+            $source_conn_string = "DefaultEndpointsProtocol=https;AccountName={$source_account['name']};AccountKey={$source_account['key']}";
+            $dest_conn_string = "DefaultEndpointsProtocol=https;AccountName={$dest_account['name']};AccountKey={$dest_account['key']}";
+            
+            $source_blob_client = BlobRestProxy::createBlobService($source_conn_string);
+            $dest_blob_client = BlobRestProxy::createBlobService($dest_conn_string);
+
+            try {
+                // Copy blob from source to destination
+                $blob_content = $source_blob_client->getBlob($source_container, $blob_name);
+                $content = stream_get_contents($blob_content->getContentStream());
+                
+                $dest_blob_client->createBlockBlob($dest_account['container'], $blob_name, $content);
+
+                // Only delete source after successful copy
+                $source_blob_client->deleteBlob($source_container, $blob_name);
+
+                return [
+                    'status' => true,
+                    'url' => "https://{$dest_account['name']}.blob.core.windows.net/{$dest_account['container']}/$blob_name",
+                    'message' => "Blob {$move_type}d successfully"
+                ];
+
+            } catch (ServiceException $e) {
+                $error_details = $e->getResponse() ? print_r($e->getResponse(), true) : '';
+                error_log("Azure service error details: " . $error_details);
+                throw new Exception('Azure service error: ' . $e->getMessage());
+            }
+
+        } catch (Exception $e) {
+            error_log("Error {$move_type}ing blob: " . $e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Delete a blob by its source URL
+     *
+     * @param string $url The source URL of the blob to delete
+     * @return array Response status and message
+     */
+    public function delete_blob_by_url($url) {
+        try {
+            // Validate URL format
+            $url_parts = parse_url($url);
+            if (!isset($url_parts['host']) || !isset($url_parts['path'])) {
+                throw new Exception('Invalid source URL format');
+            }
+
+            // Extract container and blob path
+            $path_parts = explode('/', trim($url_parts['path'], '/'));
+            if (count($path_parts) < 2) {
+                throw new Exception('Invalid blob path format');
+            }
+
+            $container = $this->sanitize_blob_name($path_parts[0]);
+            $blob_name = $this->sanitize_blob_name(implode('/', array_slice($path_parts, 1))); // Preserve path structure
+
+            // Determine account based on account name from URL
+            $account_name = $url_parts['host'] === 'saturn007.blob.core.windows.net' ? 'saturn007' : 'saturnarchive';
+            if ($account_name === 'saturn007') {
+                $account = [
+                    'name'      => get_option('azure_storage_account_name'),
+                    'key'       => get_option('azure_storage_account_primary_access_key'),
+                    'container' => get_option('default_azure_storage_account_container_name'),
+                ];
+            } elseif ($account_name === 'saturnarchive') {
+                $account = [
+                    'name'      => get_field('archive_storage_account_name', 'option'),
+                    'key'       => get_field('archive_storage_account_key', 'option'),
+                    'container' => get_field('archive_storage_container', 'option')
+                ];
+            } else {
+                throw new Exception('Invalid account name');
+            }
+
+            // Initialize blob client
+            $conn_string = "DefaultEndpointsProtocol=https;AccountName={$account['name']};AccountKey={$account['key']}";
+            $blob_client = BlobRestProxy::createBlobService($conn_string);
+
+            // Delete the blob
+            $blob_client->deleteBlob($container, $blob_name);
+
+            return [
+                'status' => true,
+                'message' => "Blob deleted from {$account_name} successfully",
+            ];
+
+        } catch (Exception $e) {
+            error_log("Error deleting blob: " . $e->getMessage());
+            return [
+                'status' => false,
+                'message' => $e->getMessage()
+            ];
         }
     }
     

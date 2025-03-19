@@ -10,7 +10,7 @@ function wpa_admin_enqueue_scripts()
     global $post_type;
     $post_types_allow = array('assessments', 'submissions', 'dcr_submissions', 'reports', 'dcr_reports');
 
-    if ( in_array($post_type, $post_types_allow) ) {
+    if ( in_array($post_type, $post_types_allow) || $_GET['page'] === 'saturn-archive') {
         wp_enqueue_editor();
         wp_enqueue_media();
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
