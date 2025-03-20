@@ -846,12 +846,12 @@ public function restore_archived_org_data_ajax() {
         $att_ids = !empty($archive_data->attachments) ? json_decode($archive_data->attachments, true) : [];
 
         // Restore data
-        if (!empty($post_ids) && !$this->restore_archived_posts($post_ids)) {
-            throw new Exception('Failed to restore posts');
-        }
-
         if (!empty($user_ids) && !$this->restore_archived_users($user_ids)) {
             throw new Exception('Failed to restore users');
+        }
+
+        if (!empty($post_ids) && !$this->restore_archived_posts($post_ids)) {
+            throw new Exception('Failed to restore posts');
         }
 
         if (!empty($att_ids) && !$this->restore_archived_attachments($att_ids)) {

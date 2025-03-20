@@ -2042,7 +2042,6 @@ jQuery(document).ready(function ($) {
                 <td>${escapedTime}</td>
                 <td>${escapedAuthor}</td>
                 <td>
-                    <button class="btn-restore-archived-org" data-row-id="${archiveId}">Restore</button>
                     <button class="btn-delete-archived-org" data-row-id="${archiveId}">Delete</button>
                 </td>
             </tr>

@@ -115,7 +115,6 @@ $logs_file_path = wp_upload_dir()['baseurl'] . '/saturn-archive/saturn-archive-h
                         <td><?php echo date("M d Y, H:i a", strtotime($row['archived_date'])) ?? ''; ?></td>
                         <td><?php echo $row['archived_by_name'] ?? ''; ?></td>
                         <td>
-                            <button class="btn-restore-archived-org" data-row-id="<?php echo $row['id'] ?? ''; ?>">Restore</button>
                             <button class="btn-delete-archived-org" data-row-id="<?php echo $row['id'] ?? ''; ?>">Delete</button>
                         </td>
                     </tr>
