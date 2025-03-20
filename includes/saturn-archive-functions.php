@@ -210,7 +210,7 @@ function get_client_org_data_ajax() {
 
         // Properly structure the data collection
         $data = [
-            'contacts' => [],
+            'users' => [],
             'submissions' => [],
             'dcr_submissions' => [],
             'reports' => [],
@@ -221,21 +221,20 @@ function get_client_org_data_ajax() {
         $post_ids = [];
         $user_ids = [];
 
-        // Get contacts
-        $contacts = get_users(array(
+        // Get users
+        $users = get_users(array(
             'meta_key' => '__salesforce_account_id',
             'meta_value' => $org_id,
         ));
 
-        // Format contact data
-        foreach ($contacts as $contact) {
-            $data['contacts'][] = [
-                'id' => $contact->ID,
-                'name' => $contact->display_name,
-                'email' => $contact->user_email
-            ];
-            $user_ids[] = $contact->ID;
+        if (!empty($users)) {
+            // Format user data
+            foreach ($users as $user) {
+                $data['users'][] = $user->user_login;
+                $user_ids[] = $user->ID;
+            }
         }
+        $user_names = array_unique($data['users']) ?? [];
 
         // Get posts data with proper error handling
         $post_types = ['submissions', 'dcr_submissions', 'reports', 'dcr_reports'];
@@ -254,18 +253,16 @@ function get_client_org_data_ajax() {
             ]);
 
             $data[$post_type] = array_map(function($post) {
-                return [
-                    'id' => $post->ID,
-                    'title' => $post->post_title,
-                    'date' => $post->post_date
-                ];
+                return $post->post_title;
             }, $posts);
+            array_unique($data[$post_type]);
 
             $post_ids[] = array_map(function($post) {
                 if (!empty($post->ID)) {
                     return $post->ID;
                 }
             }, $posts);
+            array_unique($post_ids);
         }
 
         // Get files uploaded
@@ -274,7 +271,7 @@ function get_client_org_data_ajax() {
         $attachment_ids = [];
         foreach ($azure_files_uploaded as $row) {
             if (isset($row->attachment_id) && !empty($row->attachment_id)) {
-                $attachment_ids[] = $row->attachment_id;
+                $attachment_ids[] = intval($row->attachment_id);
             }
         }
 
@@ -285,7 +282,7 @@ function get_client_org_data_ajax() {
         <table class="widefat">
             <thead>
                 <tr>
-                    <th>Contacts (<?php echo count($data['contacts']); ?>)</th>
+                    <th>Contacts (<?php echo count($user_names); ?>)</th>
                     <th>Index Submissions (<?php echo count($data['submissions']); ?>)</th>
                     <th>DCR Submissions (<?php echo count($data['dcr_submissions']); ?>)</th>
                     <th>Index Reports (<?php echo count($data['reports']); ?>)</th>
@@ -297,36 +294,36 @@ function get_client_org_data_ajax() {
                 <tr>
                     <td>
                         <ul>
-                        <?php foreach($data['contacts'] as $contact): ?>
-                            <li><?php echo esc_html($contact['name']); ?></li>
+                        <?php foreach($user_names as $user_name): ?>
+                            <li><?php echo esc_html($user_name); ?></li>
                         <?php endforeach; ?>
                         </ul>
                     </td>
                     <td>
                         <ul>
                         <?php foreach($data['submissions'] as $submission): ?>
-                            <li><?php echo esc_html($submission['title']); ?></li>
+                            <li><?php echo esc_html($submission); ?></li>
                         <?php endforeach; ?>
                         </ul>
                     </td>
                     <td>
                         <ul>
                         <?php foreach($data['dcr_submissions'] as $submission): ?>
-                            <li><?php echo esc_html($submission['title']); ?></li>
+                            <li><?php echo esc_html($submission); ?></li>
                         <?php endforeach; ?>
                         </ul>
                     </td>
                     <td>
                         <ul>
                         <?php foreach($data['reports'] as $report): ?>
-                            <li><?php echo esc_html($report['title']); ?></li>
+                            <li><?php echo esc_html($report); ?></li>
                         <?php endforeach; ?>
                         </ul>
                     </td>
                     <td>
                         <ul>
                         <?php foreach($data['dcr_reports'] as $report): ?>
-                            <li><?php echo esc_html($report['title']); ?></li>
+                            <li><?php echo esc_html($report); ?></li>
                         <?php endforeach; ?>
                         </ul>
                     </td>
@@ -334,9 +331,9 @@ function get_client_org_data_ajax() {
                 </tr>
             </tbody>
         </table>
-        <input type="hidden" name="archive_posts" value="<?php echo esc_attr(json_encode(array_merge(...array_filter($post_ids)))); ?>">
-        <input type="hidden" name="archive_users" value="<?php echo esc_attr(json_encode($user_ids)); ?>">
-        <input type="hidden" name="archive_atts" value="<?php echo esc_attr(json_encode($attachment_ids)); ?>">
+        <input type="hidden" name="archive_posts" value="<?php echo esc_attr(json_encode(array_merge(...array_filter(array_unique($post_ids))))); ?>">
+        <input type="hidden" name="archive_users" value="<?php echo esc_attr(json_encode(array_unique($user_ids))); ?>">
+        <input type="hidden" name="archive_atts" value="<?php echo esc_attr(json_encode(array_unique($attachment_ids))); ?>">
         <?php
         $html = ob_get_clean();
 
