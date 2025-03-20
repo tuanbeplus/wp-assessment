@@ -1738,6 +1738,10 @@ jQuery(document).ready(function ($) {
         ascending = !ascending;
     });
 
+    $('select#select_org').select2({
+        placeholder: "Choose organisation",
+        allowClear: true,
+    });
     // Select Org to load their data
     $(document).on("change", "select#select_org", async function (e) {
         const orgId = $(this).val();

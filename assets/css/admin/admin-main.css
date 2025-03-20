@@ -2488,3 +2488,26 @@ table.saturn-invites-table #sort-org-name.active::after {
 .saturn-archive-page #btn-back-to-saturn-archive {
   font-weight: 500;
 }
+.saturn-archive-page .select2-container--default .select2-selection--single .select2-selection__placeholder {
+  color: #555;
+}
+.saturn-archive-page .select2-container--default .select2-selection--single {
+  height: auto;
+  padding: 2px;
+  border: 1px solid #888;
+  border-radius: 2px;
+}
+.saturn-archive-page .select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 30px;
+  top: 2px;
+  right: 4px;
+}
+.saturn-archive-page .select2-container--default .select2-selection--single .select2-selection__clear {
+  color: #555;
+}
+.settings_page_saturn-archive .select2-container--default .select2-results .select2-results__options {
+  max-height: 500px !important;
+}
+.settings_page_saturn-archive .select2-container--default .select2-results .select2-results__options .select2-results__option {
+  font-size: 14px;
+}

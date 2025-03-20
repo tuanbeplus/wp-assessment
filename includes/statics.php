@@ -15,8 +15,10 @@ function wpa_admin_enqueue_scripts()
         wp_enqueue_media();
         wp_enqueue_style('bootstrap-min', WP_ASSESSMENT_ASSETS . '/css/bootstrap.min.css');
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css');
+        wp_enqueue_style('select2-style', WP_ASSESSMENT_ASSETS . '/lib/select2/select2.min.css');
         wp_enqueue_script('chart-lib', 'https://cdn.jsdelivr.net/npm/chart.js');
-        wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/admin-main.js', array('jquery'), WP_ASSESSMENT_VER, true);
+        wp_enqueue_script('select2-script', WP_ASSESSMENT_ASSETS . '/lib/select2/select2.min.js', array('jquery'));
+        wp_enqueue_script('admin-js', WP_ASSESSMENT_ASSETS . '/js/admin/admin-main.js', array('jquery', 'select2'), WP_ASSESSMENT_VER, true);
 
         wp_localize_script(
             'admin-js',
