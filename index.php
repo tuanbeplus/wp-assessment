@@ -32,5 +32,5 @@ require_once(WP_ASSESSMENT_DIR . '/includes/salesforce-webhook.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/azure-storage.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/feedbacks-functions.php');
 require_once(WP_ASSESSMENT_DIR . '/includes/ranking-functions.php');
-require_once(WP_ASSESSMENT_DIR . '/includes/saturn-archive-functions.php');
+// require_once(WP_ASSESSMENT_DIR . '/includes/saturn-archive-functions.php');
 require_once(WP_ASSESSMENT_DIR . '/vendor/autoload.php');
