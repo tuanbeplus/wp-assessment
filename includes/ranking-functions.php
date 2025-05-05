@@ -129,7 +129,9 @@ class AndAssessmentRanking {
         foreach ( $submissions as $sub ) {     
           $user_id = get_post_meta($sub->ID, 'user_id', true);
           $org_id = get_post_meta($sub->ID, 'organisation_id', true);
-          $org_metadata = get_post_meta($sub->ID, 'org_data', true);
+          $wp_user_id = get_current_user_by_salesforce_id($user_id);
+          $salesforce_account_json = get_user_meta($wp_user_id, '__salesforce_account_json', true);
+          $org_metadata = json_decode($salesforce_account_json, true);
 
           // Calculator Agreed Scores
           $agreed_score = get_post_meta($sub->ID, 'agreed_score', true);

@@ -394,8 +394,8 @@ class WPA_Question_Form
                 $user_id = get_user_meta(get_current_user_id(), '__salesforce_user_id', true);
             }
 
-            $org_name = $_POST['org_name'];
-            $organisation_id = $_POST['organisation_id'];
+            $org_name = isset($_POST['org_name']) ? wp_unslash($_POST['org_name']) : '';
+            $organisation_id = $_POST['organisation_id'] ?? '';
             if (empty($organisation_id))
                 throw new Exception('Organisation not found.');
 
