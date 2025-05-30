@@ -58,6 +58,9 @@ $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
                         $sub_title = $sub_field['sub_title'] ?? '';
                         $weighting = $sub_field['point'] ?? 0;
                         $key_area = $sub_field['key_area'] ?? null;
+                        $choices = $sub_field['choice'] ?? [];
+                        $is_desc = $sub_field['is_description'] ?? false;
+                        $is_supporting_doc = $sub_field['supporting_doc'] ?? false;
                         $quiz_rows = $reorganize_quizzes[$group_id][$sub_id] ?? [];
                         $this_submission_row = $quiz_rows[$post_id] ?? null;
                         $current_quiz_row = null;
@@ -91,7 +94,7 @@ $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
                             else {
                                 $quiz_status = $current_quiz_row->status ?? '';
                                 foreach ($quiz_rows as $row) {
-                                    if (wpa_convert_to_slug($row->status) !== 'pending') {
+                                    if (!empty($row->status) && wpa_convert_to_slug($row->status) !== 'pending') {
                                         $quiz_status = $row->status;
                                         break;
                                     }
@@ -99,7 +102,7 @@ $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
                             }
                         }
                         ?>
-                        <?php if ( !empty($current_quiz_row) ): ?>
+                        <?php if (!empty($current_quiz_row) && (!empty($choices) || $is_desc == true || $is_supporting_doc == true)): ?>
                         <!-- Sub Question Row -->
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>"
                             data-submission="<?php echo esc_attr($row_submission_id) ?>">

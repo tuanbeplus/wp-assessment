@@ -24,8 +24,6 @@ class WP_Assessment
         add_action('wp_ajax_get_quizs_status_submission', array($this, 'get_quizs_status_submission'));
         add_action('wp_ajax_nopriv_get_quizs_status_submission', array($this, 'get_quizs_status_submission'));
         
-        add_action('transition_post_status', array($this, 'handle_submission_status_change'), 10, 3);
-
         // Index table
         $this->set_quiz_table();
         $this->init_quiz_tables_for_users();
@@ -33,44 +31,6 @@ class WP_Assessment
         // DCR table
         $this->set_dcr_quiz_table();
         $this->init_dcr_quiz_submissions_table();
-    }
-
-    /**
-     * Handle submission status changes
-     * 
-     * @param string $new_status New post status
-     * @param string $old_status Old post status
-     * @param WP_Post $post Post object
-     */
-    function handle_submission_status_change($new_status, $old_status, $post) {
-        // Only run in admin and for submissions post type
-        if (!is_admin() || $post->post_type !== 'submissions') {
-            return;
-        }
-        // When changing to draft status
-        if ($new_status === 'draft' && $old_status !== 'draft') {
-            // Update assessment_status meta
-            update_post_meta($post->ID, 'assessment_status', 'draft');
-            
-            // Update title - replace "submission" with "progress"
-            $new_title = str_ireplace('Submission', 'Progress', $post->post_title);
-            wp_update_post(array(
-                'ID' => $post->ID,
-                'post_title' => $new_title
-            ));
-        }
-        // When changing from draft to any other status
-        if ($old_status === 'draft' && $new_status !== 'draft') {
-            // Update assessment_status meta
-            update_post_meta($post->ID, 'assessment_status', 'pending');
-            
-            // Update title - replace "progress" with "submission"
-            $new_title = str_ireplace('Progress', 'Submission', $post->post_title);
-            wp_update_post(array(
-                'ID' => $post->ID,
-                'post_title' => $new_title
-            ));
-        }
     }
 
     function set_email_content_type()

@@ -119,8 +119,8 @@ class WPA_Question_Form
                 }
             } else {
                 // Regular quiz processing
-                $answers = $_POST['answers'] ? wp_unslash($_POST['answers']) : null;
-                $description = $_POST['description'] ? wp_unslash($_POST['description']) : null;
+                $answers = isset($_POST['answers']) ? wp_unslash($_POST['answers']) : null;
+                $description = isset($_POST['description']) ? wp_unslash($_POST['description']) : null;
                 $attachment_id = $_POST['attachment_id'] ?? null;
 
                 $quiz_data = $submission_id

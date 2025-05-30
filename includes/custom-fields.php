@@ -381,6 +381,15 @@ class WPA_Custom_Fields
         update_post_meta($post_id, 'key_area', $key_area);
         update_post_meta($post_id, 'maturity_level', $maturity_level);
 
+        // Handle status changes
+        $new_status = isset($_POST['post_status']) ? $_POST['post_status'] : $old_status;
+
+        if ($new_status == 'draft') {
+            update_post_meta($post_id, 'assessment_status', 'draft');
+        } else {
+            update_post_meta($post_id, 'assessment_status', 'pending');
+        }
+
         if ( $post_type != 'dcr_submissions') {
             $question_form->save_all_submission_feedback();
         }
