@@ -72,7 +72,7 @@ class AndAssessmentRanking {
       $wp_query->set_404();
       status_header( 404 );
       nocache_headers();
-      include( get_query_template( '404' ) );
+      wp_redirect( home_url( '/404' ), 301 );
       exit;
     }
   }
