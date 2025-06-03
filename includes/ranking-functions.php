@@ -16,7 +16,7 @@ class AndAssessmentRanking {
     add_action('init', array($this, 'register_ranking_custom_post_type'));
     add_action('admin_init', array($this, 'add_ranking_meta_boxes'));
     add_action('admin_enqueue_scripts', array($this, 'ranking_enqueue_scripts'));
-
+    add_action('template_redirect', array($this, 'redirect_ranking_to_404'));
     add_action('save_post', array($this, 'save_post_for_ranking'));
 
     // Custom ranking admin column
@@ -55,11 +55,26 @@ class AndAssessmentRanking {
       'query_var' => true,
       'can_export' => true,
       'rewrite' => true,
-      'public' => true,
+      'public' => false,
       'map_meta_cap' => true,
       'menu_icon' => 'dashicons-editor-ol',
     );
     register_post_type('ranking', $args);
+  }
+
+  function redirect_ranking_to_404() {
+    if (
+      is_singular( 'ranking' ) ||
+      is_post_type_archive( 'ranking' ) ||
+      is_tax( get_object_taxonomies( 'ranking' ) )
+    ) {
+      global $wp_query;
+      $wp_query->set_404();
+      status_header( 404 );
+      nocache_headers();
+      include( get_query_template( '404' ) );
+      exit;
+    }
   }
 
   /**
