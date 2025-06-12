@@ -102,7 +102,11 @@ $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
                             }
                         }
                         ?>
-                        <?php if (!empty($current_quiz_row) && (!empty($choices) || $is_desc == true || $is_supporting_doc == true)): ?>
+                        <?php if (!empty($current_quiz_row) 
+                                && (!empty($choices) || $is_desc == true || $is_supporting_doc == true) 
+                                && (!empty($answers) || !empty($description) || !empty($arr_attachmentID)) 
+                            ): 
+                        ?>
                         <!-- Sub Question Row -->
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>"
                             data-submission="<?php echo esc_attr($row_submission_id) ?>">

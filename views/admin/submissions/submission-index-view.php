@@ -96,7 +96,10 @@ $submission_score_arr = array();
                         }
                         $azure_attachment_rows = $azure_attachments_uploaded[$group_id][$sub_id] ?? '';
 
-                        if (!empty($current_quiz_rows) && (!empty($choices) || $is_desc == true || $is_supporting_doc == true)):
+                        if (!empty($current_quiz_rows) 
+                            && (!empty($choices) || $is_desc == true || $is_supporting_doc == true) 
+                            && (!empty($answers) || !empty($description) || !empty($arr_attachmentID)) 
+                        ):
                         ?>
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>"
                             data-submission="<?php echo esc_attr($row_submission_id) ?>">
