@@ -120,3 +120,44 @@ function wpa_update_missing_created_date_meta() {
     }
 }
 // add_action('init', 'wpa_update_missing_created_date_meta');
+
+function wpa_update_missing_submission_version_meta() {
+    if (isset($_GET['action']) && $_GET['action'] == 'wpa_update_missing_submission_version_meta') {
+        // Basic admin check
+        if (!current_user_can('manage_options')) {
+            wp_die('You do not have permission to access this page.');
+        }
+        
+        $posts = get_posts(array(
+            'post_type'      => 'dcr_submissions', // Replace with your desired post type or 'any' for all post types
+            'post_status'    => 'publish', // Include published, draft, etc.
+            'numberposts'    => -1,    // Get all posts
+            'fields'         => 'ids', // Only fetch post IDs for better performance
+        ));
+        
+        foreach ($posts as $post_id) {
+            // Check if 'submission_version' meta exists or is null
+            $submission_version_meta = get_post_meta($post_id, 'submission_version', true);
+    
+            if (empty($submission_version_meta)) {
+                // Update the meta field with the value '1'
+                $updated = update_post_meta($post_id, 'submission_version', '1');
+    
+                if ($updated) {
+                    echo 'Updated "submission_version" meta for post ID: '.$post_id;
+                    echo '<br>';
+                    echo '<br>';
+                }
+                else {
+                    echo '[Failed] to update "submission_version" meta for post ID: '.$post_id;
+                    echo '<br>';
+                    echo '<br>';
+                }
+            }
+        }
+        
+        // Stop WordPress from continuing to load unnecessary code
+        exit;
+    }
+}
+// add_action('init', 'wpa_update_missing_submission_version_meta');

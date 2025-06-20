@@ -53,23 +53,26 @@
     }
 
     /**
-     * Validate Quiz choices answered
+     * Validate Quiz choices, description answered
      */
-    function getDataQuizAnswered(currentSection) 
-    {
+    function getDataQuizAnswered(currentSection) {
         let count_empty_des = 0;
-        let choice_answer_area = currentSection.find('.multiple-choice-area').length
-        let count_checked_answers = currentSection.find('.form-check-input.checked').length
-        let quiz_description = currentSection.find('.quiz-description')
+        // Get count of choice areas and checked answers
+        let choice_answer_area = currentSection.find('.multiple-choice-area').length;
+        let count_checked_answers = currentSection.find('.form-check-input.checked').length;
 
-        quiz_description.each(function(e) {
-            if ($(this).val() == '') {
-                $(this).addClass('required')
-                count_empty_des++
-            }
-        })
-
-        if (choice_answer_area > count_checked_answers) {
+        // Handle description validation only if exists
+        let quiz_description = currentSection.find('.quiz-description');
+        if (quiz_description.length > 0) {
+            quiz_description.each(function(e) {
+                if ($(this).val() == '') {
+                    $(this).addClass('required')
+                    count_empty_des++
+                }
+            })
+        }
+        // Handle multiple choice validation only if exists
+        if (choice_answer_area > 0 && choice_answer_area > count_checked_answers) {
             let multiple_choice_area = $('.quiz.active .multiple-choice-area')
 
             multiple_choice_area.each(function(e) {
@@ -80,18 +83,17 @@
                     $(this).addClass('required')
                 }
             })
-            
             $('.multiple-choice-area.required .form-check-label').addClass('required')
         }
-
-        if (choice_answer_area > count_checked_answers || count_empty_des > 0) {
-            currentSection.find('.answer-notification').show()
+        // Show notification if any errors
+        if ((choice_answer_area > count_checked_answers) || count_empty_des > 0) {
+            currentSection.find('.answer-notification').fadeIn();
             setTimeout(() => {
-                currentSection.find('.answer-notification').hide()
+                currentSection.find('.answer-notification').fadeOut()
             }, 10000); 
             return false
         }
-        else if (choice_answer_area = count_checked_answers) {
+        else if (choice_answer_area == count_checked_answers) {
             return true
         }
     }
@@ -375,7 +377,6 @@
     }
 
     function getMultipleAttachmentIdInput(currentQuizInstance) {
-
         let input_file = currentQuizInstance.find('.file-item');
         let files_arr = [];
 
@@ -392,7 +393,6 @@
                 })
             }
         })
-
         return files_arr;
     }
 
@@ -405,18 +405,15 @@
         checkboxes.each(function () {
             let that = $(this);
             let input = that.find('.form-check-input');
-            // let input_point = that.find('.quiz-input-point');
             let isChecked = input.is(':checked');
 
             if (isChecked) {
                 choices.push({
                     id: input.data('id'), 
                     title: input.data('title'),
-                    // point: input_point.val()
                 })
             }
         })
-
         return choices;
     }
 
@@ -453,8 +450,6 @@
             data: data,
         });
         const {status, message, result, list_quiz} = response;
-
-        console.log(response);
         
         if (status == false) {
             alert(message)
@@ -477,8 +472,6 @@
             url: ajax_object.ajax_url,
             data: data
         });
-
-        console.log(response);
 
         return response;
     }
@@ -523,7 +516,6 @@
         formData.append("sf_user_name", userName)
         formData.append("assessment_id", assessmentId)
         formData.append("organisation_id", organisationId)
-        // formData.append("security", ajax_object.security)
         
         let response = await $.ajax({
             type: 'POST',
@@ -572,7 +564,6 @@
         formData.append("quiz_id", quizId)
         formData.append("assessment_id", assessmentId)
         formData.append("organisation_id", organisationId)
-        // formData.append("security", ajax_object.security)
     
         let response = await $.ajax({
             type: 'POST',

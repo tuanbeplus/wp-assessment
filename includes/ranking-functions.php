@@ -16,7 +16,7 @@ class AndAssessmentRanking {
     add_action('init', array($this, 'register_ranking_custom_post_type'));
     add_action('admin_init', array($this, 'add_ranking_meta_boxes'));
     add_action('admin_enqueue_scripts', array($this, 'ranking_enqueue_scripts'));
-
+    add_action('template_redirect', array($this, 'redirect_ranking_to_404'));
     add_action('save_post', array($this, 'save_post_for_ranking'));
 
     // Custom ranking admin column
@@ -55,11 +55,26 @@ class AndAssessmentRanking {
       'query_var' => true,
       'can_export' => true,
       'rewrite' => true,
-      'public' => true,
+      'public' => false,
       'map_meta_cap' => true,
       'menu_icon' => 'dashicons-editor-ol',
     );
     register_post_type('ranking', $args);
+  }
+
+  function redirect_ranking_to_404() {
+    if (
+      is_singular( 'ranking' ) ||
+      is_post_type_archive( 'ranking' ) ||
+      is_tax( get_object_taxonomies( 'ranking' ) )
+    ) {
+      global $wp_query;
+      $wp_query->set_404();
+      status_header( 404 );
+      nocache_headers();
+      wp_redirect( home_url( '/404' ), 301 );
+      exit;
+    }
   }
 
   /**
@@ -129,7 +144,9 @@ class AndAssessmentRanking {
         foreach ( $submissions as $sub ) {     
           $user_id = get_post_meta($sub->ID, 'user_id', true);
           $org_id = get_post_meta($sub->ID, 'organisation_id', true);
-          $org_metadata = get_post_meta($sub->ID, 'org_data', true);
+          $wp_user_id = get_current_user_by_salesforce_id($user_id);
+          $salesforce_account_json = get_user_meta($wp_user_id, '__salesforce_account_json', true);
+          $org_metadata = json_decode($salesforce_account_json, true);
 
           // Calculator Agreed Scores
           $agreed_score = get_post_meta($sub->ID, 'agreed_score', true);

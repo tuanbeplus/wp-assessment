@@ -143,7 +143,7 @@ $exception_orgs_id = get_exception_orgs_id();
                         <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
                     </div><!-- .Notification Box -->
                 <?php endif; ?>
-                <?php if ($terms[0] === 'index' && $assessment_status !== 'pending' && $questions): ?>
+                <?php if ($terms[0] === 'index' && $is_disabled && $questions): ?>
                     <!-- Notification Box -->
                     <div class="notificationBar rejected">
                         <div class="bgRed"><h2>ATTENTION</h2></div>
@@ -339,6 +339,21 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                 </label>
                                                             </div>
                                                         <?php endforeach; ?>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="multiple-choice-area checked" style="display: none;">
+                                                        <div class="checkBox">
+                                                            <input class="form-check-input checked" 
+                                                                    type="radio" 
+                                                                    value="" 
+                                                                    id="checkbox-<?php echo $group_id ?>-<?php echo $sub_id; ?>-1" 
+                                                                    data-title="" 
+                                                                    data-point="0" 
+                                                                    name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_choice" 
+                                                                    data-id="1" 
+                                                                    checked="checked">
+                                                            <label class="form-check-label" for="">Dummy Choice</label>
+                                                        </div>
                                                     </div>
                                                 <?php endif; ?>
 

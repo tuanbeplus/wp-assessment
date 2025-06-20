@@ -63,6 +63,9 @@ $submission_score_arr = array();
                     foreach ($sub_questions as $sub_id => $sub_field):
                         $sub_title = $sub_field['sub_title'] ?? '';
                         $weighting = $sub_field['point'] ?? 0;
+                        $choices = $sub_field['choice'] ?? [];
+                        $is_desc = $sub_field['is_description'] ?? false;
+                        $is_supporting_doc = $sub_field['supporting_doc'] ?? false;
                         $key_area = $sub_field['key_area'] ?? '';
                         $sub_list_point = $group_quiz_points[$group_id]['sub_list'] ?? null;
                         $sub_quiz_point = $sub_list_point[$sub_id]['point'] ?? null;
@@ -93,7 +96,10 @@ $submission_score_arr = array();
                         }
                         $azure_attachment_rows = $azure_attachments_uploaded[$group_id][$sub_id] ?? '';
 
-                        if (!empty($current_quiz_rows)):
+                        if (!empty($current_quiz_rows) 
+                            && (!empty($choices) || $is_desc == true || $is_supporting_doc == true) 
+                            && (!empty($answers) || !empty($description) || !empty($arr_attachmentID)) 
+                        ):
                         ?>
                         <div class="submission-view-item-row" id="main-container-<?php echo $group_id.'_'.$sub_id; ?>"
                             data-submission="<?php echo esc_attr($row_submission_id) ?>">

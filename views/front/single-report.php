@@ -22,7 +22,12 @@ $post_meta = get_post_meta($post_id);
 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
 $submission_id = get_post_meta($post_id, 'submission_id', true);
 $ranking_id = get_ranking_of_assessment($assessment_id);
-$org_data = get_post_meta($submission_id, 'org_data', true);
+
+$user_id = get_post_meta($submission_id, 'user_id', true);
+$wp_user_id = get_current_user_by_salesforce_id($user_id);
+$salesforce_account_json = get_user_meta($wp_user_id, '__salesforce_account_json', true);
+$org_data = json_decode($salesforce_account_json, true);
+
 $org_score = get_post_meta($submission_id, 'org_score', true);
 $org_section_score = get_post_meta($submission_id, 'org_section_score', true);
 $agreed_score = get_post_meta($submission_id, 'agreed_score', true);

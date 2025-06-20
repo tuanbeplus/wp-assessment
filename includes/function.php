@@ -23,7 +23,7 @@ class WP_Assessment
 
         add_action('wp_ajax_get_quizs_status_submission', array($this, 'get_quizs_status_submission'));
         add_action('wp_ajax_nopriv_get_quizs_status_submission', array($this, 'get_quizs_status_submission'));
-
+        
         // Index table
         $this->set_quiz_table();
         $this->init_quiz_tables_for_users();
