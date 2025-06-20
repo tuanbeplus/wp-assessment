@@ -797,6 +797,54 @@ class WP_Assessment
         }
     }
 
+    function get_previous_submission_id($assessment_id, $organisation_id, $current_submission_id)
+    {
+        $terms = get_assessment_terms($assessment_id);
+
+        if ($terms[0] === 'dcr') {
+            $post_type = 'dcr_submissions';
+        } else {
+            $post_type = 'submissions';
+        }
+        // Verify current submission exists
+        $current_submission = get_post($current_submission_id);
+        if (!$current_submission) {
+            return null;
+        }
+
+        $args = array(
+            'post_type' => $post_type,
+            'posts_per_page' => -1, // Get all submissions to properly compare IDs
+            'orderby' => 'ID',
+            'order' => 'DESC',
+            'post_status' => 'any',
+            'meta_query' => array(
+                array(
+                    'key' => 'organisation_id',
+                    'value' => $organisation_id,
+                ),
+                array(
+                    'key' => 'assessment_id',
+                    'value' => $assessment_id,
+                ),
+            ),
+            'exclude' => array($current_submission_id),
+        );
+
+        $submissions = get_posts($args);
+        wp_reset_postdata();
+
+        if (!empty($submissions)) {
+            // Find the submission with highest ID that is less than current submission ID
+            foreach ($submissions as $submission) {
+                if ($submission->ID < $current_submission_id) {
+                    return $submission->ID;
+                }
+            }
+        }
+        return null;
+    }
+
     function wpa_ptags_tinymce_fix($init)
     {
         //wpautop = yes

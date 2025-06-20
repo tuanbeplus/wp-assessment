@@ -15,7 +15,7 @@ if (!function_exists('add_action')) {
     exit;
 }
 
-define('WP_ASSESSMENT_VER', '2.9.5');
+define('WP_ASSESSMENT_VER', time());
 define('WP_ASSESSMENT_DIR', plugin_dir_path(__FILE__));
 define('WP_ASSESSMENT_ASSETS', plugins_url('/assets', __FILE__));
 define('WP_ASSESSMENT_FRONT_IMAGES', plugins_url('/assets/images/front', __FILE__));

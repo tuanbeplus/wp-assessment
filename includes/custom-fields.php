@@ -10,6 +10,7 @@ class WPA_Custom_Fields
         add_action('save_post', array($this, 'save_assigned_moderator'));
         add_action('save_post', array($this, 'save_assigned_collaborator'));
         add_action('save_post', array($this, 'on_save_submission_custom_fields'));
+        add_action('save_post', array($this, 'on_save_dcr_submission'));
         add_action('show_user_profile', array($this, 'assessments_additional_profile_fields'));
         add_action('edit_user_profile', array($this, 'assessments_additional_profile_fields'));
         // Hook into the 'acf/init' action to add the ACF options page
@@ -384,6 +385,41 @@ class WPA_Custom_Fields
         if ( $post_type != 'dcr_submissions') {
             $question_form->save_all_submission_feedback();
         }
+    }
+
+    function on_save_dcr_submission($post_id): void {
+        $post_type = get_post_type($post_id);
+        if ($post_type != 'dcr_submissions') {
+            return;
+        }
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+        if (is_single() || is_page()) {
+            return;
+        }
+        if (isset($_POST['_inline_edit'])) {
+            return;
+        }
+
+        $quizzes_status = $_POST['quizzes_status'] ?? [];
+
+        if (!empty($quizzes_status)) {
+            foreach ($quizzes_status as $group_id => &$gr_quizzes) {
+                foreach ($gr_quizzes as $quiz_id => &$quiz) {
+                    if (empty($quiz['datetime'])) {
+                        $quizzes_status[$group_id][$quiz_id]['datetime'] = current_time('M d Y H:i a');
+                    }
+                }
+            }
+            unset($gr_quizzes); // Break the reference
+            unset($quiz); // Break the reference
+        }
+        
+        update_post_meta($post_id, 'quizzes_status', $quizzes_status);
     }
 
     function save_assigned_moderator($post_id): void

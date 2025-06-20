@@ -843,11 +843,13 @@ jQuery(document).ready(function ($) {
                 wrapper.removeClass('loading');
             }
         });
-        const { status, message, saved_status, status_class } = response;
-        // console.log(response);
+        const { status, message, saved_status, status_class, saved_time } = response;
+        console.log(response);
 
         if (status == true) {
             wrapper.find('.quiz-status strong').removeClass().addClass(status_class).text(saved_status);
+            wrapper.find('input#quiz_status_input').val(saved_status);
+            wrapper.find('input#quiz_datetime_input').val(saved_time);
         }
         else {
             alert(message);

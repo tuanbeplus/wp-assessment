@@ -25,6 +25,11 @@ foreach ($quizzes as $row) {
 }
 $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment_id, $organisation_id);
 $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
+$pre_submission_id = $main->get_previous_submission_id($assessment_id, $organisation_id, $post_id);
+$pre_quizzes_status = get_post_meta($pre_submission_id, 'quizzes_status', true);
+if (empty($all_quizzes_status)) {
+    $all_quizzes_status = $pre_quizzes_status ?? [];
+}
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -273,6 +278,14 @@ $all_quizzes_status = get_post_meta($post_id, 'quizzes_status', true);
                                 <div class="quiz-status">
                                     <span>Status: </span>
                                     <strong class="<?php echo esc_attr(wpa_convert_to_slug($quiz_status)) ?>"><?php echo ucwords($quiz_status) ?></strong>
+                                    <input type="hidden" 
+                                        id="quiz_status_input"
+                                        name="quizzes_status[<?php echo $group_id ?>][<?php echo $sub_id ?>][meta_status]"
+                                        value="<?php echo esc_attr(ucwords($quiz_status)) ?>">
+                                    <input type="hidden" 
+                                        id="quiz_datetime_input"
+                                        name="quizzes_status[<?php echo $group_id ?>][<?php echo $sub_id ?>][datetime]"
+                                        value="<?php echo esc_attr($meta_status_time) ?>"> 
                                 </div>
                             </div>
                         </div>

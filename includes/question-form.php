@@ -360,6 +360,17 @@ class WPA_Question_Form
             // Update created date meta
             update_post_meta($post_id, 'created_date', $current_time);
 
+            if (isset($assessment_terms[0]) && $assessment_terms[0] == 'dcr') {
+                $pre_submission_id = $main->get_previous_submission_id($assessment_id, $organisation_id, $post_id);
+                if (!empty($pre_submission_id)) {
+                    $pre_quiz_status = get_post_meta($pre_submission_id, 'quizzes_status', true);
+                    if (!empty($pre_quiz_status)) {
+                        // Update quiz status meta
+                        update_post_meta($post_id, 'quizzes_status', $pre_quiz_status);
+                    }
+                }
+            }
+
             // Get submission url
             $submission_url = get_permalink( $post_id );
 

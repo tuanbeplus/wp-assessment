@@ -2511,3 +2511,7 @@ table.saturn-invites-table #sort-org-name.active::after {
 .settings_page_saturn-archive .select2-container--default .select2-results .select2-results__options .select2-results__option {
   font-size: 14px;
 }
+
+.saturn-archive-page .notice-error.is-dismissible {
+  display: none !important;
+}
