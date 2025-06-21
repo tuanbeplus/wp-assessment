@@ -630,13 +630,13 @@
         buttonLoadingStatus($button, 'show'); // Show loading indicator
         try {
             // Fetch and save answers
-            const answers = getCheckAnswers($currentQuiz);
+            let answers = getCheckAnswers($currentQuiz);
             await saveDraftSubmission(); // Save the draft submission
-            const isQuizSaved = await saveQuizAssessment(answers);
+            let isQuizSaved = await saveQuizAssessment(answers);
 
             if (isQuizSaved) {
                 // Show success message
-                const sectionId = $currentQuiz.data('group');
+                let sectionId = $currentQuiz.data('group');
                 $formMessage
                     .addClass('_success')
                     .find('.message')
@@ -719,7 +719,8 @@
             let currentQuiz = $('#quiz-item-' + getActiveQuizId());
             let checkAnswers = getCheckAnswers(currentQuiz);
 
-            await saveQuizAssessment(checkAnswers);
+            let isQuizSaved = await saveQuizAssessment(checkAnswers);     
+                    
             let response = await submitPublishSubmission();
 
             // Hide loading after submission

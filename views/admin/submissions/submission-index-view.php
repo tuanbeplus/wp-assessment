@@ -109,7 +109,7 @@ $submission_score_arr = array();
                             <div class="card content">
                                 <div class="card-body">
                                     <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $sub_id ?>" class="quiz-input"/>
-                                    <?php if ( !empty($answers) ) : ?>
+                                    <?php if (!empty($answers) && !empty($answers[0]->title)): ?>
                                         <div class="submission-answers-list">
                                             <strong>Selected Answer</strong>
                                             <ul>

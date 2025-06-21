@@ -264,6 +264,7 @@ class WPA_Question_Form
     function create_assessment_submission()
     {
         try {
+            $main = new WP_Assessment();
             $assessment_id = intval($_POST['assessment_id']);
             if (empty($assessment_id)) throw new Exception('Assessment not found.');
 

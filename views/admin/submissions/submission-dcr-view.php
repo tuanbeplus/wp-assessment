@@ -121,7 +121,7 @@ if (empty($all_quizzes_status)) {
                             <div class="card content">
                                 <div class="card-body">
                                     <input class="quiz_id" type="hidden" name="quiz_id[]" value="<?php echo $sub_id ?>" class="quiz-input"/>
-                                    <?php if (is_array($answers) && count($answers) > 0) : ?>
+                                    <?php if (!empty($answers) && !empty($answers[0]->title)): ?>
                                         <div class="submission-answers-list">
                                             <strong>Selected Answer</strong>
                                             <ul>

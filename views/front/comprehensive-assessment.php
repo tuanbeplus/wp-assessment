@@ -216,7 +216,7 @@ $exception_orgs_id = get_exception_orgs_id();
                     <?php endif; ?>
                 </div>
 
-                <?php if ( $assessment_status === 'pending' ): ?>
+                <?php if ( $assessment_status === 'pending' && $terms[0] === 'index' ): ?>
                     <!-- Notification Box -->
                     <div class="notificationBar pending">
                         <h3>Your submission is under pending review!</h3>
@@ -341,8 +341,8 @@ $exception_orgs_id = get_exception_orgs_id();
                                                         <?php endforeach; ?>
                                                     </div>
                                                 <?php else: ?>
-                                                    <div class="multiple-choice-area checked" style="display: none;">
-                                                        <div class="checkBox">
+                                                    <div class="multiple-choice-area checked" style="display:none;">
+                                                        <div class="checkBox dummy_checkbox">
                                                             <input class="form-check-input checked" 
                                                                     type="radio" 
                                                                     value="" 
@@ -352,7 +352,7 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                     name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_choice" 
                                                                     data-id="1" 
                                                                     checked="checked">
-                                                            <label class="form-check-label" for="">Dummy Choice</label>
+                                                            <label class="form-check-label" for="checkbox-<?php echo $group_id ?>-<?php echo $sub_id; ?>-1">Dummy Choice</label>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
