@@ -105,16 +105,21 @@
         const $isRequiredAllDocuments = $('input#required_document_all').val();
         const $thisStep = $(`.stepsWrap .step-${sectionId}`);
         const $thisQuiz = $(`#form_submit_quiz #quiz-item-${sectionId}`);
+        const $assessCat = $('input#assessment_cat').val();        
         // Check conditions
         const hasCheckedAnswers = isAnswerChoicesChecked($thisQuiz);
         const hasFilledComments = isAnswerCmtsFilled($thisQuiz);
         const hasUploadedDocuments = ($isRequiredAllDocuments == true) ? getUploadedDocumentRequired($thisQuiz) : true;
 
         // Mark section as completed if all conditions are met
-        if (hasCheckedAnswers == true && hasFilledComments == true && hasUploadedDocuments == true) {
-            $thisStep.addClass('completed');
+        const allConditionsMet = hasCheckedAnswers && hasFilledComments && hasUploadedDocuments;
+        const isDCR = $assessCat == 'dcr';
+        const classToModify = isDCR ? 'pending' : 'completed';
+
+        if (allConditionsMet) {
+            $thisStep.addClass(classToModify);
         } else {
-            $thisStep.removeClass('completed');
+            $thisStep.removeClass(classToModify);
         }
     }
 

@@ -100,7 +100,7 @@ $exception_orgs_id = get_exception_orgs_id();
                             </p>
                             <p class="result">Details:</p>
                             <div class="notifiDetails">
-                            <?php foreach ($questions as $group_id => $gr_field) :
+                            <?php foreach ($questions as $group_id => $gr_field):
                                 $section_title = $gr_field['title'] ?? '';
                                 $sub_questions = $gr_field['list'] ?? array();
                                 ?>
@@ -246,8 +246,26 @@ $exception_orgs_id = get_exception_orgs_id();
                             <div class="stepsWrap">
                                 <?php foreach ($questions as $group_id => $gr_field):
                                     $questions_list = $gr_field['list'] ?? array();
+                                    $gr_quizzes_status = $all_quizzes_status[$group_id] ?? [];
+                                    $count_status = 0;
+                                    foreach ($gr_quizzes_status as $row) {
+                                        if ($row['meta_status'] == 'Criteria Satisfied' || $row['meta_status'] == 'Accepted') {
+                                            $count_status++;
+                                        }
+                                    }
                                     $is_step_completed = $main->is_group_quiz_completed($questions_list, $group_id, $quizzes);
                                     $step_completed_class = $is_step_completed ? 'completed' : '';
+                                    if ($terms[0] === 'dcr') {
+                                        if ($count_status == count($questions_list) && $is_step_completed) {
+                                            $step_completed_class = 'completed';
+                                        }
+                                        elseif ($is_step_completed) {
+                                            $step_completed_class = 'pending';
+                                        }
+                                        else {
+                                            $step_completed_class = 'edit';
+                                        }
+                                    }
                                     ?>
                                     <button id="step-<?php echo $group_id; ?>" class="step step-item-container <?php echo $step_completed_class; ?> step-<?php echo $group_id; ?>" data-id="<?php echo $group_id; ?>">
                                         <span class="editImg">
