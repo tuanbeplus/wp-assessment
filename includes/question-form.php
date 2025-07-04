@@ -55,6 +55,7 @@ class WPA_Question_Form
      */
     function save_answers_assessment_ajax() {
         try {
+            $main = new WP_Assessment();
             // Retrieve the assessment ID from the request and validate it
             $assessment_id = intval($_POST['assessment_id'] ?? '');
             if (empty($assessment_id)) throw new Exception('Assessment not found.');
@@ -72,48 +73,50 @@ class WPA_Question_Form
             $quiz_id = intval($_POST['quiz_id'] ?? 0);
             if (empty($quiz_id)) throw new Exception('Question not found.');
 
+            $data_quiz = isset($_POST['data_quiz']) ? $_POST['data_quiz'] : [];
+
             // Check if a submission in progress exists
             $submission_id = $this->is_submission_progress_exist($organisation_id, $assessment_id);
-            $main = new WP_Assessment();
-
+            
             // Process data based on quiz type
-            $quiz_action = '';
+            $quiz_action = 'None';
             if ($_POST['type_quiz'] == 'Comprehensive Assessment') {
-                $list_quiz = $this->process_comprehensive_assessment($_POST['data_quiz']);
-
-                foreach ($list_quiz as $parent_id => $quiz_post) {
-                    if ($quiz_id != $parent_id) continue;
-
-                    foreach ($quiz_post as $quiz_id => $field) {
-                        $answers = $field['choice'] ?? null;
-                        $description = $field['description'] ?? null;
-                        $attachment_ids = $field['attachmentIDs'] ?? null;
-                        $quiz_point = $field['point'] ?? null;
-
-                        $quiz_data = $submission_id 
-                            ? $main->get_quiz_by_assessment_id_and_submission_parent($assessment_id, $submission_id, $quiz_id, $organisation_id, $parent_id)
-                            : $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id, $parent_id);
-
-                        $input = $this->prepare_quiz_input_data([
-                            'time'            => current_time('mysql'),
-                            'user_id'         => $user_id, 
-                            'organisation_id' => $organisation_id, 
-                            'submission_id'   => $submission_id, 
-                            'answers'         => $answers, 
-                            'description'     => $description, 
-                            'attachment_ids'  => $attachment_ids, 
-                            'quiz_point'      => $quiz_point,
-                        ]);
-
-                        $conditions = ['organisation_id' => $organisation_id, 'assessment_id' => $assessment_id, 'quiz_id' => $quiz_id, 'parent_id' => $parent_id];
-                        if ($submission_id) $conditions['submission_id'] = $submission_id;
-
-                        if (!$quiz_data) {
-                            $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
-                            $quiz_action = 'Inserted';
-                        } else {
-                            $main->update_quiz_assessment($input, $conditions);
-                            $quiz_action = 'Updated';
+                $list_quiz = $this->process_comprehensive_assessment($data_quiz) ?? [];
+                if (!empty($list_quiz)) {
+                    foreach ($list_quiz as $parent_id => $quiz_post) {
+                        if ($quiz_id != $parent_id) continue;
+    
+                        foreach ($quiz_post as $quiz_id => $field) {
+                            $answers = $field['choice'] ?? null;
+                            $description = $field['description'] ?? null;
+                            $attachment_ids = $field['attachmentIDs'] ?? null;
+                            $quiz_point = $field['point'] ?? null;
+    
+                            $quiz_data = $submission_id 
+                                ? $main->get_quiz_by_assessment_id_and_submission_parent($assessment_id, $submission_id, $quiz_id, $organisation_id, $parent_id)
+                                : $main->get_quiz_by_assessment_id_and_parent($assessment_id, $quiz_id, $organisation_id, $parent_id);
+    
+                            $input = $this->prepare_quiz_input_data([
+                                'time'            => current_time('mysql'),
+                                'user_id'         => $user_id, 
+                                'organisation_id' => $organisation_id, 
+                                'submission_id'   => $submission_id, 
+                                'answers'         => $answers, 
+                                'description'     => $description, 
+                                'attachment_ids'  => $attachment_ids, 
+                                'quiz_point'      => $quiz_point,
+                            ]);
+    
+                            $conditions = ['organisation_id' => $organisation_id, 'assessment_id' => $assessment_id, 'quiz_id' => $quiz_id, 'parent_id' => $parent_id];
+                            if ($submission_id) $conditions['submission_id'] = $submission_id;
+    
+                            if (!$quiz_data) {
+                                $main->insert_quiz_by_assessment_id(array_merge($input, $conditions));
+                                $quiz_action = 'Inserted';
+                            } else {
+                                $main->update_quiz_assessment($input, $conditions);
+                                $quiz_action = 'Updated';
+                            }
                         }
                     }
                 }
@@ -152,7 +155,7 @@ class WPA_Question_Form
             return wp_send_json([
                 'message' => 'Answers have been saved',
                 'status' => true,
-                'data' => array_merge($input, $conditions),
+                'data' => array_merge($input, $conditions) ?? [],
                 'quiz_action' => $quiz_action,
             ]);
         } catch (Exception $exception) {

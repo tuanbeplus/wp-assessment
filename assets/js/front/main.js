@@ -116,10 +116,10 @@
         const isDCR = $assessCat == 'dcr';
         const classToModify = isDCR ? 'pending' : 'completed';
 
+        $thisStep.removeClass('pending completed');
+
         if (allConditionsMet) {
             $thisStep.addClass(classToModify);
-        } else {
-            $thisStep.removeClass(classToModify);
         }
     }
 
@@ -431,8 +431,8 @@
         let answerDescription = getDescriptionValue();
         let attachmentIdValue = getAttachmentIdInput().val();
         let multipleAttachmentIdValue = getMultipleAttachmentIdInput(currentQuiz);
-        let data_form = $('#form_submit_quiz');
-        let type_quiz = $('input[name="type_quiz"]').val();
+        let typeQuiz = $('input[name="type_quiz"]').val();
+        let dataQuiz = currentQuiz.find('input, select, textarea').serializeArray() || [];
 
         const data = {
             'action': 'save_answers_assessment',
@@ -444,22 +444,28 @@
             'description': answerDescription,
             'attachment_ids': multipleAttachmentIdValue,
             'attachment_id': attachmentIdValue,
-            'data_quiz' : data_form.serializeArray(),
-            'type_quiz' : type_quiz,
+            'data_quiz' : dataQuiz,
+            'type_quiz' : typeQuiz,
         };
-        // console.log(data_form.serializeArray());
-
-        let response = await $.ajax({
-            type: 'POST',
-            url: ajax_object.ajax_url,
-            data: data,
-        });
-        const {status, message, result, list_quiz} = response;
         
-        if (status == false) {
-            alert(message)
+        try {
+            let response = await $.ajax({
+                type: 'POST',
+                url: ajax_object.ajax_url,
+                data: data,
+            });
+            const {status, message, result, list_quiz} = response;        
+            
+            if (status == false) {
+                alert(message)
+            }
+            return status;
+        } 
+        catch (error) {
+            console.error('AJAX Error:', error);
+            alert('There was a problem saving the quiz. Please try again.');
+            return false;
         }
-        return status;
     }
 
     async function submitPublishSubmission() {
@@ -723,9 +729,7 @@
         try {
             let currentQuiz = $('#quiz-item-' + getActiveQuizId());
             let checkAnswers = getCheckAnswers(currentQuiz);
-
             let isQuizSaved = await saveQuizAssessment(checkAnswers);     
-                    
             let response = await submitPublishSubmission();
 
             // Hide loading after submission

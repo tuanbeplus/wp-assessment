@@ -355,11 +355,17 @@ $exception_orgs_id = get_exception_orgs_id();
                                                                         <span class="answer-tooltip">This answer has been selected</span>
                                                                     <?php endif; ?>
                                                                 </label>
+                                                                <?php if ($is_checked): ?>
+                                                                    <input class="quiz-input-point" type="hidden" 
+                                                                        name="questions_<?php echo $group_id; ?>_quiz_<?php echo $sub_id; ?>_point" 
+                                                                        value="<?php echo $item['point']; ?>">
+                                                                <?php endif; ?>
                                                             </div>
                                                         <?php endforeach; ?>
                                                     </div>
                                                 <?php else: ?>
-                                                    <div class="multiple-choice-area checked" style="display:none;">
+                                                    <!-- No multiple choice options for this question. This block intentionally left blank. -->
+                                                    <div class="multiple-choice-area checked" style="display:none; opacity:0; visibility:hidden;">
                                                         <div class="checkBox dummy_checkbox">
                                                             <input class="form-check-input checked" 
                                                                     type="radio" 
