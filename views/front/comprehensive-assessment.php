@@ -661,7 +661,7 @@ $exception_orgs_id = get_exception_orgs_id();
         
     <?php else: ?>
         <!-- User is logged in but not allowed to access asessment -->
-        <section class="formWrapper">
+        <section class="formWrapper not-allowed-access">
             <div class="container">
                 <h3 style="text-align:center;">Oops! You can't access this assessment.</h3>
                 <?php 
