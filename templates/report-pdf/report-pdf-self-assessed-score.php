@@ -70,7 +70,8 @@ foreach ($questions as $index => $key_area) {
     $and_assessed_percent = 0;
 
     foreach ($key_area['list'] as $quiz) {
-        $max_score[] = $quiz['point'] * 4;
+        $point = is_numeric($quiz['point']) ? (float)$quiz['point'] : 0;
+        $max_score[] = $point * 4;
     }
 
     // Average Org score in a Key area
