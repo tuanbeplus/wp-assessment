@@ -728,7 +728,7 @@
   justify-content: space-between;
   gap: 16px;
   border-top: 1px solid #ccc;
-  padding-top: 16px;
+  padding-top: 32px;
   margin: 24px 0 2px;
 }
 .submission-admin-view-footer.loading {
@@ -736,8 +736,7 @@
   pointer-events: none;
 }
 .submission-admin-view-footer .button {
-  margin-right: 4px;
-  margin-bottom: 8px;
+  margin: 10px 6px 8px 0;
 }
 #questions-repeater-field .accepted,
 #questions-repeater-field .criteria-satisfied {
@@ -748,6 +747,13 @@
 #questions-repeater-field .criteria-not-yet-satisfied {
   color: indianred;
   border-color: indianred;
+}
+
+.submission-admin-view-footer .current-status strong.accepted {
+  color: green;
+}
+.submission-admin-view-footer .current-status strong.rejected {
+  color: indianred;
 }
 
 .submission-admin-view-footer p {
@@ -768,6 +774,10 @@
   opacity: 0.6;
   pointer-events: none;
   cursor: default;
+}
+
+.submission-admin-view-footer .current-status strong{
+  text-transform: capitalize;
 }
 
 .icon-spinner {
@@ -856,6 +866,9 @@
 #submitted_info_view .submission-info-container p {
   margin: 14px 0;
   overflow-wrap: break-word;
+}
+#submitted_info_view .submission-info-container .status {
+  text-transform: capitalize;
 }
 #submitted_info_view .submission-info-container > *:last-child {
   margin-bottom: 0;

@@ -55,9 +55,15 @@ $all_quizzes_status = get_post_meta($submission_id, 'quizzes_status', true);
 $is_disabled = $assessment_status === 'pending';
 $is_publish = $assessment_status === 'publish';
 $is_accepted = $assessment_status === 'accepted' || $assessment_status === 'criteria-satisfied';
+$is_rejected = $assessment_status === 'rejected';
+$dcr_status = [];
 
 if ($terms[0] === 'dcr') {
-    $is_disabled = isset($_GET['submission_id']);
+    foreach ($all_submission_vers as $submission) {
+        $submission_id = $submission->ID ?? '';
+        $dcr_status[] = get_post_meta($submission_id, 'assessment_status', true);
+    }
+    $is_disabled = isset($_GET['submission_id']) || in_array('pending', $dcr_status);
 }
 elseif ($terms[0] === 'index') {
     $is_disabled = $assessment_status === 'pending' || $assessment_status === 'accepted';
@@ -143,7 +149,7 @@ $exception_orgs_id = get_exception_orgs_id();
                         <p class="revisionRemarks">Please resubmit the assessment for review after completing the revision.</p>
                     </div><!-- .Notification Box -->
                 <?php endif; ?>
-                <?php if ($terms[0] === 'index' && $is_disabled && $questions): ?>
+                <?php if ($terms[0] === 'index' && ($is_rejected || $is_accepted)): ?>
                     <!-- Notification Box -->
                     <div class="notificationBar rejected">
                         <div class="bgRed"><h2>ATTENTION</h2></div>
@@ -225,7 +231,8 @@ $exception_orgs_id = get_exception_orgs_id();
                 <?php elseif ( $is_disabled && $terms[0] === 'dcr' ): ?>
                     <!-- Notification Box -->
                     <div class="notificationBar pending">
-                        <p>This submisison version not enabled to edit.</p>
+                        <h3>Your submissions are under pending review!</h3>
+                        <p>Not enabled to edit.</p>
                     </div><!-- .Notification Box -->
                 <?php endif; ?>
 

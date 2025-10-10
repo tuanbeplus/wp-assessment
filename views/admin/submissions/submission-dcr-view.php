@@ -306,7 +306,7 @@ if (empty($all_quizzes_status)) {
 
         <div class="submission-admin-view-footer">
             <div>
-                <p>Change review status of this submission</p>
+                <h3 class="label">Change review status of this submission</h3>
                 <?php foreach ($quiz_status_options as $status_name): ?>
                     <a type="button" data-status="<?php echo esc_attr(ucwords($status_name)); ?>" class="btn-update-review-status button button-large">
                         <?php echo ucwords($status_name); ?>

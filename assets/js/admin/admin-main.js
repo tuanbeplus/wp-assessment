@@ -895,29 +895,25 @@ jQuery(document).ready(function ($) {
         }, 10000)
     });
 
-    $(".reject-button").on("click", async function (e) {
+    $(document).on("click", ".btn-change-index-status", async function (e) {
         e.preventDefault();
-        await submit_feedback_submission($(this), "rejected");
+        const status = $(this).data('status');
+        console.log(status);
+        await submit_feedback_submission($(this), status);
     });
 
-    $(".accept-button").on("click", async function (e) {
-        e.preventDefault();
-        await submit_feedback_submission($(this), "accepted");
-    });
-
-    async function submit_feedback_submission(btn, feedbackType) {
+    async function submit_feedback_submission(btn, submissionStatus) {
         let assessment_id = $("#assessment_id").val();
         let submission_id = $("#submission_id").val();
         let organisation_id = $("#organisation_id").val();
-        let parent_wrapper = btn.closest('.submission-admin-view-footer')
+        let parent_wrapper = btn.closest('.submission-admin-view-footer');
 
         const payload = {
             action: "final_accept_reject_assessment",
             assessment_id: assessment_id,
-            // user_id: user_id,
             submission_id: submission_id,
             organisation_id: organisation_id,
-            type: feedbackType,
+            type: submissionStatus,
         };
 
         let response = await $.ajax({
@@ -928,7 +924,9 @@ jQuery(document).ready(function ($) {
                 parent_wrapper.find('.button').addClass('loading')
             },
             success:function(response){
-                parent_wrapper.find('.button').removeClass('loading')
+                parent_wrapper.find('.button').removeClass('loading');
+                $('.submission-info-container .status strong').removeClass().addClass(submissionStatus).text(submissionStatus);
+                $('.submission-admin-view-footer .current-status strong').removeClass().addClass(submissionStatus).text(submissionStatus);
             }
         });
         const { quiz_point, status, message } = response;
@@ -938,11 +936,6 @@ jQuery(document).ready(function ($) {
         setTimeout(() => {
             alert(message);
         }, 100);
-
-        if (status == true) {
-            $('#submitpost input[name="save"]').click();
-            return true;
-        }
     }
 
     $(document).on("click", ".btn-update-review-status", function (e) {

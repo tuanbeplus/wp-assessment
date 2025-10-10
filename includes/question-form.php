@@ -807,8 +807,6 @@ class WPA_Question_Form
     function save_quiz_feedback_submission()
     {
         try {
-            global $post;
-            $post_id = $post->ID;
             $main = new WP_Assessment();
             $submission_id = intval($_POST['submission_id']);
 
@@ -824,7 +822,7 @@ class WPA_Question_Form
             if (empty($quiz_id))
                 throw new Exception('Quiz not found.');
 
-            $post_type = get_post($submission_id)->post_type;
+            $post_type = get_post($submission_id)->post_type ?? '';
 
             $feedback = $_POST['feedback'] ?? null;
 
@@ -892,22 +890,19 @@ class WPA_Question_Form
     function final_accept_reject_assessment()
     {
         try {
-            global $post;
-            $post_id = $post->ID;
-
-            $assessment_id = intval($_POST['assessment_id']);
+            $assessment_id = intval($_POST['assessment_id'] ?? '');
             if (empty($assessment_id))
                 throw new Exception('Assessment not found.');
 
-            $submission_id = intval($_POST['submission_id']);
+            $submission_id = intval($_POST['submission_id'] ?? '');
             if (empty($submission_id))
                 throw new Exception('Submission not found.');
 
-            $organisation_id = $_POST['organisation_id'];
+            $organisation_id = $_POST['organisation_id']  ?? '';
             if (empty($organisation_id))
                 throw new Exception('Organisation not found.');
 
-            $type = $_POST['type'];
+            $type = $_POST['type'] ?? 'pending';
             if (empty($type))
                 throw new Exception('Type not found.');
 
@@ -925,14 +920,21 @@ class WPA_Question_Form
             $content .= '<p>Kind regards,</p>';
             $content .= '<p>Australian Network on Disability</p>';
 
-            $sent = wp_mail($sf_user_email , 'New feedback about your Submission on '. get_the_title($assessment_id), $content);
+            $message = '';
+            $updated_meta = update_post_meta($submission_id, 'assessment_status', $type);
+            if (!$updated_meta) throw new Exception($updated_meta, 1);
 
-            update_post_meta($submission_id, 'assessment_status', $type);
-
-            if (!$sent) throw new Exception($sent, 1);
+            if (!empty($type) && $type != 'pending') {
+                $sent = wp_mail($sf_user_email , 'New feedback about your Submission on '. get_the_title($assessment_id), $content);
+                $message = ucfirst($type) .' submission and sent feedback to: '.$sf_user_email;
+                if (!$sent) throw new Exception($sent, 1);
+            }
+            else {
+                $message = 'Changed the status of this submission to Pending';
+            }
 
             return wp_send_json(array(
-                'message' => ucfirst($type).', feedback has been updated and send to: '.$sf_user_email, 
+                'message' => $message, 
                 'submission_status' => $type,
                 'status' => true,
             ));

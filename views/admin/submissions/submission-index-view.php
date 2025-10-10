@@ -34,6 +34,7 @@ foreach ($quizzes as $row) {
 $azure_attachments_uploaded = $azure->get_azure_attachments_uploaded($assessment_id, $organisation_id);
 $quiz_status_options = array('Pending', 'Accepted', 'Rejected');
 $submission_score_arr = array();
+$submission_status = get_post_meta($post_id, 'assessment_status', true);
 ?>
 
 <input type="hidden" id="assessment_id" name="assessment_id" value="<?php echo $assessment_id ?>"/>
@@ -385,15 +386,45 @@ $submission_score_arr = array();
 
         <!-- End Comprehensive Submission -->
         <div class="submission-admin-view-footer">
-            <p class="label">Accept or reject this submission</p>
             <div>
-                <a type="button" class="button button-primary button-large accept-button" title="Accept this Submission">
-                    Accept this Submission
-                </a>
-                <a type="button" class="button button-large reject-button" title="Reject this Submission">
-                    Reject
-                </a>
+                <h3 class="label">Change the review status of this submission.</h3>
+                <div>
+                    <?php 
+                        $status_buttons = [
+                            [
+                                'status'=> 'accepted',
+                                'class' => 'accept-button button-primary',
+                                'title' => 'Accept this submission',
+                                'label' => 'Accept this Submission'
+                            ],
+                            [
+                                'status'=> 'pending',
+                                'class' => 'pending-button',
+                                'title' => 'Update this submission to pending',
+                                'label' => 'Pending'
+                            ],
+                            [
+                                'status'=> 'rejected',
+                                'class' => 'reject-button',
+                                'title' => 'Reject this submission',
+                                'label' => 'Reject'
+                            ],
+                        ];
+                        foreach ($status_buttons as $button) : 
+                    ?>
+                        <a type="button" 
+                            data-status="<?php echo esc_attr(strtolower($button['status'])); ?>" 
+                            class="btn-change-index-status button button-large <?php echo esc_attr($button['class']); ?>" 
+                            title="<?php echo esc_attr($button['title']); ?>"
+                        >
+                            <?php echo esc_html($button['label']); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
             </div>
+            <p class="current-status">
+                Current status: <strong class="<?php echo $submission_status ?? '' ?>"><?php echo $submission_status ?? '' ?></strong>
+            </p>
         </div>
     <?php endif; ?>
 </div>
