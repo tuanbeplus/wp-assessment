@@ -374,11 +374,14 @@ class WP_Azure_Storage {
                 throw new Exception('Maximum file size is ' . size_format($max_file_size) . '');
             }
             
-            if (isset($_COOKIE['userId'])) {
+            if (isset($_COOKIE['userId']) && !empty($_COOKIE['userId'])) {
                 $user_id = $_COOKIE['userId'];
+            } else if (is_user_logged_in()) {
+                $user_id = get_user_meta(get_current_user_id(), '__salesforce_user_id', true);
             } else {
-                $user_id = get_current_user_id();
+                $user_id = null;
             }
+            
             if (empty($user_id))
                 throw new Exception('User not found.');
 
