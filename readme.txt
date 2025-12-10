@@ -2,7 +2,7 @@
 
 Author: tom@ysnstudios.com
 
-Version: 3.0.1
+Version: 3.0.2
 
 Copyright (c) 2025 YSN! All Rights Reserved
 
