@@ -538,7 +538,14 @@ class WPA_Custom_Fields
                         'label' => 'DCR Submission Notification Email',
                         'name' => 'dcr_submission_notification_email',
                         'type' => 'email',
-                        'instructions' => 'Enter the email address to receive notifications for the new submissions.',
+                        'instructions' => 'Enter the email address to receive notifications for the new DCR submissions.',
+                    ),
+                    array(
+                        'key' => 'field_index_submission_notification_email',
+                        'label' => 'Index Submission Notification Email',
+                        'name' => 'index_submission_notification_email',
+                        'type' => 'email',
+                        'instructions' => 'Enter the email address to receive notifications for the new Index submissions.',
                     ),
                     array(
                         'key' => 'field_repeater_exception_orgs_id',

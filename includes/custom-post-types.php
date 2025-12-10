@@ -515,9 +515,12 @@ class WPA_CustomPostType
         $org_data = get_post_meta($post_id, 'org_data', true);
         $org_name = $org_data['Name'] ?? '';
         $dcr_sub_notifi_email = get_field('dcr_submission_notification_email', 'option');
+        $index_sub_notifi_email = get_field('index_submission_notification_email', 'option');
 
         if ($post->post_date == $post->post_modified) {
             if ($post->post_type == 'submissions' || $post->post_type == 'dcr_submissions') {
+                $to = '';
+                $subject = 'Saturn - New Submission Added';
 
                 if ($post->post_type == 'dcr_submissions') {
                     if (!empty($dcr_sub_notifi_email)) {
@@ -526,12 +529,18 @@ class WPA_CustomPostType
                     else {
                         $to = $this->get_all_users_email($assessment_id);
                     }
+                    $subject = 'Saturn - New DCR Submission Added #' .$post_id. ' - ' .$org_name;
                 }
                 else {
-                    $to = $this->get_all_users_email($assessment_id);
+                    if (!empty($index_sub_notifi_email)) {
+                        $to = $index_sub_notifi_email;
+                    }
+                    else {
+                        $to = $this->get_all_users_email($assessment_id);
+                    }
+                    $subject = 'Saturn - New Index Submission Added #' .$post_id. ' - ' .$org_name;
                 }
                 
-                $subject = 'Saturn - New Submission Added #' .$post_id. ' - ' .$org_name;
                 $message  = '<div style="font-size:15px;">';
                 $message .= '<p style="font-size:16px;">You have a new submission of <strong>'. get_the_title($assessment_id). '</strong>.</p>';
                 $message .= '<p>From:</p>';
