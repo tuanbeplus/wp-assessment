@@ -67,7 +67,7 @@ else {
             foreach ($saturn_invites as $index => $record): ?>
                 <tr>
                     <td class="index"><?php echo $index + 1; ?></td>
-                    <td>
+                    <td style="white-space:nowrap;">
                         <a href="<?php echo $record['Invite_url'] ?>" target="_blank">
                             <?php echo $record['Name'] ?>
                         </a>
