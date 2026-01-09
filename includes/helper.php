@@ -301,32 +301,50 @@ function get_assessments_accessible_all_users()
  * 
  */
 function get_saturn_invite_status($sf_user_id, $assessment_id) {
-	// Get WordPress User ID
-	$wp_user_id = get_current_user_by_salesforce_id($sf_user_id);
+    // Get WordPress User ID
+    $wp_user_id = get_current_user_by_salesforce_id($sf_user_id);
+    if (empty($wp_user_id)) {
+        return null;
+    }
 
-	// Salesforce Contact ID
-	$contact_id = get_user_meta($wp_user_id, 'salesforce_contact_id', true);
-	if (!empty($contact_id)) {
-		$sf_user_data = getUser($sf_user_id);
-		if (!empty($sf_user_data) && !empty($sf_user_data->records)) {
-			$contact_id = $sf_user_data->records[0]->ContactId ?? '';
-		}
-		else {
-			return null;
-		}
-	}
-	// Get the Saturn Invites data
-	$saturn_invites = get_post_meta($assessment_id, 'sf_saturn_invites', true);
+    // Resolve Salesforce Contact ID
+    $contact_id = get_user_meta($wp_user_id, 'salesforce_contact_id', true);
 
-	$filtered = '';
-	if (is_array($saturn_invites) && !empty($saturn_invites)) {
-		$filtered = array_filter($saturn_invites, function($item) use ($contact_id) {
-			return isset($item['Contact__c']) && $item['Contact__c'] === $contact_id;
-		});
-	}
+    if (empty($contact_id)) {
+        $sf_user_data = get_user_meta($wp_user_id, '__salesforce_user_meta', true);
+        if (!empty($sf_user_data)) {
+            $decoded = json_decode($sf_user_data, true);
+            $contact_id = $decoded['ContactId'] ?? '';
+        }
+    }
+    if (empty($contact_id)) {
+        return null;
+    }
 
-	// Return the Status__c of the first matching item, or null if no matches found
-    return !empty($filtered) ? reset($filtered)['Status__c'] : null;
+    // Get Saturn Invites
+    $saturn_invites = get_post_meta($assessment_id, 'sf_saturn_invites', true);
+    if (!is_array($saturn_invites) || empty($saturn_invites)) {
+        return null;
+    }
+
+    $has_expired = false;
+
+    foreach ($saturn_invites as $invite) {
+        if (
+            isset($invite['Contact__c'], $invite['Status__c']) &&
+            $invite['Contact__c'] === $contact_id
+        ) {
+            // Highest priority
+            if ($invite['Status__c'] === 'Active') {
+                return 'Active';
+            }
+
+            if ($invite['Status__c'] === 'Expired') {
+                $has_expired = true;
+            }
+        }
+    }
+    return $has_expired ? 'Expired' : null;
 }
 
 /**
