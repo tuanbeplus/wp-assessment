@@ -33,7 +33,15 @@ $agreed_gr_score_with_weighting = cal_scores_with_weighting($assessment_id, $agr
 <div class="scoring-wrapper">
     <div class="maturity-level _field">
         <p><strong>Maturity Level</strong></p>
-        <p class="org-score">Org Score: <strong><?php echo $total_org_score['percent'] ?? 0; ?>%</strong></p>
+        <?php
+            $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+            $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
+            // $sum_key:     'sum' for 2024 (raw),     'sum_with_weighting' for 2023
+            // $percent_key: 'percent' for 2024 (raw),  'percent_with_weighting' for 2023
+            $sum_key     = $is_2024 ? 'sum'     : 'sum_with_weighting';
+            $percent_key = $is_2024 ? 'percent' : 'percent_with_weighting';
+        ?>
+        <p class="org-score">Org Score: <strong><?php echo $total_org_score[$percent_key] ?? 0; ?>%</strong></p>
     </div>
     <div class="key-area _field">
         <p><strong>Key Area</strong></p>
@@ -52,30 +60,20 @@ $agreed_gr_score_with_weighting = cal_scores_with_weighting($assessment_id, $agr
     <div class="overall _field">
         <p><strong>Overall total score</strong></p>
         <?php
-            $sum_key = 'sum';
-            // Get Scoring formula type
-		    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
-            // Using Index formula 2024
-            if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
-                $sum_key = 'sum';
-            }
-            // Using Index formula 2023
-            else {
-                $sum_key = 'sum_with_weighting';
-            }
+            // $sum_key and $percent_key already set above in the Maturity Level block
         ?>
         <ul class="overall-list">
             <li>Overall Organisation Total Score: 
                 <strong><?php echo $total_submission_score[$sum_key] ?? 0; ?></strong> 
-                <strong>(<?php echo $total_submission_score['percent'] ?? 0; ?>%)</strong>
+                <strong>(<?php echo $total_submission_score[$percent_key] ?? 0; ?>%)</strong>
             </li>
             <li>Overall AND Total Score: 
                 <strong><?php echo $total_and_score[$sum_key] ?? 0; ?></strong> 
-                <strong>(<?php echo $total_and_score['percent'] ?? 0; ?>%)</strong>
+                <strong>(<?php echo $total_and_score[$percent_key] ?? 0; ?>%)</strong>
             </li>
             <li>Overall Agreed Total Score: 
                 <strong><?php echo $total_agreed_score[$sum_key] ?? 0; ?></strong> 
-                <strong>(<?php echo $total_agreed_score['percent'] ?? 0; ?>%)</strong>
+                <strong>(<?php echo $total_agreed_score[$percent_key] ?? 0; ?>%)</strong>
             </li>
         </ul>
     </div>

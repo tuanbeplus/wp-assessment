@@ -6,16 +6,35 @@
  * 
  */
 
-$total_org_score = get_post_meta($submission_id, 'total_submission_score', true);
+$total_org_score    = get_post_meta($submission_id, 'total_submission_score', true);
 $total_agreed_score = get_post_meta($submission_id, 'total_agreed_score', true);
-$all_agreed_score = cal_overall_total_score($assessment_id, 'total_agreed_score');
-$overall_and_score = cal_overall_total_score($assessment_id, 'total_and_score');
-$org_score_rank = $position_by_total_score[$org_data['Id']]['org_rank'] ?? '';
-$org_industry_rank = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'] ?? '';
-$average_industry = cal_average_industry_score($assessment_id, $position_by_industry['by_indus_data'][$org_data['Industry']]) ?? '';
+$all_agreed_score   = cal_overall_total_score($assessment_id, 'total_agreed_score');
+$overall_and_score  = cal_overall_total_score($assessment_id, 'total_and_score');
+$org_score_rank     = $position_by_total_score[$org_data['Id']]['org_rank'] ?? '';
+$org_industry_rank  = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'] ?? '';
+$average_industry   = cal_average_industry_score($assessment_id, $position_by_industry['by_indus_data'][$org_data['Industry']]) ?? '';
 
-$total_org_score_percent   = isset($total_org_score['percent']) ? $total_org_score['percent'] : '';
-$total_agreed_score_percent = isset($total_agreed_score['percent']) ? $total_agreed_score['percent'] : '';
+// Use the formula-aware 'percent' key saved by on_save_submission_custom_fields.
+// 'percent' is now always consistent with the assessment's scoring formula (fixed in v3.0.3).
+// For submissions saved before v3.0.3, fall back to on-the-fly recalculation or the old 'percent' key.
+$scoring_formula      = get_post_meta($assessment_id, 'scoring_formula', true);
+$is_2024              = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
+$sum_key_for_percent  = $is_2024 ? 'sum' : 'sum_with_weighting';
+$percent_key          = $is_2024 ? 'percent' : 'percent_with_weighting';
+$assessment_max_score = get_assessment_max_score($assessment_id);
+
+$total_org_score_percent = $total_org_score[$percent_key]
+    ?? $total_org_score['percent']
+    ?? ((!empty($total_org_score[$sum_key_for_percent]) && !empty($assessment_max_score))
+        ? round($total_org_score[$sum_key_for_percent] / $assessment_max_score * 100)
+        : '');
+
+$total_agreed_score_percent = $total_agreed_score[$percent_key]
+    ?? $total_agreed_score['percent']
+    ?? ((!empty($total_agreed_score[$sum_key_for_percent]) && !empty($assessment_max_score))
+        ? round($total_agreed_score[$sum_key_for_percent] / $assessment_max_score * 100)
+        : '');
+
 $all_agreed_score_average = isset($all_agreed_score['percent_average']) ? $all_agreed_score['percent_average'] : '';
 
 $count_org_industry = 0;

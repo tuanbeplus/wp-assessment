@@ -162,14 +162,13 @@ class AndAssessmentRanking {
           $industry_name = (isset($org_metadata['Industry'])) ? $org_metadata['Industry'] : '';
 
           if ( ! in_array($org_name, $org_list) && $org_name ) {
-            if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
-              $total_score_sum = ( isset($total_score['sum']) ) ? $total_score['sum'] : 0;
-            }
-            else {
-              $total_score_sum = ( isset($total_score['sum_with_weighting']) ) ? $total_score['sum_with_weighting'] : 0;
-            }
+            $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
+            $sum_key     = $is_2024 ? 'sum'     : 'sum_with_weighting';
+            $percent_key = $is_2024 ? 'percent' : 'percent_with_weighting';
+
+            $total_score_sum = $total_score[$sum_key] ?? 0;
+            $total_percent   = $total_score[$percent_key] ?? 0;
             
-            $total_percent = ( isset($total_score['percent']) ) ? $total_score['percent'] : 0;
             $submissions_info[] = array(
               'sub_id' => $sub->ID,
               'org_id' => $org_id,

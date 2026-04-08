@@ -65,22 +65,16 @@ $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
 
     <?php if (in_array('index', $terms)): ?>
         <?php
-            $sum_key = 'sum';
-            // Using Index formula 2024
-            if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
-                $sum_key = 'sum';
-            }
-            // Using Index formula 2023
-            else {
-                $sum_key = 'sum_with_weighting';
-            }
+            $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
+            $sum_key     = $is_2024 ? 'sum'     : 'sum_with_weighting';
+            $percent_key = $is_2024 ? 'percent' : 'percent_with_weighting';
         ?>
         <?php if (isset($total_submission_score)): ?>
             <p class="post-status-display">
                 Total Org Score: 
                 <strong class="total-submission-score">
                     <?php echo $total_submission_score[$sum_key] ?? 0; ?>
-                    (<?php echo $total_submission_score['percent'] ?? 0; ?>%)
+                    (<?php echo $total_submission_score[$percent_key] ?? 0; ?>%)
                 </strong>
             </p>
         <?php endif; ?>
@@ -90,7 +84,7 @@ $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
                 Total AND Score: 
                 <strong class="total-submission-score">
                     <?php echo $total_and_score[$sum_key] ?? 0; ?>
-                    (<?php echo $total_and_score['percent'] ?? 0; ?>%)
+                    (<?php echo $total_and_score[$percent_key] ?? 0; ?>%)
                 </strong>
             </p>
         <?php endif; ?>
@@ -100,7 +94,7 @@ $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
                 Total Agreed Score: 
                 <strong class="total-submission-score">
                     <?php echo $total_agreed_score[$sum_key] ?? 0; ?>
-                    (<?php echo $total_agreed_score['percent'] ?? 0; ?>%)
+                    (<?php echo $total_agreed_score[$percent_key] ?? 0; ?>%)
                 </strong>
             </p>
         <?php endif; ?>

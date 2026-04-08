@@ -65,22 +65,22 @@ $self_assessed_percent_table =
         </tr>';
 foreach ($questions as $index => $key_area) {
 
-    $max_score = array();
-    $org_self_percent = 0;
-    $and_assessed_percent = 0;
+    // Detect Scoring formula type
+    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+    $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
 
     foreach ($key_area['list'] as $quiz) {
-        $point = is_numeric($quiz['point']) ? (float)$quiz['point'] : 0;
+        $point = $is_2024 ? 1 : (is_numeric($quiz['point']) ? (float)$quiz['point'] : 0);
         $max_score[] = $point * 4;
     }
 
     // Average Org score in a Key area
-    if (is_array($cal_org_score[$index])) {
+    if (isset($cal_org_score[$index]) && is_array($cal_org_score[$index])) {
         $org_self_percent = round(array_sum($cal_org_score[$index]) / array_sum($max_score) * 100);
     }
     
     // Average Agreed score in a Key area
-    if (is_array($cal_agreed_score[$index])) {
+    if (isset($cal_agreed_score[$index]) && is_array($cal_agreed_score[$index])) {
         $and_assessed_percent = round(array_sum($cal_agreed_score[$index]) / array_sum($max_score) * 100);
     }
     

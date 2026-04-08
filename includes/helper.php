@@ -609,11 +609,21 @@ function cal_scores_with_weighting_for_percentages($assessment_id, $scores_arr, 
 
 	if (is_array($scores_arr) && !empty($scores_arr)) {
 
+		// Get Scoring formula type
+		$scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+
 		foreach ($scores_arr as $i => $group) {
 			foreach ($group as $j => $quiz) {
 				$weighting = $questions[$i]['list'][$j]['point'];
 				if (!empty($quiz)) {
-					$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
+					// Using Index formula 2024
+					if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
+						$cal_scores_array[$i][$j] = (float)$quiz;
+					}
+					// Using Index formula 2023
+					else {
+						$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
+					}
 				}
 				else {
 					$cal_scores_array[$i][$j] = 0;
@@ -868,8 +878,8 @@ function cal_overall_total_score($assessment_id, $post_meta)
 	if (!empty($submissions)) {
 		foreach ($submissions as $submission){
 			$total_score = get_post_meta($submission->ID, $post_meta, true) ?? 0;
-			if (isset($total_score['sum'])) {
-				$overall_scores[] = $total_score['sum'];
+			if (isset($total_score['sum_with_weighting'])) {
+				$overall_scores[] = $total_score['sum_with_weighting'];
 			}
 		}
 		if (!empty($overall_scores) && is_array($overall_scores)) {

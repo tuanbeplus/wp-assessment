@@ -294,92 +294,117 @@ class WPA_Custom_Fields
         $assessment_id = get_post_meta($post_id, 'assessment_id', true);
         $group_quiz_points = $_POST['group_quiz_point'] ?? null;
         $quiz_answer_points = $_POST['quiz_answer_point'] ?? null;
-        $org_score = $_POST['org_score'] ?? array();
-        $and_score = $_POST['and_score'] ?? array();
-        $agreed_score = $_POST['agreed_score'] ?? array();
+
+        // Fall back to existing saved meta if POST fields are missing.
+        // This prevents re-saving an Update from zeroing out scores on existing submissions
+        // when the form fields were not present in the current POST (e.g. large forms truncated by max_input_vars).
+        $org_score    = !empty($_POST['org_score'])    ? $_POST['org_score']    : (get_post_meta($post_id, 'org_score', true) ?: array());
+        $and_score    = !empty($_POST['and_score'])    ? $_POST['and_score']    : (get_post_meta($post_id, 'and_score', true) ?: array());
+        $agreed_score = !empty($_POST['agreed_score']) ? $_POST['agreed_score'] : (get_post_meta($post_id, 'agreed_score', true) ?: array());
         $org_section_score = $_POST['org_section_score'] ?? null;
-        $recommentdation = $_POST['recommentdation'] ?? null;
-        $key_area = $_POST['key_area'] ?? null;
+        $recommentdation   = $_POST['recommentdation'] ?? null;
+        $key_area          = !empty($_POST['key_area']) ? $_POST['key_area'] : (get_post_meta($post_id, 'key_area', true) ?: null);
 
-        $maturity_level = array();
-        $agreed_score_with_weighting = cal_scores_with_weighting($assessment_id, $agreed_score, 'sub') ?? array();
-        foreach ($key_area as $pr_key => $ka) {
-            $framework_cnt = $implementation_cnt = $review_cnt = $innovation_cnt = 0;
-            $framework_vl = $implementation_vl = $review_vl = $innovation_vl = 0;
-            foreach ($ka as $c_key => $value) {
-                switch ($value) {
-                    case 'Framework':
-                        $framework_cnt++;
-                        $framework_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
-                        break;
-                    case 'Implementation':
-                        $implementation_cnt++;
-                        $implementation_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
-                        break;
-                    case 'Review':
-                        $review_cnt++;
-                        $review_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
-                        break;
-                    case 'Innovation':
-                        $innovation_cnt++;
-                        $innovation_vl += (float)$agreed_score_with_weighting[$pr_key][$c_key];
-                        break;
-                    default:
-                        break;
+        // Calculate maturity levels — only when key_area data is available
+        $maturity_level = get_post_meta($post_id, 'maturity_level', true) ?: array();
+        if (!empty($key_area) && is_array($key_area)) {
+            $maturity_level = array();
+            $agreed_score_with_weighting = cal_scores_with_weighting($assessment_id, $agreed_score, 'sub') ?? array();
+            foreach ($key_area as $pr_key => $ka) {
+                $framework_cnt = $implementation_cnt = $review_cnt = $innovation_cnt = 0;
+                $framework_vl = $implementation_vl = $review_vl = $innovation_vl = 0;
+                foreach ($ka as $c_key => $value) {
+                    switch ($value) {
+                        case 'Framework':
+                            $framework_cnt++;
+                            $framework_vl += (float)($agreed_score_with_weighting[$pr_key][$c_key] ?? 0);
+                            break;
+                        case 'Implementation':
+                            $implementation_cnt++;
+                            $implementation_vl += (float)($agreed_score_with_weighting[$pr_key][$c_key] ?? 0);
+                            break;
+                        case 'Review':
+                            $review_cnt++;
+                            $review_vl += (float)($agreed_score_with_weighting[$pr_key][$c_key] ?? 0);
+                            break;
+                        case 'Innovation':
+                            $innovation_cnt++;
+                            $innovation_vl += (float)($agreed_score_with_weighting[$pr_key][$c_key] ?? 0);
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                $framework_level     = ($framework_cnt > 0)     ? get_maturity_level_org($framework_vl / $framework_cnt)         : 1;
+                $implementation_level = ($implementation_cnt > 0) ? get_maturity_level_org($implementation_vl / $implementation_cnt) : 1;
+                $review_level        = ($review_cnt > 0)        ? get_maturity_level_org($review_vl / $review_cnt)               : 1;
+                $innovation_level    = ($innovation_cnt > 0)    ? get_maturity_level_org($innovation_vl / $innovation_cnt)       : 1;
+                $maturity_level[$pr_key] = array(
+                    'Framework'      => $framework_level,
+                    'Implementation' => $implementation_level,
+                    'Review'         => $review_level,
+                    'Innovation'     => $innovation_level,
+                );
             }
-            $framework_level = ($framework_cnt > 0) ? get_maturity_level_org($framework_vl/$framework_cnt) : 1;
-            $implementation_level = ($implementation_cnt > 0) ? get_maturity_level_org($implementation_vl/$implementation_cnt) : 1;
-            $review_level = ($review_cnt > 0) ? get_maturity_level_org($review_vl/$review_cnt) : 1;
-            $innovation_level = ($innovation_cnt > 0) ? get_maturity_level_org($innovation_vl/$innovation_cnt) : 1;
-            $maturity_level[$pr_key] = array(
-                'Framework' => $framework_level,
-                'Implementation' => $implementation_level,
-                'Review' => $review_level,
-                'Innovation' => $innovation_level
-            );
         }
 
+        // Re-index group quiz points — fall back to existing meta if POST is missing
         $new_group_quiz_points = array();
-        $item = 1;
-        foreach ($group_quiz_points as $value) {
-          $new_group_quiz_points[$item] = $value;
-          $item++;
+        if (!empty($group_quiz_points) && is_array($group_quiz_points)) {
+            $item = 1;
+            foreach ($group_quiz_points as $value) {
+                $new_group_quiz_points[$item] = $value;
+                $item++;
+            }
+            $new_group_quiz_points = serialize($new_group_quiz_points);
+        } else {
+            // Preserve existing value so clicking Update never blanks it
+            $new_group_quiz_points = get_post_meta($post_id, 'group_quiz_point', true) ?: serialize(array());
         }
-        $new_group_quiz_points = serialize($new_group_quiz_points);
 
         // Get max score of the assessmnet
         $assessment_max_score = get_assessment_max_score($assessment_id);
 
+        // Determine which sum key to use for percent calculation based on scoring formula
+        // index_formula_2024 uses raw sum (no weighting); 2023 uses sum_with_weighting
+        $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
+        $sum_key_for_percent = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') ? 'sum' : 'sum_with_weighting';
+
         // Save total Org Self-Assessed Score
         $total_org_score = array();
-        $total_org_score['sum'] = array_sum_submission_score($assessment_id, $org_score);
-        $total_org_score['sum_with_weighting'] = array_sum_submission_score_with_weighting($assessment_id, $org_score);
-        $total_org_score['percent'] = round((array_sum_submission_score_with_weighting($assessment_id, $org_score))/$assessment_max_score * 100);
+        $total_org_score['sum']                  = array_sum_submission_score($assessment_id, $org_score);
+        $total_org_score['sum_with_weighting']   = array_sum_submission_score_with_weighting($assessment_id, $org_score);
+        $total_org_score['percent']              = round($total_org_score[$sum_key_for_percent] / $assessment_max_score * 100);
+        // Always store the weighting-based percent so templates can use it directly without recalculating
+        $total_org_score['percent_with_weighting'] = round($total_org_score['sum_with_weighting'] / $assessment_max_score * 100);
 
         // Save total AND Score
         $total_and_score = array();
-        $total_and_score['sum'] = array_sum_submission_score($assessment_id, $and_score);
-        $total_and_score['sum_with_weighting'] = array_sum_submission_score_with_weighting($assessment_id, $and_score);
-        $total_and_score['percent'] = round((array_sum_submission_score_with_weighting($assessment_id, $and_score))/$assessment_max_score * 100);
+        $total_and_score['sum']                  = array_sum_submission_score($assessment_id, $and_score);
+        $total_and_score['sum_with_weighting']   = array_sum_submission_score_with_weighting($assessment_id, $and_score);
+        $total_and_score['percent']              = round($total_and_score[$sum_key_for_percent] / $assessment_max_score * 100);
+        $total_and_score['percent_with_weighting'] = round($total_and_score['sum_with_weighting'] / $assessment_max_score * 100);
 
         // Save total Agreed Score
         $total_agreed_score = array();
-        $total_agreed_score['sum'] = array_sum_submission_score($assessment_id, $agreed_score);
-        $total_agreed_score['sum_with_weighting'] = array_sum_submission_score_with_weighting($assessment_id, $agreed_score);
-        $total_agreed_score['percent'] = round((array_sum_submission_score_with_weighting($assessment_id, $agreed_score))/$assessment_max_score * 100);
+        $total_agreed_score['sum']                  = array_sum_submission_score($assessment_id, $agreed_score);
+        $total_agreed_score['sum_with_weighting']   = array_sum_submission_score_with_weighting($assessment_id, $agreed_score);
+        $total_agreed_score['percent']              = round($total_agreed_score[$sum_key_for_percent] / $assessment_max_score * 100);
+        $total_agreed_score['percent_with_weighting'] = round($total_agreed_score['sum_with_weighting'] / $assessment_max_score * 100);
 
         update_post_meta($post_id, 'group_quiz_point', $new_group_quiz_points);
         update_post_meta($post_id, 'quiz_answer_point', $quiz_answer_points);
-        update_post_meta($post_id, 'org_score', $org_score);
-        update_post_meta($post_id, 'and_score', $and_score);
-        update_post_meta($post_id, 'agreed_score', $agreed_score);
-        update_post_meta($post_id, 'org_section_score', $org_section_score);
-        update_post_meta($post_id, 'recommentdation', $recommentdation);
+        // Only overwrite scores in DB if the POST actually contained them (prevent blanking on large forms)
+        if (!empty($_POST['org_score']))    update_post_meta($post_id, 'org_score', $org_score);
+        if (!empty($_POST['and_score']))    update_post_meta($post_id, 'and_score', $and_score);
+        if (!empty($_POST['agreed_score'])) update_post_meta($post_id, 'agreed_score', $agreed_score);
+        if (!empty($_POST['org_section_score'])) update_post_meta($post_id, 'org_section_score', $org_section_score);
+        if (!empty($_POST['recommentdation']))   update_post_meta($post_id, 'recommentdation', $recommentdation);
+        // Scores and maturity are always recalculated from whatever data is available
         update_post_meta($post_id, 'total_submission_score', $total_org_score);
         update_post_meta($post_id, 'total_and_score', $total_and_score);
         update_post_meta($post_id, 'total_agreed_score', $total_agreed_score);
-        update_post_meta($post_id, 'key_area', $key_area);
+        if (!empty($key_area)) update_post_meta($post_id, 'key_area', $key_area);
         update_post_meta($post_id, 'maturity_level', $maturity_level);
 
         // Handle status changes
