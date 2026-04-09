@@ -34,12 +34,9 @@ $agreed_gr_score_with_weighting = cal_scores_with_weighting($assessment_id, $agr
     <div class="maturity-level _field">
         <p><strong>Maturity Level</strong></p>
         <?php
-            $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
-            $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
-            // $sum_key:     'sum' for 2024 (raw),     'sum_with_weighting' for 2023
-            // $percent_key: 'percent' for 2024 (raw),  'percent_with_weighting' for 2023
-            $sum_key     = $is_2024 ? 'sum'     : 'sum_with_weighting';
-            $percent_key = $is_2024 ? 'percent' : 'percent_with_weighting';
+            // Both 2023 and 2024 now use weighting (updated v3.0.4)
+            $sum_key     = 'sum_with_weighting';
+            $percent_key = 'percent_with_weighting';
         ?>
         <p class="org-score">Org Score: <strong><?php echo $total_org_score[$percent_key] ?? 0; ?>%</strong></p>
     </div>

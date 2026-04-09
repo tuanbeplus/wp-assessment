@@ -162,9 +162,9 @@ class AndAssessmentRanking {
           $industry_name = (isset($org_metadata['Industry'])) ? $org_metadata['Industry'] : '';
 
           if ( ! in_array($org_name, $org_list) && $org_name ) {
-            $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
-            $sum_key     = $is_2024 ? 'sum'     : 'sum_with_weighting';
-            $percent_key = $is_2024 ? 'percent' : 'percent_with_weighting';
+            // Both 2023 and 2024 now use weighting (updated v3.0.4)
+            $sum_key     = 'sum_with_weighting';
+            $percent_key = 'percent_with_weighting';
 
             $total_score_sum = $total_score[$sum_key] ?? 0;
             $total_percent   = $total_score[$percent_key] ?? 0;
@@ -368,13 +368,7 @@ class AndAssessmentRanking {
                         $agreed_score = get_post_meta($submission->ID, 'agreed_score', true);
 
                         if (!empty($weighting)) {
-                          if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
-                            $sub_score = (float)$agreed_score[$group_id][$sub_id];
-                          }
-                          else {
-                            $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
-                          }
-                          
+                          $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
                         }
                         else {
                           $sub_score = (float)$agreed_score[$group_id][$sub_id];
@@ -474,12 +468,7 @@ class AndAssessmentRanking {
               $weighting = $sub_field['point'] ?? '';
           
               if (!empty($weighting)) {
-                if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
-                  $sub_score = (float)$agreed_score[$group_id][$sub_id];
-                }
-                else {
-                  $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
-                }
+                $sub_score = (float)$agreed_score[$group_id][$sub_id] * (float)$weighting;
               }
               else {
                 $sub_score = (float)$agreed_score[$group_id][$sub_id];

@@ -571,14 +571,7 @@ function cal_scores_with_weighting($assessment_id, $scores_arr, $arr_type = 'sub
 			foreach ($group as $j => $quiz) {
 				$weighting = $questions[$i]['list'][$j]['point'];
 				if (!empty($quiz)) {
-					// Using Index formula 2024
-					if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
-						$cal_scores_array[$i][$j] = (float)$quiz;
-					}
-					// Using Index formula 2023
-					else {
-						$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
-					}
+					$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
 				}
 				else {
 					$cal_scores_array[$i][$j] = 0;
@@ -616,14 +609,7 @@ function cal_scores_with_weighting_for_percentages($assessment_id, $scores_arr, 
 			foreach ($group as $j => $quiz) {
 				$weighting = $questions[$i]['list'][$j]['point'];
 				if (!empty($quiz)) {
-					// Using Index formula 2024
-					if (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') {
-						$cal_scores_array[$i][$j] = (float)$quiz;
-					}
-					// Using Index formula 2023
-					else {
-						$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
-					}
+					$cal_scores_array[$i][$j] = (float)$quiz * (float)$weighting;
 				}
 				else {
 					$cal_scores_array[$i][$j] = 0;

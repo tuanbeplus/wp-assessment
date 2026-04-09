@@ -365,10 +365,8 @@ class WPA_Custom_Fields
         // Get max score of the assessmnet
         $assessment_max_score = get_assessment_max_score($assessment_id);
 
-        // Determine which sum key to use for percent calculation based on scoring formula
-        // index_formula_2024 uses raw sum (no weighting); 2023 uses sum_with_weighting
-        $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
-        $sum_key_for_percent = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024') ? 'sum' : 'sum_with_weighting';
+        // Both 2023 and 2024 formulas now use weighted scoring (updated v3.0.4)
+        $sum_key_for_percent = 'sum_with_weighting';
 
         // Save total Org Self-Assessed Score
         $total_org_score = array();

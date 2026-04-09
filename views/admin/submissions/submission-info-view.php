@@ -65,9 +65,9 @@ $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
 
     <?php if (in_array('index', $terms)): ?>
         <?php
-            $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
-            $sum_key     = $is_2024 ? 'sum'     : 'sum_with_weighting';
-            $percent_key = $is_2024 ? 'percent' : 'percent_with_weighting';
+            // Both 2023 and 2024 now use weighting (updated v3.0.4)
+            $sum_key     = 'sum_with_weighting';
+            $percent_key = 'percent_with_weighting';
         ?>
         <?php if (isset($total_submission_score)): ?>
             <p class="post-status-display">

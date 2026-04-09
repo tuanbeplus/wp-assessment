@@ -65,12 +65,8 @@ $self_assessed_percent_table =
         </tr>';
 foreach ($questions as $index => $key_area) {
 
-    // Detect Scoring formula type
-    $scoring_formula = get_post_meta($assessment_id, 'scoring_formula', true);
-    $is_2024 = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
-
     foreach ($key_area['list'] as $quiz) {
-        $point = $is_2024 ? 1 : (is_numeric($quiz['point']) ? (float)$quiz['point'] : 0);
+        $point = (is_numeric($quiz['point']) ? (float)$quiz['point'] : 0);
         $max_score[] = $point * 4;
     }
 

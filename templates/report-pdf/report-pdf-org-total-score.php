@@ -14,13 +14,9 @@ $org_score_rank     = $position_by_total_score[$org_data['Id']]['org_rank'] ?? '
 $org_industry_rank  = $position_by_industry['rank_data'][$org_data['Id']]['org_rank'] ?? '';
 $average_industry   = cal_average_industry_score($assessment_id, $position_by_industry['by_indus_data'][$org_data['Industry']]) ?? '';
 
-// Use the formula-aware 'percent' key saved by on_save_submission_custom_fields.
-// 'percent' is now always consistent with the assessment's scoring formula (fixed in v3.0.3).
-// For submissions saved before v3.0.3, fall back to on-the-fly recalculation or the old 'percent' key.
-$scoring_formula      = get_post_meta($assessment_id, 'scoring_formula', true);
-$is_2024              = (!empty($scoring_formula) && $scoring_formula == 'index_formula_2024');
-$sum_key_for_percent  = $is_2024 ? 'sum' : 'sum_with_weighting';
-$percent_key          = $is_2024 ? 'percent' : 'percent_with_weighting';
+// Both 2023 and 2024 formulas now use weighted scoring (updated v3.0.4)
+$sum_key_for_percent  = 'sum_with_weighting';
+$percent_key          = 'percent_with_weighting';
 $assessment_max_score = get_assessment_max_score($assessment_id);
 
 $total_org_score_percent = $total_org_score[$percent_key]
