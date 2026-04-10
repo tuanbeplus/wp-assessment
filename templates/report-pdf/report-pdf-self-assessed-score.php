@@ -23,14 +23,12 @@ $self_assessed_score =
 foreach ($position_by_framework as $index => $key_area) {
     $org_self_score = 0;
     $and_assessed_score = 0;
-
     // Average Org score in a Key area
-    if (isset($org_section_score[$index])) {
+    if (isset($org_section_score[$index]) && !empty($org_section_score[$index])) {
         $org_self_score = get_maturity_level_org($org_section_score[$index]);
-    }
-    // Final AND agreed score level
-    $and_assessed_level = get_maturity_level_org($agreed_gr_score_with_weighting[$index]) ?? '1';
-    $self_assessed_score .=
+        // Final AND agreed score level
+        $and_assessed_level = get_maturity_level_org($agreed_gr_score_with_weighting[$index]) ?? '1';
+        $self_assessed_score .=
         '<tr>
             <td width="40%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'
                 . $key_area['title'] .
@@ -38,6 +36,7 @@ foreach ($position_by_framework as $index => $key_area) {
             <td width="30%">'. $org_self_score .'</td>
             <td width="30%">'. $and_assessed_level .'</td>
         </tr>';
+    }
 }
 $self_assessed_score .=
     '</table>
@@ -63,24 +62,26 @@ $self_assessed_percent_table =
             <th width="30%">Organisation <br> self-assessment</th>
             <th width="30%">AND <br> assessed score</th>
         </tr>';
+$max_score = array();
 foreach ($questions as $index => $key_area) {
 
-    foreach ($key_area['list'] as $quiz) {
-        $point = (is_numeric($quiz['point']) ? (float)$quiz['point'] : 0);
-        $max_score[] = $point * 4;
-    }
+    $sub_questions = $key_area['list'] ?? array();
 
-    // Average Org score in a Key area
-    if (isset($cal_org_score[$index]) && is_array($cal_org_score[$index])) {
-        $org_self_percent = round(array_sum($cal_org_score[$index]) / array_sum($max_score) * 100);
-    }
-    
-    // Average Agreed score in a Key area
-    if (isset($cal_agreed_score[$index]) && is_array($cal_agreed_score[$index])) {
-        $and_assessed_percent = round(array_sum($cal_agreed_score[$index]) / array_sum($max_score) * 100);
-    }
-    
-    $self_assessed_percent_table .=
+    if (!empty($sub_questions) && !empty($cal_org_score[$index]) && !empty($cal_agreed_score[$index])) {
+        foreach ($sub_questions as $quiz) {
+            $point = (is_numeric($quiz['point']) ? (float)$quiz['point'] : 0);
+            $max_score[$index][] = $point * 4;
+        }
+        // Average Org score in a Key area
+        if (isset($cal_org_score[$index]) && is_array($cal_org_score[$index])) {
+            $org_self_percent = round(array_sum($cal_org_score[$index]) / array_sum($max_score[$index]) * 100);
+        }
+        // Average Agreed score in a Key area
+        if (isset($cal_agreed_score[$index]) && is_array($cal_agreed_score[$index])) {
+            $and_assessed_percent = round(array_sum($cal_agreed_score[$index]) / array_sum($max_score[$index]) * 100);
+        }
+        
+        $self_assessed_percent_table .=
         '<tr>
             <td width="40%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'
                 . $key_area['title'] .
@@ -88,6 +89,7 @@ foreach ($questions as $index => $key_area) {
             <td width="30%">'. $org_self_percent .' %</td>
             <td width="30%">'. $and_assessed_percent .' %</td>
         </tr>';
+    }
 }
 $self_assessed_percent_table .=
     '</table>

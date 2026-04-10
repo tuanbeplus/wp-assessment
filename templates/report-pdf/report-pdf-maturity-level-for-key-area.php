@@ -53,7 +53,8 @@ foreach ($questions as $gr_id => $gr_field) {
     // Overall
     $overall_lv = 'Level '.get_maturity_level_org($agreed_gr_score_with_weighting[$gr_id]) ?? 'Level 1';
 
-    $table_html .= "<tr>
+    if (!empty($agreed_gr_score_with_weighting[$gr_id]) && !empty($overall_lv)) {
+        $table_html .= "<tr>
                         <td width='20%' style='text-align:right;border-bottom:none;background-color:none;font-style:italic;'>
                             ".$gr_field['title']."
                         </td>
@@ -63,6 +64,7 @@ foreach ($questions as $gr_id => $gr_field) {
                         <td width='16%'>". $innovation_lv ."</td>
                         <td width='16%'>". $overall_lv ."</td>
                     </tr>";
+    }
 }
 
 $total_index_score = 

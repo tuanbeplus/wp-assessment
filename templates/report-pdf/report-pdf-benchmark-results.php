@@ -30,7 +30,8 @@ foreach ($position_by_framework as $index => $key_area) {
     $org_rank = $key_area['parent_questions'][$org_data['Id']]['org_rank'] ?? '';
     $org_at_levels = '';
     $org_at_levels = $key_area['org_at_levels'];
-    $benchmark_results .=
+    if (!empty($agreed_gr_score_with_weighting[$index]) && !empty($org_rank)) {
+        $benchmark_results .=
         '<tr>
             <td width="30%" style="font-style:italic;border-bottom:none;border-left:none;background:none;">'
                 . $key_area['title'] .
@@ -42,6 +43,7 @@ foreach ($position_by_framework as $index => $key_area) {
             <td width="10%">'. $org_at_levels['level3'] .'</td>
             <td width="10%">'. $org_at_levels['level4'] .'</td>
         </tr>';
+    }
     $org_at_levels = null;
 }
 $benchmark_results .=

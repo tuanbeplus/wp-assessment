@@ -13,7 +13,8 @@ if (!empty($position_by_framework)) {
         $org_maturity_lv = get_maturity_level_org($agreed_gr_score_with_weighting[$parent_id]) ?? '1';
         $average_maturity_lv = $parent_question['average_maturity_level'];
         $variance = $org_maturity_lv - $average_maturity_lv;
-        $table_html .= "<tr>
+        if (!empty($agreed_gr_score_with_weighting[$parent_id]) && !empty($org_maturity_lv)) {
+            $table_html .= "<tr>
                             <td style='text-align:right;border-bottom:none;background-color:none;font-style:italic;'>
                                 ".$parent_question['title']."
                             </td>
@@ -21,6 +22,7 @@ if (!empty($position_by_framework)) {
                             <td>". $average_maturity_lv ."</td>
                             <td>". $variance ."</td>
                         </tr>";
+        }
     }
 
     $total_index_score = 
