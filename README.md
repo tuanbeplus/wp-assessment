@@ -2,7 +2,7 @@
 
 Custom WordPress plugin for the **Australian Disability Network (AND) Project Saturn**. This plugin handles complex organizational assessments, multi-tier scoring, ranking systems, and automated PDF report generation.
 
-**Version:** 3.0.3
+**Version:** 3.0.4
 
 ---
 

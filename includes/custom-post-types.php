@@ -34,6 +34,9 @@ class WPA_CustomPostType
         add_action('publish_dcr_submissions', array($this, 'on_submissions_created'), 10, 2);
         add_action('template_redirect', array($this, 'redirect_post_type_archives_to_404'));
         add_filter('single_template', array($this, 'redirect_single_front_template'));
+
+        // Test mail log endpoint (admin only) — remove after testing
+        add_action('wp_ajax_test_wpa_mail_log', array($this, 'test_mail_log'));
     }
 
     function activate(): void
@@ -491,7 +494,7 @@ class WPA_CustomPostType
             $comment = get_comment($comment_ID);
             $post_id = $comment->comment_post_ID;
             $submission = get_post($post_id);
-            if ($submission->post_type = 'submissions') {
+            if ($submission->post_type == 'submissions') {
                 $assessment_id = get_post_meta($post_id, 'assessment_id', true);
                 $user_id = get_post_meta($post_id, 'user_id', true);
                 $user = get_user_by('id', $user_id);
@@ -540,25 +543,54 @@ class WPA_CustomPostType
                     }
                     $subject = 'Saturn - New Index Submission Added #' .$post_id. ' - ' .$org_name;
                 }
+
+                // Validate recipients before sending
+                if (empty($to) || (is_array($to) && empty(array_filter($to)))) {
+                    $this->wpa_mail_log('MAIL_NO_RECIPIENTS', [
+                        'sf_user_name'  => $sf_user_name,
+                        'sf_user_email' => $sf_user_email,
+                        'org_name'      => $org_name,
+                        'post_id'       => $post_id,
+                        'post_type'     => $post->post_type,
+                        'assessment_id' => $assessment_id,
+                        'subject'       => $subject,
+                    ]);
+                    return false;
+                }
                 
                 $message  = '<div style="font-size:15px;">';
                 $message .= '<p style="font-size:16px;">You have a new submission of <strong>'. get_the_title($assessment_id). '</strong>.</p>';
                 $message .= '<p>From:</p>';
                 $message .= '<ul style="padding:0;">';
-                if (isset($sf_user_name)) {
+                if (!empty($sf_user_name)) {
                     $message .= '<li>User: <strong>'. $sf_user_name .'</strong></li>';
                 }
-                if (isset($sf_user_email)) {
+                if (!empty($sf_user_email)) {
                     $message .= '<li>Email: '. $sf_user_email .'</li>';
                 }
-                if (isset($org_name)) {
+                if (!empty($org_name)) {
                     $message .= '<li>Organisation: '. $org_name .'</li>';
                 }
                 $message .= '</ul>';
                 $message .= 'View <a href='. home_url() .'/wp-admin/post.php?post='. $post_id .'&action=edit>'.get_the_title($post_id).'</a>';
                 $message .= '</div>';
 
-                $sent = wp_mail($to, $subject, $message);
+                $headers = array('Content-Type: text/html; charset=UTF-8');
+
+                $sent = wp_mail($to, $subject, $message, $headers);
+
+                // Log mail result
+                $this->wpa_mail_log($sent ? 'MAIL_SENT' : 'MAIL_FAILED', [
+                    'sf_user_name'  => $sf_user_name,
+                    'sf_user_email' => $sf_user_email,
+                    'org_name'      => $org_name,
+                    'post_id'       => $post_id,
+                    'post_type'     => $post->post_type,
+                    'assessment_id' => $assessment_id,
+                    'to'            => $to,
+                    'subject'       => $subject,
+                ]);
+
                 return $sent;
             }
         }
@@ -567,21 +599,91 @@ class WPA_CustomPostType
     function get_all_users_email($assessment_id)
     {
         $users_id = array();
-        $users = array();
         $assigned_moderator = get_post_meta($assessment_id, 'assigned_moderator', true);
         $author_id = get_post_field('post_author', $assessment_id);
 
-        array_push($users_id, $author_id, $assigned_moderator);
-        
-        foreach($users_id as $id) {
-            $users[] = get_user_by('id', $id);
+        if (!empty($author_id)) {
+            $users_id[] = $author_id;
+        }
+        if (!empty($assigned_moderator)) {
+            $users_id[] = $assigned_moderator;
         }
         
         $email = array();
-        foreach ($users as $user) {
-            $email[] = $user->user_email;
+        foreach($users_id as $id) {
+            $user = get_user_by('id', $id);
+            if ($user && !empty($user->user_email)) {
+                $email[] = $user->user_email;
+            }
         }
         return $email;
+    }
+
+    /**
+     * Log mail events to file, following the same pattern as user login logs.
+     *
+     * @param string $log_code  A short code describing the event (e.g. MAIL_SENT, MAIL_FAILED).
+     * @param array  $info      Additional context to log.
+     */
+    function wpa_mail_log($log_code = '', $info = []) {
+        if (empty($log_code)) {
+            return;
+        }
+
+        $upload_dir = wp_upload_dir();
+        $log_dir_path = $upload_dir['basedir'] . '/saturn-mail-logs';
+        $log_file_path = $log_dir_path . '/mail-logs-' . wp_date('m-Y') . '.log';
+
+        // Create the logs directory if it doesn't exist.
+        if (!file_exists($log_dir_path)) {
+            if (!mkdir($log_dir_path, 0755, true) && !is_dir($log_dir_path)) {
+                error_log('WPA: Failed to create mail log directory: ' . $log_dir_path);
+                return;
+            }
+        }
+
+        // Prepare the log message with the current timestamp.
+        $log_message  = PHP_EOL;
+        $log_message .= "[" . sanitize_text_field($log_code) . "] at [" . wp_date('d-m-Y H:i:s') . "]" . PHP_EOL;
+        $log_message .= json_encode($info, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL;
+
+        // Append the log message to the file.
+        $result = file_put_contents($log_file_path, $log_message, FILE_APPEND | LOCK_EX);
+
+        // Log to WordPress debug log if file writing fails.
+        if ($result === false) {
+            error_log('WPA: Failed to write to mail log file: ' . $log_file_path);
+        }
+    }
+
+    /**
+     * Test endpoint for mail logging — remove after testing.
+     * Trigger via: /wp-admin/admin-ajax.php?action=test_wpa_mail_log
+     */
+    function test_mail_log() {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized', 403);
+        }
+
+        $this->wpa_mail_log('MAIL_TEST', [
+            'sf_user_name'  => 'Tom',
+            'sf_user_email' => 'test@test.com',
+            'org_name'      => 'YSN',
+            'post_id'       => 0,
+            'post_type'     => 'test',
+            'assessment_id' => 0,
+            'to'            => 'tom@ysnstudios.com',
+            'subject'       => 'Test mail log entry',
+        ]);
+
+        $upload_dir = wp_upload_dir();
+        $log_file = $upload_dir['basedir'] . '/saturn-mail-logs/mail-logs-' . wp_date('m-Y') . '.log';
+
+        wp_send_json_success([
+            'message'  => 'Test log entry written.',
+            'log_file' => $log_file,
+            'exists'   => file_exists($log_file),
+        ]);
     }
 }
 
